@@ -1,4 +1,4 @@
-# Birb
+# birb
 An API.
 ## Getting Started
 1. `git clone https://github.com/murtyjones/birb.git`
