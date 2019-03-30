@@ -4,7 +4,7 @@
 
 #[get("/world")]
 fn world() -> &'static str {
-    "Hello, world!"
+    "Hello, world!!"
 }
 
 fn main() {

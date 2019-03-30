@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  mongo_datastore:
+    image: 'mongo:latest'
+    ports:
+      - '27100:27017'
+  server:
+    build: ./server
+    ports:
+      - 8000:8000
+    volumes:
+      - ./server:/usr/src/app
+    depends_on:
+      - mongo_datastore
+    environment:
+      - &dbName     DB_NAME=playground
+      - &dbPort     DB_PORT=27017
+      - &dbHost     DB_HOST=mongo_datastore
+      - &serverPort PORT=8000
+      - ROCKET_ENV=development
+    command: "cargo watch -x run"
