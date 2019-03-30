@@ -6,11 +6,11 @@ services:
     ports:
       - '27100:27017'
   server:
-    build: ./server
+    build: crates/api
     ports:
       - 8000:8000
     volumes:
-      - ./server:/usr/src/app
+      - ./crates/api:/usr/src/app
     depends_on:
       - mongo_datastore
     environment:
