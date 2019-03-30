@@ -14,6 +14,7 @@ services:
     depends_on:
       - mongo_datastore
     environment:
+      - &mongoUri   MONGO_URI=mongodb://mongo_datastore:27017/playground
       - &dbName     DB_NAME=playground
       - &dbPort     DB_PORT=27017
       - &dbHost     DB_HOST=mongo_datastore

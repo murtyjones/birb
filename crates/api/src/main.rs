@@ -4,14 +4,24 @@
 extern crate rocket;
 #[macro_use]
 extern crate rocket_contrib;
+extern crate mongodb;
 extern crate serde_derive;
 
+use rocket::request::Request;
 use rocket_contrib::json::JsonValue;
 
 #[get("/")]
-fn index() -> &'static str {
-    "Hello, world!"
+fn index(_db_conn: DbConn) -> &'static str {
+    "Hello, from Rust! (With a DB connection!)"
 }
+
+#[catch(503)]
+fn service_not_available(_req: &Request) -> &'static str {
+    "Service not available. Is the DB up?"
+}
+
+#[database("MONGO_URI")]
+pub struct DbConn(mongodb::db::Database);
 
 #[catch(404)]
 fn not_found() -> JsonValue {
@@ -23,6 +33,7 @@ fn not_found() -> JsonValue {
 
 fn rocket() -> rocket::Rocket {
     return rocket::ignite()
+        .attach(DbConn::fairing())
         .mount("/", routes![index])
         .register(catchers![not_found]);
 }
