@@ -10,9 +10,20 @@ extern crate serde_derive;
 use rocket::request::Request;
 use rocket_contrib::json::JsonValue;
 
+impl Companies {
+    fn by_cik(conn: &mongodb::db::Database) -> JsonValue {
+        return conn.collection("company");
+    }
+}
+
 #[get("/")]
-fn index(_db_conn: DbConn) -> &'static str {
+fn index() -> &'static str {
     "Hello, from Rust! (With a DB connection!)"
+}
+
+#[get("/")]
+fn get_company(conn: DbConn) -> JsonValue {
+    return Companies::by_cik(&conn);
 }
 
 #[catch(503)]
@@ -34,7 +45,7 @@ fn not_found() -> JsonValue {
 fn rocket() -> rocket::Rocket {
     return rocket::ignite()
         .attach(DbConn::fairing())
-        .mount("/", routes![index])
+        .mount("/", routes![index, get_company])
         .register(catchers![not_found]);
 }
 
