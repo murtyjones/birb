@@ -3,3 +3,6 @@ address = "0.0.0.0"
 port = 8000
 workers = 4
 log = "normal"
+
+[development.databases]
+mongo_datastore = { url = "mongodb://mongo_datastore:27017/playground" }

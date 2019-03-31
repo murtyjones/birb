@@ -14,10 +14,12 @@ services:
     depends_on:
       - mongo_datastore
     environment:
-      - &mongoUri   MONGO_URI=mongodb://mongo_datastore:27017/playground
-      - &dbName     DB_NAME=playground
-      - &dbPort     DB_PORT=27017
-      - &dbHost     DB_HOST=mongo_datastore
-      - &serverPort PORT=8000
-      - ROCKET_ENV=development
+      # For Rocket's purposes we have to store the connection
+      # string in crates/api/Rocket.toml. These DB_... values
+      # are not used at the moment.
+      - DB_NAME:playground
+      - DB_PORT:27017
+      - DB_HOST:mongo_datastore
+      - PORT:8000
+      - ROCKET_ENV:development
     command: "cargo watch -x run"

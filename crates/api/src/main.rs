@@ -20,7 +20,7 @@ fn service_not_available(_req: &Request) -> &'static str {
     "Service not available. Is the DB up?"
 }
 
-#[database("MONGO_URI")]
+#[database("mongo_datastore")]
 pub struct DbConn(mongodb::db::Database);
 
 #[catch(404)]
