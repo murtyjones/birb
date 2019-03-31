@@ -5,6 +5,12 @@ services:
     image: 'mongo:latest'
     ports:
       - '27100:27017'
+
+  mongo_seed:
+    build: seed-data
+    links:
+      - mongo_datastore
+
   api:
     build: crates/api
     ports:
@@ -13,6 +19,7 @@ services:
       - ./crates/api:/usr/src/app
     depends_on:
       - mongo_datastore
+      - mongo_seed
     environment:
       # For Rocket's purposes we have to store the connection
       # string in crates/api/Rocket.toml. These DB_... values
