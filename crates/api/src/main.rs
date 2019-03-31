@@ -7,32 +7,41 @@ extern crate rocket_contrib;
 extern crate mongodb;
 extern crate serde_derive;
 
+use mongodb::db::ThreadedDatabase;
+use mongodb::Bson;
 use rocket::request::Request;
 use rocket_contrib::json::JsonValue;
-
-impl Companies {
-    fn by_cik(conn: &mongodb::db::Database) -> JsonValue {
-        return conn.collection("company");
-    }
-}
 
 #[get("/")]
 fn index() -> &'static str {
     "Hello, from Rust! (With a DB connection!)"
 }
 
-#[get("/")]
-fn get_company(conn: DbConn) -> JsonValue {
-    return Companies::by_cik(&conn);
+#[database("mongo_datastore")]
+struct DbConn(mongodb::db::Database);
+
+fn use_connection(conn: &mongodb::db::Database) -> () {
+    let coll = ThreadedDatabase::collection(conn, "company");
+    let cursor = coll.find(None, None).unwrap();
+    for result in cursor {
+        if let Ok(item) = result {
+            if let Some(&Bson::String(ref cik)) = item.get("CIK") {
+                println!("cik: {}", cik);
+            }
+        }
+    }
+}
+
+#[get("/co")]
+fn use_company_collection(conn: DbConn) -> () {
+    // this parameter doesn't feel right...
+    use_connection(&conn.0)
 }
 
 #[catch(503)]
 fn service_not_available(_req: &Request) -> &'static str {
     "Service not available. Is the DB up?"
 }
-
-#[database("mongo_datastore")]
-pub struct DbConn(mongodb::db::Database);
 
 #[catch(404)]
 fn not_found() -> JsonValue {
@@ -45,7 +54,7 @@ fn not_found() -> JsonValue {
 fn rocket() -> rocket::Rocket {
     return rocket::ignite()
         .attach(DbConn::fairing())
-        .mount("/", routes![index, get_company])
+        .mount("/", routes![index, use_company_collection])
         .register(catchers![not_found]);
 }
 
