@@ -1,9 +1,14 @@
 version: 2
 jobs:
-  build:
+  test:
     steps:
       - checkout
-
       - run:
-          name: Greeting
+          name: Tests
           command: cargo test --all
+
+workflows:
+  version: 2
+  test_and_deploy:
+    jobs:
+      - test
