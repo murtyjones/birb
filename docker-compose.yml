@@ -21,12 +21,10 @@ services:
       - mongo_datastore
       - mongo_seed
     environment:
-      # For Rocket's purposes we have to store the connection
-      # string in crates/api/Rocket.toml. These DB_... values
-      # are not used at the moment.
       - DB_NAME:playground
       - DB_PORT:27017
       - DB_HOST:mongo_datastore
       - PORT:8000
       - ROCKET_ENV:development
+      - ROCKET_DATABASES={mongo_datastore={url="mongodb://mongo_datastore:27017/playground"}}
     command: "cargo watch -x run"
