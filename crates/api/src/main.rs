@@ -34,8 +34,8 @@ fn use_connection(conn: &mongodb::db::Database) -> () {
 
 #[get("/co")]
 fn use_company_collection(conn: DbConn) -> () {
-    // this parameter doesn't feel right...
-    use_connection(&conn.0)
+    // https://github.com/SergioBenitez/Rocket/issues/960
+    use_connection(&*conn)
 }
 
 #[catch(503)]
