@@ -21,6 +21,7 @@ fn index() -> &'static str {
 struct DbConn(mongodb::db::Database);
 
 fn use_connection(conn: &mongodb::db::Database) -> () {
+    conn.collection();
     let coll = ThreadedDatabase::collection(conn, "company");
     let cursor = coll.find(None, None).unwrap();
     for result in cursor {
@@ -35,7 +36,7 @@ fn use_connection(conn: &mongodb::db::Database) -> () {
 #[get("/co")]
 fn use_company_collection(conn: DbConn) -> () {
     // https://github.com/SergioBenitez/Rocket/issues/960
-    use_connection(&*conn)
+    use_connection(&conn)
 }
 
 #[catch(503)]
