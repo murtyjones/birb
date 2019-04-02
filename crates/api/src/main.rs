@@ -4,11 +4,11 @@
 extern crate rocket;
 #[macro_use]
 extern crate rocket_contrib;
-extern crate mongodb;
 extern crate serde_derive;
-
+#[macro_use]
+extern crate bson;
+extern crate mongodb;
 use mongodb::db::ThreadedDatabase;
-use mongodb::Bson;
 use rocket::request::Request;
 use rocket_contrib::json::JsonValue;
 
@@ -20,23 +20,17 @@ fn index() -> &'static str {
 #[database("mongo_datastore")]
 struct DbConn(mongodb::db::Database);
 
-fn use_connection(conn: &mongodb::db::Database) -> () {
-    conn.collection();
-    let coll = ThreadedDatabase::collection(conn, "company");
-    let cursor = coll.find(None, None).unwrap();
-    for result in cursor {
-        if let Ok(item) = result {
-            if let Some(&Bson::String(ref cik)) = item.get("CIK") {
-                println!("cik: {}", cik);
-            }
-        }
-    }
+fn find_one_company(
+    conn: &mongodb::db::Database,
+) -> Result<Option<mongodb::ordered::OrderedDocument>, mongodb::Error> {
+    conn.collection("company")
+        .find_one(Some(doc! { "cik" => "a" }), None)
 }
 
-#[get("/co")]
-fn use_company_collection(conn: DbConn) -> () {
-    // https://github.com/SergioBenitez/Rocket/issues/960
-    use_connection(&conn)
+#[get("/company")]
+fn get_company(conn: DbConn) -> JsonValue {
+    let doc = find_one_company(&conn).unwrap();
+    json!({ "status": "ok!" })
 }
 
 #[catch(503)]
@@ -55,7 +49,7 @@ fn not_found() -> JsonValue {
 fn rocket() -> rocket::Rocket {
     return rocket::ignite()
         .attach(DbConn::fairing())
-        .mount("/", routes![index, use_company_collection])
+        .mount("/", routes![index, get_company])
         .register(catchers![not_found]);
 }
 
