@@ -4,11 +4,11 @@
 extern crate rocket;
 #[macro_use]
 extern crate rocket_contrib;
-extern crate serde_derive;
 #[macro_use]
 extern crate bson;
 extern crate mongodb;
 use mongodb::db::ThreadedDatabase;
+use mongodb::ordered::OrderedDocument;
 use rocket::request::Request;
 use rocket_contrib::json::JsonValue;
 
@@ -20,17 +20,17 @@ fn index() -> &'static str {
 #[database("mongo_datastore")]
 struct DbConn(mongodb::db::Database);
 
-fn find_one_company(
-    conn: &mongodb::db::Database,
-) -> Result<Option<mongodb::ordered::OrderedDocument>, mongodb::Error> {
+fn find_one_company(conn: &mongodb::db::Database) -> Option<OrderedDocument> {
     conn.collection("company")
-        .find_one(Some(doc! { "cik" => "a" }), None)
+        .find_one(Some(doc! { "CIK" => "0001318605" }), None)
+        .unwrap()
 }
 
 #[get("/company")]
 fn get_company(conn: DbConn) -> JsonValue {
     let doc = find_one_company(&conn).unwrap();
-    json!({ "status": "ok!" })
+    let hm = bson::Bson::Document(doc);
+    json!({ "status": hm })
 }
 
 #[catch(503)]
