@@ -20,17 +20,20 @@ fn index() -> &'static str {
 #[database("mongo_datastore")]
 struct DbConn(mongodb::db::Database);
 
-fn find_one_company(conn: &mongodb::db::Database) -> Option<OrderedDocument> {
+fn find_company_by_cik(conn: &mongodb::db::Database, cik: String) -> Option<OrderedDocument> {
     conn.collection("company")
-        .find_one(Some(doc! { "CIK" => "0001318605" }), None)
+        .find_one(Some(doc! { "CIK" => cik }), None)
         .unwrap()
 }
 
-#[get("/company")]
-fn get_company(conn: DbConn) -> JsonValue {
-    let doc = find_one_company(&conn).unwrap();
-    let hm = bson::Bson::Document(doc);
-    json!({ "status": hm })
+#[get("/company/<cik>")]
+fn get_company(conn: DbConn, cik: String) -> JsonValue {
+    let doc = find_company_by_cik(&conn, cik).unwrap();
+    let company = bson::Bson::Document(doc);
+    json!({
+        "status": "ok",
+        "doc": company
+    })
 }
 
 #[catch(503)]
