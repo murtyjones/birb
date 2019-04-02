@@ -1,6 +1,6 @@
-#[macro_use]
 use bson;
 use mongodb::db::Database;
+use mongodb::db::ThreadedDatabase;
 use mongodb::ordered::OrderedDocument;
 
 #[derive(Debug)]

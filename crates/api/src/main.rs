@@ -7,11 +7,13 @@ extern crate rocket_contrib;
 #[macro_use]
 extern crate bson;
 extern crate mongodb;
-mod models;
+
 use mongodb::db::ThreadedDatabase;
 use mongodb::ordered::OrderedDocument;
 use rocket::request::Request;
 use rocket_contrib::json::JsonValue;
+
+mod models;
 
 #[get("/")]
 fn index() -> &'static str {
@@ -29,7 +31,7 @@ fn find_company_by_cik(conn: &mongodb::db::Database, cik: String) -> Option<Orde
 
 #[get("/company/<cik>")]
 fn get_company(conn: DbConn, cik: String) -> JsonValue {
-    let doc = models::company::find_one_by_cik(&conn, cik.to_owned()).unwrap();
+    let doc = models::company::Model::find_one_by_cik(&conn, cik.to_owned()).unwrap();
     let company = bson::Bson::Document(doc);
     json!({
         "status": "ok",
