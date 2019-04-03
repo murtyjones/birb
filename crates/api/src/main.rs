@@ -16,26 +16,16 @@ mod meta;
 mod models;
 
 #[database("mongo_datastore")]
-pub struct DbConn(mongodb::db::Database);
-
-#[catch(503)]
-fn service_not_available(_req: &rocket::request::Request) -> &'static str {
-    "Service not available. Is the DB up?"
-}
-
-#[catch(404)]
-fn not_found() -> rocket_contrib::json::JsonValue {
-    json!({
-        "status": "error",
-        "reason": "Resource not found.",
-    })
-}
+pub struct DbConnection(mongodb::db::Database);
 
 fn rocket() -> rocket::Rocket {
     return rocket::ignite()
-        .attach(DbConn::fairing())
+        .attach(DbConnection::fairing())
         .mount("/", routes![handlers::company::get])
-        .register(catchers![not_found, service_not_available]);
+        .register(catchers![
+            handlers::not_found::handler,
+            handlers::service_not_available::handler
+        ]);
 }
 
 fn main() {
