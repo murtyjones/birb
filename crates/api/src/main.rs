@@ -6,24 +6,25 @@ extern crate bson;
 extern crate rocket;
 #[macro_use]
 extern crate rocket_contrib;
+#[macro_use]
+extern crate serde_derive;
 extern crate mongodb;
-
-use rocket::request::Request;
-use rocket_contrib::json::JsonValue;
+extern crate serde_json;
 
 mod handlers;
+mod meta;
 mod models;
 
 #[database("mongo_datastore")]
 pub struct DbConn(mongodb::db::Database);
 
 #[catch(503)]
-fn service_not_available(_req: &Request) -> &'static str {
+fn service_not_available(_req: &rocket::request::Request) -> &'static str {
     "Service not available. Is the DB up?"
 }
 
 #[catch(404)]
-fn not_found() -> JsonValue {
+fn not_found() -> rocket_contrib::json::JsonValue {
     json!({
         "status": "error",
         "reason": "Resource not found.",
