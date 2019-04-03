@@ -1,43 +1,21 @@
 #![feature(proc_macro_hygiene, decl_macro)]
 
+#[macro_use(bson, doc)]
+extern crate bson;
 #[macro_use]
 extern crate rocket;
 #[macro_use]
 extern crate rocket_contrib;
-#[macro_use]
-extern crate bson;
 extern crate mongodb;
 
-use mongodb::db::ThreadedDatabase;
-use mongodb::ordered::OrderedDocument;
 use rocket::request::Request;
 use rocket_contrib::json::JsonValue;
 
+mod handlers;
 mod models;
 
-#[get("/")]
-fn index() -> &'static str {
-    "Hello, from Rust! (With a DB connection!)"
-}
-
 #[database("mongo_datastore")]
-struct DbConn(mongodb::db::Database);
-
-fn find_company_by_cik(conn: &mongodb::db::Database, cik: String) -> Option<OrderedDocument> {
-    conn.collection("company")
-        .find_one(Some(doc! { "CIK" => cik }), None)
-        .unwrap()
-}
-
-#[get("/company/<cik>")]
-fn get_company(conn: DbConn, cik: String) -> JsonValue {
-    let doc = models::company::Model::find_one_by_cik(&conn, cik.to_owned()).unwrap();
-    let company = bson::Bson::Document(doc);
-    json!({
-        "status": "ok",
-        "doc": company
-    })
-}
+pub struct DbConn(mongodb::db::Database);
 
 #[catch(503)]
 fn service_not_available(_req: &Request) -> &'static str {
@@ -55,8 +33,8 @@ fn not_found() -> JsonValue {
 fn rocket() -> rocket::Rocket {
     return rocket::ignite()
         .attach(DbConn::fairing())
-        .mount("/", routes![index, get_company])
-        .register(catchers![not_found]);
+        .mount("/", routes![handlers::company::get])
+        .register(catchers![not_found, service_not_available]);
 }
 
 fn main() {
