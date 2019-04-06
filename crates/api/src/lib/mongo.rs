@@ -1,13 +1,10 @@
 #[cfg(test)]
 use crate::mocks::mongodb::Database;
-#[cfg(test)]
-use crate::mocks::mongodb::OrderedDocument;
 
 #[cfg(not(test))]
 use mongodb::db::Database;
 #[allow(unused)]
 use mongodb::db::ThreadedDatabase;
-#[cfg(not(test))]
 use mongodb::ordered::OrderedDocument;
 
 pub struct Mongo;
