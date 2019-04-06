@@ -1,3 +1,6 @@
+#[cfg(test)]
+use crate::mocks::mongodb::Database;
+#[cfg(not(test))]
 use mongodb::db::Database;
 use mongodb::db::ThreadedDatabase;
 use mongodb::ordered::OrderedDocument;

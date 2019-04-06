@@ -14,6 +14,7 @@ extern crate serde_json;
 mod handlers;
 mod lib;
 mod meta;
+mod mocks;
 mod models;
 
 #[database("mongo_datastore")]
