@@ -12,6 +12,7 @@ extern crate mongodb;
 extern crate serde_json;
 
 mod handlers;
+mod lib;
 mod meta;
 mod models;
 
