@@ -18,7 +18,7 @@ impl Model {
 }
 
 #[cfg(test)]
-mod tests {
+mod test {
     #[test]
     fn find_one_by_cik_unwraps() {}
 }

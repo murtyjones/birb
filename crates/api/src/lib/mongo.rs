@@ -16,3 +16,11 @@ impl Mongo {
         conn.collection(collection).find_one(filter, None).unwrap()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn find_one_unwraps() {
+        assert_eq!(1, 1)
+    }
+}
