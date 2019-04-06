@@ -2,6 +2,7 @@ use mongodb::ordered::OrderedDocument;
 use std::io::Error;
 use std::result::Result;
 
+#[cfg(test)]
 pub struct Database;
 
 pub struct FakeCollection;
@@ -17,6 +18,7 @@ impl FakeCollection {
     }
 }
 
+#[cfg(test)]
 impl Database {
     pub fn collection(&self, collection: &'static str) -> FakeCollection {
         FakeCollection

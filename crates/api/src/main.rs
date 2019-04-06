@@ -8,8 +8,10 @@ extern crate rocket;
 extern crate rocket_contrib;
 #[macro_use]
 extern crate serde_derive;
-extern crate mongodb;
 extern crate serde_json;
+
+use lib::mongo::db::Database;
+use rocket_contrib::databases::{r2d2_mongodb, DatabaseConfig, DbError, Poolable};
 
 mod handlers;
 mod lib;
@@ -17,8 +19,24 @@ mod meta;
 mod mocks;
 mod models;
 
+#[cfg(test)]
+#[cfg(feature = "mongodb_pool")]
+impl Poolable for Database {
+    type Manager = r2d2_mongodb::MongodbConnectionManager;
+    type Error = DbError<mongodb::Error>;
+
+    fn pool(config: DatabaseConfig) -> Result<r2d2::Pool<Self::Manager>, Self::Error> {
+        let manager = r2d2_mongodb::MongodbConnectionManager::new_with_uri(config.url)
+            .map_err(DbError::Custom)?;
+        r2d2::Pool::builder()
+            .max_size(config.pool_size)
+            .build(manager)
+            .map_err(DbError::PoolError)
+    }
+}
+
 #[database("mongo_datastore")]
-pub struct DbConnection(mongodb::db::Database);
+pub struct DbConnection(Database);
 
 fn rocket() -> rocket::Rocket {
     return rocket::ignite()
