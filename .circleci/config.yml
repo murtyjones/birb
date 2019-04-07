@@ -2,13 +2,17 @@ version: 2
 jobs:
   test:
     machine: true
-      image: rustlang/rust:nightly
     steps:
       - checkout
 #      - restore_cache:
 #          keys:
 #            - v1-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
 #            - v1-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
+      - run:
+          name: Install Rust nightly
+          command: |
+            curl https://sh.rustup.rs -sSf | sh -s -- -y
+            rustup default nightly
       - run:
           name: Tests
           command: make test
