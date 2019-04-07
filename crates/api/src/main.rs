@@ -65,7 +65,7 @@ mod test {
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let body = res.body_string().unwrap();
-        assert!(body.contains("TESLA MOTORS INC"));
+        assert!(body.contains("TEssSLA MOTORS INC"));
         assert!(body.contains("0001318605"));
     }
 

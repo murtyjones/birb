@@ -17,7 +17,7 @@ jobs:
             mv ~/docker-compose /usr/local/bin/docker-compose
       - setup_remote_docker
       - run:
-          name: Start container and verify it is working
+          name: Start container to get DB running and seeded
           command: |
             set -x
             docker-compose up -d
