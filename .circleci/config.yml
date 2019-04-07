@@ -3,7 +3,7 @@ jobs:
   test:
     machine: true
     steps:
-#      - checkout
+      - checkout
 #      - restore_cache:
 #          keys:
 #            - v1-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
