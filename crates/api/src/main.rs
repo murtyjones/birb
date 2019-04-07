@@ -48,7 +48,7 @@ mod test {
     use rocket::local::Client;
     #[test]
     fn bad_get() {
-        let client = Client::new(rocket()).unwrap();
+        let client = Client::new(rocket()).expect("valid rocket instance");
         let res = client
             .get("/doesnotexist")
             .header(ContentType::JSON)
@@ -58,7 +58,7 @@ mod test {
 
     #[test]
     fn get_tsla() {
-        let client = Client::new(rocket()).unwrap();
+        let client = Client::new(rocket()).expect("valid rocket instance");
         let mut res = client
             .get("/company/0001318605")
             .header(ContentType::JSON)
