@@ -24,7 +24,7 @@ jobs:
       - run:
           name: Run Tests
           command: |
-            make rebuld
+            make rebuild
             cargo test --all
       - save_cache:
           key: v1-cargo-cache-{{ arch }}-{{ .Branch }}
