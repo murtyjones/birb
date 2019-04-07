@@ -11,7 +11,7 @@ jobs:
             - v1-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
       - run:
           name: Tests
-          command: cargo test --all
+          command: make test
       - save_cache:
           key: v1-cargo-cache-{{ arch }}-{{ .Branch }}
           paths:

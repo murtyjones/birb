@@ -6,6 +6,12 @@ dev:
 	make up
 	cargo watch -x "run --package api"
 
+test:
+	make down
+	make build
+	make up
+	cargo test --all
+
 down:
 	docker-compose down
 
