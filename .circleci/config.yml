@@ -25,6 +25,7 @@ jobs:
           name: Run Tests
           command: |
             cargo test --all
+      - run: make down
       - save_cache:
           key: v1-cargo-cache-{{ arch }}-{{ .Branch }}
           paths:
