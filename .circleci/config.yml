@@ -12,6 +12,11 @@ jobs:
       - run:
           name: Tests
           command: cargo test --all
+      - save_cache:
+          key: v1-cargo-cache-{{ arch }}-{{ .Branch }}
+          paths:
+            - target
+            - /usr/local/cargo
 
 workflows:
   version: 2
