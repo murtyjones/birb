@@ -53,7 +53,7 @@ mod test {
             .get("/doesnotexist")
             .header(ContentType::JSON)
             .dispatch();
-        assert_eq!(res.status(), Status::Ok);
+        assert_eq!(res.status(), Status::NotFound);
     }
 
     //    #[test]
