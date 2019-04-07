@@ -1,15 +1,16 @@
 default: dev
 
 dev:
-	make down
-	make build
-	make up
+	make rebuild
 	cargo watch -x "run --package api"
 
-test:
+rebuild:
 	make down
 	make build
 	make up
+
+test:
+	make rebuild
 	cargo test --all
 
 down:

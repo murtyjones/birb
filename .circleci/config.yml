@@ -20,10 +20,10 @@ jobs:
           name: Start container to get DB running and seeded
           command: |
             set -x
-            docker-compose up -d
+            make rebuild
       - run:
           name: Tests
-          command: cargo test --all
+          command: make test
       - save_cache:
           key: v1-cargo-cache-{{ arch }}-{{ .Branch }}
           paths:
