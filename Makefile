@@ -14,7 +14,8 @@ rebuild:
 test:
 	make down
 	make build
-	docker-compose up --exit-code-from=test
+	docker-compose up -d
+	docker-compose run --rm test cargo test --all
 
 down:
 	docker-compose down

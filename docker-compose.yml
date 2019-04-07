@@ -29,4 +29,3 @@ services:
       - .env
     environment:
       - ROCKET_DATABASES={mongo_datastore={url="mongodb://mongo_datastore:27017/playground"}}
-    command: "cargo test --all"
