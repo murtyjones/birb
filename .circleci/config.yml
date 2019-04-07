@@ -15,8 +15,11 @@ jobs:
             source $HOME/.cargo/env
             rustup default nightly
       - run:
+          name: Run Docker-Compose
+          command: make
+      - run:
           name: Tests
-          command: make test
+          command: cargo test --all
       - save_cache:
           key: v1-cargo-cache-{{ arch }}-{{ .Branch }}
           paths:

@@ -10,7 +10,6 @@ test:
 	make down
 	make build
 	make up
-	cargo test --all
 
 down:
 	docker-compose down
