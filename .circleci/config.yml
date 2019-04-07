@@ -22,7 +22,7 @@ jobs:
             set -x
             docker-compose up -d
       - run:
-          name: Tests:
+          name: Tests
           command: cargo test --all
       - save_cache:
           key: v1-cargo-cache-{{ arch }}-{{ .Branch }}
