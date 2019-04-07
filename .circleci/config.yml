@@ -11,8 +11,7 @@ jobs:
       - run:
           name: Run tests
           command: |
-            set -x
-            make test
+            make test && make logs
 #      - save_cache:
 #          key: v1-cargo-cache-{{ arch }}-{{ .Branch }}
 #          paths:
