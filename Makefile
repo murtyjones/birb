@@ -14,7 +14,7 @@ rebuild:
 test:
 	make down
 	make build
-	docker-compose up -d
+	docker-compose up --exit-code-from=test
 
 down:
 	docker-compose down
