@@ -8,8 +8,11 @@ extern crate rocket;
 extern crate rocket_contrib;
 #[macro_use]
 extern crate serde_derive;
+extern crate dotenv;
 extern crate mongodb;
 extern crate serde_json;
+
+use dotenv::dotenv;
 
 mod handlers;
 mod lib;
@@ -21,6 +24,10 @@ mod models;
 pub struct DbConnection(mongodb::db::Database);
 
 fn rocket() -> rocket::Rocket {
+    // Load env vars
+    dotenv().ok();
+
+    // Start server
     return rocket::ignite()
         .attach(DbConnection::fairing())
         .mount("/", routes![handlers::company::get])

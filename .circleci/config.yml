@@ -5,6 +5,10 @@ jobs:
       - image: rustlang/rust:nightly
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - v1-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
+            - v1-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
       - run:
           name: Tests
           command: cargo test --all

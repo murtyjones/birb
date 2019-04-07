@@ -4,6 +4,7 @@ dev:
 	make down
 	make build
 	make up
+	cargo watch -x "run --package api"
 
 down:
 	docker-compose down

@@ -5,27 +5,12 @@ services:
     image: 'mongo:latest'
     ports:
       - '27100:27017'
+    env_file:
+      - .env
 
   mongo_seed:
     build: seed-data
     links:
       - mongo_datastore
-
-  api:
-    build: crates/api
-    ports:
-      - 8000:8000
-    volumes:
-      - ./:/usr/src/app
-    working_dir: /usr/src/app/crates/api
-    depends_on:
-      - mongo_datastore
-      - mongo_seed
-    environment:
-      - DB_NAME:playground
-      - DB_PORT:27017
-      - DB_HOST:mongo_datastore
-      - PORT:8000
-      - ROCKET_ENV:development
-      - ROCKET_DATABASES={mongo_datastore={url="mongodb://mongo_datastore:27017/playground"}}
-    command: "cargo watch -x run"
+    env_file:
+      - .env
