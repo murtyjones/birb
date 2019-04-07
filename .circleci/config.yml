@@ -2,8 +2,6 @@ version: 2
 jobs:
   test:
     machine: true
-    docker:
-      - image: rustlang/rust:nightly
     steps:
       - checkout
       - restore_cache:
