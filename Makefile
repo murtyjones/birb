@@ -1,7 +1,9 @@
 default: dev
 
 dev:
-	make rebuild
+	make down
+	make build
+	make up
 	cargo watch -x "run --package api"
 
 rebuild:
@@ -10,15 +12,16 @@ rebuild:
 	make up
 
 test:
-	make rebuild
-	cargo test --all
+	make down
+	make build
+	docker-compose up -d
 
 down:
 	docker-compose down
 
 up:
 	@echo "=============starting server locally============="
-	docker-compose up -d
+	docker-compose up -d --scale test=0
 
 build:
 	docker-compose build

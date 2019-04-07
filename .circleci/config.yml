@@ -1,8 +1,7 @@
 version: 2
 jobs:
   test:
-    docker:
-      - image: rustlang/rust:nightly
+    machine: true
     steps:
 #      - checkout
 #      - restore_cache:
@@ -10,21 +9,10 @@ jobs:
 #            - v1-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
 #            - v1-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
       - run:
-          name: Install Docker Compose
-          command: |
-            curl -L https://github.com/docker/compose/releases/download/1.19.0/docker-compose-`uname -s`-`uname -m` > ~/docker-compose
-            chmod +x ~/docker-compose
-            mv ~/docker-compose /usr/local/bin/docker-compose
-      - run:
-          name: Start container to get DB running and seeded
+          name: Run tests
           command: |
             set -x
-            make rebuild
-      - run:
-          name: Run Tests
-          command: |
-            sleep 10
-            cargo test --all
+            make test
 #      - save_cache:
 #          key: v1-cargo-cache-{{ arch }}-{{ .Branch }}
 #          paths:

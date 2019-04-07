@@ -10,7 +10,23 @@ services:
 
   mongo_seed:
     build: seed-data
-    links:
+    depends_on:
       - mongo_datastore
     env_file:
       - .env
+
+  test:
+    build: crates/api
+    ports:
+      - 8000:8000
+    volumes:
+      - ./:/usr/src/app
+    working_dir: /usr/src/app/crates/api
+    depends_on:
+      - mongo_datastore
+      - mongo_seed
+    env_file:
+      - .env
+    environment:
+      - ROCKET_DATABASES={mongo_datastore={url="mongodb://mongo_datastore:27017/playground"}}
+    command: "cargo test --all"
