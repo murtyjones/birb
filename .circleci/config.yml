@@ -1,17 +1,19 @@
 version: 2
 jobs:
   test:
-    machine:
-      docker_layer_caching: true
+    machine: true
     steps:
-      - run:
-          name: Build Rust image
-          command: docker build -t rustlang/rust:nightly .
       - checkout
 #      - restore_cache:
 #          keys:
 #            - v1-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
 #            - v1-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
+      - run:
+          name: Install Rust nightly
+          command: |
+            curl https://sh.rustup.rs -sSf | sh
+            source $HOME/.cargo/env
+            rustup default nightly
       - run:
           name: Tests
           command: make test
