@@ -12,6 +12,7 @@ jobs:
           name: Install Rust nightly
           command: |
             curl https://sh.rustup.rs -sSf | sh -s -- -y
+            source $HOME/.cargo/env
             rustup default nightly
       - run:
           name: Tests
