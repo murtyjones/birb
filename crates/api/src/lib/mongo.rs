@@ -1,22 +1,14 @@
 #[allow(unused)]
+use mongodb::db::Database;
 use mongodb::db::ThreadedDatabase;
 use mongodb::ordered::OrderedDocument;
 
-#[cfg(not(test))]
-pub mod db {
-    pub use mongodb::db::Database;
-}
-
-#[cfg(test)]
-pub mod db {
-    pub use crate::mocks::mongodb::Database;
-}
-
 pub struct Mongo;
 
+#[cfg(not(test))]
 impl Mongo {
     pub fn find_one(
-        conn: &db::Database,
+        conn: &Database,
         collection: &'static str,
         filter: Option<OrderedDocument>,
     ) -> Option<OrderedDocument> {
