@@ -22,8 +22,10 @@ jobs:
             set -x
             make rebuild
       - run:
-          name: Tests
-          command: make test
+          name: Run Tests
+          command: |
+            make rebuld
+            cargo test --all
       - save_cache:
           key: v1-cargo-cache-{{ arch }}-{{ .Branch }}
           paths:

@@ -46,15 +46,15 @@ mod test {
     use super::rocket;
     use rocket::http::{ContentType, Status};
     use rocket::local::Client;
-    //    #[test]
-    //    fn bad_get() {
-    //        let client = Client::new(rocket()).unwrap();
-    //        let res = client
-    //            .get("/doesnotexist")
-    //            .header(ContentType::JSON)
-    //            .dispatch();
-    //        assert_eq!(res.status(), Status::NotFound);
-    //    }
+    #[test]
+    fn bad_get() {
+        let client = Client::new(rocket()).unwrap();
+        let res = client
+            .get("/doesnotexist")
+            .header(ContentType::JSON)
+            .dispatch();
+        assert_eq!(res.status(), Status::NotFound);
+    }
 
     #[test]
     fn get_tsla() {
