@@ -15,8 +15,6 @@ dotenv = "0.13.0"
 
 filing-metadata = { path = "../filing-metadata", version = "0.1.0" }
 
-
-
 [dependencies.rocket_contrib]
 version = "0.4.0"
 features = ["mongodb_pool"]

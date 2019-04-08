@@ -34,3 +34,6 @@ clean: down
 	@echo "=============cleaning up============="
 	docker system prune -f
 	docker volume prune -f
+
+tag:
+	docker build -f crates/api/Dockerfile-prod -t murtyjones/birb:latest .
