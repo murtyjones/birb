@@ -4,3 +4,9 @@
 target/**/*
 **/*/target
 **/*.rs.bk
+
+# Terraform Compiled Files and Module Directory
+*.tfstate
+*.tfstate.backup
+.terraform.tfstate.lock.info
+.terraform/
