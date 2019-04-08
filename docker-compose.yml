@@ -16,7 +16,7 @@ services:
       - .env
 
   test:
-    build: crates/api
+    build: crates/api/test.Dockerfile
     ports:
       - 8000:8000
     volumes:
