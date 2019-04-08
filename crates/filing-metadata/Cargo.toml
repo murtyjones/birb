@@ -1,11 +1,6 @@
 [package]
-name = "birb"
+name = "filing-metadata"
 version = "0.1.0"
 authors = ["Marty Jones <murtin.jones@gmail.com>"]
 edition = "2018"
 
-[workspace]
-members = [
-  "crates/api",
-  "crates/filing-metadata"
-]
