@@ -17,8 +17,6 @@ jobs:
       - run:
           name: Build image
           command: make release-build
-      - aws-cli/install
-      - aws-cli/configure
       - run:
           name: Tag and push to ECR
           command: |
@@ -40,5 +38,4 @@ workflows:
           repo: birb-api
           region: AWS_DEFAULT_REGION
           path: ./out
-      - push:
 
