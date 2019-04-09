@@ -1,8 +1,3 @@
-NAME=api
-VERSION=$(shell git rev-parse HEAD)
-SEMVER_VERSION=$(shell grep version Cargo.toml | awk -F"\"" '{print $$2}' | head -n 1)
-REPO=birb
-
 default: dev
 
 dev:
@@ -49,17 +44,18 @@ build-binary:
 		-w /volume \
 		-it clux/muslrust \
 		cargo build -p api --release
+
+copy-artifacts:
 	# put binary and production dockerfile in a temporary
 	# folder to keep the build context simple/small
-
-build-docker-image:
 	rm -rf out
 	mkdir out
 	cp ./crates/api/Dockerfile-prod out
 	cp ./target/x86_64-unknown-linux-musl/release/api out
-	pushd out
-	docker build -t $(REPO)/$(NAME):$(VERSION) .
-	popd
+
+
+build-push-docker-image:
+	./scripts/build-push-docker.sh
 
 release-tag-latest:
 	docker tag $(REPO)/$(NAME):$(VERSION) $(REPO)/$(NAME):latest

@@ -16,9 +16,10 @@ jobs:
           name: Build binary and docker image
           command: |
             make build-binary
-            make build-docker-image
+            make copy-artifacts
+            make build-push-docker-image
       - save_cache:
-          key: v3-cargo-cache-{{ arch }}-{{ .Branch }}
+          key: v4-cargo-cache-{{ arch }}-{{ .Branch }}
           paths:
             - target
             - /usr/local/cargo
@@ -28,4 +29,3 @@ workflows:
   build_and_deploy:
     jobs:
       - build_and_deploy
-
