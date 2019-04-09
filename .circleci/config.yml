@@ -2,7 +2,7 @@ version: 2.1
 orbs:
   aws-ecr: circleci/aws-ecr@1.0.0
 jobs:
-  test:
+  build_and_deploy:
     machine: true
     steps:
       - checkout
@@ -21,6 +21,12 @@ jobs:
           name: Tag and push to ECR
           command: |
             make release-tag-latest
+      - aws-ecr/build_and_push_image:
+          requires:
+            - test
+          repo: birb-api
+          region: AWS_DEFAULT_REGION
+          path: ./out
       - save_cache:
           key: v3-cargo-cache-{{ arch }}-{{ .Branch }}
           paths:
@@ -31,11 +37,5 @@ workflows:
   version: 2
   test_and_deploy:
     jobs:
-      - test
-      - aws-ecr/build_and_push_image:
-          requires:
-            - test
-          repo: birb-api
-          region: AWS_DEFAULT_REGION
-          path: ./out
+      - build_and_deploy
 
