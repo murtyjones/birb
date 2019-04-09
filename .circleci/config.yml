@@ -1,7 +1,6 @@
 version: 2
 orbs:
-  aws-ecr: circleci/aws-ecr@0.0.2
-  aws-ecs: circleci/aws-ecs@0.0.3
+  aws-cli: circleci/aws-cli@0.1.4
 jobs:
   test:
     machine: true
