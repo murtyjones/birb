@@ -15,11 +15,11 @@ jobs:
       - run:
           name: Build image
           command: make release-build
-#      - save_cache:
-#          key: v3-cargo-cache-{{ arch }}-{{ .Branch }}
-#          paths:
-#            - target
-#            - /usr/local/cargo
+      - save_cache:
+          key: v3-cargo-cache-{{ arch }}-{{ .Branch }}
+          paths:
+            - target
+            - /usr/local/cargo
 
 workflows:
   version: 2
