@@ -3,7 +3,7 @@ orbs:
   aws-ecr: circleci/aws-ecr@0.0.2
   aws-ecs: circleci/aws-ecs@0.0.3
 jobs:
-  test_and_build:
+  test:
     machine: true
     steps:
       - checkout
@@ -18,26 +18,24 @@ jobs:
       - run:
           name: Build image
           command: make release-build
+      - aws-cli/install
+      - aws-cli/configure:
+          aws-access-key-id: "$AWS_ACCESS_KEY_ID"
+          aws-region: "$AWS_DEFAULT_REGION"
       - run:
-          name: Tag latest
+          name: Tag and push to ECR
           command: |
             make release-tag-latest
+            make ecr-login
+            make ecr-push
       - save_cache:
           key: v3-cargo-cache-{{ arch }}-{{ .Branch }}
           paths:
             - target
             - /usr/local/cargo
 
-
 workflows:
   version: 2
-  test_build_deploy:
+  test_and_deploy:
     jobs:
-      - test_and_build
-      - aws-ecr/build_and_push_image:
-          requires:
-            - test_and_build
-          account-url: "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
-          repo: "${AWS_RESOURCE_NAME_PREFIX}"
-          region: ${AWS_DEFAULT_REGION}
-          tag: "${CIRCLE_SHA1}"
+      - test
