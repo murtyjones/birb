@@ -1,6 +1,4 @@
 version: 2.1
-orbs:
-  aws-ecr: circleci/aws-ecr@3.1.0
 jobs:
   test:
     machine: true
@@ -10,10 +8,10 @@ jobs:
           keys:
             - v3-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
             - v3-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
-#      - run:
-#          name: Run tests
-#          command: |
-#            make test
+      - run:
+          name: Run tests
+          command: |
+            make test
       - save_cache:
           key: v3-cargo-cache-{{ arch }}-{{ .Branch }}
           paths:
@@ -22,24 +20,7 @@ jobs:
 
 workflows:
   version: 2
-  test_and_deploy:
+  build_and_deploy:
     jobs:
-      - test
-      - aws-ecr/build_and_push_image:
-          pre-steps:
-            - checkout
-            - run:
-                name: Make image for build
-                command: make build-binary
-            - save_cache:
-                key: v1-build-cargo-cache-{{ arch }}-{{ .Branch }}
-                paths:
-                  - target
-                  - /usr/local/cargo
-          requires:
-            - test
-          repo: birb-api
-          region: AWS_DEFAULT_REGION
-          dockerfile: Dockerfile-prod
-          path: out
+      - build_and_deploy
 
