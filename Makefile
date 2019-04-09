@@ -40,11 +40,19 @@ clean: down
 	docker system prune -f
 	docker volume prune -f
 
-build-and-push:
+release-build:
 	docker pull clux/muslrust
 	docker run --rm -v cargo-cache:/root/.cargo \
 		-v $$PWD:/volume \
 		-w /volume \
 		-it clux/muslrust \
 		cargo build -p api --release
-	docker build -f crates/api/Dockerfile-prod -t $(REPO)/$(NAME):$(VERSION) .
+	rm -r out
+	mkdir out
+	cp crates/api/Dockerfile-prod out/Dockerfile
+	cp ./target/x86_64-unknown-linux-musl/release/api out
+	cd out
+	docker build -t $(REPO)/$(NAME):$(VERSION) .
+
+release-tag-latest:
+	docker tag $(REPO)/$(NAME):$(VERSION) $(REPO)/$(NAME):latest

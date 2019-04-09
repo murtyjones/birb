@@ -10,3 +10,6 @@ target/**/*
 *.tfstate.backup
 .terraform.tfstate.lock.info
 .terraform/
+
+# Ignore generated output for docker
+out
