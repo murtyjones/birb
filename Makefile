@@ -40,7 +40,7 @@ clean: down
 	docker system prune -f
 	docker volume prune -f
 
-release-build:
+build-binary:
 	docker pull clux/muslrust
 	docker run --rm -v cargo-cache:/root/.cargo \
 		-v $$PWD:/volume \

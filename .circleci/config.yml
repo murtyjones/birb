@@ -30,11 +30,12 @@ workflows:
             - checkout
             - run:
                 name: Make image for build
-                command: make release-build
-            - run:
-                name: Tag and push to ECR
-                command: |
-                  make release-tag-latest
+                command: make build-binary
+            - save_cache:
+                key: v1-build-cargo-cache-{{ arch }}-{{ .Branch }}
+                paths:
+                  - target
+                  - /usr/local/cargo
           requires:
             - test
           repo: birb-api
