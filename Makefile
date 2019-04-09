@@ -49,7 +49,7 @@ build-binary:
 		cargo build -p api --release
 	rm -rf out
 	mkdir out
-	cp ./crates/api/Dockerfile-prod out/Dockerfile
+	cp ./crates/api/Dockerfile-prod out
 	cp ./target/x86_64-unknown-linux-musl/release/api out
 	# Keep these commands together:
 	# cd out && docker build -t $(REPO)/$(NAME):$(VERSION) .
