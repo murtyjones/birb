@@ -37,9 +37,8 @@ workflows:
       - aws-ecr/build_and_push_image:
           requires:
             - test
-          repo: birb-api
+          repo: "birb-api"
           region: AWS_DEFAULT_REGION
-          tag: latest
-          dockerfile: out/Dockerfile
+          path: "./out"
       - push:
 
