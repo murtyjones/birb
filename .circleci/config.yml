@@ -1,6 +1,6 @@
 version: 2.1
 jobs:
-  test:
+  build_and_deploy:
     machine: true
     steps:
       - checkout
@@ -12,6 +12,11 @@ jobs:
           name: Run tests
           command: |
             make test
+      - run:
+          name: Build binary and docker image
+          command: |
+            make build-binary
+            make build-docker-image
       - save_cache:
           key: v3-cargo-cache-{{ arch }}-{{ .Branch }}
           paths:

@@ -41,18 +41,25 @@ clean: down
 	docker volume prune -f
 
 build-binary:
+    # get base image
 	docker pull clux/muslrust
+	# build binary
 	docker run --rm -v cargo-cache:/root/.cargo \
 		-v $$PWD:/volume \
 		-w /volume \
 		-it clux/muslrust \
 		cargo build -p api --release
+	# put binary and production dockerfile in a temporary
+	# folder to keep the build context simple/small
+
+build-docker-image:
 	rm -rf out
 	mkdir out
 	cp ./crates/api/Dockerfile-prod out
 	cp ./target/x86_64-unknown-linux-musl/release/api out
-	# Keep these commands together:
-	# cd out && docker build -t $(REPO)/$(NAME):$(VERSION) .
+	pushd out
+	docker build -t $(REPO)/$(NAME):$(VERSION) .
+	popd
 
 release-tag-latest:
 	docker tag $(REPO)/$(NAME):$(VERSION) $(REPO)/$(NAME):latest
