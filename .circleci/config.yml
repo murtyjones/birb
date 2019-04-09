@@ -18,8 +18,7 @@ jobs:
           name: Build image
           command: make release-build
       - aws-cli/install
-      - aws-cli/configure:
-          aws-region: $AWS_DEFAULT_REGION
+      - aws-cli/configure
       - run:
           name: Tag and push to ECR
           command: |
