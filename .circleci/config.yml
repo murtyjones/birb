@@ -40,5 +40,5 @@ workflows:
             - test
           repo: birb-api
           region: AWS_DEFAULT_REGION
-          path: ./out
+          file: ./out/Dockerfile
 
