@@ -47,9 +47,9 @@ release-build:
 		-w /volume \
 		-it clux/muslrust \
 		cargo build -p api --release
-	rm -r out
+	rm -rf out
 	mkdir out
-	cp crates/api/Dockerfile-prod out/Dockerfile
+	cp ./crates/api/Dockerfile-prod out/Dockerfile
 	cp ./target/x86_64-unknown-linux-musl/release/api out
 	cd out
 	docker build -t $(REPO)/$(NAME):$(VERSION) .
