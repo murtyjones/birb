@@ -12,6 +12,10 @@ jobs:
           name: Run tests
           command: |
             make test
+      - run:
+          - name: Build image
+            command: |
+              make build-and-push
       - save_cache:
           key: v2-cargo-cache-{{ arch }}-{{ .Branch }}
           paths:

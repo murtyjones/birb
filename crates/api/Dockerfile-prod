@@ -1,26 +1,8 @@
 FROM rustlang/rust:nightly
 
-RUN rustup target add x86_64-unknown-linux-musl
+COPY ./target/x86_64-unknown-linux-musl/release/api /api
 
-WORKDIR /usr/src/app
-
-# musl
-RUN apt-get update
-RUN apt-get install -y musl-tools
-RUN apt-get install pkg-config libssl-dev
-
-COPY ./ ./
-
-RUN cargo build --release --target x86_64-unknown-linux-musl -p api --features vendored
-
-# From scratch in order to minimize image size
-
-FROM scratch
-
-COPY --from=build /usr/src/app/target/x86_64-unknown-linux-musl/release/api /
-
-WORKDIR /
-
+ENV ROCKET_ENV=production
 ENV ROCKET_PORT=10050
 
 EXPOSE 10050/tcp
