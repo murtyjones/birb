@@ -37,8 +37,8 @@ workflows:
       - aws-ecr/build_and_push_image:
           requires:
             - test
-          repo: "birb-api"
+          repo: birb-api
           region: AWS_DEFAULT_REGION
-          path: "./out"
+          path: ./out
       - push:
 
