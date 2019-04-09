@@ -14,19 +14,6 @@ jobs:
 #          name: Run tests
 #          command: |
 #            make test
-      - run:
-          name: Build image
-          command: make release-build
-      - run:
-          name: Tag and push to ECR
-          command: |
-            make release-tag-latest
-      - aws-ecr/build_and_push_image:
-          requires:
-            - test
-          repo: birb-api
-          region: AWS_DEFAULT_REGION
-          path: ./out
       - save_cache:
           key: v3-cargo-cache-{{ arch }}-{{ .Branch }}
           paths:
@@ -38,4 +25,18 @@ workflows:
   test_and_deploy:
     jobs:
       - test
+      - aws-ecr/build_and_push_image:
+          pre-steps:
+            - run:
+                name: Make image for build
+                command: make release-build
+            - run:
+                name: Tag and push to ECR
+                command: |
+                  make release-tag-latest
+          requires:
+            - test
+          repo: birb-api
+          region: AWS_DEFAULT_REGION
+          path: ./out
 
