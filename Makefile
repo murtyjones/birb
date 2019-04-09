@@ -58,7 +58,7 @@ release-tag-latest:
 	docker tag $(REPO)/$(NAME):$(VERSION) $(REPO)/$(NAME):latest
 
 ecr-login:
-	eval $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
+	$(aws ecr get-login --no-include-email | sed 's|https://||')
 
 ecr-push:
 	docker tag birb/api 757879768810.dkr.ecr.us-east-1.amazonaws.com/birb-api
