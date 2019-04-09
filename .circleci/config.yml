@@ -1,8 +1,8 @@
 version: 2.1
 orbs:
-  aws-ecr: circleci/aws-ecr@1.0.0
+  aws-ecr: circleci/aws-ecr@3.1.0
 jobs:
-  build_and_deploy:
+  test:
     machine: true
     steps:
       - checkout
@@ -37,5 +37,5 @@ workflows:
   version: 2
   test_and_deploy:
     jobs:
-      - build_and_deploy
+      - test
 
