@@ -41,5 +41,5 @@ workflows:
           repo: birb-api
           region: AWS_DEFAULT_REGION
           dockerfile: Dockerfile-prod
-          path: ./out
+          path: out
 
