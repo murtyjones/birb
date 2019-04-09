@@ -27,6 +27,7 @@ workflows:
       - test
       - aws-ecr/build_and_push_image:
           pre-steps:
+            - checkout
             - run:
                 name: Make image for build
                 command: make release-build
