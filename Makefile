@@ -51,8 +51,8 @@ release-build:
 	mkdir out
 	cp ./crates/api/Dockerfile-prod out/Dockerfile
 	cp ./target/x86_64-unknown-linux-musl/release/api out
-	cd out
-	docker build -t $(REPO)/$(NAME):$(VERSION) .
+	# Keep these commands together:
+	cd out && docker build -t $(REPO)/$(NAME):$(VERSION) .
 
 release-tag-latest:
 	docker tag $(REPO)/$(NAME):$(VERSION) $(REPO)/$(NAME):latest
