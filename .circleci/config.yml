@@ -16,7 +16,7 @@ jobs:
           name: Build image
           command: make release-build
       - save_cache:
-          key: v2-cargo-cache-{{ arch }}-{{ .Branch }}
+          key: v3-cargo-cache-{{ arch }}-{{ .Branch }}
           paths:
             - target
             - /usr/local/cargo
