@@ -38,9 +38,9 @@ workflows:
           requires:
             - test
           account-url: "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
-          repo: "birb-api"
-          region: "us-east-1"
-          tag: "latest"
+          repo: birb-api
+          region: us-east-1
+          tag: latest
           dockerfile: out/Dockerfile
       - push:
 
