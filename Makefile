@@ -56,3 +56,10 @@ release-build:
 
 release-tag-latest:
 	docker tag $(REPO)/$(NAME):$(VERSION) $(REPO)/$(NAME):latest
+
+ecr-login:
+	$(aws ecr get-login --no-include-email | sed 's|https://||')
+
+ecr-push:
+	docker tag birb/api 757879768810.dkr.ecr.us-east-1.amazonaws.com/birb-api
+	docker push 757879768810.dkr.ecr.us-east-1.amazonaws.com/birb-api

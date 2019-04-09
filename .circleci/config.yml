@@ -4,10 +4,10 @@ jobs:
     machine: true
     steps:
       - checkout
-#      - restore_cache:
-#          keys:
-#            - v3-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
-#            - v3-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
+      - restore_cache:
+          keys:
+            - v3-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
+            - v3-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
 #      - run:
 #          name: Run tests
 #          command: |
@@ -15,6 +15,12 @@ jobs:
       - run:
           name: Build image
           command: make release-build
+      - run:
+          name: Tag and push to ECR
+          command: |
+            make release-tag-latest
+            make ecr-login
+            make ecr-push
       - save_cache:
           key: v3-cargo-cache-{{ arch }}-{{ .Branch }}
           paths:
