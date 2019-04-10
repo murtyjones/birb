@@ -10,7 +10,7 @@ variable "az_count" {
 
 variable "app_name" {
   description = "Docker image to run in the ECS cluster"
-  default     = "birb-api"
+  default     = "birb_api"
 }
 
 variable "app_port" {

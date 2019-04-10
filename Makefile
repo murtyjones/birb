@@ -57,12 +57,8 @@ copy-artifacts:
 build-push-docker-image:
 	./scripts/build_and_push.sh
 
-release-tag-latest:
-	docker tag $(REPO)/$(NAME):$(VERSION) $(REPO)/$(NAME):latest
+produp:
+	terraform apply -auto-approve terraform/
 
-ecr-login:
-	eval $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION | sed 's|https://||')
-
-ecr-push:
-	docker tag birb/api 757879768810.dkr.ecr.us-east-1.amazonaws.com/birb-api
-	docker push 757879768810.dkr.ecr.us-east-1.amazonaws.com/birb-api
+proddown:
+	terraform destroy -auto-approve terraform/

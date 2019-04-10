@@ -3,10 +3,11 @@ resource "aws_ecs_cluster" "main" {
 }
 
 data "template_file" "birb_api_app" {
-  template = "${file("terraform/templates/ecs/${var.app_name}_app.json.tpl")}"
+  template = "${file("terraform/templates/ecs/birb_api_app.json.tpl")}"
 
   vars {
-    app_name      = "${var.app_name}"
+    repo_url       = "${aws_ecr_repository.birb_repo.repository_url}"
+    app_name       = "${var.app_name}"
     fargate_cpu    = "${var.fargate_cpu}"
     fargate_memory = "${var.fargate_memory}"
     aws_region     = "${var.aws_region}"
@@ -15,7 +16,7 @@ data "template_file" "birb_api_app" {
 }
 
 resource "aws_ecs_task_definition" "app" {
-  family                   = "${var.app_name}-app-task"
+  family                   = "birb-api-app-task"
   execution_role_arn       = "${aws_iam_role.task_execution_role.arn}"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
@@ -25,7 +26,7 @@ resource "aws_ecs_task_definition" "app" {
 }
 
 resource "aws_ecs_service" "main" {
-  name            = "${var.app_name}-service"
+  name            = "birb-api-service"
   cluster         = "${aws_ecs_cluster.main.id}"
   task_definition = "${aws_ecs_task_definition.app.arn}"
   desired_count   = "${var.app_count}"

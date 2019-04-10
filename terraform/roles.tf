@@ -59,7 +59,7 @@ resource "aws_iam_role" "task_execution_role" {
   name = "fargate-task-execution-role"
   assume_role_policy = <<EOF
 {
-    "Version": "2008-10-17",
+    "Version": "2012-10-17",
     "Statement": [
         {
             "Sid": "",
@@ -68,6 +68,11 @@ resource "aws_iam_role" "task_execution_role" {
                 "Service": "ecs-tasks.amazonaws.com"
             },
             "Action": "sts:AssumeRole"
+        },
+        {
+          "Effect": "Allow",
+          "Action": "ecr:*",
+          "Resource":"${aws_ecr_repository.birb_repo.arn}"
         }
     ]
 }

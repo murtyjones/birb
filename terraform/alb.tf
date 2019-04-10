@@ -1,12 +1,12 @@
 # TODO: use port 443 instead of port 80
 resource "aws_alb" "main" {
-  name            = "${var.app_name}-load-balancer"
+  name            = "birb-api-load-balancer"
   subnets         = ["${aws_subnet.public.*.id}"]
   security_groups = ["${aws_security_group.lb.id}"]
 }
 
 resource "aws_alb_target_group" "app" {
-  name        = "${var.app_name}-target-group"
+  name        = "birb-api-target-group"
   port        = 80
   protocol    = "HTTP"
   vpc_id      = "${aws_vpc.main.id}"

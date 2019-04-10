@@ -1,7 +1,7 @@
 [
     {
     "name": "${app_name}-app",
-    "image": "${app_name}",
+    "image": "${repo_url}",
     "cpu": ${fargate_cpu},
     "memory": ${fargate_memory},
     "networkMode": "awsvpc",
