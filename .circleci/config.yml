@@ -6,8 +6,8 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v3-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
-            - v3-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
+            - v4-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
+            - v4-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
       - run:
           name: Run tests
           command: |
