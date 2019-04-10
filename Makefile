@@ -55,7 +55,7 @@ copy-artifacts:
 
 
 build-push-docker-image:
-	./scripts/build-push-docker.sh
+	./scripts/build_and_push.sh
 
 release-tag-latest:
 	docker tag $(REPO)/$(NAME):$(VERSION) $(REPO)/$(NAME):latest
