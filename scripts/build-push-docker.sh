@@ -18,7 +18,9 @@ docker build -t $(REPO)/$(NAME):$(VERSION) -t $(REPO)/$(NAME):latest -f ./out/Do
 docker tag $(REPO)/$(NAME):latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$(REPO)/$(NAME):latest &&
 
 # Push to ECR
-docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/auth:latest &&
+docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/auth:latest \
+
+# &&
 
 # Force cluster to restart with new image
 # aws ecs update-service --cluster cluster-name-here --service service-name-here --force-new-deployment
