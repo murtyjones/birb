@@ -30,7 +30,10 @@ fn rocket() -> rocket::Rocket {
     // Start server
     return rocket::ignite()
         .attach(DbConnection::fairing())
-        .mount("/", routes![handlers::company::get])
+        .mount(
+            "/",
+            routes![handlers::health_check::get, handlers::company::get],
+        )
         .register(catchers![
             handlers::not_found::handler,
             handlers::service_not_available::handler
@@ -47,6 +50,12 @@ mod test {
     use rocket::http::{ContentType, Status};
     use rocket::local::Client;
     #[test]
+    fn good_health_check() {
+        let client = Client::new(rocket()).expect("valid rocket instance");
+        let res = client.get("/").header(ContentType::JSON).dispatch();
+        assert_eq!(res.status(), Status::Ok);
+    }
+    #[test]
     fn bad_get() {
         let client = Client::new(rocket()).expect("valid rocket instance");
         let res = client
@@ -55,7 +64,6 @@ mod test {
             .dispatch();
         assert_eq!(res.status(), Status::NotFound);
     }
-
     #[test]
     fn get_tsla() {
         let client = Client::new(rocket()).expect("valid rocket instance");
