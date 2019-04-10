@@ -4,10 +4,10 @@ jobs:
     machine: true
     steps:
       - checkout
-#      - restore_cache:
-#          keys:
-#            - v4-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
-#            - v4-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
+      - restore_cache:
+          keys:
+            - v4-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
+            - v4-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
       - run:
           name: Run tests
           command: make test
