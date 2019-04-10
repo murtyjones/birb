@@ -10,7 +10,7 @@ jobs:
             - v4-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
       - run:
           name: Install AWS CLI Latest Version
-          command: sudo apt-get update && apt-get install -y awscli
+          command: aws --version
       - run:
           name: Run tests
           command: make test
