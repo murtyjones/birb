@@ -1,3 +1,4 @@
+[![CircleCI](https://circleci.com/gh/murtyjones/birb.svg?style=svg)](https://circleci.com/gh/murtyjones/birb)
 # birb
 An API.
 ## Getting Started
