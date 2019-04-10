@@ -10,14 +10,16 @@ jobs:
             - v4-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
       - run:
           name: Run tests
-          command: |
-            make test
+          command: make test
       - run:
           name: Build binary and docker image
-          command: |
-            make build-binary
-            make copy-artifacts
-            make build-push-docker-image
+          command: make build-binary
+      - run:
+          name: Copy artifacts to ./out
+          command: make copy-artifacts
+      - run:
+          name: Push image to ECS
+          command: make build-push-docker-image
       - save_cache:
           key: v4-cargo-cache-{{ arch }}-{{ .Branch }}
           paths:
