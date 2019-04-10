@@ -17,7 +17,7 @@ REPO=birb
 aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email | sh
 
 # Build docker image for production and push to ECR
-docker build -t $REPO/$NAME:$VERSION -t $REPO/$NAME:latest -f Dockerfile-prod ./out
+docker build -t $REPO/$NAME:$VERSION -t $REPO/$NAME:latest -f ./out/Dockerfile-prod ./out
 
 # Tag image
 docker tag $REPO/$NAME:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$NAME:latest
