@@ -3,7 +3,7 @@ variable "aws_region" {
   default = "us-east-1"
 }
 
-variable "app_image" {
+variable "api_image" {
   description = "Docker image to run in the ECS cluster"
-  default     = "murtyjones/birb:latest"
+  default     = "birb-api"
 }
