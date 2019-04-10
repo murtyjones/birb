@@ -26,4 +26,4 @@ docker tag $REPO/$NAME:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazon
 docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$NAME:latest
 
 # Force cluster to restart with new image
-# aws ecs update-service --cluster cluster-name-here --service service-name-here --force-new-deployment
+aws ecs update-service --cluster $NAME-cluster --service $NAME-here --force-new-deployment
