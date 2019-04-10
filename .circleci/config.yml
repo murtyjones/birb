@@ -9,8 +9,8 @@ jobs:
             - v4-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
             - v4-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
       - run:
-          name: Install AWS CLI Latest Version
-          command: aws --version
+          name: Upgrade AWS CLI Latest Version
+          command: pip install --upgrade awscli
       - run:
           name: Run tests
           command: make test
