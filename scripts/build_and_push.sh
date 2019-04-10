@@ -7,10 +7,10 @@ set -e
 cd $(git rev-parse --show-toplevel)
 
 # Set variables to use in the tagging process
-NAME=api
+NAME=birb-api
 VERSION=$(git rev-parse HEAD)
 SEMVER_VERSION=$(grep version Cargo.toml | awk -F"\"" '{print $$2}' | head -n 1)
-REPO=birb
+REPO=murtyjones
 
 
 # docker login to ECR registry
