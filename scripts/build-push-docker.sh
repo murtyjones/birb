@@ -19,7 +19,7 @@ docker build -t $REPO/$NAME:$VERSION -t $REPO/$NAME:latest -f ./out/Dockerfile-p
 &&
 
 # Tag auth
-docker tag $REPO/$NAME:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$REPO/$NAME:latest \
+docker tag $REPO/$NAME:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$NAME:latest \
 &&
 
 # Push to ECR

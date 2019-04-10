@@ -4,27 +4,27 @@ jobs:
     machine: true
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - v4-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
-            - v4-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
+#      - restore_cache:
+#          keys:
+#            - v4-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
+#            - v4-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
+#      - run:
+#          name: Run tests
+#          command: make test
       - run:
-          name: Run tests
-          command: make test
-      - run:
-          name: Build binary and docker image
+          name: Build binary
           command: make build-binary
       - run:
           name: Copy artifacts to ./out
           command: make copy-artifacts
       - run:
-          name: Push image to ECS
+          name: Build image and push to ECS
           command: make build-push-docker-image
-      - save_cache:
-          key: v4-cargo-cache-{{ arch }}-{{ .Branch }}
-          paths:
-            - target
-            - /usr/local/cargo
+#      - save_cache:
+#          key: v4-cargo-cache-{{ arch }}-{{ .Branch }}
+#          paths:
+#            - target
+#            - /usr/local/cargo
 
 workflows:
   version: 2
