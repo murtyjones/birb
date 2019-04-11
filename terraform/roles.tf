@@ -96,7 +96,9 @@ resource "aws_iam_policy" "task_execution_policy" {
             "Effect": "Allow",
             "Action": [
                 "cloudwatch:DescribeAlarms",
-                "cloudwatch:PutMetricAlarm"
+                "cloudwatch:PutMetricAlarm",
+                "logs:CreateLogStream",
+                "logs:CreateLogGroup"
             ],
             "Resource": [
                 "*"
