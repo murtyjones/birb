@@ -1,4 +1,4 @@
-use crate::lib::mongo::Mongo;
+use crate::mongo::Mongo;
 use bson;
 use bson::Array;
 use mongodb::db::Database;

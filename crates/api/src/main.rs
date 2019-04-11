@@ -14,20 +14,26 @@ extern crate serde_json;
 
 use dotenv::dotenv;
 
+/// Route handlers
 mod handlers;
-mod lib;
+/// DB module
+mod mongo;
+/// Response types
 mod meta;
+/// Mocks for testing
 mod mocks;
+/// DB models
 mod models;
 
+/// Struct to handle the DB connection
 #[database("mongo_datastore")]
 pub struct DbConnection(mongodb::db::Database);
 
+/// Launches the server
 fn rocket() -> rocket::Rocket {
     // Load env vars
     dotenv().ok();
 
-    // Start server
     return rocket::ignite()
         .attach(DbConnection::fairing())
         .mount(
@@ -40,21 +46,25 @@ fn rocket() -> rocket::Rocket {
         ]);
 }
 
+/// Entrypoint
 fn main() {
     rocket().launch();
 }
 
+/// Test suite
 #[cfg(test)]
 mod test {
     use super::rocket;
     use rocket::http::{ContentType, Status};
     use rocket::local::Client;
+    /// Health check should return OK
     #[test]
     fn good_health_check() {
         let client = Client::new(rocket()).expect("valid rocket instance");
         let res = client.get("/").header(ContentType::JSON).dispatch();
         assert_eq!(res.status(), Status::Ok);
     }
+    /// nonexistent route should Not Found
     #[test]
     fn bad_get() {
         let client = Client::new(rocket()).expect("valid rocket instance");
@@ -64,6 +74,7 @@ mod test {
             .dispatch();
         assert_eq!(res.status(), Status::NotFound);
     }
+    /// Get a company successfully
     #[test]
     fn get_tsla() {
         let client = Client::new(rocket()).expect("valid rocket instance");
