@@ -68,11 +68,6 @@ resource "aws_iam_role" "task_execution_role" {
                 "Service": "ecs-tasks.amazonaws.com"
             },
             "Action": "sts:AssumeRole"
-        },
-        {
-          "Effect": "Allow",
-          "Action": "ecr:*",
-          "Resource":"${aws_ecr_repository.birb_repo.arn}"
         }
     ]
 }
@@ -102,6 +97,15 @@ resource "aws_iam_policy" "task_execution_policy" {
             "Action": [
                 "cloudwatch:DescribeAlarms",
                 "cloudwatch:PutMetricAlarm"
+            ],
+            "Resource": [
+                "*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ecr:*"
             ],
             "Resource": [
                 "*"
