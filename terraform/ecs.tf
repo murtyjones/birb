@@ -12,6 +12,7 @@ data "template_file" "birb_api_app" {
     fargate_memory = "${var.fargate_memory}"
     aws_region     = "${var.aws_region}"
     app_port       = "${var.app_port}"
+    ROCKET_ENV     = "${aws_secretsmanager_secret.ROCKET_ENV.arn}"
   }
 }
 

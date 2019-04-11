@@ -62,3 +62,6 @@ produp:
 
 proddown:
 	terraform destroy -auto-approve terraform/
+
+prodplan:
+	terraform plan terraform/
