@@ -8,7 +8,7 @@ cd $(git rev-parse --show-toplevel)
 
 # Set variables to use in the tagging process
 NAME=birb-api
-NAME_UNDERSCORED=birb-api
+NAME_UNDERSCORED=birb_api
 VERSION=$(git rev-parse HEAD)
 SEMVER_VERSION=$(grep version Cargo.toml | awk -F"\"" '{print $$2}' | head -n 1)
 REPO=murtyjones
