@@ -22,7 +22,9 @@ docker build -t $REPO/$NAME_UNDER:$VERSION -t $REPO/$NAME_UNDER:latest -f ./out/
 docker tag $REPO/$NAME_UNDER:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$NAME_UNDER:latest
 
 # Push to ECR
-docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$NAME_UNDER:latest
+# Disable until infrastructure is done:
+# docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$NAME_UNDER:latest
 
 # Force cluster to restart with new image
-aws ecs update-service --cluster $NAME_UNDER-cluster --service $NAME_HYPHEN-service --force-new-deployment
+# Disable until infrastructure is done:
+# aws ecs update-service --cluster $NAME_UNDER-cluster --service $NAME_HYPHEN-service --force-new-deployment
