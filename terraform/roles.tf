@@ -107,7 +107,9 @@ resource "aws_iam_policy" "task_execution_policy" {
         {
             "Effect": "Allow",
             "Action": [
-                "ecr:*"
+                "ecr:BatchGetImage",
+                "ecr:GetAuthorizationToken",
+                "ecr:GetDownloadUrlForLayer"
             ],
             "Resource": [
                 "*"
