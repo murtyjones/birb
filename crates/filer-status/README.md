@@ -9,3 +9,5 @@ This library is used to determine whether an entity files financial statements o
 ![active filer example – Tesla](../../assets/images/docs/active_filer_example_tesla.png)
 ### Inactive Filer – Some guy named Kenneth Sawyer
 ![inactive filer example – Sawyer](../../assets/images/docs/inactive_filer_example_sawyer.png)
+### Guide Level Explanation
+### Implementation Level Explanation
