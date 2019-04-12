@@ -37,12 +37,12 @@ clean: down
 
 build-binary:
     # get base image
-	docker pull clux/muslrust
+	docker pull clux/muslrust:nightly
 	# build binary
 	docker run --rm -v cargo-cache:/root/.cargo \
 		-v $$PWD:/volume \
 		-w /volume \
-		-it clux/muslrust \
+		-it clux/muslrust:nightly \
 		cargo build -p api --release
 
 copy-artifacts:
