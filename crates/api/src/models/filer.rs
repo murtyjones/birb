@@ -13,7 +13,7 @@ pub struct Model {
 
 impl Model {
     pub fn find_one_by_cik(conn: &Database, cik: String) -> OrderedDocument {
-        Mongo::find_one(conn, "company", Some(doc! { "cik" => cik })).unwrap()
+        Mongo::find_one(conn, "filer", Some(doc! { "cik" => cik })).unwrap()
     }
 }
 

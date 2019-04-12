@@ -16,14 +16,14 @@ extern crate serde_json;
 
 /// Route handlers
 mod handlers;
-/// DB module
-mod mongo;
 /// Response types
 mod meta;
 /// Mocks for testing
 mod mocks;
 /// DB models
 mod models;
+/// DB module
+mod mongo;
 
 /// Struct to handle the DB connection
 #[database("mongo_datastore")]
@@ -39,7 +39,7 @@ fn rocket() -> rocket::Rocket {
         .attach(DbConnection::fairing())
         .mount(
             "/",
-            routes![handlers::health_check::get, handlers::company::get],
+            routes![handlers::health_check::get, handlers::filer::get],
         )
         .register(catchers![
             handlers::not_found::handler,
@@ -75,12 +75,12 @@ mod test {
             .dispatch();
         assert_eq!(res.status(), Status::NotFound);
     }
-    /// Get a company successfully
+    /// Get a filer successfully
     #[test]
     fn get_tsla() {
         let client = Client::new(rocket()).expect("valid rocket instance");
         let mut res = client
-            .get("/company/0001318605")
+            .get("/filer/0001318605")
             .header(ContentType::JSON)
             .dispatch();
         let body = res.body_string().unwrap();
