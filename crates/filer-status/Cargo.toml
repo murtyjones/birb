@@ -1,0 +1,6 @@
+[package]
+name = "filer-status"
+version = "0.1.0"
+authors = ["Marty Jones <murtin.jones@gmail.com>"]
+edition = "2018"
+
