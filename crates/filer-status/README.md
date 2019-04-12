@@ -22,4 +22,5 @@ This library is used to determine whether an entity files financial statements o
     - Filer: `FilerModel`
 3. impl `getFilingStatus`
     - `http::request` on `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${Filer.CIK}&type=10-Q&dateb=&owner=exclude&count=40`
-        - Throw error if an <a> element with the CIK is not found on in the request body (what library to use?)
+        - Throw error if an <a> element with the CIK is not found on in the request body
+4. Persist to DB
