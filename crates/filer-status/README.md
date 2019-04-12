@@ -14,10 +14,12 @@ This library is used to determine whether an entity files financial statements o
 2. For each:
     - Search `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${CIK}&type=10-Q&dateb=&owner=exclude&count=40`
     - If filings are found, mark `filerStatus: 'ACTIVE'` for the company in the database
-    - Otherwise, mark `filerStatus: 'INACTIVE'` for the company in the database
+    - Otherwise, mark `filingStatus: 'INACTIVE'` for the company in the database
 ### Implementation Level Explanation
-1. Struct named `FilerRequest`
+1. New field on `FilerModel`:
+    - `filingStatus: enm = ['ACTIVE', 'INACTIVE', 'UNSET']`
+2. Struct named `FilerRequest`
     - Filer: `FilerModel`
-2. impl `getFilerStatus`
+3. impl `getFilingStatus`
     - `http::request` on `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${Filer.CIK}&type=10-Q&dateb=&owner=exclude&count=40`
         - Throw error if an <a> element with the CIK is not found on in the request body (what library to use?)
