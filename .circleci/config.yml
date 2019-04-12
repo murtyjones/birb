@@ -24,7 +24,7 @@ jobs:
           name: Build Image and Push to ECS
           command: make build-push-docker-image
       - save_cache:
-          key: v4-cargo-cache-{{ arch }}-{{ .Branch }}
+          key: v5-cargo-cache-{{ arch }}-{{ .Branch }}
           paths:
             - target
             - /usr/local/cargo
