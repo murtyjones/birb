@@ -4,10 +4,10 @@ jobs:
     machine: true
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - v4-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
-            - v4-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
+#      - restore_cache:
+#          keys:
+#            - v4-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
+#            - v4-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
       - run:
           name: Upgrade AWS CLI Latest Version
           command: pip install --upgrade awscli
@@ -23,11 +23,11 @@ jobs:
       - run:
           name: Build Image and Push to ECS
           command: make build-push-docker-image
-      - save_cache:
-          key: v5-cargo-cache-{{ arch }}-{{ .Branch }}
-          paths:
-            - target
-            - /usr/local/cargo
+#      - save_cache:
+#          key: v4-cargo-cache-{{ arch }}-{{ .Branch }}
+#          paths:
+#            - target
+#            - /usr/local/cargo
 
 workflows:
   version: 2
