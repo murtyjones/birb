@@ -12,7 +12,7 @@ extern crate dotenv;
 extern crate mongodb;
 extern crate serde_json;
 
-use dotenv::dotenv;
+#[cfg(debug_assertions)] use dotenv::dotenv;
 
 /// Route handlers
 mod handlers;
@@ -31,7 +31,8 @@ pub struct DbConnection(mongodb::db::Database);
 
 /// Launches the server
 fn rocket() -> rocket::Rocket {
-    // Load env vars
+    // Load env vars in non-release environments
+    #[cfg(debug_assertions)]
     dotenv().ok();
 
     return rocket::ignite()
