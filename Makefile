@@ -4,7 +4,7 @@ dev:
 	make down
 	make build
 	make up
-	cargo watch -x "run --package api"
+	cargo watch -x "run -p api"
 
 rebuild:
 	make down

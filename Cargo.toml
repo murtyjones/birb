@@ -7,7 +7,8 @@ edition = "2018"
 [workspace]
 members = [
   "crates/api",
-  "crates/filing-metadata"
+  "crates/filing-metadata",
+  "crates/filer-status",
 ]
 
 [dependencies]

@@ -48,7 +48,7 @@ fn rocket() -> rocket::Rocket {
 }
 
 /// Entrypoint
-fn main() {
+pub fn launch() {
     rocket().launch();
 }
 

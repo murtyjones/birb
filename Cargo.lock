@@ -27,7 +27,6 @@ version = "0.1.0"
 dependencies = [
  "bson 0.13.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "dotenv 0.13.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "filing-metadata 0.1.0",
  "mongodb 0.3.12 (registry+https://github.com/rust-lang/crates.io-index)",
  "rocket 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rocket_contrib 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -274,6 +273,13 @@ dependencies = [
 name = "fake-simd"
 version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "filer-status"
+version = "0.1.0"
+dependencies = [
+ "api 0.1.0",
+]
 
 [[package]]
 name = "filetime"
