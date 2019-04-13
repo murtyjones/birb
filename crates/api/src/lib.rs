@@ -23,8 +23,6 @@ pub mod handlers;
 pub mod meta;
 /// DB models
 pub mod models;
-/// DB module
-pub mod mongo;
 
 /// Struct to handle the DB connection
 #[database("mongo_datastore")]

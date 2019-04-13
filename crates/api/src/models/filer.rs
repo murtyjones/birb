@@ -1,9 +1,10 @@
-use crate::mongo::Mongo;
 use bson;
 use bson::Array;
 use mongodb::db::Database;
 
-use mongodb::ordered::OrderedDocument;
+use mongodb::db::ThreadedDatabase;
+
+const FILER_COLLECTION: &str = "filer";
 
 /// Model for a filer
 #[derive(Debug, Serialize, Deserialize)]
@@ -16,10 +17,20 @@ pub struct Model {
     pub names: Array,
 }
 
-impl Model {
-    /// Find an entity using its cik
-    pub fn find_one_by_cik(conn: &Database, cik: String) -> OrderedDocument {
-        Mongo::find_one(conn, "filer", Some(doc! { "cik" => cik })).unwrap()
+/// Find an entity using its cik
+pub fn find_one_by_cik(conn: &Database, cik: String) -> Result<Model, &str> {
+    let filter = Some(doc! { "cik" => cik });
+    match conn
+        .collection(FILER_COLLECTION)
+        .find_one(filter, None)
+        .expect("fail")
+    {
+        Some(result) => Ok(Model {
+            // not loving this:
+            cik: result.get("cik").unwrap().as_str().unwrap().to_string(),
+            names: result.get("names").unwrap().as_array().unwrap().to_vec(),
+        }),
+        None => Err("Not found"),
     }
 }
 
