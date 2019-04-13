@@ -12,7 +12,6 @@ rebuild:
 
 test:
 	make down
-	make build
 	docker-compose up -d
 	docker-compose run --rm test cargo test --all
 
