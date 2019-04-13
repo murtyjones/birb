@@ -6,7 +6,7 @@ use mongodb::db::Database;
 use mongodb::ordered::OrderedDocument;
 
 /// Model for a filer
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Model {
     /// A Central Index Key or CIK number is a number given to an individual, company, or foreign
     /// government by the United States Securities and Exchange Commission. The number is used to
