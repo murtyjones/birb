@@ -2,7 +2,6 @@ default: dev
 
 dev:
 	make down
-	make build
 	make up
 	cargo watch -x "run -p api"
 
