@@ -6,7 +6,6 @@
 
 extern crate api_lib;
 extern crate bson;
-use bson::Array;
 
 use crate::api_lib::models::filer::Model as Filer;
 
@@ -25,6 +24,7 @@ mod test {
         let mut names = Vec::new();
         // TODO this doesn't seem right:
         names.push(bson::to_bson("marty").unwrap());
+        names.push(bson::to_bson("martin").unwrap());
         let mock_filer = Filer { cik, names };
         let r = main(&mock_filer);
         assert_eq!(r.cik, mock_filer.cik);
