@@ -6,8 +6,8 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v5-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
-            - v5-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
+            - v6-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
+            - v6-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
       - run:
           name: Upgrade AWS CLI Latest Version
           command: pip install --upgrade awscli
