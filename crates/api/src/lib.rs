@@ -18,15 +18,13 @@ extern crate serde_json;
 #[cfg(debug_assertions)] use dotenv::dotenv;
 
 /// Route handlers
-mod handlers;
+pub mod handlers;
 /// Response types
-mod meta;
-/// Mocks for testing
-mod mocks;
+pub mod meta;
 /// DB models
-mod models;
+pub mod models;
 /// DB module
-mod mongo;
+pub mod mongo;
 
 /// Struct to handle the DB connection
 #[database("mongo_datastore")]
