@@ -1,26 +1,21 @@
 default: dev
 
-dev:
-	make down
-	make up
+dev: down up-without-tests
 	cargo watch -x "run -p api"
 
-rebuild:
-	make down
-	make build
-	make up
+rebuild: down build up-without-tests
 
-test:
-	make down
-	docker-compose up -d
+test: down up-with-tests
 	docker-compose run --rm test cargo test --all
 
 down:
 	docker-compose down
 
-up:
-	@echo "=============starting server locally============="
+up-without-tests:
 	docker-compose up -d --scale test=0
+
+up-with-tests:
+	docker-compose up -d
 
 build:
 	docker-compose build
@@ -29,7 +24,6 @@ logs:
 	docker-compose logs -f
 
 clean: down
-	@echo "=============cleaning up============="
 	docker system prune -f
 	docker volume prune -f
 
