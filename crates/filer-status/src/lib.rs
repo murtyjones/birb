@@ -3,31 +3,34 @@
 //! should not care about the DB.
 
 #![deny(missing_docs)]
+#[cfg(test)] extern crate mockers_derive;
+#[cfg(test)] use mockers_derive::mocked;
 
-extern crate api_lib;
 extern crate bson;
 
-use crate::api_lib::models::filer::Model as Filer;
+/// A filer's status
+#[cfg_attr(test, mocked)]
+pub trait Status {
+    /// Tells whether or not the filer is actively submitting filings
+    fn is_active(&mut self, cik: String) -> bool;
+}
 
-/// Entrypoint to run the script against a given entity
-pub fn main(f: &Filer) -> &Filer {
-    f
+/// Get the status for a filer given the cik
+pub fn get_filer_status(cik: String, cond: &mut Status) -> bool {
+    cond.is_active(cik)
 }
 
 #[cfg(test)]
 mod test {
-    use super::main;
-    use super::Filer;
+    use super::*;
+    use mockers::Scenario;
     #[test]
-    fn returns_filer() {
+    fn test_get_status() {
         let cik = String::from("0000000000");
-        let mut names = Vec::new();
-        // TODO this doesn't seem right:
-        names.push(bson::to_bson("marty").unwrap());
-        names.push(bson::to_bson("martin").unwrap());
-        let mock_filer = Filer { cik, names };
-        let r = main(&mock_filer);
-        assert_eq!(r.cik, mock_filer.cik);
-        assert_eq!(r.names, mock_filer.names);
+        let scenario = Scenario::new();
+        let mut cond = scenario.create_mock_for::<Status>();
+        scenario.expect(cond.is_active_call(cik.clone()).and_return(true));
+        let r = get_filer_status(cik, &mut cond);
+        assert_eq!(r, true);
     }
 }
