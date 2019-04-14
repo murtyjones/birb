@@ -6,7 +6,5 @@ edition = "2018"
 
 [dependencies]
 bson = "0.13.0"
-mockers = "0.13.1"
-mockers_derive = "0.13.1"
 
 api = { path = "../api", version = "0.1.0" }
