@@ -1,7 +1,7 @@
 //! Returns information about a given filer's status. Intended
 //! to be as static as possible - it does make HTTP requests, but
 //! should not care about the DB.
-#![feature(proc_macro)]
+
 #![deny(missing_docs)]
 extern crate mockers;
 extern crate mockers_derive;
@@ -12,8 +12,8 @@ extern crate bson;
 
 use api_lib::models::filer::Model as Filer;
 
+#[cfg_attr(test, mocked)]
 /// Filing status of the filer
-#[mocked]
 pub trait FilingStatus {
     /// Is the filer active in filing with the SEC?
     fn is_active(&self) -> bool;
@@ -33,7 +33,7 @@ impl FilingStatus for Filer {
     }
 }
 
-/// Wow!
+/// Performs retrieval of a filer status
 pub fn get_filer_status(f: &mut FilingStatus) -> bool {
     f.is_active()
 }
