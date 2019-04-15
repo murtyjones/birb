@@ -20,9 +20,10 @@ pub struct Model {
 /// Find an entity using its cik
 pub fn find_one_by_cik(conn: &Database, cik: String) -> Result<Model, &str> {
     let filter = Some(doc! { "cik" => cik });
+    let options = None;
     match conn
         .collection(FILER_COLLECTION)
-        .find_one(filter, None)
+        .find_one(filter, options)
         .expect("fail")
     {
         Some(result) => Ok(Model {
