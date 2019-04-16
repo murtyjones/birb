@@ -1,0 +1,301 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ENG">
+<head>
+<title>EDGAR Search Results</title>
+<link href="/include/interactive.css" rel="stylesheet" type="text/css" />
+<link rel="alternate" type="application/atom+xml" title="ATOM" href="/cgi-bin/browse-edgar?action=getcompany&amp;CIK=0001318605&amp;type=10-Q%25&amp;dateb=&amp;owner=include&amp;count=40&amp;output=atom" />
+
+</head>
+<body style="margin: 0">
+<!-- SEC Web Analytics - For information please visit: https://www.sec.gov/privacy.htm#collectedinfo -->
+<noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-TD3BKV"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-TD3BKV');</script>
+<!-- End SEC Web Analytics -->
+
+<!-- BEGIN BANNER -->
+<div id="headerTop">
+   <div id="Nav"><a href="/index.htm">Home</a> | <a href="/cgi-bin/browse-edgar?action=getcurrent">Latest Filings</a> | <a href="javascript:history.back()">Previous Page</a></div>
+   <div id="seal"><a href="/index.htm"><img src="/images/sealTop.gif" alt="SEC Seal" border="0" /></a></div>
+   <div id="secWordGraphic"><img src="/images/bannerTitle.gif" alt="SEC Banner" /></div>
+</div>
+<div id="headerBottom">
+<div id="secBetaGraphic"><a href="/cgi-bin/browse-edgar?action=getcompany&amp;CIK=0001318605&amp;type=10-Q%25&amp;dateb=&amp;owner=include&amp;count=100&amp;output=xml"><img src="/images/edgar_button_usasearch.png" alt="EDGAR USA Search" style="border-style: none"/></a></div>   <div id="PageTitle">EDGAR Search Results</div>
+</div>
+<!-- END BANNER -->
+
+
+<!-- BEGIN BREADCRUMBS -->
+<div id="breadCrumbs">
+   <ul>
+      <li><a href="/index.htm">SEC Home</a> &#187;</li>
+      <li><a href="/edgar/searchedgar/webusers.htm">Search the Next-Generation EDGAR System</a> &#187;</li>
+      <li><a href="/edgar/searchedgar/companysearch.html">Company Search</a> &#187;</li>
+      <li class="last">Current Page</li>
+   </ul>
+</div>
+<!-- END BREADCRUMBS -->
+
+<div id="contentDiv">
+   <!-- START FILER DIV -->
+   <div style="margin: 15px 0 10px 0; padding: 3px; overflow: hidden; background-color: #BCD6F8;">
+      <div class="mailer">Mailing Address
+         <span class="mailerAddress">3500 DEER CREEK RD</span>
+         <span class="mailerAddress">
+PALO ALTO CA 94304         </span>
+      </div>
+      <div class="mailer">Business Address
+         <span class="mailerAddress">3500 DEER CREEK RD</span>
+         <span class="mailerAddress">
+PALO ALTO CA 94304         </span>
+         <span class="mailerAddress">650-681-5000</span>
+      </div>
+      <div class="companyInfo">
+         <span class="companyName">Tesla, Inc. <acronym title="Central Index Key">CIK</acronym>#: <a href="/cgi-bin/browse-edgar?action=getcompany&amp;CIK=0001318605&amp;owner=include&amp;count=40">0001318605 (see all company filings)</a></span>
+         <p class="identInfo"><acronym title="Standard Industrial Code">SIC</acronym>: <a href="/cgi-bin/browse-edgar?action=getcompany&amp;SIC=3711&amp;owner=include&amp;count=40">3711</a> - MOTOR VEHICLES &amp; PASSENGER CAR BODIES<br />State location: <a href="/cgi-bin/browse-edgar?action=getcompany&amp;State=CA&amp;owner=include&amp;count=40">CA</a> | State of Inc.: <strong>DE</strong> | Fiscal Year End: 1231<br />formerly: TESLA MOTORS INC (filings through 2017-01-27)<br />(Assistant Director Office: 5)<br />Get <a href="/cgi-bin/own-disp?action=getissuer&amp;CIK=0001318605"><b>insider transactions</b></a> for this <b>issuer</b>.
+</p>
+      </div>
+   </div>
+   <div style="width: 100%;">
+      <form method="GET" action="/cgi-bin/browse-edgar">
+         <input type="hidden" name="action" value="getcompany">
+         <input type="hidden" name="CIK" value="0001318605">
+         <table style="margin: 0px; background:#FFFFFF; border: 1px solid #BCD6F8; width: 100%;">
+            <tr>
+               <td>Filter Results:</td>
+               <td><label for="type">Filing Type:</label><br /><input name="type" size="10" tabindex="1" id="type" value="10-Q"></td>
+               <td><label for="prior_to">Prior to:</label> (YYYYMMDD)<br /><input name="dateb" size="10" tabindex="2" id="prior_to" value=""></td>
+               <td>Ownership?<br /><input type="radio" name="owner" value="include" id="include" checked="checked" tabindex="3"><label for="include">include</label><input type="radio" name="owner" value="exclude" id="exclude" tabindex="4"><label for="exclude">exclude</label><input type="radio" name="owner" value="only" id="only" tabindex="5"/><label for="only">only</label>
+               <td><label for="count">Limit Results Per Page</label><br />
+					 <select name="count" id="count" tabindex="6">
+                     <option value="10" >10 Entries
+                     <option value="20" >20 Entries
+                     <option value="40"  selected>40 Entries
+                     <option value="80" >80 Entries
+                     <option value="100" >100 Entries
+                  </select>
+               </td>
+               <td style="text-align: middle;"><input type="submit" value="Search"><br /><input type="submit" onClick="this.form.type.value=''" value="Show All"></td>
+            </tr>
+         </table>
+      </form>
+   </div>
+<!-- END FILER DIV -->
+   <div style="margin-top: 5px; margin-bottom: 5px;">
+      <form>
+         <table border="0" width="100%">
+            <tr>
+               <td>Items 1 - 26&nbsp;&nbsp;<a href="/cgi-bin/browse-edgar?action=getcompany&amp;CIK=0001318605&amp;type=10-Q%25&amp;dateb=&amp;owner=include&amp;start=0&amp;count=40&amp;output=atom"><img src="/images/rss-feed-icon-14x14.png" alt="0001318605 Filings" border="0" align="top" /> RSS Feed</a></td>
+            </tr>
+         </table>
+      </form>
+   </div>
+   <div id="seriesDiv" style="margin-top: 0px;">
+      <table class="tableFile2" summary="Results">
+         <tr>
+            <th width="7%" scope="col">Filings</th>
+            <th width="10%" scope="col">Format</th>
+            <th scope="col">Description</th>
+            <th width="10%" scope="col">Filing Date</th>
+            <th width="15%" scope="col">File/Film Number</th>
+         </tr>
+<tr>
+<td nowrap="nowrap">10-Q</td>
+<td nowrap="nowrap"><a href="/Archives/edgar/data/1318605/000156459018026353/0001564590-18-026353-index.htm" id="documentsbutton">&nbsp;Documents</a>&nbsp; <a href="/cgi-bin/viewer?action=view&amp;cik=1318605&amp;accession_number=0001564590-18-026353&amp;xbrl_type=v" id="interactiveDataBtn">&nbsp;Interactive Data</a></td>
+<td class="small" >Quarterly report [Sections 13 or 15(d)]<br />Acc-no: 0001564590-18-026353&nbsp;(34 Act)&nbsp; Size: 18 MB            </td>
+            <td>2018-11-02</td>
+            <td nowrap="nowrap"><a href="/cgi-bin/browse-edgar?action=getcompany&amp;filenum=001-34756&amp;owner=include&amp;count=40">001-34756</a><br>181155344         </td>
+         </tr>
+<tr class="blueRow">
+<td nowrap="nowrap">10-Q</td>
+<td nowrap="nowrap"><a href="/Archives/edgar/data/1318605/000156459018019254/0001564590-18-019254-index.htm" id="documentsbutton">&nbsp;Documents</a>&nbsp; <a href="/cgi-bin/viewer?action=view&amp;cik=1318605&amp;accession_number=0001564590-18-019254&amp;xbrl_type=v" id="interactiveDataBtn">&nbsp;Interactive Data</a></td>
+<td class="small" >Quarterly report [Sections 13 or 15(d)]<br />Acc-no: 0001564590-18-019254&nbsp;(34 Act)&nbsp; Size: 16 MB            </td>
+            <td>2018-08-06</td>
+            <td nowrap="nowrap"><a href="/cgi-bin/browse-edgar?action=getcompany&amp;filenum=001-34756&amp;owner=include&amp;count=40">001-34756</a><br>18993354         </td>
+         </tr>
+<tr>
+<td nowrap="nowrap">10-Q</td>
+<td nowrap="nowrap"><a href="/Archives/edgar/data/1318605/000156459018011086/0001564590-18-011086-index.htm" id="documentsbutton">&nbsp;Documents</a>&nbsp; <a href="/cgi-bin/viewer?action=view&amp;cik=1318605&amp;accession_number=0001564590-18-011086&amp;xbrl_type=v" id="interactiveDataBtn">&nbsp;Interactive Data</a></td>
+<td class="small" >Quarterly report [Sections 13 or 15(d)]<br />Acc-no: 0001564590-18-011086&nbsp;(34 Act)&nbsp; Size: 15 MB            </td>
+            <td>2018-05-07</td>
+            <td nowrap="nowrap"><a href="/cgi-bin/browse-edgar?action=getcompany&amp;filenum=001-34756&amp;owner=include&amp;count=40">001-34756</a><br>18809529         </td>
+         </tr>
+<tr class="blueRow">
+<td nowrap="nowrap">10-Q</td>
+<td nowrap="nowrap"><a href="/Archives/edgar/data/1318605/000156459017021343/0001564590-17-021343-index.htm" id="documentsbutton">&nbsp;Documents</a>&nbsp; <a href="/cgi-bin/viewer?action=view&amp;cik=1318605&amp;accession_number=0001564590-17-021343&amp;xbrl_type=v" id="interactiveDataBtn">&nbsp;Interactive Data</a></td>
+<td class="small" >Quarterly report [Sections 13 or 15(d)]<br />Acc-no: 0001564590-17-021343&nbsp;(34 Act)&nbsp; Size: 19 MB            </td>
+            <td>2017-11-03</td>
+            <td nowrap="nowrap"><a href="/cgi-bin/browse-edgar?action=getcompany&amp;filenum=001-34756&amp;owner=include&amp;count=40">001-34756</a><br>171174295         </td>
+         </tr>
+<tr>
+<td nowrap="nowrap">10-Q</td>
+<td nowrap="nowrap"><a href="/Archives/edgar/data/1318605/000156459017015705/0001564590-17-015705-index.htm" id="documentsbutton">&nbsp;Documents</a>&nbsp; <a href="/cgi-bin/viewer?action=view&amp;cik=1318605&amp;accession_number=0001564590-17-015705&amp;xbrl_type=v" id="interactiveDataBtn">&nbsp;Interactive Data</a></td>
+<td class="small" >Quarterly report [Sections 13 or 15(d)]<br />Acc-no: 0001564590-17-015705&nbsp;(34 Act)&nbsp; Size: 17 MB            </td>
+            <td>2017-08-04</td>
+            <td nowrap="nowrap"><a href="/cgi-bin/browse-edgar?action=getcompany&amp;filenum=001-34756&amp;owner=include&amp;count=40">001-34756</a><br>171009477         </td>
+         </tr>
+<tr class="blueRow">
+<td nowrap="nowrap">10-Q</td>
+<td nowrap="nowrap"><a href="/Archives/edgar/data/1318605/000156459017009968/0001564590-17-009968-index.htm" id="documentsbutton">&nbsp;Documents</a>&nbsp; <a href="/cgi-bin/viewer?action=view&amp;cik=1318605&amp;accession_number=0001564590-17-009968&amp;xbrl_type=v" id="interactiveDataBtn">&nbsp;Interactive Data</a></td>
+<td class="small" >Quarterly report [Sections 13 or 15(d)]<br />Acc-no: 0001564590-17-009968&nbsp;(34 Act)&nbsp; Size: 13 MB            </td>
+            <td>2017-05-10</td>
+            <td nowrap="nowrap"><a href="/cgi-bin/browse-edgar?action=getcompany&amp;filenum=001-34756&amp;owner=include&amp;count=40">001-34756</a><br>17827795         </td>
+         </tr>
+<tr>
+<td nowrap="nowrap">10-Q</td>
+<td nowrap="nowrap"><a href="/Archives/edgar/data/1318605/000156459016026820/0001564590-16-026820-index.htm" id="documentsbutton">&nbsp;Documents</a>&nbsp; <a href="/cgi-bin/viewer?action=view&amp;cik=1318605&amp;accession_number=0001564590-16-026820&amp;xbrl_type=v" id="interactiveDataBtn">&nbsp;Interactive Data</a></td>
+<td class="small" >Quarterly report [Sections 13 or 15(d)]<br />Acc-no: 0001564590-16-026820&nbsp;(34 Act)&nbsp; Size: 10 MB            </td>
+            <td>2016-11-02</td>
+            <td nowrap="nowrap"><a href="/cgi-bin/browse-edgar?action=getcompany&amp;filenum=001-34756&amp;owner=include&amp;count=40">001-34756</a><br>161966131         </td>
+         </tr>
+<tr class="blueRow">
+<td nowrap="nowrap">10-Q</td>
+<td nowrap="nowrap"><a href="/Archives/edgar/data/1318605/000156459016023024/0001564590-16-023024-index.htm" id="documentsbutton">&nbsp;Documents</a>&nbsp; <a href="/cgi-bin/viewer?action=view&amp;cik=1318605&amp;accession_number=0001564590-16-023024&amp;xbrl_type=v" id="interactiveDataBtn">&nbsp;Interactive Data</a></td>
+<td class="small" >Quarterly report [Sections 13 or 15(d)]<br />Acc-no: 0001564590-16-023024&nbsp;(34 Act)&nbsp; Size: 6 MB            </td>
+            <td>2016-08-05</td>
+            <td nowrap="nowrap"><a href="/cgi-bin/browse-edgar?action=getcompany&amp;filenum=001-34756&amp;owner=include&amp;count=40">001-34756</a><br>161812062         </td>
+         </tr>
+<tr>
+<td nowrap="nowrap">10-Q</td>
+<td nowrap="nowrap"><a href="/Archives/edgar/data/1318605/000156459016018886/0001564590-16-018886-index.htm" id="documentsbutton">&nbsp;Documents</a>&nbsp; <a href="/cgi-bin/viewer?action=view&amp;cik=1318605&amp;accession_number=0001564590-16-018886&amp;xbrl_type=v" id="interactiveDataBtn">&nbsp;Interactive Data</a></td>
+<td class="small" >Quarterly report [Sections 13 or 15(d)]<br />Acc-no: 0001564590-16-018886&nbsp;(34 Act)&nbsp; Size: 6 MB            </td>
+            <td>2016-05-10</td>
+            <td nowrap="nowrap"><a href="/cgi-bin/browse-edgar?action=getcompany&amp;filenum=001-34756&amp;owner=include&amp;count=40">001-34756</a><br>161635448         </td>
+         </tr>
+<tr class="blueRow">
+<td nowrap="nowrap">10-Q</td>
+<td nowrap="nowrap"><a href="/Archives/edgar/data/1318605/000156459015009741/0001564590-15-009741-index.htm" id="documentsbutton">&nbsp;Documents</a>&nbsp; <a href="/cgi-bin/viewer?action=view&amp;cik=1318605&amp;accession_number=0001564590-15-009741&amp;xbrl_type=v" id="interactiveDataBtn">&nbsp;Interactive Data</a></td>
+<td class="small" >Quarterly report [Sections 13 or 15(d)]<br />Acc-no: 0001564590-15-009741&nbsp;(34 Act)&nbsp; Size: 6 MB            </td>
+            <td>2015-11-05</td>
+            <td nowrap="nowrap"><a href="/cgi-bin/browse-edgar?action=getcompany&amp;filenum=001-34756&amp;owner=include&amp;count=40">001-34756</a><br>151201649         </td>
+         </tr>
+<tr>
+<td nowrap="nowrap">10-Q</td>
+<td nowrap="nowrap"><a href="/Archives/edgar/data/1318605/000156459015006666/0001564590-15-006666-index.htm" id="documentsbutton">&nbsp;Documents</a>&nbsp; <a href="/cgi-bin/viewer?action=view&amp;cik=1318605&amp;accession_number=0001564590-15-006666&amp;xbrl_type=v" id="interactiveDataBtn">&nbsp;Interactive Data</a></td>
+<td class="small" >Quarterly report [Sections 13 or 15(d)]<br />Acc-no: 0001564590-15-006666&nbsp;(34 Act)&nbsp; Size: 10 MB            </td>
+            <td>2015-08-07</td>
+            <td nowrap="nowrap"><a href="/cgi-bin/browse-edgar?action=getcompany&amp;filenum=001-34756&amp;owner=include&amp;count=40">001-34756</a><br>151037418         </td>
+         </tr>
+<tr class="blueRow">
+<td nowrap="nowrap">10-Q</td>
+<td nowrap="nowrap"><a href="/Archives/edgar/data/1318605/000156459015003789/0001564590-15-003789-index.htm" id="documentsbutton">&nbsp;Documents</a>&nbsp; <a href="/cgi-bin/viewer?action=view&amp;cik=1318605&amp;accession_number=0001564590-15-003789&amp;xbrl_type=v" id="interactiveDataBtn">&nbsp;Interactive Data</a></td>
+<td class="small" >Quarterly report [Sections 13 or 15(d)]<br />Acc-no: 0001564590-15-003789&nbsp;(34 Act)&nbsp; Size: 8 MB            </td>
+            <td>2015-05-11</td>
+            <td nowrap="nowrap"><a href="/cgi-bin/browse-edgar?action=getcompany&amp;filenum=001-34756&amp;owner=include&amp;count=40">001-34756</a><br>15848261         </td>
+         </tr>
+<tr>
+<td nowrap="nowrap">10-Q</td>
+<td nowrap="nowrap"><a href="/Archives/edgar/data/1318605/000119312514403635/0001193125-14-403635-index.htm" id="documentsbutton">&nbsp;Documents</a>&nbsp; <a href="/cgi-bin/viewer?action=view&amp;cik=1318605&amp;accession_number=0001193125-14-403635&amp;xbrl_type=v" id="interactiveDataBtn">&nbsp;Interactive Data</a></td>
+<td class="small" >Quarterly report [Sections 13 or 15(d)]<br />Acc-no: 0001193125-14-403635&nbsp;(34 Act)&nbsp; Size: 5 MB            </td>
+            <td>2014-11-07</td>
+            <td nowrap="nowrap"><a href="/cgi-bin/browse-edgar?action=getcompany&amp;filenum=001-34756&amp;owner=include&amp;count=40">001-34756</a><br>141205790         </td>
+         </tr>
+<tr class="blueRow">
+<td nowrap="nowrap">10-Q</td>
+<td nowrap="nowrap"><a href="/Archives/edgar/data/1318605/000119312514303175/0001193125-14-303175-index.htm" id="documentsbutton">&nbsp;Documents</a>&nbsp; <a href="/cgi-bin/viewer?action=view&amp;cik=1318605&amp;accession_number=0001193125-14-303175&amp;xbrl_type=v" id="interactiveDataBtn">&nbsp;Interactive Data</a></td>
+<td class="small" >Quarterly report [Sections 13 or 15(d)]<br />Acc-no: 0001193125-14-303175&nbsp;(34 Act)&nbsp; Size: 5 MB            </td>
+            <td>2014-08-08</td>
+            <td nowrap="nowrap"><a href="/cgi-bin/browse-edgar?action=getcompany&amp;filenum=001-34756&amp;owner=include&amp;count=40">001-34756</a><br>141027754         </td>
+         </tr>
+<tr>
+<td nowrap="nowrap">10-Q</td>
+<td nowrap="nowrap"><a href="/Archives/edgar/data/1318605/000119312514192606/0001193125-14-192606-index.htm" id="documentsbutton">&nbsp;Documents</a>&nbsp; <a href="/cgi-bin/viewer?action=view&amp;cik=1318605&amp;accession_number=0001193125-14-192606&amp;xbrl_type=v" id="interactiveDataBtn">&nbsp;Interactive Data</a></td>
+<td class="small" >Quarterly report [Sections 13 or 15(d)]<br />Acc-no: 0001193125-14-192606&nbsp;(34 Act)&nbsp; Size: 5 MB            </td>
+            <td>2014-05-09</td>
+            <td nowrap="nowrap"><a href="/cgi-bin/browse-edgar?action=getcompany&amp;filenum=001-34756&amp;owner=include&amp;count=40">001-34756</a><br>14829746         </td>
+         </tr>
+<tr class="blueRow">
+<td nowrap="nowrap">10-Q</td>
+<td nowrap="nowrap"><a href="/Archives/edgar/data/1318605/000119312513435480/0001193125-13-435480-index.htm" id="documentsbutton">&nbsp;Documents</a>&nbsp; <a href="/cgi-bin/viewer?action=view&amp;cik=1318605&amp;accession_number=0001193125-13-435480&amp;xbrl_type=v" id="interactiveDataBtn">&nbsp;Interactive Data</a></td>
+<td class="small" >Quarterly report [Sections 13 or 15(d)]<br />Acc-no: 0001193125-13-435480&nbsp;(34 Act)&nbsp; Size: 4 MB            </td>
+            <td>2013-11-08</td>
+            <td nowrap="nowrap"><a href="/cgi-bin/browse-edgar?action=getcompany&amp;filenum=001-34756&amp;owner=include&amp;count=40">001-34756</a><br>131205696         </td>
+         </tr>
+<tr>
+<td nowrap="nowrap">10-Q</td>
+<td nowrap="nowrap"><a href="/Archives/edgar/data/1318605/000119312513327916/0001193125-13-327916-index.htm" id="documentsbutton">&nbsp;Documents</a>&nbsp; <a href="/cgi-bin/viewer?action=view&amp;cik=1318605&amp;accession_number=0001193125-13-327916&amp;xbrl_type=v" id="interactiveDataBtn">&nbsp;Interactive Data</a></td>
+<td class="small" >Quarterly report [Sections 13 or 15(d)]<br />Acc-no: 0001193125-13-327916&nbsp;(34 Act)&nbsp; Size: 7 MB            </td>
+            <td>2013-08-09</td>
+            <td nowrap="nowrap"><a href="/cgi-bin/browse-edgar?action=getcompany&amp;filenum=001-34756&amp;owner=include&amp;count=40">001-34756</a><br>131024385         </td>
+         </tr>
+<tr class="blueRow">
+<td nowrap="nowrap">10-Q</td>
+<td nowrap="nowrap"><a href="/Archives/edgar/data/1318605/000119312513212354/0001193125-13-212354-index.htm" id="documentsbutton">&nbsp;Documents</a>&nbsp; <a href="/cgi-bin/viewer?action=view&amp;cik=1318605&amp;accession_number=0001193125-13-212354&amp;xbrl_type=v" id="interactiveDataBtn">&nbsp;Interactive Data</a></td>
+<td class="small" >Quarterly report [Sections 13 or 15(d)]<br />Acc-no: 0001193125-13-212354&nbsp;(34 Act)&nbsp; Size: 4 MB            </td>
+            <td>2013-05-10</td>
+            <td nowrap="nowrap"><a href="/cgi-bin/browse-edgar?action=getcompany&amp;filenum=001-34756&amp;owner=include&amp;count=40">001-34756</a><br>13830957         </td>
+         </tr>
+<tr>
+<td nowrap="nowrap">10-Q</td>
+<td nowrap="nowrap"><a href="/Archives/edgar/data/1318605/000119312512457610/0001193125-12-457610-index.htm" id="documentsbutton">&nbsp;Documents</a>&nbsp; <a href="/cgi-bin/viewer?action=view&amp;cik=1318605&amp;accession_number=0001193125-12-457610&amp;xbrl_type=v" id="interactiveDataBtn">&nbsp;Interactive Data</a></td>
+<td class="small" >Quarterly report [Sections 13 or 15(d)]<br />Acc-no: 0001193125-12-457610&nbsp;(34 Act)&nbsp; Size: 5 MB            </td>
+            <td>2012-11-07</td>
+            <td nowrap="nowrap"><a href="/cgi-bin/browse-edgar?action=getcompany&amp;filenum=001-34756&amp;owner=include&amp;count=40">001-34756</a><br>121187348         </td>
+         </tr>
+<tr class="blueRow">
+<td nowrap="nowrap">10-Q</td>
+<td nowrap="nowrap"><a href="/Archives/edgar/data/1318605/000119312512332138/0001193125-12-332138-index.htm" id="documentsbutton">&nbsp;Documents</a>&nbsp; <a href="/cgi-bin/viewer?action=view&amp;cik=1318605&amp;accession_number=0001193125-12-332138&amp;xbrl_type=v" id="interactiveDataBtn">&nbsp;Interactive Data</a></td>
+<td class="small" >Quarterly report [Sections 13 or 15(d)]<br />Acc-no: 0001193125-12-332138&nbsp;(34 Act)&nbsp; Size: 5 MB            </td>
+            <td>2012-08-02</td>
+            <td nowrap="nowrap"><a href="/cgi-bin/browse-edgar?action=getcompany&amp;filenum=001-34756&amp;owner=include&amp;count=40">001-34756</a><br>121004189         </td>
+         </tr>
+<tr>
+<td nowrap="nowrap">10-Q</td>
+<td nowrap="nowrap"><a href="/Archives/edgar/data/1318605/000119312512225825/0001193125-12-225825-index.htm" id="documentsbutton">&nbsp;Documents</a>&nbsp; <a href="/cgi-bin/viewer?action=view&amp;cik=1318605&amp;accession_number=0001193125-12-225825&amp;xbrl_type=v" id="interactiveDataBtn">&nbsp;Interactive Data</a></td>
+<td class="small" >Quarterly report [Sections 13 or 15(d)]<br />Acc-no: 0001193125-12-225825&nbsp;(34 Act)&nbsp; Size: 4 MB            </td>
+            <td>2012-05-10</td>
+            <td nowrap="nowrap"><a href="/cgi-bin/browse-edgar?action=getcompany&amp;filenum=001-34756&amp;owner=include&amp;count=40">001-34756</a><br>12831059         </td>
+         </tr>
+<tr class="blueRow">
+<td nowrap="nowrap">10-Q</td>
+<td nowrap="nowrap"><a href="/Archives/edgar/data/1318605/000119312511308489/0001193125-11-308489-index.htm" id="documentsbutton">&nbsp;Documents</a>&nbsp; <a href="/cgi-bin/viewer?action=view&amp;cik=1318605&amp;accession_number=0001193125-11-308489&amp;xbrl_type=v" id="interactiveDataBtn">&nbsp;Interactive Data</a></td>
+<td class="small" >Quarterly report [Sections 13 or 15(d)]<br />Acc-no: 0001193125-11-308489&nbsp;(34 Act)&nbsp; Size: 2 MB            </td>
+            <td>2011-11-14</td>
+            <td nowrap="nowrap"><a href="/cgi-bin/browse-edgar?action=getcompany&amp;filenum=001-34756&amp;owner=include&amp;count=40">001-34756</a><br>111197366         </td>
+         </tr>
+<tr>
+<td nowrap="nowrap">10-Q</td>
+<td nowrap="nowrap"><a href="/Archives/edgar/data/1318605/000119312511221497/0001193125-11-221497-index.htm" id="documentsbutton">&nbsp;Documents</a>&nbsp; <a href="/cgi-bin/viewer?action=view&amp;cik=1318605&amp;accession_number=0001193125-11-221497&amp;xbrl_type=v" id="interactiveDataBtn">&nbsp;Interactive Data</a></td>
+<td class="small" >Quarterly report [Sections 13 or 15(d)]<br />Acc-no: 0001193125-11-221497&nbsp;(34 Act)&nbsp; Size: 2 MB            </td>
+            <td>2011-08-12</td>
+            <td nowrap="nowrap"><a href="/cgi-bin/browse-edgar?action=getcompany&amp;filenum=001-34756&amp;owner=include&amp;count=40">001-34756</a><br>111031898         </td>
+         </tr>
+<tr class="blueRow">
+<td nowrap="nowrap">10-Q</td>
+<td nowrap="nowrap"><a href="/Archives/edgar/data/1318605/000119312511139677/0001193125-11-139677-index.htm" id="documentsbutton">&nbsp;Documents</a></td>
+<td class="small" >Quarterly report [Sections 13 or 15(d)]<br />Acc-no: 0001193125-11-139677&nbsp;(34 Act)&nbsp; Size: 735 KB            </td>
+            <td>2011-05-13</td>
+            <td nowrap="nowrap"><a href="/cgi-bin/browse-edgar?action=getcompany&amp;filenum=001-34756&amp;owner=include&amp;count=40">001-34756</a><br>11841967         </td>
+         </tr>
+<tr>
+<td nowrap="nowrap">10-Q</td>
+<td nowrap="nowrap"><a href="/Archives/edgar/data/1318605/000119312510259068/0001193125-10-259068-index.htm" id="documentsbutton">&nbsp;Documents</a></td>
+<td class="small" >Quarterly report [Sections 13 or 15(d)]<br />Acc-no: 0001193125-10-259068&nbsp;(34 Act)&nbsp; Size: 2 MB            </td>
+            <td>2010-11-12</td>
+            <td nowrap="nowrap"><a href="/cgi-bin/browse-edgar?action=getcompany&amp;filenum=001-34756&amp;owner=include&amp;count=40">001-34756</a><br>101187955         </td>
+         </tr>
+<tr class="blueRow">
+<td nowrap="nowrap">10-Q</td>
+<td nowrap="nowrap"><a href="/Archives/edgar/data/1318605/000119312510188792/0001193125-10-188792-index.htm" id="documentsbutton">&nbsp;Documents</a></td>
+<td class="small" >Quarterly report [Sections 13 or 15(d)]<br />Acc-no: 0001193125-10-188792&nbsp;(34 Act)&nbsp; Size: 1 MB            </td>
+            <td>2010-08-13</td>
+            <td nowrap="nowrap"><a href="/cgi-bin/browse-edgar?action=getcompany&amp;filenum=001-34756&amp;owner=include&amp;count=40">001-34756</a><br>101015496         </td>
+         </tr>
+      </table>
+   </div>
+</div>
+
+<!-- BEGIN FOOTER -->
+<div id="footer">
+  <div class="currentURL">https://www.sec.gov/cgi-bin/browse-edgar</div>
+  <div class="links"><a href="/index.htm">Home</a> | <a href="/edgar/searchedgar/webusers.htm">Search the Next-Generation EDGAR System</a> | <a href="javascript:history.back()">Previous Page</a></div>
+  <div class="modified">Modified 07/18/2014</div>
+</div>
+<!-- END FOOTER -->
+
+</body>
+</html>

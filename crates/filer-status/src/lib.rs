@@ -6,6 +6,7 @@
 
 extern crate api_lib;
 extern crate bson;
+extern crate failure;
 extern crate reqwest;
 
 use api_lib::models::filer::Model as Filer;
@@ -24,19 +25,23 @@ impl FilingStatus for Filer {
         true
     }
 
-    #[cfg(not(test))]
+    #[cfg(not(test))] // TODO use failure library instead of Box<...>
     fn get_10q_doc(&self) -> Result<(), Box<std::error::Error>> {
         let url = "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001318605&type=10-Q&dateb=&owner=include&count=40";
         let resp: String = reqwest::get(url)?.text()?;
-        println!("response body: {:#?}", &resp[0..0]);
         Ok(())
     }
 
-    #[cfg(test)]
+    #[cfg(test)] // TODO use failure library instead of Box<...>
     fn get_10q_doc(&self) -> Result<(), Box<std::error::Error>> {
         let url = "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001318605&type=10-Q&dateb=&owner=include&count=40";
         let resp: String = reqwest::get(url)?.text()?;
-        println!("response body: {:#?}", &resp[0..0]);
+        println!("response body: {}", resp);
+        std::fs::write(
+            "/Users/murtyjones/birb/seed-data/unit-test/tsla-10q-listings",
+            resp,
+        )
+        .expect("Unable to write file");
         Ok(())
     }
 }
