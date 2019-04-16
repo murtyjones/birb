@@ -1,0 +1,110 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ENG">
+<head>
+<title>EDGAR Search Results</title>
+<link href="/include/interactive.css" rel="stylesheet" type="text/css" />
+<link rel="alternate" type="application/atom+xml" title="ATOM" href="/cgi-bin/browse-edgar?action=getcompany&amp;CIK=0000948605&amp;type=10-Q%25&amp;dateb=&amp;owner=include&amp;count=40&amp;output=atom" />
+
+</head>
+<body style="margin: 0">
+<!-- SEC Web Analytics - For information please visit: https://www.sec.gov/privacy.htm#collectedinfo -->
+<noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-TD3BKV"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-TD3BKV');</script>
+<!-- End SEC Web Analytics -->
+
+<!-- BEGIN BANNER -->
+<div id="headerTop">
+   <div id="Nav"><a href="/index.htm">Home</a> | <a href="/cgi-bin/browse-edgar?action=getcurrent">Latest Filings</a> | <a href="javascript:history.back()">Previous Page</a></div>
+   <div id="seal"><a href="/index.htm"><img src="/images/sealTop.gif" alt="SEC Seal" border="0" /></a></div>
+   <div id="secWordGraphic"><img src="/images/bannerTitle.gif" alt="SEC Banner" /></div>
+</div>
+<div id="headerBottom">
+<div id="secBetaGraphic"><a href="/cgi-bin/browse-edgar?action=getcompany&amp;CIK=0000948605&amp;type=10-Q%25&amp;dateb=&amp;owner=include&amp;count=100&amp;output=xml"><img src="/images/edgar_button_usasearch.png" alt="EDGAR USA Search" style="border-style: none"/></a></div>   <div id="PageTitle">EDGAR Search Results</div>
+</div>
+<!-- END BANNER -->
+
+
+<!-- BEGIN BREADCRUMBS -->
+<div id="breadCrumbs">
+   <ul>
+      <li><a href="/index.htm">SEC Home</a> &#187;</li>
+      <li><a href="/edgar/searchedgar/webusers.htm">Search the Next-Generation EDGAR System</a> &#187;</li>
+      <li><a href="/edgar/searchedgar/companysearch.html">Company Search</a> &#187;</li>
+      <li class="last">Current Page</li>
+   </ul>
+</div>
+<!-- END BREADCRUMBS -->
+
+<div id="contentDiv">
+   <!-- START FILER DIV -->
+   <div style="margin: 15px 0 10px 0; padding: 3px; overflow: hidden; background-color: #BCD6F8;">
+      <div class="mailer">Mailing Address
+         <span class="mailerAddress">ONE RAM RIDGE ROAD</span>
+         <span class="mailerAddress">
+SPRING VALLEY NY 10977         </span>
+      </div>
+      <div class="mailer">Business Address
+         <span class="mailerAddress">ONE RAM RIDGE ROAD</span>
+         <span class="mailerAddress">
+SPRING VALLEY NY 10977         </span>
+         <span class="mailerAddress">9144257100</span>
+      </div>
+      <div class="companyInfo">
+         <span class="companyName">SAWYER KENNETH I <acronym title="Central Index Key">CIK</acronym>#: <a href="/cgi-bin/browse-edgar?action=getcompany&amp;CIK=0000948605&amp;owner=include&amp;count=40">0000948605 (see all company filings)</a></span>
+         <p class="identInfo">State location: <a href="/cgi-bin/browse-edgar?action=getcompany&amp;State=NY&amp;owner=include&amp;count=40">NY</a><br />Get <a href="/cgi-bin/own-disp?action=getowner&amp;CIK=0000948605"><b>insider transactions</b></a> for this <b>reporting owner</b>.
+</p>
+      </div>
+   </div>
+   <div style="width: 100%;">
+      <form method="GET" action="/cgi-bin/browse-edgar">
+         <input type="hidden" name="action" value="getcompany">
+         <input type="hidden" name="CIK" value="0000948605">
+         <table style="margin: 0px; background:#FFFFFF; border: 1px solid #BCD6F8; width: 100%;">
+            <tr>
+               <td>Filter Results:</td>
+               <td><label for="type">Filing Type:</label><br /><input name="type" size="10" tabindex="1" id="type" value="10-Q"></td>
+               <td><label for="prior_to">Prior to:</label> (YYYYMMDD)<br /><input name="dateb" size="10" tabindex="2" id="prior_to" value=""></td>
+               <td>Ownership?<br /><input type="radio" name="owner" value="include" id="include" checked="checked" tabindex="3"><label for="include">include</label><input type="radio" name="owner" value="exclude" id="exclude" tabindex="4"><label for="exclude">exclude</label><input type="radio" name="owner" value="only" id="only" tabindex="5"/><label for="only">only</label>
+               <td><label for="count">Limit Results Per Page</label><br />
+					 <select name="count" id="count" tabindex="6">
+                     <option value="10" >10 Entries
+                     <option value="20" >20 Entries
+                     <option value="40"  selected>40 Entries
+                     <option value="80" >80 Entries
+                     <option value="100" >100 Entries
+                  </select>
+               </td>
+               <td style="text-align: middle;"><input type="submit" value="Search"><br /><input type="submit" onClick="this.form.type.value=''" value="Show All"></td>
+            </tr>
+         </table>
+      </form>
+   </div>
+<!-- END FILER DIV -->
+   <div id="seriesDiv" style="margin-top: 0px;">
+      <table class="tableFile2" summary="Results">
+         <tr>
+            <th width="7%" scope="col">Filings</th>
+            <th width="10%" scope="col">Format</th>
+            <th scope="col">Description</th>
+            <th width="10%" scope="col">Filing Date</th>
+            <th width="15%" scope="col">File/Film Number</th>
+         </tr>
+      </table>
+   </div>
+</div>
+
+<!-- BEGIN FOOTER -->
+<div id="footer">
+  <div class="currentURL">https://www.sec.gov/cgi-bin/browse-edgar</div>
+  <div class="links"><a href="/index.htm">Home</a> | <a href="/edgar/searchedgar/webusers.htm">Search the Next-Generation EDGAR System</a> | <a href="javascript:history.back()">Previous Page</a></div>
+  <div class="modified">Modified 07/18/2014</div>
+</div>
+<!-- END FOOTER -->
+
+</body>
+</html>

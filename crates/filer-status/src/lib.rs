@@ -34,11 +34,11 @@ impl FilingStatus for Filer {
 
     #[cfg(test)] // TODO use failure library instead of Box<...>
     fn get_10q_doc(&self) -> Result<(), Box<std::error::Error>> {
-        let url = "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001318605&type=10-Q&dateb=&owner=include&count=40";
+        let url = "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000948605&type=10-Q&dateb=&owner=include&count=40";
         let resp: String = reqwest::get(url)?.text()?;
         println!("response body: {}", resp);
         std::fs::write(
-            "/Users/murtyjones/birb/seed-data/unit-test/tsla-10q-listings",
+            "/Users/murtyjones/birb/seed-data/unit-test/kenneth-sawyer-10q-listings",
             resp,
         )
         .expect("Unable to write file");
