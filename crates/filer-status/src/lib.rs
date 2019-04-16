@@ -42,22 +42,23 @@ impl FilingStatus for Filer {
 
     #[cfg(test)] // TODO use failure library instead of Box<...>
     fn get_10q_doc(&self) -> Result<String, Box<std::error::Error>> {
-        let mut filer_mock_html_path: &'static str = "";
+        let mut filer_mock_html_path: String = "../../seed-data/unit-test".to_string();
         match &*self.cik {
             INACTIVE_FILER_CIK => {
-                filer_mock_html_path = "../../seed-data/unit-test/kenneth-sawyer-10q-listings"
+                filer_mock_html_path =
+                    filer_mock_html_path + &"/kenneth-sawyer-10q-listings".to_string()
             }
             ACTIVE_FILER_CIK => {
-                filer_mock_html_path = "../../seed-data/unit-test/tsla-10q-listings"
+                filer_mock_html_path = filer_mock_html_path + &"/tsla-10q-listings".to_string()
             }
             _ => {
                 // Just use an active filer if no match
-                filer_mock_html_path = "../../seed-data/unit-test/tsla-10q-listings"
+                filer_mock_html_path = filer_mock_html_path + &"/tsla-10q-listings".to_string()
             }
         }
         // TODO: This path is relative to birb/crates/filer-status. Not sure whether it
         // holds up at compile time but I guess since this is a test it's okay.
-        let path: &Path = Path::new(filer_mock_html_path);
+        let path: &Path = Path::new(&filer_mock_html_path);
         let html: String = fs::read_to_string(path)?;
         Ok(html)
     }
