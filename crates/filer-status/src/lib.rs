@@ -6,6 +6,7 @@
 
 extern crate api_lib;
 extern crate bson;
+extern crate reqwest;
 
 use api_lib::models::filer::Model as Filer;
 
@@ -14,7 +15,7 @@ pub trait FilingStatus {
     /// Is the filer active in filing with the SEC?
     fn is_active(&self) -> bool;
     /// Gets the doc from sec.gov
-    fn get_10q_doc(&self) -> String;
+    fn get_10q_doc(&self) -> Result<(), Box<std::error::Error>>;
 }
 
 /// Implements the status retrieval for the Filer model
@@ -24,15 +25,19 @@ impl FilingStatus for Filer {
     }
 
     #[cfg(not(test))]
-    fn get_10q_doc(&self) -> String {
-        // make actual api request here
-        self.cik.clone()
+    fn get_10q_doc(&self) -> Result<(), Box<std::error::Error>> {
+        let url = "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001318605&type=10-Q&dateb=&owner=include&count=40";
+        let resp: String = reqwest::get(url)?.text()?;
+        println!("response body: {:#?}", &resp[0..0]);
+        Ok(())
     }
 
     #[cfg(test)]
-    fn get_10q_doc(&self) -> String {
-        // stub out a response here
-        self.cik.clone()
+    fn get_10q_doc(&self) -> Result<(), Box<std::error::Error>> {
+        let url = "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001318605&type=10-Q&dateb=&owner=include&count=40";
+        let resp: String = reqwest::get(url)?.text()?;
+        println!("response body: {:#?}", &resp[0..0]);
+        Ok(())
     }
 }
 
@@ -54,5 +59,21 @@ mod test {
 
         // Act
         assert_eq!(r, true)
+    }
+
+    #[test]
+    fn test_get_10q() {
+        // Arrange
+        let cik = String::from("0000000000");
+        let mut names = vec![];
+        names.push(bson::to_bson("marty").unwrap());
+        names.push(bson::to_bson("martin").unwrap());
+        let f = Filer { cik, names };
+
+        // Assert
+        let r = f.get_10q_doc();
+
+        // Act
+        // assert_eq!(r, Ok(()))
     }
 }
