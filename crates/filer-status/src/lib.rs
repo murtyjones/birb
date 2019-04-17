@@ -13,7 +13,6 @@ extern crate reqwest;
 use api_lib::models::filer::Model as Filer;
 use html5ever::driver::parse_document;
 use html5ever::driver::ParseOpts;
-use html5ever::driver::Parser;
 use html5ever::rcdom::RcDom;
 use html5ever::serialize::serialize;
 use tendril::stream::TendrilSink;
@@ -22,9 +21,9 @@ use tendril::stream::TendrilSink;
 #[cfg(test)] use std::path::Path;
 
 #[cfg(test)]
-const INACTIVE_FILER_CIK: &'static str = "0000948605"; // Kenneth Sawyer
+const MOCK_INACTIVE_FILER_CIK: &'static str = "0000948605"; // Kenneth Sawyer
 #[cfg(test)]
-const ACTIVE_FILER_CIK: &'static str = "0001318605"; // Tesla, Inc.
+const MOCK_ACTIVE_FILER_CIK: &'static str = "0001318605"; // Tesla, Inc.
 
 /// Filing status of the filer
 pub trait FilingStatus {
@@ -42,22 +41,22 @@ impl FilingStatus for Filer {
         true
     }
 
-    #[cfg(not(test))] // TODO use failure library instead of Box<...>
+    #[cfg(not(test))] // TODO use "failure" crate instead of Box<...>
     fn get_10q_doc(&self) -> Result<String, Box<std::error::Error>> {
         let url: &str = "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001318605&type=10-Q&dateb=&owner=include&count=40";
         let html: String = reqwest::get(url)?.text()?;
         Ok(html)
     }
 
-    #[cfg(test)] // TODO use failure library instead of Box<...>
+    #[cfg(test)] // TODO use "failure" crate instead of Box<...>
     fn get_10q_doc(&self) -> Result<String, Box<std::error::Error>> {
         let mut filer_mock_html_path: String = "../../seed-data/unit-test".to_string();
         match &*self.cik {
-            INACTIVE_FILER_CIK => {
+            MOCK_INACTIVE_FILER_CIK => {
                 filer_mock_html_path =
                     filer_mock_html_path + &"/kenneth-sawyer-10q-listings".to_string()
             }
-            ACTIVE_FILER_CIK => {
+            MOCK_ACTIVE_FILER_CIK => {
                 filer_mock_html_path = filer_mock_html_path + &"/tsla-10q-listings".to_string()
             }
             _ => {
@@ -83,8 +82,8 @@ impl FilingStatus for Filer {
 mod test {
     use super::*;
 
-    fn get_mock_inactive_filer() -> Filer {
-        let cik = String::from(INACTIVE_FILER_CIK);
+    fn get_mock_filer(cik: &'static str) -> Filer {
+        let cik = String::from(cik);
         let mut names = vec![];
         names.push(bson::to_bson("ken sawyer").unwrap());
         names.push(bson::to_bson("kenneth").unwrap());
@@ -94,7 +93,7 @@ mod test {
     #[test]
     fn test_get_filer_status() {
         // Arrange
-        let f: Filer = get_mock_inactive_filer();
+        let f: Filer = get_mock_filer(MOCK_INACTIVE_FILER_CIK);
 
         // Assert
         let r = f.is_active();
@@ -104,24 +103,41 @@ mod test {
     }
 
     #[test]
-    fn test_get_10q_listings_inactive_filer() {
+    fn test_get_10q_listings() {
         // Arrange
-        let f: Filer = get_mock_inactive_filer();
-        let path: &Path = Path::new("../../seed-data/unit-test/kenneth-sawyer-10q-listings");
-        let expected_html = fs::read_to_string(path);
+        let filer_inactive: Filer = get_mock_filer(MOCK_INACTIVE_FILER_CIK);
+        let filer_inactive_path: &Path =
+            Path::new("../../seed-data/unit-test/kenneth-sawyer-10q-listings");
+        let filer_inactive_expected_html = fs::read_to_string(filer_inactive_path);
+        let filer_active: Filer = get_mock_filer(MOCK_ACTIVE_FILER_CIK);
+        let filer_active_path: &Path = Path::new("../../seed-data/unit-test/tsla-10q-listings");
+        let filer_active_expected_html = fs::read_to_string(filer_active_path);
 
         // Assert
-        let r = f.get_10q_doc();
+        let filer_inactive_result = filer_inactive.get_10q_doc();
+        let filer_active_result = filer_active.get_10q_doc();
 
         // Act
-        assert_eq!(r.unwrap(), expected_html.unwrap())
+        assert_eq!(
+            filer_inactive_result.unwrap(),
+            filer_inactive_expected_html.unwrap()
+        );
+        assert_eq!(
+            filer_active_result.unwrap(),
+            filer_active_expected_html.unwrap()
+        );
     }
 
     #[test]
     fn test_parse_html() {
-        let f: Filer = get_mock_inactive_filer();
+        // Arrange
+        let f: Filer = get_mock_filer(MOCK_ACTIVE_FILER_CIK);
         let html = String::from("<title>Hello whirled");
+
+        // Act
         let dom = f.parse_html(html);
+
+        // Assert
         let mut serialized = Vec::new();
         serialize(&mut serialized, &dom.document, Default::default()).unwrap();
         assert_eq!(
