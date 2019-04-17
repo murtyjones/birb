@@ -7,9 +7,16 @@
 extern crate api_lib;
 extern crate bson;
 extern crate failure;
+extern crate html5ever;
 extern crate reqwest;
 
 use api_lib::models::filer::Model as Filer;
+use html5ever::driver::parse_document;
+use html5ever::driver::ParseOpts;
+use html5ever::driver::Parser;
+use html5ever::rcdom::RcDom;
+use html5ever::serialize::serialize;
+use tendril::stream::{TendrilSink, Utf8LossyDecoder};
 
 #[cfg(test)] use std::fs;
 #[cfg(test)] use std::path::Path;
@@ -25,6 +32,8 @@ pub trait FilingStatus {
     fn is_active(&self) -> bool;
     /// Gets the doc from sec.gov
     fn get_10q_doc(&self) -> Result<String, Box<std::error::Error>>;
+    /// Parses the html
+    fn parse_html(stri: String) -> ();
 }
 
 /// Implements the status retrieval for the Filer model
@@ -62,6 +71,10 @@ impl FilingStatus for Filer {
         let html: String = fs::read_to_string(path)?;
         Ok(html)
     }
+
+    fn parse_html(stri: String) -> () {
+        unimplemented!();
+    }
 }
 
 #[cfg(test)]
@@ -98,5 +111,19 @@ mod test {
 
         // Act
         // assert_eq!(r, Ok(()))
+    }
+
+    #[test]
+    fn test_parse_html() {
+        let html: &[u8] = "<title>Hello whirled".as_bytes();
+        let dom = parse_document(RcDom::default(), ParseOpts::default())
+            .from_utf8()
+            .one(html);
+        let mut serialized = Vec::new();
+        serialize(&mut serialized, &dom.document, Default::default()).unwrap();
+        assert_eq!(
+            String::from_utf8(serialized).unwrap().replace(" ", ""),
+            "<html><head><title>Hellowhirled</title></head><body></body></html>"
+        );
     }
 }
