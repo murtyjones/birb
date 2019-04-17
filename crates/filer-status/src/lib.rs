@@ -16,7 +16,7 @@ use html5ever::driver::ParseOpts;
 use html5ever::driver::Parser;
 use html5ever::rcdom::RcDom;
 use html5ever::serialize::serialize;
-use tendril::stream::{TendrilSink, Utf8LossyDecoder};
+use tendril::stream::TendrilSink;
 
 #[cfg(test)] use std::fs;
 #[cfg(test)] use std::path::Path;
@@ -33,7 +33,7 @@ pub trait FilingStatus {
     /// Gets the doc from sec.gov
     fn get_10q_doc(&self) -> Result<String, Box<std::error::Error>>;
     /// Parses the html
-    fn parse_html(stri: String) -> ();
+    fn parse_html(&self, html: String) -> RcDom;
 }
 
 /// Implements the status retrieval for the Filer model
@@ -72,8 +72,10 @@ impl FilingStatus for Filer {
         Ok(html)
     }
 
-    fn parse_html(stri: String) -> () {
-        unimplemented!();
+    fn parse_html(&self, html: String) -> RcDom {
+        let sink: RcDom = RcDom::default();
+        let opts: ParseOpts = ParseOpts::default();
+        parse_document(sink, opts).from_utf8().one(html.as_bytes())
     }
 }
 
@@ -81,14 +83,18 @@ impl FilingStatus for Filer {
 mod test {
     use super::*;
 
+    fn get_mock_inactive_filer() -> Filer {
+        let cik = String::from(INACTIVE_FILER_CIK);
+        let mut names = vec![];
+        names.push(bson::to_bson("ken sawyer").unwrap());
+        names.push(bson::to_bson("kenneth").unwrap());
+        Filer { cik, names }
+    }
+
     #[test]
     fn test_get_filer_status() {
         // Arrange
-        let cik = String::from("0000000000");
-        let mut names = vec![];
-        names.push(bson::to_bson("marty").unwrap());
-        names.push(bson::to_bson("martin").unwrap());
-        let f = Filer { cik, names };
+        let f: Filer = get_mock_inactive_filer();
 
         // Assert
         let r = f.is_active();
@@ -100,25 +106,22 @@ mod test {
     #[test]
     fn test_get_10q_listings_inactive_filer() {
         // Arrange
-        let cik = String::from(INACTIVE_FILER_CIK);
-        let mut names = vec![];
-        names.push(bson::to_bson("ken sawyer").unwrap());
-        names.push(bson::to_bson("kenneth").unwrap());
-        let f = Filer { cik, names };
+        let f: Filer = get_mock_inactive_filer();
+        let path: &Path = Path::new("../../seed-data/unit-test/kenneth-sawyer-10q-listings");
+        let expected_html = fs::read_to_string(path);
 
         // Assert
         let r = f.get_10q_doc();
 
         // Act
-        // assert_eq!(r, Ok(()))
+        assert_eq!(r.unwrap(), expected_html.unwrap())
     }
 
     #[test]
     fn test_parse_html() {
-        let html: &[u8] = "<title>Hello whirled".as_bytes();
-        let dom = parse_document(RcDom::default(), ParseOpts::default())
-            .from_utf8()
-            .one(html);
+        let f: Filer = get_mock_inactive_filer();
+        let html = String::from("<title>Hello whirled");
+        let dom = f.parse_html(html);
         let mut serialized = Vec::new();
         serialize(&mut serialized, &dom.document, Default::default()).unwrap();
         assert_eq!(
