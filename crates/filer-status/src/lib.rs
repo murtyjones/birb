@@ -65,7 +65,7 @@ impl FilingStatus for Filer {
             }
         }
         // TODO: This path is relative to birb/crates/filer-status. Not sure whether it
-        // holds up at compile time but I guess since this is a test it's okay.
+        // holds up at release compile time but I guess since this is a test it's okay.
         let path: &Path = Path::new(&filer_mock_html_path);
         let html: String = fs::read_to_string(path)?;
         Ok(html)
@@ -91,7 +91,7 @@ mod test {
     }
 
     #[test]
-    fn test_get_filer_status() {
+    fn test_is_active() {
         // Arrange
         let f: Filer = get_mock_filer(MOCK_INACTIVE_FILER_CIK);
 
@@ -103,7 +103,7 @@ mod test {
     }
 
     #[test]
-    fn test_get_10q_listings() {
+    fn test_get_10q_doc() {
         // Arrange
         let filer_inactive: Filer = get_mock_filer(MOCK_INACTIVE_FILER_CIK);
         let filer_inactive_path: &Path =
