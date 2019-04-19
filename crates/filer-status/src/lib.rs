@@ -39,6 +39,13 @@ impl FilerStatus {
         FilerStatus(f, false)
     }
 
+    /// sets the active status for the filer
+    fn set_is_active(&mut self) -> () {
+        let html: String = self.get_10q_doc().unwrap();
+        let dom: RcDom = self.generate_dom(html);
+        self.walk_dom_find_div(dom.document);
+    }
+
     /// Escape use for examining node text
     fn escape_default(&self, s: &str) -> String {
         s.chars().flat_map(|c| c.escape_default()).collect()
@@ -189,11 +196,22 @@ mod test {
         // Arrange
         let mut fs: FilerStatus = get_mock_filer_status(MOCK_INACTIVE_FILER_CIK);
         let html: String = fs.get_10q_doc().unwrap();
-        println!("{}", html);
         let dom: RcDom = fs.generate_dom(html);
 
         // Act
         fs.walk_dom_find_div(dom.document);
+
+        // Assert
+        assert_eq!(false, fs.1);
+    }
+
+    #[test]
+    fn test_set_is_active() {
+        // Arrange
+        let mut fs: FilerStatus = get_mock_filer_status(MOCK_INACTIVE_FILER_CIK);
+
+        // Act
+        fs.set_is_active();
 
         // Assert
         assert_eq!(false, fs.1);
