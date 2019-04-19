@@ -11,9 +11,6 @@ extern crate failure;
 extern crate html5ever;
 extern crate reqwest;
 
-pub fn escape_default(s: &str) -> String {
-    s.chars().flat_map(|c| c.escape_default()).collect()
-}
 use std::default::Default;
 use std::string::String;
 
@@ -33,18 +30,18 @@ const MOCK_INACTIVE_FILER_CIK: &'static str = "0000948605"; // Kenneth Sawyer
 const MOCK_ACTIVE_FILER_CIK: &'static str = "0001318605"; // Tesla, Inc.
 
 /// The status of a given filer is tracked here
-pub struct FilerStatus(Filer);
+pub struct FilerStatus(Filer, bool);
 
 /// Implements the status retrieval for the Filer model
 impl FilerStatus {
     /// Make a new FilerStatus instance
     fn new(f: Filer) -> FilerStatus {
-        FilerStatus(f)
+        FilerStatus(f, false)
     }
 
-    /// Is the filer active in filing with the SEC?
-    fn get_is_active(&self) -> bool {
-        true
+    /// Escape use for examining node text
+    fn escape_default(&self, s: &str) -> String {
+        s.chars().flat_map(|c| c.escape_default()).collect()
     }
 
     /// Gets the doc from sec.gov
@@ -78,55 +75,30 @@ impl FilerStatus {
         Ok(html)
     }
 
+    /// Make the DOM that we will use to find the 10-Q cell
     fn generate_dom(&self, html: String) -> RcDom {
         let sink: RcDom = RcDom::default();
         let opts: ParseOpts = ParseOpts::default();
         parse_document(sink, opts).from_utf8().one(html.as_bytes())
     }
 
-    fn walk_dom_find_div(&self, handle: Handle) -> bool {
+    /// Find the 10-Q cell if it exists
+    fn walk_dom_find_div(&mut self, handle: Handle) -> () {
         let node = handle;
         match node.data {
-            NodeData::Document => println!("#Document"),
-
-            NodeData::Doctype {
-                ref name,
-                ref public_id,
-                ref system_id,
-            } => println!("<!DOCTYPE {} \"{}\" \"{}\">", name, public_id, system_id),
-
             NodeData::Text { ref contents } => {
-                println!("#text: {}", escape_default(&contents.borrow()))
-            }
-
-            NodeData::Comment { ref contents } => println!("<!-- {} -->", escape_default(contents)),
-
-            NodeData::Element {
-                ref name,
-                ref attrs,
-                ..
-            } => {
-                assert!(name.ns == ns!(html));
-                print!("<{}", name.local);
-                if name.local.to_string() == "input" {
-                    for attr in attrs.borrow().iter() {
-                        assert!(attr.name.ns == ns!());
-                        print!(" {}=\"{}\"", attr.name.local, attr.value);
-                        if attr.name.local.to_string() == "value"
-                            && attr.value.to_string() == "10-Q"
-                        {
-                            return true;
-                        }
-                    }
+                let text = self.escape_default(&contents.borrow());
+                if text == "10-Q" {
+                    self.1 = true;
                 }
-                println!(">");
             }
 
-            NodeData::ProcessingInstruction { .. } => unreachable!(),
+            // Catchall for the other node types
+            _ => (),
         }
 
         for child in node.children.borrow().iter() {
-            return self.walk_dom_find_div(child.clone());
+            self.walk_dom_find_div(child.clone());
         }
     }
 }
@@ -146,15 +118,15 @@ mod test {
     }
 
     #[test]
-    fn test_is_active() {
+    fn test_default_is_active() {
         // Arrange
-        let fs: FilerStatus = get_mock_filer_status(MOCK_INACTIVE_FILER_CIK);
+        let fs: FilerStatus = get_mock_filer_status(MOCK_ACTIVE_FILER_CIK);
 
         // Assert
-        let r = fs.get_is_active();
+        let is_active = fs.1;
 
         // Act
-        assert_eq!(r, true)
+        assert_eq!(is_active, false)
     }
 
     #[test]
@@ -208,16 +180,31 @@ mod test {
     }
 
     #[test]
-    fn test_walk_dom_find_div() {
+    fn test_walk_dom_find_div_active_filer() {
         // Arrange
         let mut fs: FilerStatus = get_mock_filer_status(MOCK_ACTIVE_FILER_CIK);
         let html: String = fs.get_10q_doc().unwrap();
         let dom: RcDom = fs.generate_dom(html);
 
         // Act
-        let r: bool = fs.walk_dom_find_div(dom.document);
-        println!("{}", r);
-        assert_eq!(true, r);
-        panic!()
+        fs.walk_dom_find_div(dom.document);
+
+        // Assert
+        assert_eq!(true, fs.1);
+    }
+
+    #[test]
+    fn test_walk_dom_find_div_inactive_filer() {
+        // Arrange
+        let mut fs: FilerStatus = get_mock_filer_status(MOCK_INACTIVE_FILER_CIK);
+        let html: String = fs.get_10q_doc().unwrap();
+        println!("{}", html);
+        let dom: RcDom = fs.generate_dom(html);
+
+        // Act
+        fs.walk_dom_find_div(dom.document);
+
+        // Assert
+        assert_eq!(false, fs.1);
     }
 }
