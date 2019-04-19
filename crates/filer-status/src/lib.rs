@@ -54,25 +54,16 @@ impl FilerStatus {
     /// Gets a fake doc
     #[cfg(test)] // TODO use "failure" crate instead of reqwest::Error
     fn get_10q_doc(&self) -> Result<String, reqwest::Error> {
-        let mut filer_mock_html_path: String = "../../seed-data/test".to_string();
+        let mock_inactive_filer_html = include_str!("../../../seed-data/test/kenneth-sawyer-10q-listings");
+        let mock_active_filer_html = include_str!("../../../seed-data/test/tsla-10q-listings");
         match &*self.0.cik {
             MOCK_INACTIVE_FILER_CIK => {
-                filer_mock_html_path =
-                    filer_mock_html_path + &"/kenneth-sawyer-10q-listings".to_string()
-            }
-            MOCK_ACTIVE_FILER_CIK => {
-                filer_mock_html_path = filer_mock_html_path + &"/tsla-10q-listings".to_string()
+                Ok(String::from(mock_inactive_filer_html))
             }
             _ => {
-                // Just use an active filer if no match
-                filer_mock_html_path = filer_mock_html_path + &"/tsla-10q-listings".to_string()
+                Ok(String::from(mock_active_filer_html))
             }
         }
-        // TODO: This path is relative to birb/crates/filer-status. Not sure whether it
-        // holds up at release compile time but I guess since this is a test it's okay.
-        let path: &Path = Path::new(&filer_mock_html_path);
-        let html: String = fs::read_to_string(path).unwrap();
-        Ok(html)
     }
 
     /// Make the DOM that we will use to find the 10-Q cell
