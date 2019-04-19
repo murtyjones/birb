@@ -32,34 +32,33 @@ const MOCK_INACTIVE_FILER_CIK: &'static str = "0000948605"; // Kenneth Sawyer
 #[cfg(test)]
 const MOCK_ACTIVE_FILER_CIK: &'static str = "0001318605"; // Tesla, Inc.
 
-/// Filing status of the filer
-pub trait FilingStatus {
-    /// Is the filer active in filing with the SEC?
-    fn is_active(&self) -> bool;
-    /// Gets the doc from sec.gov
-    fn get_10q_doc(&self) -> Result<String, reqwest::Error>;
-    /// Parses the html
-    fn generate_dom(&self, html: String) -> RcDom;
-    /// Finds the div
-    fn walk_dom_find_div(&self, handle: Handle) -> bool;
-}
+/// The status of a given filer is tracked here
+pub struct FilerStatus(Filer);
 
 /// Implements the status retrieval for the Filer model
-impl FilingStatus for Filer {
-    fn is_active(&self) -> bool {
+impl FilerStatus {
+    /// Make a new FilerStatus instance
+    fn new(f: Filer) -> FilerStatus {
+        FilerStatus(f)
+    }
+
+    /// Is the filer active in filing with the SEC?
+    fn get_is_active(&self) -> bool {
         true
     }
 
+    /// Gets the doc from sec.gov
     #[cfg(not(test))] // TODO use "failure" crate instead of reqwest::Error
     fn get_10q_doc(&self) -> Result<String, reqwest::Error> {
         let url: &str = "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001318605&type=10-Q&dateb=&owner=include&count=40";
         reqwest::get(url)?.text()
     }
 
+    /// Gets a fake doc
     #[cfg(test)] // TODO use "failure" crate instead of reqwest::Error
     fn get_10q_doc(&self) -> Result<String, reqwest::Error> {
         let mut filer_mock_html_path: String = "../../seed-data/test".to_string();
-        match &*self.cik {
+        match &*self.0.cik {
             MOCK_INACTIVE_FILER_CIK => {
                 filer_mock_html_path =
                     filer_mock_html_path + &"/kenneth-sawyer-10q-listings".to_string()
@@ -87,7 +86,6 @@ impl FilingStatus for Filer {
 
     fn walk_dom_find_div(&self, handle: Handle) -> bool {
         let node = handle;
-        let mut has_10q_input: bool = false;
         match node.data {
             NodeData::Document => println!("#Document"),
 
@@ -117,7 +115,7 @@ impl FilingStatus for Filer {
                         if attr.name.local.to_string() == "value"
                             && attr.value.to_string() == "10-Q"
                         {
-                            has_10q_input = true;
+                            return true;
                         }
                     }
                 }
@@ -127,15 +125,9 @@ impl FilingStatus for Filer {
             NodeData::ProcessingInstruction { .. } => unreachable!(),
         }
 
-        if has_10q_input == true {
-            println!("returning {} ", has_10q_input);
-            true
-        }
-
         for child in node.children.borrow().iter() {
-            self.walk_dom_find_div(child.clone());
+            return self.walk_dom_find_div(child.clone());
         }
-        false
     }
 }
 
@@ -143,21 +135,23 @@ impl FilingStatus for Filer {
 mod test {
     use super::*;
 
-    fn get_mock_filer(cik: &'static str) -> Filer {
+    fn get_mock_filer_status(cik: &'static str) -> FilerStatus {
         let cik = String::from(cik);
         let mut names = vec![];
         names.push(bson::to_bson("alias 1").unwrap());
         names.push(bson::to_bson("alias 2").unwrap());
-        Filer { cik, names }
+        let f = Filer { cik, names };
+        let fs = FilerStatus::new(f);
+        fs
     }
 
     #[test]
     fn test_is_active() {
         // Arrange
-        let f: Filer = get_mock_filer(MOCK_INACTIVE_FILER_CIK);
+        let fs: FilerStatus = get_mock_filer_status(MOCK_INACTIVE_FILER_CIK);
 
         // Assert
-        let r = f.is_active();
+        let r = fs.get_is_active();
 
         // Act
         assert_eq!(r, true)
@@ -166,38 +160,38 @@ mod test {
     #[test]
     fn test_get_10q_doc() {
         // Arrange
-        let filer_inactive: Filer = get_mock_filer(MOCK_INACTIVE_FILER_CIK);
-        let filer_inactive_path: &Path =
+        let filter_status_inactive: FilerStatus = get_mock_filer_status(MOCK_INACTIVE_FILER_CIK);
+        let filter_status_inactive_path: &Path =
             Path::new("../../seed-data/test/kenneth-sawyer-10q-listings");
-        let filer_inactive_expected_html = fs::read_to_string(filer_inactive_path);
-        let filer_active: Filer = get_mock_filer(MOCK_ACTIVE_FILER_CIK);
-        let filer_active_path: &Path = Path::new("../../seed-data/test/tsla-10q-listings");
-        let filer_active_expected_html = fs::read_to_string(filer_active_path);
+        let filter_status_inactive_expected_html = fs::read_to_string(filter_status_inactive_path);
+        let filter_status_active: FilerStatus = get_mock_filer_status(MOCK_ACTIVE_FILER_CIK);
+        let filter_status_active_path: &Path = Path::new("../../seed-data/test/tsla-10q-listings");
+        let filter_status_active_expected_html = fs::read_to_string(filter_status_active_path);
 
         // Assert
-        let filer_inactive_result = filer_inactive.get_10q_doc();
-        let filer_active_result = filer_active.get_10q_doc();
+        let filter_status_inactive_result = filter_status_inactive.get_10q_doc();
+        let filter_status_active_result = filter_status_active.get_10q_doc();
 
         // Act
         assert_eq!(
-            filer_inactive_result.unwrap(),
-            filer_inactive_expected_html.unwrap()
+            filter_status_inactive_result.unwrap(),
+            filter_status_inactive_expected_html.unwrap()
         );
         assert_eq!(
-            filer_active_result.unwrap(),
-            filer_active_expected_html.unwrap()
+            filter_status_active_result.unwrap(),
+            filter_status_active_expected_html.unwrap()
         );
     }
 
     #[test]
     fn test_generate_dom() {
         // Arrange
-        let f: Filer = get_mock_filer(MOCK_ACTIVE_FILER_CIK);
-        let html = f.get_10q_doc();
+        let fs: FilerStatus = get_mock_filer_status(MOCK_ACTIVE_FILER_CIK);
+        let html = fs.get_10q_doc();
         match html {
             Ok(content) => {
                 // Act
-                let dom = f.generate_dom(content);
+                let dom = fs.generate_dom(content);
 
                 // Assert
                 let mut serialized = Vec::new();
@@ -216,13 +210,14 @@ mod test {
     #[test]
     fn test_walk_dom_find_div() {
         // Arrange
-        let f: Filer = get_mock_filer(MOCK_ACTIVE_FILER_CIK);
-        let html: String = f.get_10q_doc().unwrap();
-        let dom: RcDom = f.generate_dom(html);
+        let mut fs: FilerStatus = get_mock_filer_status(MOCK_ACTIVE_FILER_CIK);
+        let html: String = fs.get_10q_doc().unwrap();
+        let dom: RcDom = fs.generate_dom(html);
 
         // Act
-        let r: bool = f.walk_dom_find_div(dom.document);
-        assert_eq!(r, true);
+        let r: bool = fs.walk_dom_find_div(dom.document);
+        println!("{}", r);
+        assert_eq!(true, r);
         panic!()
     }
 }
