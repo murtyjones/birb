@@ -7,18 +7,18 @@
         "networkMode"     : "awsvpc",
         "logConfiguration": {
         "logDriver"       : "awslogs",
-        "options": {
+            "options": {
                 "awslogs-group"        : "/ecs/${app_name}-app",
                 "awslogs-region"       : "${aws_region}",
                 "awslogs-stream-prefix": "ecs"
-                }
-            },
-            "portMappings": [
-                {
-                    "containerPort": ${app_port},
-                    "hostPort"     : ${app_port}
-                }
-            ]
+            }
+        },
+        "portMappings": [
+            {
+                "containerPort": ${app_port},
+                "hostPort"     : ${app_port}
+            }
+        ],
         "secrets": [
             {
                 "name"     : "ROCKET_ENV",
