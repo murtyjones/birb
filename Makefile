@@ -49,11 +49,11 @@ copy-artifacts:
 build-push-docker-image:
 	./scripts/build_and_push.sh
 
-produp:
+tfup:
 	terraform apply -auto-approve terraform/
 
-proddown:
+tfdown:
 	terraform destroy -auto-approve terraform/
 
-prodplan:
+tfplan:
 	terraform plan terraform/
