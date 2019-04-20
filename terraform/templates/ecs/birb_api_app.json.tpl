@@ -21,8 +21,8 @@
         ],
         "secrets": [
             {
-                "name"     : "ROCKET_ENV",
-                "valueFrom": "${ROCKET_ENV}"
+                "name"     : "ROCKET_DATABASES",
+                "valueFrom": "${ROCKET_DATABASES}"
             }
         ]
     }

@@ -119,7 +119,7 @@ resource "aws_iam_policy" "task_execution_policy" {
               "Effect": "Allow",
               "Action": "secretsmanager:GetSecretValue",
               "Resource": [
-                  "${aws_secretsmanager_secret.ROCKET_ENV.arn}"
+                  "${aws_secretsmanager_secret.ROCKET_DATABASES.arn}"
               ]
         }
     ]

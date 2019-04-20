@@ -6,13 +6,13 @@ data "template_file" "birb_api_app" {
   template = "${file("terraform/templates/ecs/birb_api_app.json.tpl")}"
 
   vars {
-    repo_url       = "${aws_ecr_repository.birb_repo.repository_url}"
-    app_name       = "${var.app_name}"
-    fargate_cpu    = "${var.fargate_cpu}"
-    fargate_memory = "${var.fargate_memory}"
-    aws_region     = "${var.aws_region}"
-    app_port       = "${var.app_port}"
-    ROCKET_ENV     = "${aws_secretsmanager_secret.ROCKET_ENV.arn}"
+    repo_url         = "${aws_ecr_repository.birb_repo.repository_url}"
+    app_name         = "${var.app_name}"
+    fargate_cpu      = "${var.fargate_cpu}"
+    fargate_memory   = "${var.fargate_memory}"
+    aws_region       = "${var.aws_region}"
+    app_port         = "${var.app_port}"
+    ROCKET_DATABASES = "${aws_secretsmanager_secret.ROCKET_DATABASES.arn}"
   }
 }
 

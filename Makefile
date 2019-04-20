@@ -47,6 +47,9 @@ copy-artifacts:
 
 make local-release: build-binary copy-artifacts build-push-docker-image
 
+make run-prod: down up-without-tests
+	 docker run murtyjones/birb_api:latest -e "ROCKET_DATABASES={mongo_datastore={url="mongodb://localhost:27100/playground"}}"
+
 build-push-docker-image:
 	./scripts/build_and_push.sh
 
