@@ -63,3 +63,6 @@ tfdown:
 
 tfplan:
 	terraform plan terraform/
+
+pg:
+	docker exec -it birb_postgres_datastore_1 psql -U postgres
