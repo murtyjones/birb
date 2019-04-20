@@ -39,12 +39,13 @@ build-binary:
 
 copy-artifacts:
 	# put binary and production dockerfile in a temporary
-	# folder to keep the build context simple/small
+	# folder to keep ≤the build context simple/small
 	rm -rf out
 	mkdir out
 	cp ./crates/api/Dockerfile-prod out
-	cp ./target/x86_64-unknown-linux-musl/release/api out
+	cp ./target/x86_64-unknown-linux-musl/release/api_bin out
 
+make local-release: build-binary copy-artifacts build-push-docker-image
 
 build-push-docker-image:
 	./scripts/build_and_push.sh
