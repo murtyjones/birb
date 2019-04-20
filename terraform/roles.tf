@@ -98,7 +98,8 @@ resource "aws_iam_policy" "task_execution_policy" {
                 "cloudwatch:DescribeAlarms",
                 "cloudwatch:PutMetricAlarm",
                 "logs:CreateLogStream",
-                "logs:CreateLogGroup"
+                "logs:CreateLogGroup",
+                "logs:PutLogEvents"
             ],
             "Resource": [
                 "*"
