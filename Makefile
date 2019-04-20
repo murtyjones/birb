@@ -45,9 +45,9 @@ copy-artifacts:
 	cp ./crates/api/Dockerfile-prod out
 	cp ./target/x86_64-unknown-linux-musl/release/api_bin out
 
-make local-release: build-binary copy-artifacts build-push-docker-image
+make build-all: build-binary copy-artifacts build-push-docker-image
 
-make run-prod: down up-without-tests
+make run-release: down up-without-tests
 	docker run -e \
 		ROCKET_DATABASES='{mongo_datastore={url="mongodb://localhost:27100/playground"}}' \
 		murtyjones/birb_api:latest

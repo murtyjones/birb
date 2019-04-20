@@ -6,8 +6,8 @@
         "memory"          : ${fargate_memory},
         "networkMode"     : "awsvpc",
         "logConfiguration": {
-        "logDriver"       : "awslogs",
-            "options": {
+            "logDriver": "awslogs",
+            "options"  : {
                 "awslogs-group"        : "/ecs/${app_name}-app",
                 "awslogs-region"       : "${aws_region}",
                 "awslogs-stream-prefix": "ecs"
