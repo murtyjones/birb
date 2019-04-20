@@ -3,8 +3,6 @@
 #![deny(missing_docs)]
 #![feature(proc_macro_hygiene, decl_macro)]
 
-#[macro_use(bson, doc)]
-extern crate bson;
 #[macro_use]
 extern crate rocket;
 #[macro_use]
@@ -12,7 +10,7 @@ extern crate rocket_contrib;
 #[macro_use]
 extern crate serde_derive;
 extern crate dotenv;
-extern crate mongodb;
+extern crate postgres;
 extern crate serde_json;
 
 #[cfg(debug_assertions)] use dotenv::dotenv;
@@ -25,8 +23,8 @@ pub mod meta;
 pub mod models;
 
 /// Struct to handle the DB connection
-#[database("mongo_datastore")]
-pub struct DbConnection(mongodb::db::Database);
+#[database("postgres_datastore")]
+pub struct DbConnection(postgres::Connection);
 
 /// Launches the server
 fn rocket() -> rocket::Rocket {

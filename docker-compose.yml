@@ -1,6 +1,16 @@
 version: '3'
 
 services:
+  postgres_datastore:
+    image: postgres:latest
+    restart: always
+    ports:
+      - 5432:5432
+    env_file:
+      - .env
+    volumes:
+      - database_data:/var/lib/postgresql/data
+
   mongo_datastore:
     image: 'mongo:latest'
     ports:
@@ -25,9 +35,10 @@ services:
       - ./:/usr/src/app
     working_dir: /usr/src/app
     depends_on:
-      - mongo_datastore
-      - mongo_seed
+      - postgres_datastore
     env_file:
       - .env
-    environment:
-      - ROCKET_DATABASES={mongo_datastore={url="mongodb://mongo_datastore:27017/playground"}}
+
+volumes:
+  database_data:
+    driver: local

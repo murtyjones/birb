@@ -1,10 +1,6 @@
-use bson;
-use bson::Array;
-use mongodb::db::Database;
+use postgres::Connection;
 
-use mongodb::db::ThreadedDatabase;
-
-const FILER_COLLECTION: &str = "filer";
+const FILER_TABLE: &str = "filer";
 
 /// Model for a filer
 #[derive(Debug, Serialize, Deserialize)]
@@ -14,25 +10,21 @@ pub struct Model {
     /// identify its filings in several online databases, including EDGAR.
     pub cik: String,
     /// Names used by the entity. There can be multiple
-    pub names: Array,
+    pub names: Vec<String>,
 }
 
 /// Find an entity using its cik
-pub fn find_one_by_cik(conn: &Database, cik: String) -> Result<Model, &str> {
-    let filter = Some(doc! { "cik" => cik });
-    let options = None;
-    match conn
-        .collection(FILER_COLLECTION)
-        .find_one(filter, options)
-        .expect("fail")
-    {
-        Some(result) => Ok(Model {
-            // not loving this:
-            cik: result.get("cik").unwrap().as_str().unwrap().to_string(),
-            names: result.get("names").unwrap().as_array().unwrap().to_vec(),
-        }),
-        None => Err("Not found"),
-    }
+pub fn find_one_by_cik(conn: &Connection, cik: String) -> Result<Model, &str> {
+    let query = format!(
+        "SELECT * FROM {table} WHERE CIK={cik}",
+        table = FILER_TABLE,
+        cik = cik
+    );
+    let results = conn.query(&*query, &[]).unwrap();
+    Ok(Model {
+        cik: results.get(0).get(0),
+        names: results.get(0).get(1),
+    })
 }
 
 #[cfg(test)]
