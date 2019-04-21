@@ -39,3 +39,24 @@ resource "aws_security_group" "ecs_tasks" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
+# ECS to RDS
+resource "aws_security_group" "birb_rds" {
+  name        = "hasura-rds"
+  description = "allow inbound access from the birb tasks only"
+  vpc_id      = "${aws_vpc.main.id}"
+
+  ingress {
+    protocol        = "tcp"
+    from_port       = "5432"
+    to_port         = "5432"
+    security_groups = ["${aws_security_group.ecs_tasks.id}"]
+  }
+
+  egress {
+    protocol    = "-1"
+    from_port   = 0
+    to_port     = 0
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}

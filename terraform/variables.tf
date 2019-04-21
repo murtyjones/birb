@@ -36,3 +36,28 @@ variable "fargate_memory" {
   description = "Fargate instance memory to provision (in MiB)"
   default     = "2048"
 }
+
+variable "rds_username" {
+  description = "User name for RDS"
+  default     = "pguser"
+
+}
+
+variable "rds_password" {
+  description = "Password for RDS"
+}
+
+variable "rds_db_name" {
+  description = "The DB name in the RDS instance. Note that this cannot contain -'s"
+  default     = "datastore"
+}
+
+variable "rds_instance" {
+  description = "The size of RDS instance, eg db.t2.micro"
+  default     = "db.t3.micro"
+}
+
+variable "multi_az" {
+  description = "Whether to deploy RDS and ECS in multi AZ mode or not"
+  default     = true
+}

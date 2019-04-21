@@ -1,6 +1,8 @@
 default: dev
 
-dev: down up-without-tests
+dev: down up-without-tests watch
+
+watch:
 	cargo watch -x "run -p api"
 
 rebuild: down build up-without-tests
