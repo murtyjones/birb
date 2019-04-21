@@ -1,6 +1,6 @@
 CREATE TABLE filer (
-    cik character varying(36) NOT NULL,
-    names character varying(255)
+    cik VARCHAR (20) PRIMARY KEY,
+    names text[]
 );
 
-INSERT INTO filer (cik, names) VALUES ('1', 'hello')
+INSERT INTO filer (cik, names) VALUES ('1', '{"hello"}')
