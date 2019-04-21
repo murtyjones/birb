@@ -1,7 +1,7 @@
 [development]
 address = "0.0.0.0"
 port = 8000
-log = "normal"
+log = "debug"
 
 [production]
 log = "normal"

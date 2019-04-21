@@ -2,14 +2,22 @@ version: '3'
 
 services:
   db:
-    image: postgres:latest
+    build:
+      context: ./db
+      dockerfile: ./db/Dockerfile.postgres
     restart: always
     ports:
       - 5432:5432
     env_file:
       - .env
+    environment:
+      - PGDATA=/tmp
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=develop
+      - POSTGRES_DB=postgres
     volumes:
-      - database_data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init/01-CreateFiler.sql:/docker-entrypoint-initdb.d/01-CreateFiler.sql
 
   test:
     build:
@@ -26,5 +34,5 @@ services:
       - .env
 
 volumes:
-  database_data:
+  pgdata:
     driver: local

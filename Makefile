@@ -5,15 +5,19 @@ dev: down up-without-tests
 
 rebuild: down build up-without-tests
 
+# Run tests in testing container and then shut down
 test: down up-with-tests
 	docker-compose run --rm test cargo test --all
 
+# Tear down docker containers
 down:
 	docker-compose down
 
+# Launch docker without the app tests running
 up-without-tests:
 	docker-compose up -d --scale test=0
 
+# Launch docker with the app tests running
 up-with-tests:
 	docker-compose up -d
 
@@ -65,4 +69,4 @@ tfplan:
 	terraform plan terraform/
 
 pg:
-	docker exec -it birb_postgres_datastore_1 psql -U postgres
+	docker exec -it birb_db_1 psql -U postgres

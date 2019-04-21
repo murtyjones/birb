@@ -15,12 +15,9 @@ pub struct Model {
 
 /// Find an entity using its cik
 pub fn find_one_by_cik(conn: &Connection, cik: String) -> Result<Model, &str> {
-    let query = format!(
-        "SELECT * FROM {table} WHERE CIK={cik}",
-        table = FILER_TABLE,
-        cik = cik
-    );
-    let results = conn.query(&*query, &[]).unwrap();
+    let results = conn
+        .query("SELECT * FROM filer WHERE cik='1'", &[])
+        .unwrap();
     Ok(Model {
         cik: results.get(0).get(0),
         names: results.get(0).get(1),
