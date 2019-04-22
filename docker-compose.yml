@@ -14,6 +14,18 @@ services:
       - pgdata:/var/lib/postgresql/data
       - ./db/init/01-CreateFiler.sql:/docker-entrypoint-initdb.d/01-CreateFiler.sql
 
+  test:
+    build:
+      context: crates/api
+      dockerfile: Dockerfile-test
+    volumes:
+      - ./:/usr/src/app
+    working_dir: /usr/src/app
+    depends_on:
+      - db
+    env_file:
+      - .env
+
 volumes:
   pgdata:
     driver: local

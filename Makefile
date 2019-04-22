@@ -1,14 +1,20 @@
 default: dev
 
-dev: down up sleep5 watch
+dev: down up-no-tests sleep5 cargo-watch
 
 # Run the server, watching for changes
-watch:
-	cargo watch -x "run -p api --verbose"
+cargo-watch:
+	cargo watch -x "run -p api"
 
 # Run tests in testing container and then shut down
-test: down up sleep5
-	cargo test --all
+test: down up-with-tests
+	docker-compose run --rm test sleep 5s && cargo test --all
+
+up-no-tests:
+	docker-compose up -d --scale test=0
+
+up-with-tests:
+	docker-compose up -d
 
 # Tear down docker containers
 down:
