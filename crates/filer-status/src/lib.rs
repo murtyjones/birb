@@ -61,15 +61,12 @@ impl FilerStatus {
     /// Gets a fake doc
     #[cfg(test)] // TODO use "failure" crate instead of reqwest::Error
     fn get_10q_doc(&self) -> Result<String, reqwest::Error> {
-        let mock_inactive_filer_html = include_str!("../../../seed-data/test/kenneth-sawyer-10q-listings");
+        let mock_inactive_filer_html =
+            include_str!("../../../seed-data/test/kenneth-sawyer-10q-listings");
         let mock_active_filer_html = include_str!("../../../seed-data/test/tsla-10q-listings");
         match &*self.0.cik {
-            MOCK_INACTIVE_FILER_CIK => {
-                Ok(String::from(mock_inactive_filer_html))
-            }
-            _ => {
-                Ok(String::from(mock_active_filer_html))
-            }
+            MOCK_INACTIVE_FILER_CIK => Ok(String::from(mock_inactive_filer_html)),
+            _ => Ok(String::from(mock_active_filer_html)),
         }
     }
 
@@ -108,8 +105,8 @@ mod test {
     fn get_mock_filer_status(cik: &'static str) -> FilerStatus {
         let cik = String::from(cik);
         let mut names = vec![];
-        names.push(bson::to_bson("alias 1").unwrap());
-        names.push(bson::to_bson("alias 2").unwrap());
+        names.push(String::from("alias 1"));
+        names.push(String::from("alias 2"));
         let f = Filer { cik, names };
         let fs = FilerStatus::new(f);
         fs

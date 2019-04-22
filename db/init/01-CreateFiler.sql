@@ -3,4 +3,4 @@ CREATE TABLE filer (
     names text[]
 );
 
-INSERT INTO filer (cik, names) VALUES ('1', '{"hello"}')
+INSERT INTO filer (cik, names) VALUES ('0001318605', '{"TESLA MOTORS INC", "TESLA INC"}')

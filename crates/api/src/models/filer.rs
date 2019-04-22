@@ -1,7 +1,5 @@
 use postgres::Connection;
 
-const FILER_TABLE: &str = "filer";
-
 /// Model for a filer
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Model {
@@ -16,7 +14,7 @@ pub struct Model {
 /// Find an entity using its cik
 pub fn find_one_by_cik(conn: &Connection, cik: String) -> Result<Model, &str> {
     let results = conn
-        .query("SELECT * FROM filer WHERE cik='1'", &[])
+        .query("SELECT * FROM filer WHERE cik=$1", &[&cik])
         .unwrap();
     Ok(Model {
         cik: results.get(0).get(0),

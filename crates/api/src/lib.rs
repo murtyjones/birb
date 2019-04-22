@@ -55,6 +55,7 @@ mod test {
     use super::rocket;
     use rocket::http::{ContentType, Status};
     use rocket::local::Client;
+
     /// Health check should return OK
     #[test]
     fn good_health_check() {
@@ -62,6 +63,7 @@ mod test {
         let res = client.get("/").header(ContentType::JSON).dispatch();
         assert_eq!(res.status(), Status::Ok);
     }
+
     /// nonexistent route should Not Found
     #[test]
     fn bad_get() {
@@ -72,6 +74,7 @@ mod test {
             .dispatch();
         assert_eq!(res.status(), Status::NotFound);
     }
+
     /// Get a filer successfully
     #[test]
     fn get_tsla() {

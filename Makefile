@@ -1,30 +1,28 @@
 default: dev
 
-dev: down up-without-tests watch
+dev: down up sleep5 watch
 
+# Run the server, watching for changes
 watch:
-	cargo watch -x "run -p api"
-
-rebuild: down build up-without-tests
+	cargo watch -x "run -p api --verbose"
 
 # Run tests in testing container and then shut down
-test: down up-with-tests
-	docker-compose run --rm test cargo test --all
+test: down up sleep5
+	cargo test --all
 
 # Tear down docker containers
 down:
 	docker-compose down
 
-# Launch docker without the app tests running
-up-without-tests:
-	docker-compose up -d --scale test=0
-
-# Launch docker with the app tests running
-up-with-tests:
+# Run docker containers
+up:
 	docker-compose up -d
 
+# Build each container
 build:
 	docker-compose build
+
+rebuild: down build up
 
 logs:
 	docker-compose logs -f
@@ -53,7 +51,7 @@ copy-artifacts:
 
 make build-all: build-binary copy-artifacts build-push-docker-image
 
-make run-release: down up-without-tests
+make run-release: down up
 	docker run -e \
 		ROCKET_DATABASES='{mongo_datastore={url="mongodb://localhost:27100/playground"}}' \
 		murtyjones/birb_api:latest
@@ -62,7 +60,7 @@ build-push-docker-image:
 	./scripts/build_and_push.sh
 
 tfup:
-	terraform apply -auto-approve terraform/
+	terraform apply -auto-approve terraform/ -var 'rds_password=$TF_VAR_db_password'
 
 tfdown:
 	terraform destroy -auto-approve terraform/
@@ -72,3 +70,11 @@ tfplan:
 
 pg:
 	docker exec -it birb_db_1 psql -U postgres
+
+# Regrettable hack used to await a healthy postgres status before attempting to
+# establish a connection in Rocket. Tried waiting for 5432 to become reachable
+# but that actually happens in advance of postgres actually be healthy/usable,
+# so simply waiting for on port isn't an option. In the future this will ideally
+# wait for a passing healthcheck of some kind a la https://github.com/peter-evans/docker-compose-healthcheck
+sleep5:
+	sleep 5s
