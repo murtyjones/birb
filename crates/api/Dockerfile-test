@@ -1,3 +1,5 @@
 FROM rustlang/rust:nightly
 
+RUN cargo install cargo-watch
+
 VOLUME ["/usr/local/cargo"]

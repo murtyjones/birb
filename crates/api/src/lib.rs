@@ -9,6 +9,8 @@ extern crate rocket;
 extern crate rocket_contrib;
 #[macro_use]
 extern crate serde_derive;
+#[macro_use]
+extern crate cfg_if;
 extern crate dotenv;
 extern crate postgres;
 extern crate serde_json;
@@ -22,9 +24,17 @@ pub mod meta;
 /// DB models
 pub mod models;
 
-/// Struct to handle the DB connection
-#[database("postgres_datastore")]
-pub struct DbConnection(postgres::Connection);
+// If in test mode, using the test connection string from ROCKET_DATABASES,
+// otherwise use `postgres_datastore` from ROCKET_DATABASES
+cfg_if! {
+    if #[cfg(test)] {
+        #[database("testing")]
+        pub struct DbConnection(postgres::Connection);
+    } else {
+        #[database("postgres_datastore")]
+        pub struct DbConnection(postgres::Connection);
+    }
+}
 
 /// Launches the server
 fn rocket() -> rocket::Rocket {
