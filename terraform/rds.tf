@@ -10,7 +10,7 @@ resource "aws_db_instance" "birb" {
   password                    = "${var.rds_password}"
   port                        = "5432"
   engine                      = "postgres"
-  engine_version              = "11"
+  engine_version              = "11.1"
   instance_class              = "${var.rds_instance}"
   allocated_storage           = "10"
   storage_encrypted           = false
