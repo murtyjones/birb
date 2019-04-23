@@ -5,7 +5,7 @@ resource "aws_db_subnet_group" "birb" {
 
 resource "aws_db_instance" "birb" {
   name                        = "${var.rds_db_name}"
-  identifier                  = "hasura"
+  identifier                  = "birb"
   username                    = "${var.rds_username}"
   password                    = "${var.rds_password}"
   port                        = "5432"

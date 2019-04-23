@@ -66,13 +66,18 @@ build-push-docker-image:
 	./scripts/build_and_push.sh
 
 tfup:
-	terraform apply -auto-approve terraform/ -var 'rds_password=$TF_VAR_db_password'
+	terraform apply "plan"
+	rm -rf plan
 
 tfdown:
 	terraform destroy -auto-approve terraform/
 
 tfplan:
-	terraform plan terraform/
+	terraform plan -out=plan terraform/
+
+tfplan-cert:
+	terraform plan -out=plan tf-certificate/
+
 
 pg:
 	docker exec -it birb_db_1 psql -U postgres

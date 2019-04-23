@@ -1,13 +1,13 @@
 # ALB Security Group: Edit this to restrict access to the application
 resource "aws_security_group" "lb" {
   name        = "${var.app_name}-load-balancer-security-group"
-  description = "controls access to the ALB"
+  description = "Allow access on port 443 only to ALB"
   vpc_id      = "${aws_vpc.main.id}"
 
   ingress {
     protocol    = "tcp"
-    from_port   = 3000
-    to_port     = 3000
+    from_port   = 443
+    to_port     = 443
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -42,7 +42,7 @@ resource "aws_security_group" "ecs_tasks" {
 
 # ECS to RDS
 resource "aws_security_group" "birb_rds" {
-  name        = "hasura-rds"
+  name        = "birb-rds"
   description = "allow inbound access from the birb tasks only"
   vpc_id      = "${aws_vpc.main.id}"
 

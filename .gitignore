@@ -13,3 +13,6 @@ target/**/*
 
 # Ignore generated output for docker
 out
+
+# ignore generated terraform plan
+plan
