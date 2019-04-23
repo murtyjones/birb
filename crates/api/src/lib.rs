@@ -40,7 +40,7 @@ cfg_if! {
 fn rocket() -> rocket::Rocket {
     // Load env vars in non-release environments
     #[cfg(debug_assertions)]
-    dotenv().ok();
+    dotenv().expect("Failed to read .env file");
 
     return rocket::ignite()
         .attach(DbConnection::fairing())
