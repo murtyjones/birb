@@ -89,7 +89,8 @@ resource "aws_iam_policy" "task_execution_policy" {
                 "ecs:UpdateService"
             ],
             "Resource": [
-                "*"
+                "${aws_ecs_cluster.main.arn}",
+                "${aws_ecs_service.main.arn}"
             ]
         },
         {
@@ -102,7 +103,8 @@ resource "aws_iam_policy" "task_execution_policy" {
                 "logs:PutLogEvents"
             ],
             "Resource": [
-                "*"
+                "${aws_cloudwatch_log_group.birb_api_log_group.arn}",
+                "${aws_cloudwatch_log_stream.birb_api_log_stream.arn}"
             ]
         },
         {
