@@ -16,3 +16,6 @@ out
 
 # ignore generated terraform plan
 plan
+
+# production env vars
+.env.production
