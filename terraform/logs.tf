@@ -1,14 +1,14 @@
 # Set up cloudwatch group and log stream and retain logs for 30 days
 resource "aws_cloudwatch_log_group" "birb_api_log_group" {
-  name              = "/ecs/${var.app_name}-app"
+  name              = "/ecs/birb-api-app"
   retention_in_days = 30
 
   tags {
-    Name = "${var.app_name}-log-group"
+    Name = "birb-api-log-group"
   }
 }
 
 resource "aws_cloudwatch_log_stream" "birb_api_log_stream" {
-  name           = "${var.app_name}-log-stream"
+  name           = "birb-api-log-stream"
   log_group_name = "${aws_cloudwatch_log_group.birb_api_log_group.name}"
 }

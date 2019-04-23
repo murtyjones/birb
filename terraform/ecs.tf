@@ -1,5 +1,5 @@
 resource "aws_ecs_cluster" "main" {
-  name = "${var.app_name}-cluster"
+  name = "birb-api-cluster"
 }
 
 data "template_file" "birb_api_app" {
@@ -7,7 +7,7 @@ data "template_file" "birb_api_app" {
 
   vars {
     repo_url         = "${aws_ecr_repository.birb_repo.repository_url}"
-    app_name         = "${var.app_name}"
+    app_name         = "birb-api"
     fargate_cpu      = "${var.fargate_cpu}"
     fargate_memory   = "${var.fargate_memory}"
     aws_region       = "${var.aws_region}"
@@ -41,7 +41,7 @@ resource "aws_ecs_service" "main" {
 
   load_balancer {
     target_group_arn = "${aws_alb_target_group.app.id}"
-    container_name   = "${var.app_name}-app"
+    container_name   = "birb-api-app"
     container_port   = "${var.app_port}"
   }
 

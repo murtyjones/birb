@@ -73,7 +73,7 @@ tfdown:
 	terraform destroy -auto-approve terraform/
 
 tfplan:
-	terraform plan -out=plan terraform/
+	terraform plan -out=plan -var-file=terraform/secret.tfvars terraform/
 
 tfplan-cert:
 	terraform plan -out=plan tf-certificate/

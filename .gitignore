@@ -17,5 +17,6 @@ out
 # ignore generated terraform plan
 plan
 
-# production env vars
+# secrets
 .env.production
+**/*/secret.tfvars

@@ -8,11 +8,6 @@ variable "az_count" {
   default     = "2"
 }
 
-variable "app_name" {
-  description = "Docker image to run in the ECS cluster"
-  default     = "birb_api"
-}
-
 variable "app_port" {
   description = "Port exposed by the docker image to redirect traffic to"
   default     = 10050
@@ -40,7 +35,6 @@ variable "fargate_memory" {
 variable "rds_username" {
   description = "User name for RDS"
   default     = "pguser"
-
 }
 
 variable "rds_password" {
