@@ -55,3 +55,7 @@ variable "multi_az" {
   description = "Whether to deploy RDS and ECS in multi AZ mode or not"
   default     = true
 }
+
+variable "birb_api_certificate_arn" {
+  description = "The certificate ARN for the birb API"
+}
