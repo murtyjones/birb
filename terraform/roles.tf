@@ -89,8 +89,7 @@ resource "aws_iam_policy" "task_execution_policy" {
                 "ecs:UpdateService"
             ],
             "Resource": [
-                "${aws_ecs_cluster.main.arn}",
-                "${aws_ecs_service.main.arn}"
+                "${aws_ecs_cluster.main.arn}"
             ]
         },
         {
