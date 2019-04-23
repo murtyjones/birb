@@ -1,4 +1,3 @@
-# TODO: use port 443 instead of port 80
 resource "aws_alb" "main" {
   name            = "birb-api-load-balancer"
   subnets         = ["${aws_subnet.public.*.id}"]
