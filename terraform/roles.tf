@@ -114,7 +114,7 @@ resource "aws_iam_policy" "task_execution_policy" {
                 "ecr:GetDownloadUrlForLayer"
             ],
             "Resource": [
-                "${var.birb_api_ecr_repo_arn}"
+                "*"
             ]
         },
         {

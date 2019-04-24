@@ -62,7 +62,3 @@ variable "birb_api_certificate_arn" {
 variable "marty_ip_address" {
   description = "Marty's IP address"
 }
-
-variable "birb_api_ecr_repo_arn" {
-  description = "The birb API ECR repo"
-}
