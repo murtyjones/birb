@@ -62,3 +62,7 @@ variable "birb_api_certificate_arn" {
 variable "marty_ip_address" {
   description = "Marty's IP address"
 }
+
+variable "marty_id_rsa_pub" {
+  description = "Marty's public key"
+}

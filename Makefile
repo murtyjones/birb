@@ -70,7 +70,7 @@ tfup:
 	rm -rf plan
 
 tfdown:
-	terraform destroy -auto-approve terraform/
+	terraform destroy -auto-approve -var-file=terraform/secret.tfvars terraform/
 
 tfplan:
 	terraform plan -out=plan -var-file=terraform/secret.tfvars terraform/

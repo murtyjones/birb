@@ -40,10 +40,10 @@ resource "aws_security_group" "ecs_tasks" {
   }
 }
 
-# ECS to RDS
+# ECS/Bastion access to RDS
 resource "aws_security_group" "birb_rds" {
   name        = "birb-rds"
-  description = "allow inbound access from the birb tasks only"
+  description = "specify inbound access rules"
   vpc_id      = "${aws_vpc.main.id}"
 
   ingress {
@@ -51,8 +51,10 @@ resource "aws_security_group" "birb_rds" {
     from_port       = "5432"
     to_port         = "5432"
     security_groups = [
+      # Allow ECS tasks to access RDS
       "${aws_security_group.ecs_tasks.id}",
-      "${aws_security_group.marty_ip.id}"
+      # Allow the bastion to access RDS
+      "${aws_security_group.bastion.id}"
     ]
   }
 
@@ -64,17 +66,19 @@ resource "aws_security_group" "birb_rds" {
   }
 }
 
-# Marty's access to the RDS
-resource "aws_security_group" "marty_ip" {
-  name        = "marty-jones-ip-whitelist"
-  description = "Allow Marty IP-based access to the RDS"
-  vpc_id      = "${aws_vpc.main.id}"
+resource "aws_security_group" "bastion" {
+  name   = "bastion-security-group"
+  vpc_id = "${aws_vpc.main.id}"
 
   ingress {
     protocol    = "tcp"
-    from_port   = 5432
-    to_port     = 5432
-    cidr_blocks = ["${var.marty_ip_address}/32"]
+    from_port   = 22
+    to_port     = 22
+    cidr_blocks = [
+      # as an extra layer of security, only allow access from these IPS:
+      # Marty:
+      "${var.marty_ip_address}/32"
+    ]
   }
 
   egress {
