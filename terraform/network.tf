@@ -27,7 +27,7 @@ resource "aws_internet_gateway" "gw" {
   vpc_id = "${aws_vpc.main.id}"
 }
 
-# Route the public subnet trafic through the IGW
+# Route the public subnet traffic through the IGW
 resource "aws_route" "internet_access" {
   route_table_id         = "${aws_vpc.main.main_route_table_id}"
   destination_cidr_block = "0.0.0.0/0"

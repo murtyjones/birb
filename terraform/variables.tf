@@ -24,17 +24,16 @@ variable "health_check_path" {
 
 variable "fargate_cpu" {
   description = "Fargate instance CPU units to provision (1 vCPU = 1024 CPU units)"
-  default     = "1024"
+  default     = "256"
 }
 
 variable "fargate_memory" {
   description = "Fargate instance memory to provision (in MiB)"
-  default     = "2048"
+  default     = "512"
 }
 
 variable "rds_username" {
   description = "User name for RDS"
-  default     = "pguser"
 }
 
 variable "rds_password" {
@@ -58,4 +57,12 @@ variable "multi_az" {
 
 variable "birb_api_certificate_arn" {
   description = "The certificate ARN for the birb API"
+}
+
+variable "marty_ip_address" {
+  description = "Marty's IP address"
+}
+
+variable "birb_api_ecr_repo_arn" {
+  description = "The birb API ECR repo"
 }

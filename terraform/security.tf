@@ -50,7 +50,31 @@ resource "aws_security_group" "birb_rds" {
     protocol        = "tcp"
     from_port       = "5432"
     to_port         = "5432"
-    security_groups = ["${aws_security_group.ecs_tasks.id}"]
+    security_groups = [
+      "${aws_security_group.ecs_tasks.id}",
+      "${aws_security_group.marty_ip.id}"
+    ]
+  }
+
+  egress {
+    protocol    = "-1"
+    from_port   = 0
+    to_port     = 0
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# Marty's access to the RDS
+resource "aws_security_group" "marty_ip" {
+  name        = "marty-jones-ip-whitelist"
+  description = "Allow Marty IP-based access to the RDS"
+  vpc_id      = "${aws_vpc.main.id}"
+
+  ingress {
+    protocol    = "tcp"
+    from_port   = 5432
+    to_port     = 5432
+    cidr_blocks = ["${var.marty_ip_address}/32"]
   }
 
   egress {

@@ -31,7 +31,7 @@ resource "aws_iam_policy" "autoscale_policy" {
                 "ecs:UpdateService"
             ],
             "Resource": [
-                "*"
+                "${aws_ecs_cluster.main.arn}"
             ]
         },
         {
@@ -41,7 +41,7 @@ resource "aws_iam_policy" "autoscale_policy" {
                 "cloudwatch:PutMetricAlarm"
             ],
             "Resource": [
-                "*"
+                "${aws_ecs_cluster.main.arn}"
             ]
         }
     ]
@@ -114,7 +114,7 @@ resource "aws_iam_policy" "task_execution_policy" {
                 "ecr:GetDownloadUrlForLayer"
             ],
             "Resource": [
-                "*"
+                "${var.birb_api_ecr_repo_arn}"
             ]
         },
         {
