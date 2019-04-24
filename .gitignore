@@ -18,5 +18,4 @@ out
 plan
 
 # secrets
-**/*.env.production
 **/*secret.tfvars
