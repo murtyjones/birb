@@ -1,5 +1,6 @@
 resource "aws_iam_role" "autoscale_role" {
   name = "fargate-autoscale-role"
+
   assume_role_policy = <<EOF
 {
             "Version": "2012-10-17",
@@ -16,10 +17,10 @@ resource "aws_iam_role" "autoscale_role" {
 EOF
 }
 
-
 resource "aws_iam_policy" "autoscale_policy" {
-  name        = "fargate-autoscale-policy"
-  path        = "/"
+  name = "fargate-autoscale-policy"
+  path = "/"
+
   policy = <<EOF
 {
     "Version": "2012-10-17",
@@ -57,6 +58,7 @@ resource "aws_iam_role_policy_attachment" "autoscale-attach" {
 
 resource "aws_iam_role" "task_execution_role" {
   name = "fargate-task-execution-role"
+
   assume_role_policy = <<EOF
 {
     "Version": "2012-10-17",
@@ -74,10 +76,10 @@ resource "aws_iam_role" "task_execution_role" {
 EOF
 }
 
-
 resource "aws_iam_policy" "task_execution_policy" {
-  name        = "fargate-task-execution-policy"
-  path        = "/"
+  name = "fargate-task-execution-policy"
+  path = "/"
+
   policy = <<EOF
 {
     "Version": "2012-10-17",

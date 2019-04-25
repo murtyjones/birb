@@ -1,5 +1,5 @@
 data "aws_route53_zone" "birb" {
-    zone_id = "Z1D0S9UH91H2SA"
+  zone_id = "Z1D0S9UH91H2SA"
 }
 
 resource "aws_route53_record" "birb" {

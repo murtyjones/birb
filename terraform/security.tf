@@ -47,14 +47,16 @@ resource "aws_security_group" "birb_rds" {
   vpc_id      = "${aws_vpc.main.id}"
 
   ingress {
-    protocol        = "tcp"
-    from_port       = "5432"
-    to_port         = "5432"
+    protocol  = "tcp"
+    from_port = "5432"
+    to_port   = "5432"
+
     security_groups = [
       # Allow ECS tasks to access RDS
       "${aws_security_group.ecs_tasks.id}",
+
       # Allow the bastion to access RDS
-      "${aws_security_group.bastion.id}"
+      "${aws_security_group.bastion.id}",
     ]
   }
 
@@ -71,14 +73,16 @@ resource "aws_security_group" "bastion" {
   vpc_id = "${aws_vpc.main.id}"
 
   ingress {
-    protocol    = "tcp"
-    from_port   = 22
-    to_port     = 22
+    protocol  = "tcp"
+    from_port = 22
+    to_port   = 22
+
     cidr_blocks = [
       # as an extra layer of security, only allow access from these IPS:
       # Marty:
       "${var.marty_ip_address_1}/32",
-      "${var.marty_ip_address_2}/32"
+
+      "${var.marty_ip_address_2}/32",
     ]
   }
 
