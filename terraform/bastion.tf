@@ -13,12 +13,11 @@ resource "aws_key_pair" "bastion_key" {
   public_key = "${var.marty_id_rsa_pub}"
 }
 
-resource "local_file" "bastion_ip_address" {
-  content  = "${aws_instance.bastion.public_ip}"
-  filename = "foo.bar"
-}
-
 output "bastion_ip_address" {
   value = "${aws_instance.bastion.public_ip}"
 }
 
+resource "local_file" "bastion_ip_address" {
+  content  = "${aws_instance.bastion.public_ip}"
+  filename = "${path.module}/out/bastion_ip_address"
+}

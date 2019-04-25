@@ -19,3 +19,4 @@ plan
 
 # secrets
 **/*secret.tfvars
+terraform/out
