@@ -1,6 +1,8 @@
+# Editor and OS things
 .idea
 .DS_Store
 
+# Rust build stuff
 target/**/*
 **/*/target
 **/*.rs.bk
@@ -11,12 +13,14 @@ target/**/*
 .terraform.tfstate.lock.info
 .terraform/
 
-# Ignore generated output for docker
+# generated output for docker
 out
 
-# ignore generated terraform plan
+# terraform's generated plan
 plan
 
 # secrets
 **/*secret.tfvars
+
+# terraform info written to disk that we use in build scripts
 terraform/out
