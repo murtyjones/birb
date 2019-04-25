@@ -22,7 +22,7 @@ jobs:
           command: make copy-artifacts
       - run:
           name: Build Image and Push to ECS
-          command: make build-push-docker-image
+          command: ./scripts/build_and_push.sh
       - save_cache:
           key: v7-cargo-cache-{{ arch }}-{{ .Branch }}
           paths:
