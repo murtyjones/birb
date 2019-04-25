@@ -1,5 +1,7 @@
+# Run the dev environment for local development
 default: dev
 
+# Run the dev environment for local development
 dev: down up-no-tests sleep5 cargo-watch
 
 # Run the server, watching for changes
@@ -7,14 +9,13 @@ cargo-watch:
 	cargo watch -x "run -p api"
 
 # Run tests in testing container and then shut down
-test: down up-with-tests
+test: down
+	docker-compose up -d
 	docker-compose run --rm test bash -c "cargo test --all"
 
+# Start the container without tests
 up-no-tests:
 	docker-compose up -d --scale test=0
-
-up-with-tests:
-	docker-compose up -d
 
 # Tear down docker containers
 down:
@@ -24,20 +25,23 @@ down:
 up:
 	docker-compose up -d
 
-# Build each container
-build:
+# Build the container from scratch
+rebuild: 
+	make down
 	docker-compose build
+	make up
 
-rebuild: down build up
-
+# Show the container logs
 logs:
 	docker-compose logs -f
 
+# Prune unused containers / images
 clean: down
 	docker system prune -f
 	docker volume prune -f
 
-build-binary:
+# Builds the production-ready API binary
+build-api-release:
     # get base image
 	docker pull clux/muslrust:nightly
 	# build binary
@@ -47,40 +51,34 @@ build-binary:
 		-it clux/muslrust:nightly \
 		cargo build -p api --release
 
+# put binary and production dockerfile in a temporary
+# folder to keep ≤the build context simple/small
 copy-artifacts:
-	# put binary and production dockerfile in a temporary
-	# folder to keep ≤the build context simple/small
 	rm -rf out
 	mkdir out
 	cp ./crates/api/Dockerfile-prod out
 	cp ./target/x86_64-unknown-linux-musl/release/api_bin out
 
-make build-all: build-binary copy-artifacts build-push-docker-image
-
-make run-release: down up
-	docker run -e \
-		ROCKET_DATABASES='{mongo_datastore={url="mongodb://localhost:27100/playground"}}' \
-		murtyjones/birb_api:latest
-
-build-push-docker-image:
+# Release to production
+make release: build-api-release copy-artifacts 
 	./scripts/build_and_push.sh
 
-tfup:
+# Deploy birb infrastructure
+birb-up:
 	terraform apply "plan"
 	rm -rf plan
 
-tfdown:
+# Destroy birb infrastructure
+birb-destroy:
 	terraform destroy -auto-approve -var-file=terraform/secret.tfvars terraform/
 
-tfplan:
+# Prepare bird infrastructure for deploy
+birb-prep:
 	terraform plan -out=plan -var-file=terraform/secret.tfvars terraform/
 
-tfplan-cert:
+# Prepare api.birb.io certificate for deployment
+birb-certificate:
 	terraform plan -out=plan tf-certificate/
-
-
-pg:
-	docker exec -it birb_db_1 psql -U postgres
 
 # Regrettable hack used to await a healthy postgres status before attempting to
 # establish a connection in Rocket. Tried waiting for 5432 to become reachable

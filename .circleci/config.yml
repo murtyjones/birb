@@ -16,7 +16,7 @@ jobs:
           command: make test
       - run:
           name: Build Binary
-          command: make build-binary
+          command: make build-api-release
       - run:
           name: Copy Binary and Production Dockerfile to "./out"
           command: make copy-artifacts
