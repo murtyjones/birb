@@ -70,3 +70,7 @@ variable "marty_ip_address_2" {
 variable "marty_id_rsa_pub" {
   description = "Marty's public key"
 }
+
+variable "ROCKET_DATABASES" {
+  description = "Rocket Databases environment variable"
+}
