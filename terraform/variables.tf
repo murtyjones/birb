@@ -59,8 +59,12 @@ variable "birb_api_certificate_arn" {
   description = "The certificate ARN for the birb API"
 }
 
-variable "marty_ip_address" {
-  description = "Marty's IP address"
+variable "marty_ip_address_1" {
+  description = "Marty's 1st IP address"
+}
+
+variable "marty_ip_address_2" {
+  description = "Marty's 2nd IP address"
 }
 
 variable "marty_id_rsa_pub" {

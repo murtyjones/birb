@@ -73,11 +73,11 @@ birb-destroy:
 	terraform destroy -auto-approve -var-file=terraform/secret.tfvars terraform/
 
 # Prepare bird infrastructure for deploy
-birb-prep:
+birb-plan:
 	terraform plan -out=plan -var-file=terraform/secret.tfvars terraform/
 
 # Prepare api.birb.io certificate for deployment
-birb-certificate:
+birb-cert-plan:
 	terraform plan -out=plan tf-certificate/
 
 # Regrettable hack used to await a healthy postgres status before attempting to
