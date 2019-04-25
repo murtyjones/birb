@@ -32,3 +32,6 @@ popd
 
 # Install Rust Nighhly
 # TODO
+
+# Install cargo watcher
+cargo install --force cargo-watch
