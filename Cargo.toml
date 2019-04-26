@@ -14,8 +14,15 @@ members = [
 [dependencies]
 openssl-sys = "*"
 
+[dependencies.dbmigrate-lib]
+version = "0.1.4"
+
 [features]
 # Force openssl-sys to staticly link in the openssl library. Necessary when
 # cross compiling to x86_64-unknown-linux-musl.
 vendored = ["openssl-sys/vendored"]
+default = ["postgres_support"]
+postgres_support = ["dbmigrate-lib/postgres_support"]
 
+[profile.release]
+lto = true

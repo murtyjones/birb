@@ -87,3 +87,19 @@ birb-cert-plan:
 # wait for a passing healthcheck of some kind a la https://github.com/peter-evans/docker-compose-healthcheck
 sleep5:
 	sleep 5s
+
+# Starts the SSH tunnel to production
+tunnel:
+	./scripts/start_ssh_tunnel.ssh
+
+# Seed the local database
+seed-local:
+	./scripts/seed.sh
+
+# Run migrations (up, down, etc.) locally
+migrate-local:
+	dbmigrate --url postgres://postgres:develop@localhost:5432/postgres --path ./db/migrations up
+
+# Run migrations (up, down, etc.) against production
+migrate-api:
+	make tunnel && dbmigrate --url postgres://XYZ:ABC@localhost:5433/datastore --path ./migrations
