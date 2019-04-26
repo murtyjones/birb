@@ -62,8 +62,8 @@ impl FilerStatus {
     #[cfg(test)] // TODO use "failure" crate instead of reqwest::Error
     fn get_10q_doc(&self) -> Result<String, reqwest::Error> {
         let mock_inactive_filer_html =
-            include_str!("../../../seed-data/test/kenneth-sawyer-10q-listings");
-        let mock_active_filer_html = include_str!("../../../seed-data/test/tsla-10q-listings");
+            include_str!("../../../data/test/kenneth-sawyer-10q-listings");
+        let mock_active_filer_html = include_str!("../../../data/test/tsla-10q-listings");
         match &*self.0.cik {
             MOCK_INACTIVE_FILER_CIK => Ok(String::from(mock_inactive_filer_html)),
             _ => Ok(String::from(mock_active_filer_html)),
@@ -129,10 +129,10 @@ mod test {
         // Arrange
         let filter_status_inactive: FilerStatus = get_mock_filer_status(MOCK_INACTIVE_FILER_CIK);
         let filter_status_inactive_path: &Path =
-            Path::new("../../seed-data/test/kenneth-sawyer-10q-listings");
+            Path::new("../../data/test/kenneth-sawyer-10q-listings");
         let filter_status_inactive_expected_html = fs::read_to_string(filter_status_inactive_path);
         let filter_status_active: FilerStatus = get_mock_filer_status(MOCK_ACTIVE_FILER_CIK);
-        let filter_status_active_path: &Path = Path::new("../../seed-data/test/tsla-10q-listings");
+        let filter_status_active_path: &Path = Path::new("../../data/test/tsla-10q-listings");
         let filter_status_active_expected_html = fs::read_to_string(filter_status_active_path);
 
         // Assert
