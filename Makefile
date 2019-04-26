@@ -92,14 +92,10 @@ sleep5:
 tunnel:
 	./scripts/start_ssh_tunnel.sh
 
-# Seed the local database
-seed-local:
+# Seed the database
+seed:
 	./scripts/seed.sh local
 
-# Run migrations (up, down, etc.) locally
-migrate-local:
+# Run migrations
+migrate:
 	dbmigrate --url postgres://postgres:develop@localhost:5432/postgres --path ./db/migrations up
-
-# Run migrations (up, down, etc.) against production
-migrate-api:
-	make tunnel && dbmigrate --url postgres://XYZ:ABC@localhost:5433/datastore --path ./migrations
