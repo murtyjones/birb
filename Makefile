@@ -90,11 +90,11 @@ sleep5:
 
 # Starts the SSH tunnel to production
 tunnel:
-	./scripts/start_ssh_tunnel.ssh
+	./scripts/start_ssh_tunnel.sh
 
 # Seed the local database
 seed-local:
-	./scripts/seed.sh
+	./scripts/seed.sh local
 
 # Run migrations (up, down, etc.) locally
 migrate-local:

@@ -27,3 +27,13 @@ resource "local_file" "rds_db_address" {
   content  = "${aws_db_instance.birb.address}"
   filename = "${path.module}/out/rds_db_address"
 }
+
+resource "local_file" "rds_db_username" {
+  content  = "${var.rds_username}"
+  filename = "${path.module}/out/rds_db_username"
+}
+
+resource "local_file" "rds_db_password" {
+  content  = "${var.rds_password}"
+  filename = "${path.module}/out/rds_db_password"
+}
