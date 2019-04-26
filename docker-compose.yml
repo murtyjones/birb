@@ -12,7 +12,6 @@ services:
       - .env
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./db/init/01-CreateFiler.sql:/docker-entrypoint-initdb.d/01-CreateFiler.sql
 
   test:
     build:
