@@ -20,7 +20,7 @@ cd $(git rev-parse --show-toplevel)
 # Get variables needed to make the tunnel
 
 # We'll connect to 127.0.0.1:5433 locally:
-$LOCAL_PORT=$(<scripts/local_port)
+LOCAL_PORT=$(<scripts/local_port)
 
 # User to ssh into in AWS
 BASTION_USER="ec2-user"
