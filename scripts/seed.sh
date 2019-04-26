@@ -19,15 +19,15 @@ if [ $ENV = "prod" ]; then
         echo "Exiting."
         exit 2;
     fi
-    $PORT=$(<scripts/local_port)
-    $DB_USERNAME=$(<terraform/out/rds_db_username)
-    $DB_PASSWORD=$(<terraform/out/rds_db_password)
-    $DB_NAME=$(<terraform/out/rds_db_name)
-elif if [ $ENV = "local" ]; then
-    $PORT=5432
-    $DB_USERNAME=postgres
-    $DB_PASSWORD=develop
-    $DB_NAME=postgres
+    PORT=$(<scripts/local_port)
+    DB_USERNAME=$(<terraform/out/rds_db_username)
+    DB_PASSWORD=$(<terraform/out/rds_db_password)
+    DB_NAME=$(<terraform/out/rds_db_name)
+elif [ $ENV = "local" ]; then
+    PORT=5432
+    DB_USERNAME=postgres
+    DB_PASSWORD=develop
+    DB_NAME=postgres
 else
     echo "Unrecognized environment specified!"
     exit 2;
@@ -45,6 +45,6 @@ for i in `/bin/ls -1 $SEED_DIRECTORY/*.sql;`; do
     PG_PASSWORD=$DB_PASSWORD psql --host=localhost \
          --port=$PORT \
          --username=$DB_USERNAME \
-         --dbname=$DB_PASSWORD \
+         --dbname=$DB_NAME \
          --file=$i
 done
