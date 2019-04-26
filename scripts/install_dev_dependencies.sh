@@ -21,15 +21,6 @@ mkdir -p ~/Library/LaunchAgents
 ln -sfv /usr/local/opt/postgresql/*.plist ~/Library/LaunchAgents
 launchctl load ~/Library/LaunchAgents/homebrew.mxcl.postgresql.plist
 
-# Install PGTap
-pushd ~
-git clone https://github.com/theory/pgtap.git
-cd pgtap
-make
-make installcheck
-make install
-popd
-
 # Install Rust Nighhly
 # TODO
 
