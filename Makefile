@@ -1,8 +1,8 @@
 # Run the dev environment for local development
-default: dev
+default: server
 
 # Run the dev environment for local development
-dev: down up-no-tests sleep5 cargo-watch
+server: down up-no-tests sleep5 cargo-watch
 
 # Run the server, watching for changes
 cargo-watch:

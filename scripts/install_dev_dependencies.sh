@@ -26,3 +26,6 @@ launchctl load ~/Library/LaunchAgents/homebrew.mxcl.postgresql.plist
 
 # Install cargo watcher
 cargo install --force cargo-watch
+
+# Install dbmigrate
+cargo install --force dbmigrate
