@@ -136,3 +136,23 @@ resource "aws_iam_role_policy_attachment" "task-execution-attach" {
   role       = "${aws_iam_role.task_execution_role.name}"
   policy_arn = "${aws_iam_policy.task_execution_policy.arn}"
 }
+
+resource "aws_iam_role" "edgar_worker" {
+  name = "edgar_worker"
+
+  assume_role_policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": "sts:AssumeRole",
+            "Principal": {
+                "Service": "lambda.amazonaws.com"
+            },
+            "Effect": "Allow",
+            "Sid": ""
+        }
+    ]
+}
+EOF
+}

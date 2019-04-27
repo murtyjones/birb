@@ -24,3 +24,6 @@ plan
 
 # terraform info written to disk that we use in build scripts
 terraform/out
+
+# generated files used by terraform in building infrastructure
+terraform/in

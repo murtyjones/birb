@@ -57,7 +57,7 @@ impl FilerStatus {
     fn get_10q_doc(&self) -> Result<String, reqwest::Error> {
         let url = format!("https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK={}&type=10-Q&dateb=&owner=include&count=40", self.0.cik);
         println!("{}", url);
-        reqwest::get(self.string_to_static_str(url))?.text()
+        reqwest::get(url.as_str())?.text()
     }
 
     /// Gets a fake doc“
@@ -97,13 +97,6 @@ impl FilerStatus {
         for child in node.children.borrow().iter() {
             self.walk_dom_find_div(child.clone());
         }
-    }
-
-    /// Converts a string to a static string.
-    /// See: https://stackoverflow.com/questions/23975391/how-to-convert-a-string-into-a-static-str
-    /// Note: Memory leak??? let's goooooooooooooo
-    fn string_to_static_str(&self, s: String) -> &'static str {
-        Box::leak(s.into_boxed_str())
     }
 }
 
