@@ -9,6 +9,7 @@ members = [
   "crates/api",
   "crates/filing-metadata",
   "crates/filer-status",
+  "crates/edgar-worker",
 ]
 
 [dependencies]
