@@ -98,4 +98,4 @@ seed:
 
 # Run migrations
 migrate:
-	dbmigrate --url postgres://postgres:develop@localhost:5432/postgres --path ./db/migrations up
+	./scripts/migrate.sh local up
