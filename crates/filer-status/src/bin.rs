@@ -1,19 +1,17 @@
 use api_lib::models::filer::Model as Filer;
-use api_lib::models::filer::Model as Filer;
 use filer_status_lib::FilerStatus;
+use std::env;
 
 pub fn main() {
     let args: Vec<String> = env::args().collect();
 
-    let cik = &args[0];
+    let cik = String::to_string(&args[1]);
 
-    let f = Filer {
-        cik
-    };
+    let f = Filer { cik };
 
-    let fs = FilerStatus::new(f);
+    let mut fs = FilerStatus::new(f);
 
     fs.set_is_active();
-    println!("{}", fs);
+    println!("{:?}", fs);
     // TODO save in database
 }

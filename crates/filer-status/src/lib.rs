@@ -30,17 +30,18 @@ const MOCK_INACTIVE_FILER_CIK: &'static str = "0000948605"; // Kenneth Sawyer
 const MOCK_ACTIVE_FILER_CIK: &'static str = "0001318605"; // Tesla, Inc.
 
 /// The status of a given filer is tracked here
+#[derive(Debug)]
 pub struct FilerStatus(Filer, bool);
 
 /// Implements the status retrieval for the Filer model
 impl FilerStatus {
     /// Make a new FilerStatus instance
-    fn new(f: Filer) -> FilerStatus {
+    pub fn new(f: Filer) -> FilerStatus {
         FilerStatus(f, false)
     }
 
     /// sets the active status for the filer
-    fn set_is_active(&mut self) -> () {
+    pub fn set_is_active(&mut self) -> () {
         let html: String = self.get_10q_doc().unwrap();
         let dom: RcDom = self.generate_dom(html);
         self.walk_dom_find_div(dom.document);
@@ -54,11 +55,12 @@ impl FilerStatus {
     /// Gets the doc from sec.gov
     #[cfg(not(test))] // TODO use "failure" crate instead of reqwest::Error
     fn get_10q_doc(&self) -> Result<String, reqwest::Error> {
-        let url: &str = "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001318605&type=10-Q&dateb=&owner=include&count=40";
-        reqwest::get(url)?.text()
+        let url = format!("https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK={}&type=10-Q&dateb=&owner=include&count=40", self.0.cik);
+        println!("{}", url);
+        reqwest::get(self.string_to_static_str(url))?.text()
     }
 
-    /// Gets a fake doc
+    /// Gets a fake doc“
     #[cfg(test)] // TODO use "failure" crate instead of reqwest::Error
     fn get_10q_doc(&self) -> Result<String, reqwest::Error> {
         let mock_inactive_filer_html =
@@ -96,6 +98,13 @@ impl FilerStatus {
             self.walk_dom_find_div(child.clone());
         }
     }
+
+    /// Converts a string to a static string.
+    /// See: https://stackoverflow.com/questions/23975391/how-to-convert-a-string-into-a-static-str
+    /// Note: Memory leak??? let's goooooooooooooo
+    fn string_to_static_str(&self, s: String) -> &'static str {
+        Box::leak(s.into_boxed_str())
+    }
 }
 
 #[cfg(test)]
@@ -104,10 +113,7 @@ mod test {
 
     fn get_mock_filer_status(cik: &'static str) -> FilerStatus {
         let cik = String::from(cik);
-        let mut names = vec![];
-        names.push(String::from("alias 1"));
-        names.push(String::from("alias 2"));
-        let f = Filer { cik, names };
+        let f = Filer { cik };
         let fs = FilerStatus::new(f);
         fs
     }
