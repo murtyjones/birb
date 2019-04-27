@@ -94,8 +94,8 @@ tunnel:
 
 # Seed the database
 seed:
-	./scripts/seed.sh prod
+	./scripts/seed.sh $(env)
 
 # Run migrations
 migrate:
-	./scripts/migrate.sh prod up
+	./scripts/migrate.sh $(env) up
