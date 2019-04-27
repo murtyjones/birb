@@ -26,7 +26,7 @@ up:
 	docker-compose up -d
 
 # Build the container from scratch
-rebuild: 
+rebuild:
 	make down
 	docker-compose build
 	make up
@@ -60,7 +60,7 @@ copy-artifacts:
 	cp ./target/x86_64-unknown-linux-musl/release/api_bin out
 
 # Release to production
-make release: build-api-release copy-artifacts 
+make release: build-api-release copy-artifacts
 	./scripts/build_and_push.sh
 
 # Deploy birb infrastructure
