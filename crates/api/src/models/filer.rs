@@ -7,8 +7,6 @@ pub struct Model {
     /// government by the United States Securities and Exchange Commission. The number is used to
     /// identify its filings in several online databases, including EDGAR.
     pub cik: String,
-    /// Names used by the entity. There can be multiple
-    pub names: Vec<String>,
 }
 
 /// Find an entity using its cik
@@ -18,7 +16,6 @@ pub fn find_one_by_cik(conn: &Connection, cik: String) -> Result<Model, &str> {
         .unwrap();
     Ok(Model {
         cik: results.get(0).get(0),
-        names: results.get(0).get(1),
     })
 }
 
