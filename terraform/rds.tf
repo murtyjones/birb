@@ -19,6 +19,7 @@ resource "aws_db_instance" "birb" {
   multi_az               = "${var.multi_az}"
   storage_type           = "gp2"
   publicly_accessible    = false
+  deletion_protection    = true
 
   # snapshot_identifier       = "birb"
   allow_major_version_upgrade = false
