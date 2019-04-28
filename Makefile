@@ -41,7 +41,7 @@ clean: down
 	docker volume prune -f
 
 # Builds the production-ready API binary
-build-api-release:
+build-release:
     # get base image
 	docker pull clux/muslrust:nightly
 	# build binary
@@ -49,19 +49,15 @@ build-api-release:
 		-v $$PWD:/volume \
 		-w /volume \
 		-it clux/muslrust:nightly \
-		cargo build -p api --release
+		cargo build -p $(package) --release
 
 # put binary and production dockerfile in a temporary
 # folder to keep ≤the build context simple/small
-copy-artifacts:
+copy-artifact:
 	rm -rf out
 	mkdir out
 	cp ./crates/api/Dockerfile-prod out
-	cp ./target/x86_64-unknown-linux-musl/release/api_bin out
-
-# Release to production
-make release: build-api-release copy-artifacts
-	./scripts/build_and_push.sh
+	cp ./target/x86_64-unknown-linux-musl/release/$(bin) out
 
 # Deploy birb infrastructure
 birb-up:
@@ -79,6 +75,9 @@ birb-plan:
 # Prepare api.birb.io certificate for deployment
 birb-cert-plan:
 	terraform plan -out=plan tf-certificate/
+
+birb-plan-edgar-worker:
+	tf plan -var-file=terraform/secret.tfvars -out=plan -target=aws_lambda_function.edgar_worker -target=aws_iam_role.edgar_worker terraform
 
 # Regrettable hack used to await a healthy postgres status before attempting to
 # establish a connection in Rocket. Tried waiting for 5432 to become reachable
@@ -99,3 +98,13 @@ seed:
 # Run migrations
 migrate:
 	./scripts/migrate.sh $(env) up
+
+zip-out:
+	zip -j out.zip out/*
+
+edgar-worker:
+	make build-release package=edgar-worker
+	make copy-artifact bin=bootstrap
+	make zip-out
+	terraform plan -var-file=terraform/secret.tfvars -out=plan -target=aws_lambda_function.edgar_worker -target=aws_iam_role.edgar_worker terraform
+	make birb-up

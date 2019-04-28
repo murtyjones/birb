@@ -1,25 +1,33 @@
 version: 2.1
 jobs:
-  build_and_deploy:
+  test:
     machine: true
     steps:
       - checkout
       - restore_cache:
           keys:
-            - v7-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
-            - v7-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
+            - v8-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
+            - v8-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
+      - run:
+          name: Run Tests
+          command: make test
+  deploy_api:
+    machine: true
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v8-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
+            - v8-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
       - run:
           name: Upgrade AWS CLI Latest Version
           command: pip install --upgrade awscli
       - run:
-          name: Run Tests
-          command: make test
-      - run:
-          name: Build Binary
-          command: make build-api-release
+          name: Build API Binary
+          command: make build-release package=api
       - run:
           name: Copy Binary and Production Dockerfile to "./out"
-          command: make copy-artifacts
+          command: make copy-artifact bin=api_bin
       - run:
           name: Build Image and Push to ECS
           command: ./scripts/build_and_push.sh
@@ -29,9 +37,22 @@ jobs:
             - target
             - /usr/local/cargo
             - /root/.cargo
+  deploy_lambdas:
+    machine: true
+      steps:
+        - checkout
+        - restore_cache:
+            keys:
+              - v8-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
+              - v8-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
+        - run:
+            name: Deploy Edgar Worker
+            command: make edgar-worker
 
 workflows:
   version: 2
   build_and_deploy:
     jobs:
-      - build_and_deploy
+      - test
+      - deploy_api
+      - deploy_lambdas

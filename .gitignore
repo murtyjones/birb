@@ -13,8 +13,9 @@ target/**/*
 .terraform.tfstate.lock.info
 .terraform/
 
-# generated output for docker
+# generated output for docker/lambda/etc.
 out
+out.zip
 
 # terraform's generated plan
 plan

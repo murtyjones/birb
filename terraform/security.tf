@@ -40,7 +40,7 @@ resource "aws_security_group" "ecs_tasks" {
   }
 }
 
-# ECS/Bastion access to RDS
+# ECS/Bastion/Lambda access to RDS
 resource "aws_security_group" "birb_rds" {
   name        = "birb-rds"
   description = "specify inbound access rules"
