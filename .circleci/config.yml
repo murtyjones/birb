@@ -39,15 +39,15 @@ jobs:
             - /root/.cargo
   deploy_lambdas:
     machine: true
-      steps:
-        - checkout
-        - restore_cache:
-            keys:
-              - v8-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
-              - v8-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
-        - run:
-            name: Deploy Edgar Worker
-            command: make edgar-worker
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v8-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
+            - v8-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
+      - run:
+          name: Deploy Edgar Worker
+          command: make edgar-worker
 
 workflows:
   version: 2
