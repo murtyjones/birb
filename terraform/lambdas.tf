@@ -1,7 +1,7 @@
 resource "aws_lambda_function" "edgar_worker" {
   filename      = "out.zip"
   function_name = "edgar_worker"
-  role          = "${aws_iam_role.edgar_worker.arn}"
+  role          = "${aws_iam_role.edgar_worker_role.arn}"
   handler       = "out/edgar_worker"
 
   # The filebase64sha256() function is available in Terraform 0.11.12 and later
@@ -13,10 +13,10 @@ resource "aws_lambda_function" "edgar_worker" {
 
   // TODO fix deployment errors around this VPC so that DB access
   // is available to the lambda:
-  //  vpc_config {
-  //    security_group_ids = ["${aws_security_group.birb_rds.id}"]
-  //    subnet_ids = ["${aws_subnet.public.*.id}"]
-  //  }
+    vpc_config {
+      security_group_ids = ["${aws_security_group.birb_rds.id}"]
+      subnet_ids = ["${aws_subnet.public.*.id}"]
+    }
 
   environment {
     variables = {

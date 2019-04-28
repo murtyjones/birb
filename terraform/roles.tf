@@ -137,8 +137,14 @@ resource "aws_iam_role_policy_attachment" "task-execution-attach" {
   policy_arn = "${aws_iam_policy.task_execution_policy.arn}"
 }
 
-resource "aws_iam_role" "edgar_worker" {
-  name = "edgar_worker"
+resource "aws_iam_role_policy_attachment" "edgar-worker-attach" {
+  depends_on = ["aws_iam_role.edgar_worker_role"]
+  role       = "${aws_iam_role.edgar_worker_role.name}"
+  policy_arn = "${aws_iam_policy.edgar_worker_policy.arn}"
+}
+
+resource "aws_iam_role" "edgar_worker_role" {
+  name = "edgar_worker_role"
 
   assume_role_policy = <<EOF
 {
@@ -151,6 +157,28 @@ resource "aws_iam_role" "edgar_worker" {
             },
             "Effect": "Allow",
             "Sid": ""
+        }
+    ]
+}
+EOF
+}
+
+resource "aws_iam_policy" "edgar_worker_policy" {
+  name = "edgar-worker-execution-policy"
+  path = "/"
+
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:CreateNetworkInterface"
+            ],
+            "Resource": [
+                "*"
+            ]
         }
     ]
 }
