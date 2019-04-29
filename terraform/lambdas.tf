@@ -2,6 +2,7 @@ resource "aws_lambda_function" "edgar_worker" {
   filename      = "out.zip"
   function_name = "edgar_worker"
   role          = "${aws_iam_role.edgar_worker_role.arn}"
+  depends_on    = ["aws_iam_role_policy_attachment.edgar_worker_lambdavpc"]
   handler       = "out/edgar_worker"
 
   # The filebase64sha256() function is available in Terraform 0.11.12 and later
