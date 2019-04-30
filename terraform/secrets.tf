@@ -1,9 +1,10 @@
 // For lamdba:
-resource "aws_ssm_parameter" "ROCKET_DATABASES" {
+resource "aws_ssm_parameter" "DATABASE_URI" {
   name        = "/${var.environment}/database/ROCKET_DATABASES"
   description = "Database connection info for Rocket / ECS"
   type        = "SecureString"
-  value       = "${var.ROCKET_DATABASES}"
+  overwrite   = true
+  value       = "${var.DATABASE_URI}"
 
   tags = {
     environment = "${var.environment}"

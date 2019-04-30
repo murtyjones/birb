@@ -21,7 +21,7 @@ resource "aws_lambda_function" "edgar_worker" {
 
   environment {
     variables = {
-      ROCKET_DATABASES = "${aws_ssm_parameter.ROCKET_DATABASES.value}"
+      DATABASE_URI = "${aws_ssm_parameter.DATABASE_URI.value}"
     }
   }
 }

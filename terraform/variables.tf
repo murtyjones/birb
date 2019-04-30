@@ -72,7 +72,11 @@ variable "marty_id_rsa_pub" {
 }
 
 variable "ROCKET_DATABASES" {
-  description = "Rocket Databases environment variable"
+  description = "Database(s) connection information for Rocket"
+}
+
+variable "DATABASE_URI" {
+  description = "Actual Databases connection string"
 }
 
 variable "environment" {

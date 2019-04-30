@@ -31,7 +31,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 
 fn my_handler(e: CustomEvent, c: lambda::Context) -> Result<CustomOutput, HandlerError> {
-    let conn = Connection::connect("postgres://postgres@localhost:5433", TlsMode::None).unwrap();
+    let conn = Connection::connect(env::var("DATABASE_URI").unwrap(), TlsMode::None).unwrap();
     Ok(CustomOutput {
         message: format!("Hello!"),
     })

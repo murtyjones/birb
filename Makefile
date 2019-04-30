@@ -76,9 +76,6 @@ birb-plan:
 birb-cert-plan:
 	terraform plan -out=plan tf-certificate/
 
-birb-plan-edgar-worker:
-	tf plan -var-file=terraform/secret.tfvars -out=plan -target=aws_lambda_function.edgar_worker -target=aws_iam_role.edgar_worker terraform
-
 # Regrettable hack used to await a healthy postgres status before attempting to
 # establish a connection in Rocket. Tried waiting for 5432 to become reachable
 # but that actually happens in advance of postgres becoming healthy/usable,
@@ -102,9 +99,12 @@ migrate:
 zip-out:
 	zip -j out.zip out/*
 
+birb-plan-edgar-worker:
+	terraform plan -var-file=terraform/production.secret.tfvars -out=plan -target=aws_lambda_function.edgar_worker -target=aws_iam_role.edgar_worker terraform
+
 edgar-worker:
 	make build-release package=edgar-worker
 	make copy-artifact bin=bootstrap
 	make zip-out
-	terraform plan -var-file=terraform/secret.tfvars -out=plan -target=aws_lambda_function.edgar_worker -target=aws_iam_role.edgar_worker terraform
+	make birb-plan-edgar-worker
 	make birb-up
