@@ -5,10 +5,15 @@ extern crate serde_derive;
 #[macro_use]
 extern crate log;
 extern crate simple_logger;
+extern crate api_lib;
+use std::env;
 
+use api_lib::models::filer::Model as Filer;
 use lambda::error::HandlerError;
 
 use std::error::Error;
+
+use postgres::{Connection, TlsMode};
 
 #[derive(Deserialize, Clone)]
 struct CustomEvent {}
@@ -26,6 +31,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 
 fn my_handler(e: CustomEvent, c: lambda::Context) -> Result<CustomOutput, HandlerError> {
+    let conn = Connection::connect("postgres://postgres@localhost:5433", TlsMode::None).unwrap();
     Ok(CustomOutput {
         message: format!("Hello!"),
     })

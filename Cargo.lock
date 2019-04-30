@@ -410,6 +410,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "edgar-worker"
 version = "0.1.0"
 dependencies = [
+ "api 0.1.0",
  "cfg-if 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "dotenv 0.13.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "lambda_runtime 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",

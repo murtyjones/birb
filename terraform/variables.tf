@@ -74,3 +74,8 @@ variable "marty_id_rsa_pub" {
 variable "ROCKET_DATABASES" {
   description = "Rocket Databases environment variable"
 }
+
+variable "environment" {
+  description = "The environment being deployed"
+  default     = "production"
+}

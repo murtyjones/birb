@@ -16,12 +16,12 @@ resource "aws_lambda_function" "edgar_worker" {
   // is available to the lambda:
     vpc_config {
       security_group_ids = ["${aws_security_group.birb_rds.id}"]
-      subnet_ids = ["${aws_subnet.public.*.id}"]
+      subnet_ids = ["${aws_subnet.private.*.id}"]
     }
 
   environment {
     variables = {
-      foo = "bar"
+      ROCKET_DATABASES = "${aws_ssm_parameter.ROCKET_DATABASES.value}"
     }
   }
 }
