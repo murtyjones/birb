@@ -1,4 +1,4 @@
-# ALB Security Group: Edit this to restrict access to the application
+# ALB allows access from anywhere and can call anywhere (in pratice, only goes to ECS) tasks
 resource "aws_security_group" "lb" {
   name        = "birb-api-load-balancer-security-group"
   description = "Allow access on port 443 only to ALB"
@@ -19,7 +19,7 @@ resource "aws_security_group" "lb" {
   }
 }
 
-# Traffic to the ECS cluster should only come from the ALB
+# Traffic to the ECS cluster should only come from the ALB; can call out to anywhere
 resource "aws_security_group" "ecs_tasks" {
   name        = "birb-api-ecs-tasks-security-group"
   description = "allow inbound access from the ALB only"
@@ -40,7 +40,7 @@ resource "aws_security_group" "ecs_tasks" {
   }
 }
 
-# ECS/Bastion/Lambda access to RDS
+# ECS/Bastion accessible from approved IPs (w/ SSH), able to call out to anywhere (including RDS)
 resource "aws_security_group" "birb_rds" {
   name        = "birb-rds"
   description = "specify inbound access rules"
@@ -57,6 +57,9 @@ resource "aws_security_group" "birb_rds" {
 
       # Allow the bastion to access RDS
       "${aws_security_group.bastion.id}",
+
+      # Allow lambdas to access RDS
+      "${aws_security_group.lambdas.id}",
     ]
   }
 
@@ -85,6 +88,20 @@ resource "aws_security_group" "bastion" {
       "${var.marty_ip_address_2}/32",
     ]
   }
+
+  egress {
+    protocol    = "-1"
+    from_port   = 0
+    to_port     = 0
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# Lambdas will not be accessible from the internet, but able to make any outbound calls
+resource "aws_security_group" "lambdas" {
+  name        = "birb-lambdas-security-group"
+  description = "no inbound, only outband"
+  vpc_id      = "${aws_vpc.main.id}"
 
   egress {
     protocol    = "-1"

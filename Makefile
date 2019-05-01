@@ -66,11 +66,11 @@ birb-up:
 
 # Destroy birb infrastructure
 birb-destroy:
-	terraform destroy -auto-approve -var-file=terraform/secret.tfvars terraform/
+	terraform destroy -auto-approve -var-file=terraform/production.secret.tfvars terraform/
 
 # Prepare bird infrastructure for deploy
 birb-plan:
-	terraform plan -out=plan -var-file=terraform/secret.tfvars terraform/
+	terraform plan -out=plan -var-file=terraform/production.secret.tfvars terraform/
 
 # Prepare api.birb.io certificate for deployment
 birb-cert-plan:
