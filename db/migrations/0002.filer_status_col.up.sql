@@ -1,0 +1,2 @@
+ALTER TABLE filer
+ADD COLUMN active BOOLEAN DEFAULT null;
