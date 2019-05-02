@@ -36,7 +36,7 @@ fn do_filer_status_update(e: CustomEvent, c: lambda::Context) -> Result<CustomOu
 
     // Get filer to update
     let cik = conn
-        .query("SELECT * FROM filer WHERE status IS NULL LIMIT 1", &[])
+        .query("SELECT * FROM filer WHERE active IS NULL LIMIT 1", &[])
         .unwrap()
         .get(0)
         .get(0);
@@ -48,10 +48,10 @@ fn do_filer_status_update(e: CustomEvent, c: lambda::Context) -> Result<CustomOu
 
     // Save result to database
     let update_result = conn
-        .execute("UPDATE filer SET status = $1 WHERE cik = $2", &[&filer_status.1, &filer_status.0.cik]);
+        .execute("UPDATE filer SET active = $1 WHERE cik = $2", &[&filer_status.1, &filer_status.0.cik]);
 
     Ok(CustomOutput {
-        message: format!("Set status for cik {} to '{}'", &filer_status.0.cik, &filer_status.1),
+        message: format!("Set active status for cik {} to '{}'", &filer_status.0.cik, &filer_status.1),
     })
 }
 
