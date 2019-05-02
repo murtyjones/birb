@@ -413,6 +413,7 @@ dependencies = [
  "api 0.1.0",
  "cfg-if 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "dotenv 0.13.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "filer-status 0.1.0",
  "lambda_runtime 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "postgres 0.15.2 (registry+https://github.com/rust-lang/crates.io-index)",

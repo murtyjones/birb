@@ -9,6 +9,7 @@ extern crate api_lib;
 use std::env;
 
 use api_lib::models::filer::Model as Filer;
+use filer_status_lib::FilerStatus;
 use lambda::error::HandlerError;
 
 use std::error::Error;
@@ -25,14 +26,40 @@ struct CustomOutput {
 
 fn main() -> Result<(), Box<dyn Error>> {
     simple_logger::init_with_level(log::Level::Info)?;
-    lambda!(my_handler);
+    lambda!(do_filer_status_update);
 
     Ok(())
 }
 
-fn my_handler(e: CustomEvent, c: lambda::Context) -> Result<CustomOutput, HandlerError> {
+fn do_filer_status_update(e: CustomEvent, c: lambda::Context) -> Result<CustomOutput, HandlerError> {
     let conn = Connection::connect(env::var("DATABASE_URI").unwrap(), TlsMode::None).unwrap();
+
+    // Get filer to update
+    let cik = conn
+        .query("SELECT * FROM filer WHERE status IS NULL LIMIT 1", &[])
+        .unwrap()
+        .get(0)
+        .get(0);
+
+    // Get Latest status for filer
+    let filer = Filer { cik };
+    let mut filer_status: FilerStatus = FilerStatus::new(filer);
+    filer_status.set_is_active();
+
+    // Save result to database
+    let update_result = conn
+        .execute("UPDATE filer SET status = $1 WHERE cik = $2", &[&filer_status.1, &filer_status.0.cik]);
+
     Ok(CustomOutput {
-        message: format!("Hello!"),
+        message: format!("Set status for cik {} to '{}'", &filer_status.0.cik, &filer_status.1),
     })
+}
+
+#[cfg(test)]
+mod test {
+    use super::do_filer_status_update;
+
+    #[test]
+    fn test_do_filer_status_update() {}
+
 }

@@ -31,7 +31,7 @@ const MOCK_ACTIVE_FILER_CIK: &'static str = "0001318605"; // Tesla, Inc.
 
 /// The status of a given filer is tracked here
 #[derive(Debug)]
-pub struct FilerStatus(Filer, bool);
+pub struct FilerStatus(pub Filer, pub bool);
 
 /// Implements the status retrieval for the Filer model
 impl FilerStatus {
