@@ -48,7 +48,9 @@ fn do_filer_status_update(e: CustomEvent, c: lambda::Context) -> Result<CustomOu
 
     // Save result to database
     let update_result = conn
-        .execute("UPDATE filer SET active = $1 WHERE cik = $2", &[&filer_status.1, &filer_status.0.cik]);
+        .execute("UPDATE filer SET active = $1 WHERE cik = $2", &[&filer_status.1, &filer_status.0.cik])
+        .unwrap();
+
 
     Ok(CustomOutput {
         message: format!("Set active status for cik {} to '{}'", &filer_status.0.cik, &filer_status.1),
@@ -57,9 +59,11 @@ fn do_filer_status_update(e: CustomEvent, c: lambda::Context) -> Result<CustomOu
 
 #[cfg(test)]
 mod test {
-    use super::do_filer_status_update;
+    use super::*;
 
     #[test]
-    fn test_do_filer_status_update() {}
+    fn test_do_filer_status_update() {
+
+    }
 
 }
