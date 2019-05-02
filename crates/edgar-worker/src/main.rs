@@ -31,7 +31,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn do_filer_status_update(e: CustomEvent, c: lambda::Context) -> Result<CustomOutput, HandlerError> {
+fn _do_filer_status_update() -> FilerStatus{
     let conn = Connection::connect(env::var("DATABASE_URI").unwrap(), TlsMode::None).unwrap();
 
     // Get filer to update
@@ -51,7 +51,11 @@ fn do_filer_status_update(e: CustomEvent, c: lambda::Context) -> Result<CustomOu
         .execute("UPDATE filer SET active = $1 WHERE cik = $2", &[&filer_status.1, &filer_status.0.cik])
         .unwrap();
 
+    filer_status
+}
 
+fn do_filer_status_update(e: CustomEvent, c: lambda::Context) -> Result<CustomOutput, HandlerError> {
+    let filer_status = _do_filer_status_update();
     Ok(CustomOutput {
         message: format!("Set active status for cik {} to '{}'", &filer_status.0.cik, &filer_status.1),
     })
@@ -63,7 +67,7 @@ mod test {
 
     #[test]
     fn test_do_filer_status_update() {
-
+        __do_filer_status_update();
     }
 
 }
