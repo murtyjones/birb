@@ -92,6 +92,7 @@ fn get_cik_for_unset_filer(_conn: &MockConnection) -> String {
 #[cfg(not(test))]
 /// Update filing status in the database for a given filer
 fn save_new_filer_status(conn: &Connection, active: &bool, cik: &String) -> () {
+    // TODO: Fix the fact that this execute invocation seems to hang. Not sure why.
     let result = conn.execute(
         "UPDATE filer SET active = $1 WHERE cik = $2",
         &[&active, &cik]
