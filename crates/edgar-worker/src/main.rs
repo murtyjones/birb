@@ -4,6 +4,8 @@ extern crate lambda_runtime as lambda;
 extern crate serde_derive;
 #[macro_use]
 extern crate log;
+#[macro_use]
+extern crate more_asserts;
 extern crate simple_logger;
 extern crate api_lib;
 use std::env;
@@ -75,6 +77,9 @@ fn get_cik_for_unset_filer(conn: &Connection) -> String {
     match result {
         Ok(rows) => {
             println!("{} rows found", rows.len());
+            // Should either be 0 or 1:
+            assert_gt!(rows.len(), 0);
+            assert_lt!(rows.len(), 1);
             rows
                 .get(0) // get first (and only) result
                 .get(0) // get
