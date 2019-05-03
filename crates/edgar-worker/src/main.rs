@@ -50,26 +50,26 @@ fn do_filer_status_update(e: CustomEvent, c: lambda::Context) -> Result<CustomOu
     })
 }
 
-#[cfg(not(test))]
 /// Get the database connection
+#[cfg(not(test))]
 fn get_connection() -> Connection {
     Connection::connect(
         env::var("DATABASE_URI").unwrap(), TlsMode::None
     ).unwrap()
 }
 
-#[cfg(test)]
 /// Represents a fake database connection
+#[cfg(test)]
 struct MockConnection {}
 
-#[cfg(test)]
 /// Get the mock database connection
+#[cfg(test)]
 fn get_connection() -> MockConnection {
     MockConnection {}
 }
 
-#[cfg(not(test))]
 /// Get the CIK of a filer who does not yet have a filing status
+#[cfg(not(test))]
 fn get_cik_for_unset_filer(conn: &Connection) -> String {
     // Get filer to update
     let result = conn
@@ -88,14 +88,14 @@ fn get_cik_for_unset_filer(conn: &Connection) -> String {
     }
 }
 
-#[cfg(test)]
 /// Get a mock CIK of a filer who does not yet have a filing status
+#[cfg(test)]
 fn get_cik_for_unset_filer(_conn: &MockConnection) -> String {
     String::from("0000000000")
 }
 
-#[cfg(not(test))]
 /// Update filing status in the database for a given filer
+#[cfg(not(test))]
 fn save_new_filer_status(conn: &Connection, active: &bool, cik: &String) -> () {
     // TODO: Fix the fact that this execute invocation seems to hang. Not sure why.
     let result = conn.execute(
@@ -111,8 +111,8 @@ fn save_new_filer_status(conn: &Connection, active: &bool, cik: &String) -> () {
     }
 }
 
-#[cfg(test)]
 /// Mocks the result of an updated filing status - IE, nothing returned
+#[cfg(test)]
 fn save_new_filer_status(conn: &MockConnection, active: &bool, cik: &String) -> () {
     // Do nothing
     ()
