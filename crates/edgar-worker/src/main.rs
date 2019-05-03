@@ -24,6 +24,7 @@ struct CustomOutput {
     message: String,
 }
 
+/// Entrypoint for the lambda
 fn main() -> Result<(), Box<dyn Error>> {
     simple_logger::init_with_level(log::Level::Info)?;
     lambda!(do_filer_status_update);
@@ -31,7 +32,24 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+/// Find a filer with no status and update it.
+fn do_filer_status_update(e: CustomEvent, c: lambda::Context) -> Result<CustomOutput, HandlerError> {
+    let conn = get_connection();
+    let cik = get_cik_for_unset_filer(&conn);
+    // Get Latest status for filer
+    let filer = Filer { cik };
+    let mut filer_status: FilerStatus = FilerStatus::new(filer);
+    filer_status.set_is_active();
+
+    // Save result to database
+    save_new_filer_status(&conn, &filer_status.1, &filer_status.0.cik);
+    Ok(CustomOutput {
+        message: format!("Set active status for cik {} to '{}'", &filer_status.0.cik, &filer_status.1),
+    })
+}
+
 #[cfg(not(test))]
+/// Get the database connection
 fn get_connection() -> Connection {
     Connection::connect(
         env::var("DATABASE_URI").unwrap(), TlsMode::None
@@ -39,14 +57,17 @@ fn get_connection() -> Connection {
 }
 
 #[cfg(test)]
+/// Represents a fake database connection
 struct MockConnection {}
 
 #[cfg(test)]
+/// Get the mock database connection
 fn get_connection() -> MockConnection {
     MockConnection {}
 }
 
 #[cfg(not(test))]
+/// Get the CIK of a filer who does not yet have a filing status
 fn get_cik_for_unset_filer(conn: &Connection) -> String {
     // Get filer to update
     let result = conn
@@ -62,11 +83,13 @@ fn get_cik_for_unset_filer(conn: &Connection) -> String {
 }
 
 #[cfg(test)]
+/// Get a mock CIK of a filer who does not yet have a filing status
 fn get_cik_for_unset_filer(_conn: &MockConnection) -> String {
     String::from("0000000000")
 }
 
 #[cfg(not(test))]
+/// Update filing status in the database for a given filer
 fn save_new_filer_status(conn: &Connection, active: &bool, cik: &String) -> () {
     let result = conn.execute(
         "UPDATE filer SET active = $1 WHERE cik = $2",
@@ -79,24 +102,10 @@ fn save_new_filer_status(conn: &Connection, active: &bool, cik: &String) -> () {
 }
 
 #[cfg(test)]
+/// Mocks the result of an updated filing status - IE, nothing returned
 fn save_new_filer_status(conn: &MockConnection, active: &bool, cik: &String) -> () {
     // Do nothing
     ()
-}
-
-fn do_filer_status_update(e: CustomEvent, c: lambda::Context) -> Result<CustomOutput, HandlerError> {
-    let conn = get_connection();
-    let cik = get_cik_for_unset_filer(&conn);
-    // Get Latest status for filer
-    let filer = Filer { cik };
-    let mut filer_status: FilerStatus = FilerStatus::new(filer);
-    filer_status.set_is_active();
-
-    // Save result to database
-    save_new_filer_status(&conn, &filer_status.1, &filer_status.0.cik);
-    Ok(CustomOutput {
-        message: format!("Set active status for cik {} to '{}'", &filer_status.0.cik, &filer_status.1),
-    })
 }
 
 #[cfg(test)]
