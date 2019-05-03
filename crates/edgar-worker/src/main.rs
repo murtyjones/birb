@@ -35,7 +35,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 
 /// Find a filer with no status and update it.
-fn do_filer_status_update(e: CustomEvent, c: lambda::Context) -> Result<CustomOutput, HandlerError> {
+fn do_filer_status_update(_e: CustomEvent, _c: lambda::Context) -> Result<CustomOutput, HandlerError> {
     let conn = get_connection();
     let cik = get_cik_for_unset_filer(&conn);
     // Get Latest status for filer
@@ -78,8 +78,8 @@ fn get_cik_for_unset_filer(conn: &Connection) -> String {
         Ok(rows) => {
             println!("{} rows found", rows.len());
             // Should either be 0 or 1:
-            assert_gt!(rows.len(), 0);
-            assert_lt!(rows.len(), 1);
+            assert_ge!(rows.len(), 0);
+            assert_le!(rows.len(), 1);
             rows
                 .get(0) // get first (and only) result
                 .get(0) // get
