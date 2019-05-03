@@ -83,9 +83,11 @@ resource "aws_security_group" "bastion" {
     cidr_blocks = [
       # as an extra layer of security, only allow access from these IPS:
       # Marty:
-      "${var.marty_ip_address_1}/32",
+       "${var.marty_ip_address_1}/32",
 
-      "${var.marty_ip_address_2}/32",
+       "${var.marty_ip_address_2}/32",
+
+       "${var.marty_ip_address_3}/32",
     ]
   }
 

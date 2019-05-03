@@ -40,10 +40,8 @@ pub struct TfPlan {}
 impl Subcommand for DeployEdgar {
     fn run(&self) -> Result<(), failure::Error> {
         // Not currently worrying about whether or not the deploy was successful
-        let _plan = run_str_in_bash("\
-            terraform plan -var-file=terraform/production.secret.tfvars \
-                           -out=plan -target=aws_lambda_function.edgar_worker \
-                           -target=aws_iam_role.edgar_worker terraform
+        let _plan = run_str_in_bash("
+            bb plan edgar
         ")?;
 
         let _result = run_str_in_bash("

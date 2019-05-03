@@ -15,12 +15,20 @@ extern crate failure;
 mod bash_completion;
 mod deploy;
 mod docker;
+mod build;
+mod plan;
+mod watch;
+mod ssh;
 mod bb_filesystem;
 mod update;
 
 use crate::bash_completion::BashCompletionGenerator;
 use crate::deploy::Deploy;
+use crate::plan::Plan;
 use crate::docker::Docker;
+use crate::build::Build;
+use crate::watch::Watch;
+use crate::ssh::Ssh;
 use crate::bb_filesystem::{cargo_toml_version, bb_dot_dir};
 use crate::update::Update;
 use colored::*;
@@ -36,9 +44,18 @@ pub enum Bb {
     /// Interact with docker
     #[structopt(name = "docker")]
     Docker(Docker),
+    /// Used to plan infrastructure changes
+    #[structopt(name = "plan")]
+    Plan(Plan),
     /// Used to deploy different applications or services
     #[structopt(name = "deploy")]
     Deploy(Deploy),
+    /// Used to deploy different applications or services
+    #[structopt(name = "watch")]
+    Watch(Watch),
+    /// Used to build application binaries
+    #[structopt(name = "build")]
+    Build(Build),
     /// Generate the file that powers autocompleting the `bb` command in
     /// your bash shell.
     #[structopt(name = "generate-bash-completions")]
@@ -46,6 +63,9 @@ pub enum Bb {
     /// Update your Birb CLI to the latest version
     #[structopt(name = "update")]
     Update(Update),
+    /// Used to SSH into the Bastion for RDS access
+    #[structopt(name = "ssh")]
+    Ssh(Ssh),
 }
 
 /// Used to create a Birb CLI subcommand
@@ -79,8 +99,12 @@ pub fn run() -> Result<(), failure::Error> {
             boxed_cmd(bash_completion_generator)
         }
         Bb::Update(update) => boxed_cmd(update),
+        Bb::Build(build) => boxed_cmd(build),
         Bb::Docker(docker) => boxed_cmd(docker),
+        Bb::Plan(plan) => boxed_cmd(plan),
         Bb::Deploy(deploy) => boxed_cmd(deploy),
+        Bb::Watch(watch) => boxed_cmd(watch),
+        Bb::Ssh(ssh) => boxed_cmd(ssh),
     };
 
     let result = subcmd.run();

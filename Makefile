@@ -17,35 +17,13 @@ test: down
 up-no-tests:
 	docker-compose up -d --scale test=0
 
-# Tear down docker containers
-down:
-	docker-compose down
-
-# Run docker containers
-up:
-	docker-compose up -d
-
-# Build the container from scratch
-rebuild:
-	make down
-	docker-compose build
-	make up
-
-# Show the container logs
-logs:
-	docker-compose logs -f
-
-# Prune unused containers / images
-clean: down
-	docker system prune -f
-	docker volume prune -f
-
 # Builds the production-ready API binary
 build-release:
     # get base image
 	docker pull clux/muslrust:nightly
 	# build binary
-	docker run --rm -v cargo-cache:/root/.cargo \
+	docker run --rm \
+		-v cargo-cache:/root/.cargo \
 		-v $$PWD:/volume \
 		-w /volume \
 		-it clux/muslrust:nightly \
@@ -96,15 +74,3 @@ seed:
 migrate:
 	./scripts/migrate.sh $(env) up
 
-zip-out:
-	zip -j out.zip out/*
-
-birb-plan-edgar-worker:
-	terraform plan -var-file=terraform/production.secret.tfvars -out=plan -target=aws_lambda_function.edgar_worker -target=aws_iam_role.edgar_worker terraform
-
-edgar-worker:
-	make build-release package=edgar-worker
-	make copy-artifact bin=bootstrap
-	make zip-out
-	make birb-plan-edgar-worker
-	make birb-up

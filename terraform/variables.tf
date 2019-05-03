@@ -67,6 +67,10 @@ variable "marty_ip_address_2" {
   description = "Marty's 2nd IP address"
 }
 
+variable "marty_ip_address_3" {
+  description = "Marty's 3rd IP address"
+}
+
 variable "marty_id_rsa_pub" {
   description = "Marty's public key"
 }

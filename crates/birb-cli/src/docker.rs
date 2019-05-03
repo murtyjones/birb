@@ -8,9 +8,11 @@ pub enum Docker {
     /// docker init
     #[structopt(name = "rebuild")]
     Rebuild,
-    /// Starts Birb's docker setup in the background.
+    /// Starts Birb's docker setup in the background (with test container).
     #[structopt(name = "up")]
     Up,
+    #[structopt(name = "up-no-test")]
+    UpNoTest,
     /// Stops the docker containers that are running.
     #[structopt(name = "down")]
     Down,
@@ -40,6 +42,9 @@ impl Subcommand for Docker {
             }
             Docker::Up => {
                 run_str_in_bash("docker-compose up -d").unwrap();
+            }
+            Docker::UpNoTest => {
+                run_str_in_bash("docker-compose up -d --scale test=0").unwrap();
             }
             Docker::Down => {
                 run_str_in_bash("docker-compose down").unwrap();
