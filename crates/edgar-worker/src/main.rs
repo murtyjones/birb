@@ -73,8 +73,9 @@ fn get_cik_for_unset_filer(conn: &Connection) -> String {
     let result = conn
         .query("SELECT * FROM filer WHERE active IS NULL LIMIT 1", &[]);
     match result {
-        Ok(_) => {
-            result.unwrap()
+        Ok(rows) => {
+            println!("{} rows found", rows.len());
+            rows
                 .get(0) // get first (and only) result
                 .get(0) // get
         },
@@ -96,7 +97,10 @@ fn save_new_filer_status(conn: &Connection, active: &bool, cik: &String) -> () {
         &[&active, &cik]
     );
     match result {
-        Ok(_) => (),
+        Ok(updated) => {
+            println!("{} rows updated with new filer status", updated);
+            assert_eq!(updated, 1);
+        },
         Err(_) => panic!("Unable to update filer status for {}", cik),
     }
 }
