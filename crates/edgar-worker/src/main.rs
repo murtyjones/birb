@@ -49,13 +49,16 @@ fn get_connection() -> MockConnection {
 #[cfg(not(test))]
 fn get_cik_for_unset_filer(conn: &Connection) -> String {
     // Get filer to update
-    let cik = conn
-        .query("SELECT * FROM filer WHERE active IS NULL LIMIT 1", &[])
-        .unwrap()
-        .get(0)
-        .get(0);
-
-    cik
+    let result = conn
+        .query("SELECT * FROM filer WHERE active IS NULL LIMIT 1", &[]);
+    match result {
+        Ok(_) => {
+            result.unwrap()
+                .get(0) // get first (and only) result
+                .get(0) // get
+        },
+        Err(_) => panic!("Can't get filer!"),
+    }
 }
 
 #[cfg(test)]
