@@ -13,6 +13,12 @@ pub enum Plan {
     /// Plan all infrastructure (ex. SSL certificates)
     #[structopt(name = "bastion")]
     Bastion,
+    /// Plan all local outputs needed
+    #[structopt(name = "output")]
+    Output,
+    /// Plan the DB infrastructure
+    #[structopt(name = "rds")]
+    RDS,
 }
 
 impl Subcommand for Plan {
@@ -31,7 +37,8 @@ impl Subcommand for Plan {
                     terraform plan -var-file=terraform/production.secret.tfvars \
                            -out=plan \
                            -target=aws_lambda_function.edgar_worker \
-                           -target=aws_iam_role.edgar_worker terraform/
+                           -target=aws_iam_role.edgar_worker \
+                           terraform/
                 ").unwrap();
                 Ok(())
             }
@@ -39,7 +46,31 @@ impl Subcommand for Plan {
                 run_str_in_bash("
                     terraform plan -var-file=terraform/production.secret.tfvars \
                            -out=plan \
-                           -target=aws_instance.bastion terraform/
+                           -target=aws_instance.bastion \
+                           terraform/
+                ").unwrap();
+                Ok(())
+            }
+            Plan::Output => {
+                run_str_in_bash("
+                    terraform plan -var-file=terraform/production.secret.tfvars \
+                           -out=plan \
+                           -target=local_file.bastion_ip_address \
+                           -target=local_file.rds_db_name \
+                           -target=local_file.rds_db_port \
+                           -target=local_file.rds_db_address \
+                           -target=local_file.rds_db_username \
+                           -target=local_file.rds_db_password \
+                           terraform/
+                ").unwrap();
+                Ok(())
+            }
+            Plan::RDS => {
+                run_str_in_bash("
+                    terraform plan -var-file=terraform/production.secret.tfvars \
+                           -out=plan \
+                           -target=aws_db_instance.birb \
+                           terraform/
                 ").unwrap();
                 Ok(())
             }
