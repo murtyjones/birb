@@ -13,7 +13,7 @@ pub enum Migrate {
 pub struct Up {
     /// the environment to run against
     #[structopt(short = "-e", long = "--env")]
-    env: String,
+    env: String, // TODO only accept valid environment values (e.g. prod, local)
 }
 
 impl Subcommand for Migrate {
