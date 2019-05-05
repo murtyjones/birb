@@ -22,6 +22,7 @@ mod ssh;
 mod bb_filesystem;
 mod update;
 mod migrate;
+mod seed;
 
 use crate::bash_completion::BashCompletionGenerator;
 use crate::deploy::Deploy;
@@ -31,6 +32,7 @@ use crate::build::Build;
 use crate::watch::Watch;
 use crate::ssh::Ssh;
 use crate::migrate::Migrate;
+use crate::seed::Seed;
 use crate::bb_filesystem::{cargo_toml_version, bb_dot_dir};
 use crate::update::Update;
 use colored::*;
@@ -68,9 +70,12 @@ pub enum Bb {
     /// Used to SSH into the Bastion for RDS access
     #[structopt(name = "ssh")]
     Ssh(Ssh),
-    /// Used to SSH into the Bastion for RDS access
+    /// Apply migrations
     #[structopt(name = "migrate")]
     Migrate(Migrate),
+    /// Seed DB
+    #[structopt(name = "seed")]
+    Seed(Seed),
 }
 
 /// Used to create a Birb CLI subcommand
@@ -111,6 +116,7 @@ pub fn run() -> Result<(), failure::Error> {
         Bb::Watch(watch) => boxed_cmd(watch),
         Bb::Ssh(ssh) => boxed_cmd(ssh),
         Bb::Migrate(migrate) => boxed_cmd(migrate),
+        Bb::Seed(seed) => boxed_cmd(seed),
     };
 
     let result = subcmd.run();

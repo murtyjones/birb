@@ -44,7 +44,6 @@ echo "$PRIVATE_KEY_PATH"
 
 # Establish tunnel and listen for connections locally
 ssh -N \
-    -f \
     -o "StrictHostKeyChecking no" \
     -L $LOCAL_PORT:$RDS_DB_ADDRESS:$RDS_DB_PORT \
     $BASTION_USER@$BASTION_IP \
