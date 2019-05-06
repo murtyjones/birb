@@ -162,3 +162,11 @@ resource "aws_iam_role" "edgar_worker_role" {
 }
 EOF
 }
+
+resource "aws_lambda_permission" "edgar_worker_trigger_permission" {
+  statement_id = "${aws_cloudwatch_event_rule.edgar_worker_trigger.name}"
+  action = "lambda:InvokeFunction"
+  function_name = "${aws_lambda_function.edgar_worker.function_name}"
+  principal = "events.amazonaws.com"
+  source_arn = "${aws_cloudwatch_event_rule.edgar_worker_trigger.arn}"
+}
