@@ -21,7 +21,7 @@ out.zip
 plan
 
 # secrets
-**/*secret.tfvars
+**/*.tfvars
 
 # terraform info written to disk that we use in build scripts
 terraform/out

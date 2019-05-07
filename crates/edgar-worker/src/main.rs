@@ -6,8 +6,8 @@ extern crate serde_derive;
 extern crate log;
 #[macro_use]
 extern crate more_asserts;
-extern crate simple_logger;
 extern crate api_lib;
+extern crate simple_logger;
 use std::env;
 
 use api_lib::models::filer::Model as Filer;
@@ -35,7 +35,10 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 
 /// Find a filer with no status and update it.
-fn do_filer_status_update(_e: CustomEvent, _c: lambda::Context) -> Result<CustomOutput, HandlerError> {
+fn do_filer_status_update(
+    _e: CustomEvent,
+    _c: lambda::Context,
+) -> Result<CustomOutput, HandlerError> {
     let conn = get_connection();
     let cik = get_cik_for_unset_filer(&conn);
     // Get Latest status for filer
@@ -46,16 +49,17 @@ fn do_filer_status_update(_e: CustomEvent, _c: lambda::Context) -> Result<Custom
     // Save result to database
     save_new_filer_status(&conn, &filer_status.1, &filer_status.0.cik);
     Ok(CustomOutput {
-        message: format!("Set active status for cik {} to '{}'", &filer_status.0.cik, &filer_status.1),
+        message: format!(
+            "Set active status for cik {} to '{}'",
+            &filer_status.0.cik, &filer_status.1
+        ),
     })
 }
 
 /// Get the database connection
 #[cfg(not(test))]
 fn get_connection() -> Connection {
-    Connection::connect(
-        env::var("DATABASE_URI").unwrap(), TlsMode::None
-    ).unwrap()
+    Connection::connect(env::var("DATABASE_URI").unwrap(), TlsMode::None).unwrap()
 }
 
 /// Represents a fake database connection
@@ -71,19 +75,19 @@ fn get_connection() -> MockConnection {
 /// Get the CIK of a filer who does not yet have a filing status
 #[cfg(not(test))]
 fn get_cik_for_unset_filer(conn: &Connection) -> String {
-    // Get filer to update
-    let result = conn
-        .query("SELECT * FROM filer WHERE active IS NULL LIMIT 1", &[]);
+    // Get a random filer with no `active` field set.
+    let result = conn.query(
+        "SELECT * FROM filer WHERE active IS NULL ORDER BY random() LIMIT 1;",
+        &[],
+    );
     match result {
         Ok(rows) => {
             println!("{} rows found", rows.len());
-            // Should either be 0 or 1:
-            assert_ge!(rows.len(), 0);
-            assert_le!(rows.len(), 1);
-            rows
-                .get(0) // get first (and only) result
+            // Panic if # of results != 1
+            assert_eq!(rows.len(), 1);
+            rows.get(0) // get first (and only) result
                 .get(0) // get
-        },
+        }
         Err(_) => panic!("Can't get filer!"),
     }
 }
@@ -100,13 +104,13 @@ fn save_new_filer_status(conn: &Connection, active: &bool, cik: &String) -> () {
     // TODO: Fix the fact that this execute invocation seems to hang. Not sure why.
     let result = conn.execute(
         "UPDATE filer SET active = $1 WHERE cik = $2",
-        &[&active, &cik]
+        &[&active, &cik],
     );
     match result {
         Ok(updated) => {
             println!("{} rows updated with new filer status", updated);
             assert_eq!(updated, 1);
-        },
+        }
         Err(_) => panic!("Unable to update filer status for {}", cik),
     }
 }
@@ -121,7 +125,6 @@ fn save_new_filer_status(conn: &MockConnection, active: &bool, cik: &String) -> 
 #[cfg(test)]
 mod test {
     use super::*;
-
 
     #[test]
     fn test_do_filer_status_update() {
