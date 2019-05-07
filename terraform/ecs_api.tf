@@ -6,10 +6,10 @@ data "template_file" "birb_api_app" {
   template = "${file("terraform/templates/ecs/birb_api_app.json.tpl")}"
 
   vars {
-    repo_url         = "${aws_ecr_repository.birb_repo.repository_url}"
+    repo_url         = "${aws_ecr_repository.birb_api_repo.repository_url}"
     app_name         = "birb-api"
-    fargate_cpu      = "${var.fargate_cpu}"
-    fargate_memory   = "${var.fargate_memory}"
+    birb_api_cpu      = "${var.birb_api_cpu}"
+    birb_api_memory   = "${var.birb_api_memory}"
     aws_region       = "${var.aws_region}"
     app_port         = "${var.app_port}"
     ROCKET_DATABASES = "${aws_secretsmanager_secret.ROCKET_DATABASES.arn}"
@@ -21,8 +21,8 @@ resource "aws_ecs_task_definition" "app" {
   execution_role_arn       = "${aws_iam_role.task_execution_role.arn}"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  cpu                      = "${var.fargate_cpu}"
-  memory                   = "${var.fargate_memory}"
+  cpu                      = "${var.birb_api_cpu}"
+  memory                   = "${var.birb_api_memory}"
   container_definitions    = "${data.template_file.birb_api_app.rendered}"
 }
 

@@ -22,13 +22,23 @@ variable "health_check_path" {
   default = "/"
 }
 
-variable "fargate_cpu" {
+variable "birb_api_cpu" {
   description = "Fargate instance CPU units to provision (1 vCPU = 1024 CPU units)"
   default     = "256"
 }
 
-variable "fargate_memory" {
+variable "birb_api_memory" {
   description = "Fargate instance memory to provision (in MiB)"
+  default     = "512"
+}
+
+variable "birb_edgar_worker_cpu" {
+  description = "Instance CPU units to provision (1 vCPU = 1024 CPU units) for the Edgar worker"
+  default     = "256"
+}
+
+variable "birb_edgar_worker_memory" {
+  description = "Instance memory to provision (in MiB) for the Edgar worker"
   default     = "512"
 }
 
@@ -86,4 +96,41 @@ variable "DATABASE_URI" {
 variable "environment" {
   description = "The environment being deployed"
   default     = "production"
+}
+
+
+variable "spot_prices" {
+  description = "Bid amount to spot fleet"
+  type        = "list"
+  default     = ["0.03", "0.03"]
+}
+
+variable "strategy" {
+  description = "Instance placement strategy name"
+  default     = "diversified"
+}
+
+variable "instance_count" {
+  description = "Number of instances"
+  default     = 3
+}
+
+variable "instance_type" {
+  description = "Instance type launched by spot fleet"
+  default     = "m3.medium"
+}
+
+variable "volume_size" {
+  description = "Root volume size"
+  default     = 16
+}
+
+variable "valid_until" {
+  description = "limit of spot fleet"
+  default     = "2020-12-15T00:00:00Z"
+}
+
+variable "ami" {
+  description = "ECS cluster instance AMI id, default is Amazon ECS-optimized AMI in us-east-1"
+  default     = "ami-eca289fb"
 }
