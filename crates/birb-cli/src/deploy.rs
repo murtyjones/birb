@@ -3,7 +3,7 @@ use crate::{run_str_in_bash, Subcommand};
 /// Deploy different applications / services
 #[derive(Debug, StructOpt)]
 pub enum Deploy {
-    /// Deploy the Edgar worker
+    /// Deploy all infrastructure
     #[structopt(name = "all")]
     All(DeployAll),
     /// Deploy the Edgar worker
