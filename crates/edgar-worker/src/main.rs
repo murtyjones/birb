@@ -75,8 +75,11 @@ fn get_connection() -> MockConnection {
 /// Get the CIK of a filer who does not yet have a filing status
 #[cfg(not(test))]
 fn get_cik_for_unset_filer(conn: &Connection) -> String {
-    // Get filer to update
-    let result = conn.query("SELECT * FROM filer WHERE active IS NULL LIMIT 1", &[]);
+    // Get a random filer with no `active` field set.
+    let result = conn.query(
+        "SELECT * FROM filer WHERE active IS NULL ORDER BY random() LIMIT 1;",
+        &[],
+    );
     match result {
         Ok(rows) => {
             println!("{} rows found", rows.len());
