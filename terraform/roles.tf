@@ -136,37 +136,3 @@ resource "aws_iam_role_policy_attachment" "task-execution-attach" {
   role       = "${aws_iam_role.task_execution_role.name}"
   policy_arn = "${aws_iam_policy.task_execution_policy.arn}"
 }
-
-resource "aws_iam_role_policy_attachment" "edgar_worker_lambdavpc" {
-  depends_on = ["aws_iam_role.edgar_worker_role"]
-  role       = "${aws_iam_role.edgar_worker_role.name}"
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
-}
-
-resource "aws_iam_role" "edgar_worker_role" {
-  name = "edgar_worker_role"
-
-  assume_role_policy = <<EOF
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Action": "sts:AssumeRole",
-            "Principal": {
-                "Service": "lambda.amazonaws.com"
-            },
-            "Effect": "Allow",
-            "Sid": ""
-        }
-    ]
-}
-EOF
-}
-
-resource "aws_lambda_permission" "edgar_worker_trigger_permission" {
-  statement_id = "${aws_cloudwatch_event_rule.edgar_worker_trigger.name}"
-  action = "lambda:InvokeFunction"
-  function_name = "${aws_lambda_function.edgar_worker.function_name}"
-  principal = "events.amazonaws.com"
-  source_arn = "${aws_cloudwatch_event_rule.edgar_worker_trigger.arn}"
-}
