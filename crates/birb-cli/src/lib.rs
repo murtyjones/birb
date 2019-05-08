@@ -13,28 +13,30 @@ extern crate structopt;
 extern crate failure;
 
 mod bash_completion;
+mod bb_filesystem;
+mod build;
 mod deploy;
 mod docker;
-mod build;
-mod plan;
-mod watch;
-mod ssh;
-mod bb_filesystem;
-mod update;
 mod migrate;
+mod plan;
+mod push;
 mod seed;
+mod ssh;
+mod update;
+mod watch;
 
 use crate::bash_completion::BashCompletionGenerator;
-use crate::deploy::Deploy;
-use crate::plan::Plan;
-use crate::docker::Docker;
+use crate::bb_filesystem::{bb_dot_dir, cargo_toml_version};
 use crate::build::Build;
-use crate::watch::Watch;
-use crate::ssh::Ssh;
+use crate::deploy::Deploy;
+use crate::docker::Docker;
 use crate::migrate::Migrate;
+use crate::plan::Plan;
+use crate::push::Push;
 use crate::seed::Seed;
-use crate::bb_filesystem::{cargo_toml_version, bb_dot_dir};
+use crate::ssh::Ssh;
 use crate::update::Update;
+use crate::watch::Watch;
 use colored::*;
 use std::fs::DirBuilder;
 use std::iter::repeat;
@@ -76,6 +78,9 @@ pub enum Bb {
     /// Seed DB
     #[structopt(name = "seed")]
     Seed(Seed),
+    /// Push images to ECR
+    #[structopt(name = "push")]
+    Push(Push),
 }
 
 /// Used to create a Birb CLI subcommand
@@ -117,6 +122,7 @@ pub fn run() -> Result<(), failure::Error> {
         Bb::Ssh(ssh) => boxed_cmd(ssh),
         Bb::Migrate(migrate) => boxed_cmd(migrate),
         Bb::Seed(seed) => boxed_cmd(seed),
+        Bb::Push(push) => boxed_cmd(push),
     };
 
     let result = subcmd.run();
@@ -191,7 +197,8 @@ fn update_message(old: &str, new: &str) -> String {
 
     let space_before_pipe = repeat(" ").take(space_before_pipe).collect::<String>();
 
-    format!(r#"
+    format!(
+        r#"
 {top}
 {p}                                           {p}
 {p}      Update available {old} → {new}{space}{p}
@@ -199,12 +206,15 @@ fn update_message(old: &str, new: &str) -> String {
 {p}      Run {bb_update} to update version      {p}
 {p}                                           {p}
 {bottom}
-    "#, top = "╭───────────────────────────────────────────╮".yellow(),
+    "#,
+        top = "╭───────────────────────────────────────────╮"
+            .yellow(),
         p = pipe.yellow(),
         old = old.red(),
         new = new.green(),
         space = space_before_pipe,
         bb_update = "bb update".blue(),
-        bottom = "╰───────────────────────────────────────────╯".yellow()
+        bottom = "╰───────────────────────────────────────────╯"
+            .yellow()
     )
 }

@@ -8,6 +8,9 @@ pub enum Plan {
     #[structopt(name = "all")]
     All,
     /// Plan all infrastructure (ex. SSL certificates)
+    #[structopt(name = "api")]
+    Api,
+    /// Plan all infrastructure (ex. SSL certificates)
     #[structopt(name = "edgar")]
     Edgar,
     /// Plan all infrastructure (ex. SSL certificates)
@@ -25,34 +28,59 @@ impl Subcommand for Plan {
     fn run(&self) -> Result<(), failure::Error> {
         match self {
             Plan::All => {
-                run_str_in_bash("
+                run_str_in_bash(
+                    "
                     terraform plan -var-file=terraform/production.secret.tfvars \
                                    -out=plan \
                                    terraform/
-                ").unwrap();
+                ",
+                )
+                .unwrap();
                 Ok(())
             }
-            Plan::Edgar => {
-                run_str_in_bash("
+            Plan::Api => {
+                // TODO make this actually plan the right things
+                run_str_in_bash(
+                    "
                     terraform plan -var-file=terraform/production.secret.tfvars \
                            -out=plan \
                            -target=aws_lambda_function.edgar_worker \
                            -target=aws_iam_role.edgar_worker \
                            terraform/
-                ").unwrap();
+                ",
+                )
+                .unwrap();
+                Ok(())
+            }
+            Plan::Edgar => {
+                // TODO make this actually plan the right things
+                run_str_in_bash(
+                    "
+                    terraform plan -var-file=terraform/production.secret.tfvars \
+                           -out=plan \
+                           -target=aws_lambda_function.edgar_worker \
+                           -target=aws_iam_role.edgar_worker \
+                           terraform/
+                ",
+                )
+                .unwrap();
                 Ok(())
             }
             Plan::Bastion => {
-                run_str_in_bash("
+                run_str_in_bash(
+                    "
                     terraform plan -var-file=terraform/production.secret.tfvars \
                            -out=plan \
                            -target=aws_instance.bastion \
                            terraform/
-                ").unwrap();
+                ",
+                )
+                .unwrap();
                 Ok(())
             }
             Plan::Output => {
-                run_str_in_bash("
+                run_str_in_bash(
+                    "
                     terraform plan -var-file=terraform/production.secret.tfvars \
                            -out=plan \
                            -target=local_file.bastion_ip_address \
@@ -62,16 +90,21 @@ impl Subcommand for Plan {
                            -target=local_file.rds_db_username \
                            -target=local_file.rds_db_password \
                            terraform/
-                ").unwrap();
+                ",
+                )
+                .unwrap();
                 Ok(())
             }
             Plan::RDS => {
-                run_str_in_bash("
+                run_str_in_bash(
+                    "
                     terraform plan -var-file=terraform/production.secret.tfvars \
                            -out=plan \
                            -target=aws_db_instance.birb \
                            terraform/
-                ").unwrap();
+                ",
+                )
+                .unwrap();
                 Ok(())
             }
         }

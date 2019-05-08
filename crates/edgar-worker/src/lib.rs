@@ -1,44 +1,15 @@
-#[macro_use]
-extern crate lambda_runtime as lambda;
-#[macro_use]
-extern crate serde_derive;
-#[macro_use]
-extern crate log;
-#[macro_use]
-extern crate more_asserts;
 extern crate api_lib;
-extern crate simple_logger;
 use std::env;
 
 use api_lib::models::filer::Model as Filer;
 use filer_status_lib::FilerStatus;
-use lambda::error::HandlerError;
 
 use std::error::Error;
 
 use postgres::{Connection, TlsMode};
 
-#[derive(Deserialize, Clone)]
-struct CustomEvent {}
-
-#[derive(Serialize, Clone)]
-struct CustomOutput {
-    message: String,
-}
-
-/// Entrypoint for the lambda
-fn main() -> Result<(), Box<dyn Error>> {
-    simple_logger::init_with_level(log::Level::Info)?;
-    lambda!(do_filer_status_update);
-
-    Ok(())
-}
-
 /// Find a filer with no status and update it.
-fn do_filer_status_update(
-    _e: CustomEvent,
-    _c: lambda::Context,
-) -> Result<CustomOutput, HandlerError> {
+pub fn main() -> () {
     let conn = get_connection();
     let cik = get_cik_for_unset_filer(&conn);
     // Get Latest status for filer
@@ -48,12 +19,6 @@ fn do_filer_status_update(
 
     // Save result to database
     save_new_filer_status(&conn, &filer_status.1, &filer_status.0.cik);
-    Ok(CustomOutput {
-        message: format!(
-            "Set active status for cik {} to '{}'",
-            &filer_status.0.cik, &filer_status.1
-        ),
-    })
 }
 
 /// Get the database connection
@@ -128,20 +93,7 @@ mod test {
 
     #[test]
     fn test_do_filer_status_update() {
-        let mock_context = lambda::Context {
-            aws_request_id: String::from("mock"),
-            client_context: None,
-            deadline: 10,
-            function_name: String::from("mock"),
-            function_version: String::from("mock"),
-            identity: None,
-            invoked_function_arn: String::from("mock"),
-            log_group_name: String::from("mock"),
-            log_stream_name: String::from("mock"),
-            memory_limit_in_mb: 128,
-            xray_trace_id: None,
-        };
-        let r = do_filer_status_update(CustomEvent {}, mock_context);
+        let r = do_filer_status_update();
     }
 
 }

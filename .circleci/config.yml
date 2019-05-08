@@ -30,7 +30,7 @@ jobs:
           command: make copy-artifact bin=api_bin
       - run:
           name: Build Image and Push to ECS
-          command: ./scripts/build_and_push.sh
+          command: ./scripts/build_push_api.sh
       - save_cache:
           key: v8-cargo-cache-{{ arch }}-{{ .Branch }}
           paths:

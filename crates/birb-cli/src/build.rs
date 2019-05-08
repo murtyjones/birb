@@ -11,10 +11,10 @@ pub enum Build {
     Edgar,
 }
 
-fn copy_artifacts(package: &str) {
+fn copy_artifacts(package: &str, package_crate: &str) {
     run_str_in_bash("rm -rf out").unwrap();
     run_str_in_bash("mkdir out").unwrap();
-    run_str_in_bash("cp ./crates/api/Dockerfile-prod out").unwrap();
+    run_str_in_bash(format!("cp ./crates/{}/Dockerfile-prod out", package_crate).as_str()).unwrap();
     run_str_in_bash(
         format!(
             "cp ./target/x86_64-unknown-linux-musl/release/{} out",
@@ -39,22 +39,17 @@ fn build_binary(package: &str) {
     run_str_in_bash(build_command.as_str()).unwrap();
 }
 
-fn zip_artifacts() {
-    run_str_in_bash("zip -j out.zip out/*").unwrap();
-}
-
 impl Subcommand for Build {
     fn run(&self) -> Result<(), failure::Error> {
         match self {
             Build::Api => {
                 build_binary("api");
-                copy_artifacts("api_bin");
+                copy_artifacts("api_bin", "api");
                 Ok(())
             }
             Build::Edgar => {
                 build_binary("edgar-worker");
-                copy_artifacts("bootstrap");
-                zip_artifacts();
+                copy_artifacts("edgar_worker_bin", "edgar-worker");
                 Ok(())
             }
         }
