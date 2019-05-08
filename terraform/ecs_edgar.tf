@@ -27,7 +27,7 @@ resource "aws_ecs_task_definition" "edgar-worker" {
 resource "aws_ecs_service" "edgar-worker" {
   name            = "birb-edgar-worker-service"
   cluster         = "${aws_ecs_cluster.edgar-worker.id}"
-  task_definition = "${aws_ecs_task_definition.app.arn}"
+  task_definition = "${aws_ecs_task_definition.edgar-worker.arn}"
   desired_count   = "${var.app_count}"
 
   network_configuration {

@@ -102,7 +102,7 @@ variable "environment" {
 variable "spot_prices" {
   description = "Bid amount to spot fleet"
   type        = "list"
-  default     = ["0.03", "0.03"]
+  default     = ["0.010"]
 }
 
 variable "strategy" {
@@ -117,7 +117,7 @@ variable "instance_count" {
 
 variable "instance_type" {
   description = "Instance type launched by spot fleet"
-  default     = "m3.medium"
+  default     = "a1.medium"
 }
 
 variable "volume_size" {

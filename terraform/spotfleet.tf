@@ -74,7 +74,7 @@ EOF
 
 resource "aws_spot_fleet_request" "main" {
   iam_fleet_role                      = "${aws_iam_role.fleet.arn}"
-  spot_price                          = "${var.spot_prices[0]}"
+//  spot_price                          = "${var.spot_prices[0]}"
   allocation_strategy                 = "${var.strategy}"
   target_capacity                     = "${var.instance_count}"
   terminate_instances_with_expiration = true
@@ -83,7 +83,7 @@ resource "aws_spot_fleet_request" "main" {
   launch_specification {
     ami                    = "${var.ami}"
     instance_type          = "${var.instance_type}"
-    spot_price             = "${var.spot_prices[0]}"
+//    spot_price             = "${var.spot_prices[0]}"
     subnet_id              = "${aws_subnet.private.0.id}"
     vpc_security_group_ids = ["${aws_security_group.ecs_instance.id}"]
     iam_instance_profile   = "${aws_iam_instance_profile.ecs.name}"
@@ -96,25 +96,6 @@ resource "aws_spot_fleet_request" "main" {
     user_data = <<USER_DATA
 #!/bin/bash
 echo ECS_CLUSTER=${aws_ecs_cluster.edgar-worker.name} >> /etc/ecs/ecs.config
-USER_DATA
-  }
-
-  launch_specification {
-    ami                    = "${var.ami}"
-    instance_type          = "${var.instance_type}"
-    spot_price             = "${var.spot_prices[1]}"
-    subnet_id              = "${aws_subnet.private.0.id}"
-    vpc_security_group_ids = ["${aws_security_group.ecs_instance.id}"]
-    iam_instance_profile   = "${aws_iam_instance_profile.ecs.name}"
-
-    root_block_device = {
-      volume_type = "gp2"
-      volume_size = "${var.volume_size}"
-    }
-
-    user_data = <<USER_DATA
-#!/bin/bash
-echo ECS_CLUSTER=${aws_ecs_cluster.main.name} >> /etc/ecs/ecs.config
 USER_DATA
   }
 
