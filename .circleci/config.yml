@@ -3,7 +3,7 @@ version: 2.1
 executors:
   my-executor:
     machine: true
-    working_directory: /bb
+    working_directory: ~/bb
 
 jobs:
   bb:
