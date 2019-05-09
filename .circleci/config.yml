@@ -52,7 +52,7 @@ workflows:
       - bb
       - test:
           requires:
-            - install-bb
+            - bb
       - deploy_api:
           requires:
             - test
