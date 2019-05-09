@@ -8,6 +8,9 @@ jobs:
             - v8-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
             - v8-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
       - run:
+          name: Install Rust
+          command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+      - run:
           name: Install birb cli
           command: cargo install --path crates/birb-cli --force
   test:
