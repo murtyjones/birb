@@ -1,5 +1,15 @@
 version: 2.1
 jobs:
+  bb:
+    machine: true
+    steps:
+      - restore_cache:
+          keys:
+            - v8-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
+            - v8-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
+      - run:
+          name: Install birb cli
+          command: cargo install --path crates/birb-cli --force
   test:
     machine: true
     steps:
@@ -10,7 +20,7 @@ jobs:
             - v8-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
       - run:
           name: Run Tests
-          command: make test
+          command: bb test all
   deploy_api:
     machine: true
     steps:
@@ -24,35 +34,25 @@ jobs:
           command: pip install --upgrade awscli
       - run:
           name: Build API Binary
-          command: make build-release package=api
-      - run:
-          name: Copy Binary and Production Dockerfile to "./out"
-          command: make copy-artifact bin=api_bin
+          command: bb build api
       - run:
           name: Build Image and Push to ECS
-          command: ./scripts/build_push_api.sh
+          command: bb push api
       - save_cache:
           key: v8-cargo-cache-{{ arch }}-{{ .Branch }}
           paths:
             - target
             - /usr/local/cargo
             - /root/.cargo
-  deploy_lambdas:
-    machine: true
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - v8-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
-            - v8-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
-      - run:
-          name: Deploy Edgar Worker
-          command: make edgar-worker
 
 workflows:
   version: 2
   build_and_deploy:
     jobs:
-      - test
-      - deploy_api
-      - deploy_lambdas
+      - bb
+      - test:
+          requires:
+            - install-bb
+      - deploy_api:
+          requires:
+            - test

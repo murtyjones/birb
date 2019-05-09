@@ -22,6 +22,7 @@ mod plan;
 mod push;
 mod seed;
 mod ssh;
+mod test;
 mod update;
 mod watch;
 
@@ -35,6 +36,7 @@ use crate::plan::Plan;
 use crate::push::Push;
 use crate::seed::Seed;
 use crate::ssh::Ssh;
+use crate::test::Test;
 use crate::update::Update;
 use crate::watch::Watch;
 use colored::*;
@@ -81,6 +83,9 @@ pub enum Bb {
     /// Push images to ECR
     #[structopt(name = "push")]
     Push(Push),
+    /// Run tests
+    #[structopt(name = "test")]
+    Test(Test),
 }
 
 /// Used to create a Birb CLI subcommand
@@ -123,6 +128,7 @@ pub fn run() -> Result<(), failure::Error> {
         Bb::Migrate(migrate) => boxed_cmd(migrate),
         Bb::Seed(seed) => boxed_cmd(seed),
         Bb::Push(push) => boxed_cmd(push),
+        Bb::Test(test) => boxed_cmd(test),
     };
 
     let result = subcmd.run();
