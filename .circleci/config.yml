@@ -9,7 +9,11 @@ jobs:
             - v8-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
       - run:
           name: Install Rust
-          command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+          command: |
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+            source $HOME/.cargo/env
+            rustup toolchain install nightly
+            rustup default nightly
       - run:
           name: Install birb cli
           command: cargo install --path crates/birb-cli --force
