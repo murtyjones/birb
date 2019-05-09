@@ -20,6 +20,7 @@ jobs:
       - run:
           name: Install birb cli
           command: |
+            source $HOME/.cargo/env
             cargo install --path crates/birb-cli --force
   test:
     executor: my-executor
