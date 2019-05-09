@@ -1,15 +1,14 @@
 version: 2.1
 
-executors:
-  my-executor:
-    machine: true
-    working_directory: ~/bb
-
 jobs:
-  bb:
-    executor: my-executor
+  build_test_deploy:
+    machine: true
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - v8-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
+            - v8-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
       - run:
           name: Install Rust
           command: |
@@ -20,26 +19,11 @@ jobs:
       - run:
           name: Install birb cli
           command: |
+            source $HOME/.cargo/env
             cargo install --path crates/birb-cli --force
-  test:
-    executor: my-executor
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - v8-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
-            - v8-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
       - run:
           name: Run Tests
           command: bb test all
-  deploy_api:
-    executor: my-executor
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - v8-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
-            - v8-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
       - run:
           name: Upgrade AWS CLI Latest Version
           command: pip install --upgrade awscli
@@ -60,10 +44,4 @@ workflows:
   version: 2
   build_and_deploy:
     jobs:
-      - bb
-      - test:
-          requires:
-            - bb
-      - deploy_api:
-          requires:
-            - test
+      - build_test_deploy
