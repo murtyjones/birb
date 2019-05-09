@@ -16,7 +16,9 @@ jobs:
             rustup default nightly
       - run:
           name: Install birb cli
-          command: cargo install --path crates/birb-cli --force
+          command: |
+            source $HOME/.cargo/env
+            cargo install --path crates/birb-cli --force
   test:
     machine: true
     steps:
