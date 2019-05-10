@@ -42,7 +42,7 @@ impl Subcommand for Deploy {
 
 /// Deploy eveeeerything
 #[derive(Debug, StructOpt)]
-pub struct DeployApi {}
+pub struct DeployAll {}
 
 /// Deploy the Edgar Worker
 #[derive(Debug, StructOpt)]
@@ -68,21 +68,11 @@ pub struct DeployDestroy {}
 #[derive(Debug, StructOpt)]
 pub struct DeployRDS {}
 
-impl Subcommand for DeployApi {
+impl Subcommand for DeployAll {
     fn run(&self) -> Result<(), failure::Error> {
-        let _build = run_str_in_bash(
-            "
-            bb build api
-        ",
-        )?;
-        let _push = run_str_in_bash(
-            "
-            bb push api
-        ",
-        )?;
         let _plan = run_str_in_bash(
             "
-            bb plan api
+            bb plan all
         ",
         )?;
 
