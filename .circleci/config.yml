@@ -21,6 +21,25 @@ jobs:
             - target
             - /usr/local/cargo
 
+      - run: mkdir bb-cli-workspace && mv /usr/local/cargo/bin/bb bb-cli-workspace/
+
+      - persist_to_workspace:
+          root: bb-cli-workspace
+          paths:
+            - bb
+
+  use-bb:
+    machine: true
+    working_directory: ~/birb/app
+    steps:
+      - attach_workspace:
+          at: bb-cli-workspace
+
+      - run: mv bb-cli-workspace/bb /usr/local/cargo/bin/
+
+      - run: ./bb --version
+
+
   build_test_deploy:
     machine: true
     steps:
@@ -65,3 +84,4 @@ workflows:
   build_and_deploy:
     jobs:
       - build-bb
+      - use-bb
