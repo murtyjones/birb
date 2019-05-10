@@ -60,8 +60,7 @@ jobs:
       - run:
           name: Build edgar worker binary
           command: |
-            chown -R $USER:$USER /
-            ./bb build edgar
+            sudo ./bb build edgar
 
 
   build_test_deploy:
