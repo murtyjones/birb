@@ -84,6 +84,6 @@ workflows:
   build_and_deploy:
     jobs:
       - build-bb
-      - use-bb
+      - use-bb:
         requires:
           - build-bb
