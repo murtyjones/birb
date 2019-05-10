@@ -93,7 +93,7 @@ mod test {
 
     #[test]
     fn test_do_filer_status_update() {
-        let r = do_filer_status_update();
+        let _r = main();
     }
 
 }
