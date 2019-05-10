@@ -4,7 +4,6 @@
         "image"           : "${repo_url}",
         "cpu"             : ${cpu},
         "memory"          : ${memory},
-        "networkMode"     : "awsvpc",
         "logConfiguration": {
             "logDriver": "awslogs",
             "options"  : {

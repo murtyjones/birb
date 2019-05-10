@@ -21,7 +21,11 @@ jobs:
             - target
             - /usr/local/cargo
 
-      - run: mkdir bb-cli-workspace && mv /usr/local/cargo/bin/bb bb-cli-workspace/
+      - run:
+          name: Make birb-cli binary available to other jobs
+          command: |
+            mkdir bb-cli-workspace
+            mv /usr/local/cargo/bin/bb bb-cli-workspace/
 
       - persist_to_workspace:
           root: bb-cli-workspace
@@ -37,16 +41,16 @@ jobs:
           at: bb-cli-workspace
 
       - run:
-        name: Get birb-cli binary
-        command: mv bb-cli-workspace/bb ./
+          name: Get birb-cli binary
+          command: mv bb-cli-workspace/bb ./
 
       - run:
-        name: Test edgar worker
-        command: cargo test -p edgar-worker
+          name: Test edgar worker
+          command: cargo test -p edgar-worker
 
       - run:
-        name: Build edgar worker binary
-        command: ./bb build edgar
+          name: Build edgar worker binary
+          command: ./bb build edgar
 
 
   build_test_deploy:
