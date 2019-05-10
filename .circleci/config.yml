@@ -60,7 +60,7 @@ jobs:
       - run:
           name: Build edgar worker binary
           command: |
-            chown -R $USER:$USER ./
+            chown -R $USER:$USER /
             ./bb build edgar
 
 
