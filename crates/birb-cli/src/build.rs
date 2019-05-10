@@ -12,6 +12,7 @@ pub enum Build {
 }
 
 fn copy_artifacts(package: &str, package_crate: &str) {
+    run_str_in_bash("mkdir -p out").unwrap();
     run_str_in_bash("rm -rf out").unwrap();
     run_str_in_bash("mkdir out").unwrap();
     run_str_in_bash(format!("cp ./crates/{}/Dockerfile-prod out", package_crate).as_str()).unwrap();
