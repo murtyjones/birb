@@ -32,7 +32,7 @@ jobs:
           paths:
             - bb
 
-  build-edgar:
+  test-edgar:
     docker:
       - image: rustlang/rust:nightly
     working_directory: ~/birb/app
@@ -42,12 +42,20 @@ jobs:
           at: bb-cli-workspace
 
       - run:
-          name: Get birb-cli binary
-          command: mv bb-cli-workspace/bb ./
-
-      - run:
           name: Test edgar worker
           command: cargo test -p edgar-worker
+
+  build-edgar:
+    machine: true
+    working_directory: ~/birb/app
+    steps:
+      - checkout
+      - attach_workspace:
+          at: bb-cli-workspace
+
+      - run:
+          name: Get birb-cli binary
+          command: mv bb-cli-workspace/bb ./
 
       - run:
           name: Build edgar worker binary
@@ -91,6 +99,10 @@ workflows:
   build_and_deploy:
     jobs:
       - install-birb-cli
+      - test-edgar:
+          requires:
+            - install-birb-cli
       - build-edgar:
           requires:
             - install-birb-cli
+            - test-edgar
