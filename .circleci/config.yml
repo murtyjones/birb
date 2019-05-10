@@ -1,6 +1,26 @@
 version: 2.1
 
 jobs:
+  build-bb:
+    docker:
+      - image: rust:latest
+    working_directory: ~/birb/app
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - cli-release-v1-{{ arch }}-{{ .Branch }}
+            - cli-release-v1-{{ arch }}-
+
+      - run: cargo install --path ./crates/birb-cli --force
+
+      # Save release cache
+      - save_cache:
+          key: cli-release-v1-{{ arch }}-{{ .Branch }}
+          paths:
+            - target
+            - /usr/local/cargo
+
   build_test_deploy:
     machine: true
     steps:
@@ -44,4 +64,4 @@ workflows:
   version: 2
   build_and_deploy:
     jobs:
-      - build_test_deploy
+      - build-bb

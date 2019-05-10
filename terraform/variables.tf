@@ -62,7 +62,8 @@ variable "rds_instance" {
 
 variable "multi_az" {
   description = "Whether to deploy RDS and ECS in multi AZ mode or not"
-  default     = false // May want to flip this to true at some point
+  // May want to flip this to true at some point:
+  default     = false
 }
 
 variable "birb_api_certificate_arn" {

@@ -40,6 +40,20 @@ resource "aws_security_group" "ecs_tasks" {
   }
 }
 
+# Workers get no inbound traffic but can call out anywhere
+resource "aws_security_group" "ecs_task_workers" {
+  name        = "birb-worker-ecs-tasks-security-group"
+  description = "allow inbound access from the ALB only"
+  vpc_id      = "${aws_vpc.main.id}"
+
+  egress {
+    protocol    = "-1"
+    from_port   = 0
+    to_port     = 0
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 # ECS/Bastion accessible from approved IPs (w/ SSH), able to call out to anywhere (including RDS)
 resource "aws_security_group" "birb_rds" {
   name        = "birb-rds"
@@ -81,15 +95,16 @@ resource "aws_security_group" "bastion" {
     to_port   = 22
 
     cidr_blocks = ["0.0.0.0/0"]
-//    cidr_blocks = [
-//      # as an extra layer of security, only allow access from these IPS:
-//      # Marty:
-//       "${var.marty_ip_address_1}/32",
-//
-//       "${var.marty_ip_address_2}/32",
-//
-//       "${var.marty_ip_address_3}/32",
-//    ]
+
+    //    cidr_blocks = [
+    //      # as an extra layer of security, only allow access from these IPS:
+    //      # Marty:
+    //       "${var.marty_ip_address_1}/32",
+    //
+    //       "${var.marty_ip_address_2}/32",
+    //
+    //       "${var.marty_ip_address_3}/32",
+    //    ]
   }
 
   egress {
