@@ -85,3 +85,5 @@ workflows:
     jobs:
       - build-bb
       - use-bb
+        requires:
+          - build-bb
