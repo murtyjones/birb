@@ -29,7 +29,8 @@ jobs:
             - bb
 
   use-bb:
-    machine: true
+    docker:
+      - image: rust:latest
     working_directory: ~/birb/app
     steps:
       - attach_workspace:
