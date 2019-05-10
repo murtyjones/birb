@@ -1,7 +1,7 @@
 version: 2.1
 
 jobs:
-  build-bb:
+  install-birb-cli:
     docker:
       - image: rust:latest
     working_directory: ~/birb/app
@@ -37,6 +37,7 @@ jobs:
       - image: rust:latest
     working_directory: ~/birb/app
     steps:
+      - checkout
       - attach_workspace:
           at: bb-cli-workspace
 
@@ -89,7 +90,7 @@ workflows:
   version: 2
   build_and_deploy:
     jobs:
-      - build-bb
+      - install-birb-cli
       - build-edgar:
           requires:
-            - build-bb
+            - install-birb-cli
