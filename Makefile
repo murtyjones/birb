@@ -4,7 +4,8 @@ build-release:
 	docker pull clux/muslrust:nightly
 	# build binary
 	docker run --rm \
-		-v cargo-cache:/root/.cargo \
+		-v ./tmp-cargo:/usr/local/cargo \
+		-v ./tmp-cargo:./target \
 		-v $$PWD:/volume \
 		-w /volume \
 		-it clux/muslrust:nightly \
