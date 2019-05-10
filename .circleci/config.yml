@@ -34,7 +34,7 @@ jobs:
 
   build-edgar:
     docker:
-      - image: rust:nightly
+      - image: rustlang/rust:nightly
     working_directory: ~/birb/app
     steps:
       - checkout
