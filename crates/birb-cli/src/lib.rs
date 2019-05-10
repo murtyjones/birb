@@ -12,10 +12,10 @@ extern crate structopt;
 #[macro_use]
 extern crate failure;
 
+mod aws;
 mod bash_completion;
 mod bb_filesystem;
 mod build;
-mod deploy;
 mod docker;
 mod migrate;
 mod plan;
@@ -26,10 +26,10 @@ mod test;
 mod update;
 mod watch;
 
+use crate::aws::Aws;
 use crate::bash_completion::BashCompletionGenerator;
 use crate::bb_filesystem::{bb_dot_dir, cargo_toml_version};
 use crate::build::Build;
-use crate::deploy::Deploy;
 use crate::docker::Docker;
 use crate::migrate::Migrate;
 use crate::plan::Plan;
@@ -56,9 +56,9 @@ pub enum Bb {
     #[structopt(name = "plan")]
     Plan(Plan),
     /// Used to deploy different applications or services
-    #[structopt(name = "deploy")]
-    Deploy(Deploy),
-    /// Used to deploy different applications or services
+    #[structopt(name = "aws")]
+    Aws(Aws),
+    /// Used to watch for changes while developing
     #[structopt(name = "watch")]
     Watch(Watch),
     /// Used to build application binaries
@@ -95,7 +95,7 @@ pub enum Bb {
 ///
 /// bb help # bb [subcommand].. in this case `help` is the subcommand.
 ///
-/// bb deploy plan # deploy and plan are both subcommands (subcommands can nest)
+/// bb aws plan # `deploy` and `plan` are both subcommands (subcommands can nest)
 /// ```
 pub trait Subcommand
 where
@@ -122,7 +122,7 @@ pub fn run() -> Result<(), failure::Error> {
         Bb::Build(build) => boxed_cmd(build),
         Bb::Docker(docker) => boxed_cmd(docker),
         Bb::Plan(plan) => boxed_cmd(plan),
-        Bb::Deploy(deploy) => boxed_cmd(deploy),
+        Bb::Aws(aws) => boxed_cmd(aws),
         Bb::Watch(watch) => boxed_cmd(watch),
         Bb::Ssh(ssh) => boxed_cmd(ssh),
         Bb::Migrate(migrate) => boxed_cmd(migrate),
