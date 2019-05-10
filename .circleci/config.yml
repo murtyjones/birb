@@ -36,7 +36,7 @@ jobs:
       - attach_workspace:
           at: bb-cli-workspace
 
-      - run: mv bb-cli-workspace/bb /usr/local/cargo/bin/
+      - run: mv bb-cli-workspace/bb ./
 
       - run: ./bb --version
 
