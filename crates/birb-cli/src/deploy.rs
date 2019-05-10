@@ -29,7 +29,7 @@ pub enum Deploy {
 impl Subcommand for Deploy {
     fn run(&self) -> Result<(), failure::Error> {
         match self {
-            Deploy::Api(deploy_api) => deploy_api.run(),
+            Deploy::All(deploy_all) => deploy_all.run(),
             Deploy::Edgar(deploy_edgar) => deploy_edgar.run(),
             Deploy::Bastion(deploy_bastion) => deploy_bastion.run(),
             Deploy::RDS(rds) => rds.run(),
