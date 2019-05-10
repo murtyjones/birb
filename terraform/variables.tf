@@ -22,13 +22,23 @@ variable "health_check_path" {
   default = "/"
 }
 
-variable "fargate_cpu" {
+variable "birb_api_cpu" {
   description = "Fargate instance CPU units to provision (1 vCPU = 1024 CPU units)"
   default     = "256"
 }
 
-variable "fargate_memory" {
+variable "birb_api_memory" {
   description = "Fargate instance memory to provision (in MiB)"
+  default     = "512"
+}
+
+variable "birb_edgar_worker_cpu" {
+  description = "Instance CPU units to provision (1 vCPU = 1024 CPU units) for the Edgar worker"
+  default     = "256"
+}
+
+variable "birb_edgar_worker_memory" {
+  description = "Instance memory to provision (in MiB) for the Edgar worker"
   default     = "512"
 }
 
@@ -52,7 +62,9 @@ variable "rds_instance" {
 
 variable "multi_az" {
   description = "Whether to deploy RDS and ECS in multi AZ mode or not"
-  default     = false // May want to flip this to true at some point
+
+  // May want to flip this to true at some point:
+  default = false
 }
 
 variable "birb_api_certificate_arn" {

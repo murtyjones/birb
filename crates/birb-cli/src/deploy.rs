@@ -29,7 +29,7 @@ pub enum Deploy {
 impl Subcommand for Deploy {
     fn run(&self) -> Result<(), failure::Error> {
         match self {
-            Deploy::All(deploy_all) => deploy_all.run(),
+            Deploy::Api(deploy_api) => deploy_api.run(),
             Deploy::Edgar(deploy_edgar) => deploy_edgar.run(),
             Deploy::Bastion(deploy_bastion) => deploy_bastion.run(),
             Deploy::RDS(rds) => rds.run(),
@@ -42,7 +42,7 @@ impl Subcommand for Deploy {
 
 /// Deploy eveeeerything
 #[derive(Debug, StructOpt)]
-pub struct DeployAll {}
+pub struct DeployApi {}
 
 /// Deploy the Edgar Worker
 #[derive(Debug, StructOpt)]
@@ -68,38 +68,65 @@ pub struct DeployDestroy {}
 #[derive(Debug, StructOpt)]
 pub struct DeployRDS {}
 
-impl Subcommand for DeployAll {
+impl Subcommand for DeployApi {
     fn run(&self) -> Result<(), failure::Error> {
-        let _plan = run_str_in_bash("
-            bb plan all
-        ")?;
+        let _build = run_str_in_bash(
+            "
+            bb build api
+        ",
+        )?;
+        let _push = run_str_in_bash(
+            "
+            bb push api
+        ",
+        )?;
+        let _plan = run_str_in_bash(
+            "
+            bb plan api
+        ",
+        )?;
 
-        let _result = run_str_in_bash("
+        let _result = run_str_in_bash(
+            "
             bb deploy plan
-        ")?;
+        ",
+        )?;
         Ok(())
     }
 }
 
 impl Subcommand for TfPlan {
     fn run(&self) -> Result<(), failure::Error> {
-        let _result = run_str_in_bash(
-            "terraform apply \"plan\" && rm -rf plan"
-        ).unwrap();
+        let _result = run_str_in_bash("terraform apply \"plan\" && rm -rf plan").unwrap();
         Ok(())
     }
 }
 
 impl Subcommand for DeployEdgar {
     fn run(&self) -> Result<(), failure::Error> {
-        // Not currently worrying about whether or not the deploy was successful
-        let _plan = run_str_in_bash("
-            bb plan edgar
-        ")?;
+        let _build = run_str_in_bash(
+            "
+            bb build edgar
+        ",
+        )?;
+        let _push = run_str_in_bash(
+            "
+            bb push edgar
+        ",
+        )?;
 
-        let _result = run_str_in_bash("
+        // Not currently worrying about whether or not the deploy was successful
+        let _plan = run_str_in_bash(
+            "
+            bb plan edgar
+        ",
+        )?;
+
+        let _result = run_str_in_bash(
+            "
             bb deploy plan
-        ")?;
+        ",
+        )?;
 
         Ok(())
     }
@@ -108,13 +135,17 @@ impl Subcommand for DeployEdgar {
 impl Subcommand for DeployBastion {
     fn run(&self) -> Result<(), failure::Error> {
         // Not currently worrying about whether or not the deploy was successful
-        let _plan = run_str_in_bash("
+        let _plan = run_str_in_bash(
+            "
             bb plan bastion
-        ")?;
+        ",
+        )?;
 
-        let _result = run_str_in_bash("
+        let _result = run_str_in_bash(
+            "
             bb deploy plan
-        ")?;
+        ",
+        )?;
 
         Ok(())
     }
@@ -123,11 +154,14 @@ impl Subcommand for DeployBastion {
 impl Subcommand for DeployDestroy {
     fn run(&self) -> Result<(), failure::Error> {
         // Not currently worrying about whether or not the deploy was successful
-        run_str_in_bash("
+        run_str_in_bash(
+            "
                 terraform destroy -auto-approve \
                     -var-file=terraform/production.secret.tfvars \
                     terraform/\
-            ").unwrap();
+            ",
+        )
+        .unwrap();
         Ok(())
     }
 }
@@ -135,13 +169,17 @@ impl Subcommand for DeployDestroy {
 impl Subcommand for DeployOutput {
     fn run(&self) -> Result<(), failure::Error> {
         // Not currently worrying about whether or not the deploy was successful
-        let _plan = run_str_in_bash("
+        let _plan = run_str_in_bash(
+            "
             bb plan output
-        ")?;
+        ",
+        )?;
 
-        let _result = run_str_in_bash("
+        let _result = run_str_in_bash(
+            "
             bb deploy plan
-        ")?;
+        ",
+        )?;
 
         Ok(())
     }
@@ -150,13 +188,17 @@ impl Subcommand for DeployOutput {
 impl Subcommand for DeployRDS {
     fn run(&self) -> Result<(), failure::Error> {
         // Not currently worrying about whether or not the deploy was successful
-        let _plan = run_str_in_bash("
+        let _plan = run_str_in_bash(
+            "
             bb plan rds
-        ")?;
+        ",
+        )?;
 
-        let _result = run_str_in_bash("
+        let _result = run_str_in_bash(
+            "
             bb deploy plan
-        ")?;
+        ",
+        )?;
 
         Ok(())
     }

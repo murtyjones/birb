@@ -1,6 +1,68 @@
 version: 2.1
+
 jobs:
-  test:
+  install-birb-cli:
+    docker:
+      - image: rust:latest
+    working_directory: ~/birb/app
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - cli-release-v1-{{ arch }}-{{ .Branch }}
+            - cli-release-v1-{{ arch }}-
+
+      - run: cargo install --path ./crates/birb-cli --force
+
+      # Save release cache
+      - save_cache:
+          key: cli-release-v1-{{ arch }}-{{ .Branch }}
+          paths:
+            - target
+            - /usr/local/cargo
+
+      - run:
+          name: Make birb-cli binary available to other jobs
+          command: |
+            mkdir bb-cli-workspace
+            mv /usr/local/cargo/bin/bb bb-cli-workspace/
+
+      - persist_to_workspace:
+          root: bb-cli-workspace
+          paths:
+            - bb
+
+  test-edgar:
+    docker:
+      - image: rustlang/rust:nightly
+    working_directory: ~/birb/app
+    steps:
+      - checkout
+      - attach_workspace:
+          at: bb-cli-workspace
+
+      - run:
+          name: Test edgar worker
+          command: cargo test -p edgar-worker
+
+  build-edgar:
+    machine: true
+    working_directory: ~/birb/app
+    steps:
+      - checkout
+      - attach_workspace:
+          at: bb-cli-workspace
+
+      - run:
+          name: Get birb-cli binary
+          command: mv bb-cli-workspace/bb ./
+
+      - run:
+          name: Build edgar worker binary
+          command: ./bb build edgar
+
+
+  build_test_deploy:
     machine: true
     steps:
       - checkout
@@ -9,50 +71,38 @@ jobs:
             - v8-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
             - v8-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
       - run:
+          name: Install birb cli
+          command: |
+            source $HOME/.cargo/env
+            cargo install --path crates/birb-cli --force
+      - run:
           name: Run Tests
-          command: make test
-  deploy_api:
-    machine: true
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - v8-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
-            - v8-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
+          command: bb test all
       - run:
           name: Upgrade AWS CLI Latest Version
           command: pip install --upgrade awscli
       - run:
           name: Build API Binary
-          command: make build-release package=api
-      - run:
-          name: Copy Binary and Production Dockerfile to "./out"
-          command: make copy-artifact bin=api_bin
+          command: bb build api
       - run:
           name: Build Image and Push to ECS
-          command: ./scripts/build_and_push.sh
+          command: bb push api
       - save_cache:
           key: v8-cargo-cache-{{ arch }}-{{ .Branch }}
           paths:
             - target
             - /usr/local/cargo
             - /root/.cargo
-  deploy_lambdas:
-    machine: true
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - v8-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
-            - v8-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
-      - run:
-          name: Deploy Edgar Worker
-          command: make edgar-worker
 
 workflows:
   version: 2
   build_and_deploy:
     jobs:
-      - test
-      - deploy_api
-      - deploy_lambdas
+      - install-birb-cli
+      - test-edgar:
+          requires:
+            - install-birb-cli
+      - build-edgar:
+          requires:
+            - install-birb-cli
+            - test-edgar

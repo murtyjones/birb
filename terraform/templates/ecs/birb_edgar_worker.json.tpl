@@ -1,24 +1,17 @@
 [
     {
-        "name"            : "birb-api-app",
+        "name"            : "birb-edgar-worker",
         "image"           : "${repo_url}",
-        "cpu"             : ${birb_api_cpu},
-        "memory"          : ${birb_api_memory},
-        "networkMode"     : "awsvpc",
+        "cpu"             : ${cpu},
+        "memory"          : ${memory},
         "logConfiguration": {
             "logDriver": "awslogs",
             "options"  : {
-                "awslogs-group"        : "/ecs/birb-api-app",
+                "awslogs-group"        : "/ecs/birb-edgar-worker",
                 "awslogs-region"       : "${aws_region}",
                 "awslogs-stream-prefix": "ecs"
             }
         },
-        "portMappings": [
-            {
-                "containerPort": ${app_port},
-                "hostPort"     : ${app_port}
-            }
-        ],
         "secrets": [
             {
                 "name"     : "ROCKET_DATABASES",
