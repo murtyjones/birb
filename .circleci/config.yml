@@ -46,25 +46,14 @@ jobs:
           command: cargo test -p edgar-worker
 
   build-edgar:
-    docker:
-      - image: rustlang/rust:nightly
+    machine: true
     working_directory: ~/birb/app
     steps:
       - checkout
-      - setup_remote_docker:
-          docker_layer_caching: true
       - restore_cache:
           keys:
             - v8-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
             - v8-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
-      - run:
-          name: Install Docker client
-          command: |
-            set -x
-            VER="18.09.2"
-            curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
-            tar -xz -C /tmp -f /tmp/docker-$VER.tgz
-            mv /tmp/docker/* /usr/bin
 
       - attach_workspace:
           at: bb-cli-workspace
@@ -76,7 +65,7 @@ jobs:
       - run:
           name: Build edgar worker binary
           command: |
-            ./bb build edgar
+            sudo ./bb build edgar
 
       - save_cache:
           key: v9-cargo-cache-{{ arch }}-{{ .Branch }}

@@ -10,3 +10,4 @@ build-release:
 		-w /volume \
 		-it clux/muslrust:nightly \
 		cargo build -p $(package) --release
+
