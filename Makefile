@@ -9,4 +9,4 @@ build-release:
 		-v $$PWD:/volume \
 		-w /volume \
 		-it clux/muslrust:nightly \
-		cargo build -p $(package) --release
+		RUST_BACKTRACE=1 cargo build -p $(package) --release
