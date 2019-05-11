@@ -56,7 +56,7 @@ impl Subcommand for Build {
             }
             Build::Edgar => {
                 build_binary("edgar-worker");
-                //                copy_artifacts("edgar_worker_bin", "edgar-worker");
+                copy_artifacts("edgar_worker_bin", "edgar-worker");
                 Ok(())
             }
         }
