@@ -37,7 +37,7 @@ fn build_binary(package: &str) {
     ",
         package
     );
-    run_str_in_bash(build_command.as_str()).unwrap();
+    let _result = run_str_in_bash(build_command.as_str());
 }
 
 impl Subcommand for Build {
