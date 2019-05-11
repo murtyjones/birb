@@ -129,12 +129,20 @@ impl Subcommand for AwsEdgar {
                 let _plan = run_str_in_bash(
                     "
                     terraform plan -var-file=terraform/production.secret.tfvars \
-                           -out=plan \
-                           -target=aws_ecs_cluster.birb-edgar-cluster \
-                           -target=aws_ecs_task_definition.birb-edgar-task \
-                           -target=aws_ecs_service.birb-edgar-service \
-                           -target=aws_launch_configuration.ecs-launch-configuration \
-                           terraform/
+                       -out=plan \
+                       -auto-approve \
+                       -target=aws_launch_configuration.ecs-launch-configuration \
+                       -target=aws_autoscaling_group.ecs-autoscaling-group \
+                       -target=aws_ecs_cluster.birb-edgar-cluster \
+                       -target=aws_ecs_task_definition.birb-edgar-task \
+                       -target=aws_ecs_service.birb-edgar-service \
+                       -target=aws_iam_role.ecs-instance-role \
+                       -target=aws_iam_role_policy_attachment.ecs-instance-role-attachment \
+                       -target=aws_iam_instance_profile.ecs-instance-profile \
+                       -target=aws_iam_role.ecs-service-role \
+                       -target=aws_iam_role_policy_attachment.ecs-service-role-attachment \
+                       -target=aws_ecr_repository.birb_edgar_worker_repo \
+                       terraform/
                 ",
                 )?;
 
@@ -144,7 +152,26 @@ impl Subcommand for AwsEdgar {
                 ",
                 )?;
             }
-            AwsEdgar::Down => {}
+            AwsEdgar::Down => {
+                let _reuslt = run_str_in_bash(
+                    "
+                    terraform destroy -var-file=terraform/production.secret.tfvars \
+                       -auto-approve \
+                       -target=aws_launch_configuration.ecs-launch-configuration \
+                       -target=aws_autoscaling_group.ecs-autoscaling-group \
+                       -target=aws_ecs_cluster.birb-edgar-cluster \
+                       -target=aws_ecs_task_definition.birb-edgar-task \
+                       -target=aws_ecs_service.birb-edgar-service \
+                       -target=aws_iam_role.ecs-instance-role \
+                       -target=aws_iam_role_policy_attachment.ecs-instance-role-attachment \
+                       -target=aws_iam_instance_profile.ecs-instance-profile \
+                       -target=aws_iam_role.ecs-service-role \
+                       -target=aws_iam_role_policy_attachment.ecs-service-role-attachment \
+                       -target=aws_ecr_repository.birb_edgar_worker_repo \
+                       terraform/
+                ",
+                )?;
+            }
         }
 
         Ok(())
