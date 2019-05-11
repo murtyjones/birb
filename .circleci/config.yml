@@ -48,11 +48,11 @@ jobs:
   build-edgar:
     docker:
       - image: rustlang/rust:nightly
-      - image: clux/muslrust:nightly
     working_directory: ~/birb/app
     steps:
       - checkout
-      - setup_remote_docker
+      - setup_remote_docker:
+          docker_layer_caching: true
       - restore_cache:
           keys:
             - v8-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
@@ -61,7 +61,7 @@ jobs:
           name: Install Docker client
           command: |
             set -x
-            VER="18.03.0-ce"
+            VER="18.09.2"
             curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
             tar -xz -C /tmp -f /tmp/docker-$VER.tgz
             mv /tmp/docker/* /usr/bin
