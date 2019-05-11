@@ -51,6 +51,7 @@ jobs:
       - image: clux/muslrust:nightly
     working_directory: ~/birb/app
     steps:
+      - setup_remote_docker
       - checkout
       - restore_cache:
           keys:
