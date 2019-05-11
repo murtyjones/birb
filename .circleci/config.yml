@@ -52,8 +52,8 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v8-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
-            - v8-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
+            - v9-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
+            - v9-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
 
       - attach_workspace:
           at: bb-cli-workspace
