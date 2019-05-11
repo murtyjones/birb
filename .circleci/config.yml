@@ -51,8 +51,8 @@ jobs:
       - image: clux/muslrust:nightly
     working_directory: ~/birb/app
     steps:
-      - setup_remote_docker
       - checkout
+      - setup_remote_docker
       - restore_cache:
           keys:
             - v8-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
