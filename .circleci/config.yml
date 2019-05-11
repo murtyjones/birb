@@ -46,7 +46,9 @@ jobs:
           command: cargo test -p edgar-worker
 
   build-edgar:
-    machine: true
+    docker:
+      - image: rustlang/rust:nightly
+      - image: clux/muslrust:nightly
     working_directory: ~/birb/app
     steps:
       - checkout
