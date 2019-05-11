@@ -65,7 +65,7 @@ jobs:
       - run:
           name: Build edgar worker binary
           command: |
-            sudo ./bb build edgar
+            make build-release package=edgar-worker
 
       - save_cache:
           key: v9-cargo-cache-{{ arch }}-{{ .Branch }}
