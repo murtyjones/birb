@@ -150,12 +150,13 @@ fn boxed_cmd<S: Subcommand + 'static>(subcmd: S) -> Box<dyn Subcommand> {
 /// run_in_bash("docker-compose exec app bash");
 /// run_in_bash("node ./bin/some-script.js");
 /// ```
-fn run_str_in_bash(bash_str: &str) -> Child {
+fn run_str_in_bash(bash_str: &str) -> Result<std::process::ExitStatus, std::io::Error> {
     Command::new("bash")
         .arg("-c")
         .args(&[&bash_str])
         .spawn()
         .expect(format!("{} command failed to start", bash_str).as_str())
+        .wait()
 }
 
 /// Print a message if there's a new version of the command-line available.
