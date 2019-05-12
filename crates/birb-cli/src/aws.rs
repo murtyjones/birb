@@ -24,6 +24,9 @@ pub enum Aws {
     /// Deploy stateful resources (e.g. DB, ECR)
     #[structopt(name = "stateful")]
     Stateful(AwsStateful),
+    /// Manage stateless resources (e.g. ECS)
+    #[structopt(name = "stateless")]
+    Stateless(AwsStateless),
 }
 
 impl Subcommand for Aws {
@@ -36,6 +39,7 @@ impl Subcommand for Aws {
             Aws::Plan(tf_plan) => tf_plan.run(),
             Aws::Output(output) => output.run(),
             Aws::Stateful(stateful) => stateful.run(),
+            Aws::Stateless(stateless) => stateless.run(),
         }
     }
 }
@@ -75,6 +79,15 @@ pub struct AwsOutput {}
 pub enum AwsStateful {
     #[structopt(name = "up")]
     Up,
+}
+
+/// Stateless AWS resources that should be easy to create/delete
+#[derive(Debug, StructOpt)]
+pub enum AwsStateless {
+    #[structopt(name = "up")]
+    Up,
+    #[structopt(name = "down")]
+    Down,
 }
 
 /// Deploy the Terraform Plan
@@ -267,6 +280,92 @@ impl Subcommand for AwsStateful {
                 let _result = run_str_in_bash(
                     "
                     bb aws plan up
+                ",
+                )?;
+            }
+        }
+
+        Ok(())
+    }
+}
+
+impl Subcommand for AwsStateless {
+    fn run(&self) -> Result<(), failure::Error> {
+        match self {
+            AwsStateless::Up => {
+                // Not currently worrying about whether or not the deploy was successful
+                let _plan = run_str_in_bash(
+                    "
+                    bb plan stateless
+                ",
+                )?;
+
+                let _result = run_str_in_bash(
+                    "
+                    bb aws plan up
+                ",
+                )?;
+            }
+            AwsStateless::Down => {
+                let _result = run_str_in_bash(
+                    "
+                       terraform destroy -var-file=terraform/production.secret.tfvars \
+                           -auto-approve \
+                           -target=aws_alb.main \
+                           -target=aws_alb_target_group.app \
+                           -target=aws_alb_listener.front_end \
+                           -target=aws_security_group.lb \
+                           -target=aws_security_group.lb \
+                           -target=aws_instance.bastion \
+                           -target=aws_key_pair.bastion_key \
+                           -target=aws_ecs_cluster.main \
+                           -target=aws_ecs_service.main \
+                           -target=aws_ecs_task_definition.app \
+                           -target=aws_launch_configuration.ecs-launch-configuration \
+                           -target=aws_autoscaling_group.ecs-autoscaling-group \
+                           -target=aws_ecs_cluster.birb-edgar-cluster \
+                           -target=aws_ecs_task_definition.birb-edgar-task \
+                           -target=aws_ecs_service.birb-edgar-service \
+                           -target=aws_iam_role.ecs-instance-role \
+                           -target=aws_iam_role_policy_attachment.ecs-instance-role-attachment \
+                           -target=aws_iam_instance_profile.ecs-instance-profile \
+                           -target=aws_iam_role.ecs-service-role \
+                           -target=aws_iam_role_policy_attachment.ecs-service-role-attachment \
+                           -target=aws_cloudwatch_log_group.birb_api_log_group \
+                           -target=aws_cloudwatch_log_stream.birb_api_log_stream \
+                           -target=aws_vpc.main \
+                           -target=aws_subnet.private \
+                           -target=aws_subnet.public \
+                           -target=aws_internet_gateway.gw \
+                           -target=aws_route.internet_access \
+                           -target=aws_eip.gw \
+                           -target=aws_nat_gateway.gw \
+                           -target=aws_route_table.private \
+                           -target=aws_route_table_association.private \
+                           -target=local_file.bastion_ip_address \
+                           -target=local_file.rds_db_name \
+                           -target=local_file.rds_db_port \
+                           -target=local_file.rds_db_address \
+                           -target=local_file.rds_db_username \
+                           -target=local_file.rds_db_password \
+                           -target=aws_iam_role.autoscale_role \
+                           -target=aws_iam_policy.autoscale_policy \
+                           -target=aws_iam_role_policy_attachment.autoscale-attach \
+                           -target=aws_iam_role.task_execution_role \
+                           -target=aws_iam_policy.task_execution_policy \
+                           -target=aws_iam_role_policy_attachment.task-execution-attach \
+                           -target=aws_route53_record.birb \
+                           -target=aws_secretsmanager_secret.ROCKET_DATABASES \
+                           -target=aws_secretsmanager_secret_version.ROCKET_DATABASES \
+                           -target=aws_secretsmanager_secret.DATABASE_URI \
+                           -target=aws_secretsmanager_secret_version.DATABASE_URI \
+                           -target=aws_security_group.lb \
+                           -target=aws_security_group.ecs_tasks \
+                           -target=aws_security_group.ecs_task_workers \
+                           -target=aws_security_group.birb_rds \
+                           -target=aws_security_group.bastion \
+                           -target=aws_security_group.lambdas \
+                           terraform/
                 ",
                 )?;
             }

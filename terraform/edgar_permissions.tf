@@ -12,6 +12,16 @@ data "aws_iam_policy_document" "ecs-instance-policy" {
       type        = "Service"
       identifiers = ["ec2.amazonaws.com"]
     }
+
+    principals {
+      type        = "Service"
+      identifiers = ["ecs.amazonaws.com"]
+    }
+
+    principals {
+      type        = "Service"
+      identifiers = ["ecs-tasks.amazonaws.com"]
+    }
   }
 }
 
