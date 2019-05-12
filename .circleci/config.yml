@@ -81,13 +81,15 @@ jobs:
             - v9-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
       - attach_workspace:
           at: bb-cli-workspace
-
+      - run:
+          name: Upgrade AWS CLI Latest Version
+          command: pip install --upgrade awscli
       - run:
           name: Get birb-cli binary
           command: mv bb-cli-workspace/bb ./
       - run:
           name: Push Image to ECS
-          command: sudo ./bb push api
+          command: sudo ./bb push edgar
       - save_cache:
           key: v9-cargo-cache-{{ arch }}-{{ .Branch }}
           paths:
@@ -130,7 +132,7 @@ jobs:
 
 workflows:
   version: 2
-  build_and_deploy:
+  edgar:
     jobs:
       - install-birb-cli
       - test-edgar:
