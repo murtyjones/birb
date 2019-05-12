@@ -75,39 +75,6 @@ jobs:
             - /usr/local/cargo
             - /root/.cargo
 
-
-#  build_test_deploy:
-#    machine: true
-#    steps:
-#      - checkout
-#      - restore_cache:
-#          keys:
-#            - v8-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
-#            - v8-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
-#      - run:
-#          name: Install birb cli
-#          command: |
-#            source $HOME/.cargo/env
-#            cargo install --path crates/birb-cli --force
-#      - run:
-#          name: Run Tests
-#          command: bb test all
-#      - run:
-#          name: Upgrade AWS CLI Latest Version
-#          command: pip install --upgrade awscli
-#      - run:
-#          name: Build API Binary
-#          command: bb build api
-#      - run:
-#          name: Build Image and Push to ECS
-#          command: bb push api
-#      - save_cache:
-#          key: v9-cargo-cache-{{ arch }}-{{ .Branch }}
-#          paths:
-#            - target
-#            - /usr/local/cargo
-#            - /root/.cargo
-
 workflows:
   version: 2
   edgar:
