@@ -33,4 +33,4 @@ docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/birb_edgar
 
 # Force cluster to restart with new image
 # Disable until infrastructure is done:
-aws ecs update-service --cluster edgar-worker-cluster --service birb-edgar-worker-service --force-new-deployment
+# aws ecs update-service --cluster edgar-worker-cluster --service birb-edgar-worker-service --force-new-deployment
