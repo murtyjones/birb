@@ -22,6 +22,9 @@ pub enum Plan {
     /// Plan the DB infrastructure
     #[structopt(name = "rds")]
     RDS,
+    /// Plan stateful pieces of architecture
+    #[structopt(name = "stateful")]
+    Stateful,
 }
 
 impl Subcommand for Plan {
@@ -101,6 +104,20 @@ impl Subcommand for Plan {
                     terraform plan -var-file=terraform/production.secret.tfvars \
                            -out=plan \
                            -target=aws_db_instance.birb \
+                           terraform/
+                ",
+                )
+                .unwrap();
+                Ok(())
+            }
+            Plan::Stateful => {
+                run_str_in_bash(
+                    "
+                    terraform plan -var-file=terraform/production.secret.tfvars \
+                           -out=plan \
+                           -target=aws_db_instance.birb \
+                           -target=aws_ecr_repository.birb_api_repo \
+                           -target=aws_ecr_repository.birb_edgar_worker_repo \
                            terraform/
                 ",
                 )

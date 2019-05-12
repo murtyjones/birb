@@ -15,12 +15,15 @@ pub enum Aws {
     /// Deploy the Database
     #[structopt(name = "rds")]
     RDS(AwsRDS),
-    /// Deploys whatever change is held by the "plan" file
+    /// Deploy whatever change is held by the "plan" file
     #[structopt(name = "plan")]
     Plan(TfPlan),
     /// Get output for local usage
     #[structopt(name = "output")]
     Output(AwsOutput),
+    /// Deploy stateful resources (e.g. DB, ECR)
+    #[structopt(name = "stateful")]
+    Stateful(AwsStateful),
 }
 
 impl Subcommand for Aws {
@@ -32,6 +35,7 @@ impl Subcommand for Aws {
             Aws::RDS(rds) => rds.run(),
             Aws::Plan(tf_plan) => tf_plan.run(),
             Aws::Output(output) => output.run(),
+            Aws::Stateful(stateful) => stateful.run(),
         }
     }
 }
@@ -65,6 +69,13 @@ pub enum AwsBastion {
 /// Get the outputs
 #[derive(Debug, StructOpt)]
 pub struct AwsOutput {}
+
+/// Stateful AWS resources that shouldn't be easy to delete
+#[derive(Debug, StructOpt)]
+pub enum AwsStateful {
+    #[structopt(name = "up")]
+    Up,
+}
 
 /// Deploy the Terraform Plan
 #[derive(Debug, StructOpt)]
@@ -191,7 +202,7 @@ impl Subcommand for AwsBastion {
 
                 let _result = run_str_in_bash(
                     "
-                bb deploy plan
+                bb aws plan up
             ",
                 )?;
             }
@@ -212,7 +223,7 @@ impl Subcommand for AwsOutput {
 
         let _result = run_str_in_bash(
             "
-            bb deploy plan
+            bb aws plan up
         ",
         )?;
         Ok(())
@@ -232,8 +243,31 @@ impl Subcommand for AwsRDS {
 
                 let _result = run_str_in_bash(
                     "
-            bb deploy plan
+            bb aws plan up
         ",
+                )?;
+            }
+        }
+
+        Ok(())
+    }
+}
+
+impl Subcommand for AwsStateful {
+    fn run(&self) -> Result<(), failure::Error> {
+        match self {
+            AwsStateful::Up => {
+                // Not currently worrying about whether or not the deploy was successful
+                let _plan = run_str_in_bash(
+                    "
+                    bb plan stateful
+                ",
+                )?;
+
+                let _result = run_str_in_bash(
+                    "
+                    bb aws plan up
+                ",
                 )?;
             }
         }
