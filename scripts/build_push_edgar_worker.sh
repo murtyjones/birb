@@ -12,7 +12,7 @@ mkdir out
 
 # Copy built binary and Dockerfile to output folder
 cp ./crates/edgar-worker/Dockerfile-prod out
-cp ./target/x86_64-unknown-linux-musl/release/edgar_worker_bin out
+cp ./target/x86_64-unknown-linux-musl/release/edgar_worker out
 
 # Set variables to use in the tagging process
 VERSION=$(git rev-parse HEAD)
@@ -33,4 +33,4 @@ docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/birb_edgar
 
 # Force cluster to restart with new image
 # Disable until infrastructure is done:
-# aws ecs update-service --cluster edgar-worker-cluster --service birb-edgar-worker-service --force-new-deployment
+aws ecs update-service --cluster birb-edgar-cluster --service birb-edgar-service --force-new-deployment

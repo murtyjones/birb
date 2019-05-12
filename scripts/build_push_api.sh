@@ -11,8 +11,8 @@ rm -rf out
 mkdir out
 
 # Copy built binary and Dockerfile to output folder
-cp ./crates/edgar-worker/Dockerfile-prod out
-cp ./target/x86_64-unknown-linux-musl/release/edgar_worker_bin out
+cp ./crates/api/Dockerfile-prod out
+cp ./target/x86_64-unknown-linux-musl/release/api out
 
 # Set variables to use in the tagging process
 VERSION=$(git rev-parse HEAD)

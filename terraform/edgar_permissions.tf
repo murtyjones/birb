@@ -48,7 +48,7 @@ resource "aws_iam_policy" "ecs-instance-policy-secrets" {
                 "secretsmanager:GetSecretValue"
             ],
             "Resource": [
-                "${aws_secretsmanager_secret.ROCKET_DATABASES.arn}"
+                "${aws_secretsmanager_secret.DATABASE_URI.arn}"
             ]
         }
     ]

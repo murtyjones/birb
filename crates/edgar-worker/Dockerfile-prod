@@ -1,6 +1,6 @@
 FROM scratch
 
 # This is run from the project-root/out which has the binary in it as well
-COPY ./edgar_worker_bin /edgar_worker_bin
+COPY ./edgar_worker /edgar_worker
 
-ENTRYPOINT ["/edgar_worker_bin"]
+ENTRYPOINT ["/edgar_worker"]
