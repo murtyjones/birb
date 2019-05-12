@@ -73,7 +73,7 @@ jobs:
           paths:
             - target
             - /usr/local/cargo
-            - /root/.cargo
+            - ~/.cargo
 
 workflows:
   version: 2
