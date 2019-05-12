@@ -154,7 +154,6 @@ impl Subcommand for AwsEdgar {
                     "
                     terraform plan -var-file=terraform/production.secret.tfvars \
                        -out=plan \
-                       -auto-approve \
                        -target=aws_launch_configuration.ecs-launch-configuration \
                        -target=aws_autoscaling_group.ecs-autoscaling-group \
                        -target=aws_ecs_cluster.birb-edgar-cluster \
