@@ -13,7 +13,6 @@ data "aws_iam_policy_document" "ecs-instance-policy" {
 
       identifiers = [
         "ec2.amazonaws.com",
-        "ecs.amazonaws.com",       // TODO try deleting this line
         "ecs-tasks.amazonaws.com",
       ]
     }

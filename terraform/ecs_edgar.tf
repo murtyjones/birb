@@ -25,7 +25,7 @@ data "template_file" "birb_edgar_worker_app" {
 resource "aws_launch_configuration" "ecs-launch-configuration" {
   name                 = "ecs-launch-configuration"
   image_id             = "ami-0bc08634af113cccb"
-  instance_type        = "t2.medium"
+  instance_type        = "t2.nano"
   iam_instance_profile = "${aws_iam_instance_profile.ecs-instance-profile.id}"
 
   root_block_device {
