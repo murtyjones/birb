@@ -19,7 +19,6 @@ data "template_file" "birb_edgar_worker_app" {
 # us-east-2 ami-64300001
 # us-west-1 ami-69677709
 # us-west-2 ami-40ddb938
-#
 
 # need to add security group config
 # so that we can ssh into an ecs host from bastion box

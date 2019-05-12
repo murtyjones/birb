@@ -69,11 +69,11 @@ jobs:
           name: Deploy edgar worker binary
           command: scripts/build_push_edgar_worker.sh
       - save_cache:
-          key: v9-cargo-cache-{{ arch }}-{{ .Branch }}
+          key: v10-cargo-cache-{{ arch }}-{{ .Branch }}
           paths:
             - target
             - /usr/local/cargo
-            - ~/.cargo
+            - $HOME/.cargo/registry
 
 workflows:
   version: 2

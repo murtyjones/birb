@@ -82,7 +82,7 @@ fn save_new_filer_status(conn: &Connection, active: &bool, cik: &String) -> () {
 
 /// Mocks the result of an updated filing status - IE, nothing returned
 #[cfg(test)]
-fn save_new_filer_status(conn: &MockConnection, active: &bool, cik: &String) -> () {
+fn save_new_filer_status(_conn: &MockConnection, _active: &bool, _cik: &String) -> () {
     // Do nothing
     ()
 }
