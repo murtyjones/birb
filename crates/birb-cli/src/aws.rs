@@ -341,6 +341,8 @@ impl Subcommand for AwsStateless {
                            -target=aws_iam_role_policy_attachment.ecs-service-role-attachment \
                            -target=aws_cloudwatch_log_group.birb_api_log_group \
                            -target=aws_cloudwatch_log_stream.birb_api_log_stream \
+                           -target=aws_cloudwatch_log_group.birb_edgar_worker_log_group \
+                           -target=aws_cloudwatch_log_stream.birb_edgar_worker_log_stream \
                            -target=aws_vpc.main \
                            -target=aws_subnet.private \
                            -target=aws_subnet.public \

@@ -30,6 +30,20 @@ resource "aws_iam_policy" "ecs-instance-policy-secrets" {
         {
             "Effect": "Allow",
             "Action": [
+                "cloudwatch:DescribeAlarms",
+                "cloudwatch:PutMetricAlarm",
+                "logs:CreateLogStream",
+                "logs:CreateLogGroup",
+                "logs:PutLogEvents"
+            ],
+            "Resource": [
+                "${aws_cloudwatch_log_group.birb_edgar_worker_log_group.arn}",
+                "${aws_cloudwatch_log_stream.birb_edgar_worker_log_stream.arn}"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
                 "secretsmanager:GetSecretValue"
             ],
             "Resource": [
