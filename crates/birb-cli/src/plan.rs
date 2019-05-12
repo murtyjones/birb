@@ -130,7 +130,7 @@ impl Subcommand for Plan {
             Plan::Stateless => {
                 run_str_in_bash(
                     "
-                    terraform plan -var-file=terraform/production.secret.tfvars \
+                      terraform plan -var-file=terraform/production.secret.tfvars \
                            -out=plan \
                            -target=aws_alb.main \
                            -target=aws_alb_target_group.app \
@@ -144,10 +144,19 @@ impl Subcommand for Plan {
                            -target=aws_ecs_task_definition.app \
                            -target=aws_launch_configuration.ecs-launch-configuration \
                            -target=aws_autoscaling_group.ecs-autoscaling-group \
+                           -target=aws_appautoscaling_target.target \
+                           -target=aws_appautoscaling_policy.up \
+                           -target=aws_appautoscaling_policy.down \
+                           -target=aws_cloudwatch_metric_alarm.service_cpu_high \
+                           -target=aws_cloudwatch_metric_alarm.service_cpu_low \
                            -target=aws_ecs_cluster.birb-edgar-cluster \
                            -target=aws_ecs_task_definition.birb-edgar-task \
                            -target=aws_ecs_service.birb-edgar-service \
                            -target=aws_iam_role.ecs-instance-role \
+                           -target=aws_iam_role_policy_attachment.ecs-instance-role-attachment \
+                           -target=aws_iam_instance_profile.ecs-instance-profile \
+                           -target=aws_iam_role.ecs-service-role \
+                           -target=aws_iam_role_policy_attachment.ecs-service-role-attachment \
                            -target=aws_cloudwatch_log_group.birb_api_log_group \
                            -target=aws_cloudwatch_log_stream.birb_api_log_stream \
                            -target=aws_vpc.main \

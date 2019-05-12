@@ -41,11 +41,9 @@ resource "aws_launch_configuration" "ecs-launch-configuration" {
   }
 
   associate_public_ip_address = false
-
-  #
+  
   # register the cluster name with ecs-agent which will in turn coord
   # with the AWS api about the cluster
-  #
   user_data = <<EOF
 #!/bin/bash
 echo ECS_CLUSTER=birb-edgar-cluster >> /etc/ecs/ecs.config

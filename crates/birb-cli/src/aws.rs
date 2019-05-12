@@ -323,6 +323,11 @@ impl Subcommand for AwsStateless {
                            -target=aws_ecs_task_definition.app \
                            -target=aws_launch_configuration.ecs-launch-configuration \
                            -target=aws_autoscaling_group.ecs-autoscaling-group \
+                           -target=aws_appautoscaling_target.target \
+                           -target=aws_appautoscaling_policy.up \
+                           -target=aws_appautoscaling_policy.down \
+                           -target=aws_cloudwatch_metric_alarm.service_cpu_high \
+                           -target=aws_cloudwatch_metric_alarm.service_cpu_low \
                            -target=aws_ecs_cluster.birb-edgar-cluster \
                            -target=aws_ecs_task_definition.birb-edgar-task \
                            -target=aws_ecs_service.birb-edgar-service \
