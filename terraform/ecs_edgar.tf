@@ -2,15 +2,14 @@ data "template_file" "birb_edgar_worker_app" {
   template = "${file("terraform/templates/ecs/birb_edgar_worker.json.tpl")}"
 
   vars {
-    repo_url         = "${aws_ecr_repository.birb_edgar_worker_repo.repository_url}"
-    app_name         = "birb-edgar"
-    cpu              = "${var.birb_edgar_worker_cpu}"
-    memory           = "${var.birb_edgar_worker_memory}"
-    aws_region       = "${var.aws_region}"
-    ROCKET_DATABASES = "${aws_secretsmanager_secret.ROCKET_DATABASES.arn}"
+    repo_url     = "${aws_ecr_repository.birb_edgar_worker_repo.repository_url}"
+    app_name     = "birb-edgar"
+    cpu          = "${var.birb_edgar_worker_cpu}"
+    memory       = "${var.birb_edgar_worker_memory}"
+    aws_region   = "${var.aws_region}"
+    DATABASE_URI = "${aws_secretsmanager_secret.DATABASE_URI.arn}"
   }
 }
-
 
 # the ECS optimized AMI's change by region. You can lookup the AMI here:
 # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-optimized_AMI.html
@@ -72,18 +71,14 @@ resource "aws_ecs_cluster" "birb-edgar-cluster" {
 }
 
 resource "aws_ecs_task_definition" "birb-edgar-task" {
-  family                   = "birb-edgar-worker-task"
-  execution_role_arn       = "${aws_iam_role.ecs-instance-role.arn}"
-  container_definitions    = "${data.template_file.birb_edgar_worker_app.rendered}"
+  family                = "birb-edgar-worker-task"
+  execution_role_arn    = "${aws_iam_role.ecs-instance-role.arn}"
+  container_definitions = "${data.template_file.birb_edgar_worker_app.rendered}"
 }
 
 resource "aws_ecs_service" "birb-edgar-service" {
-  name = "birb-edgar-service"
-  cluster = "${aws_ecs_cluster.birb-edgar-cluster.id}"
+  name            = "birb-edgar-service"
+  cluster         = "${aws_ecs_cluster.birb-edgar-cluster.id}"
   task_definition = "${aws_ecs_task_definition.birb-edgar-task.arn}"
-  desired_count = 1
+  desired_count   = 1
 }
-
-
-
-

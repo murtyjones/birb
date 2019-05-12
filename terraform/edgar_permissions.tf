@@ -9,11 +9,12 @@ data "aws_iam_policy_document" "ecs-instance-policy" {
     actions = ["sts:AssumeRole"]
 
     principals {
-      type        = "Service"
+      type = "Service"
+
       identifiers = [
         "ec2.amazonaws.com",
-        "ecs.amazonaws.com", // TODO try deleting this line
-        "ecs-tasks.amazonaws.com"
+        "ecs.amazonaws.com",       // TODO try deleting this line
+        "ecs-tasks.amazonaws.com",
       ]
     }
   }

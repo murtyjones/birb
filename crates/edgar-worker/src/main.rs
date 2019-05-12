@@ -1,5 +1,7 @@
 extern crate api_lib;
 use std::env;
+use std::thread;
+use std::time::Duration;
 
 use api_lib::models::filer::Model as Filer;
 use filer_status_lib::FilerStatus;
@@ -10,6 +12,14 @@ use postgres::{Connection, TlsMode};
 
 /// Find a filer with no status and update it.
 pub fn main() -> () {
+    // Spawn one second timer
+    thread::spawn(move || loop {
+        thread::sleep(Duration::from_secs(1));
+        update_one_filer();
+    });
+}
+
+fn update_one_filer() -> () {
     let conn = get_connection();
     let cik = get_cik_for_unset_filer(&conn);
     // Get Latest status for filer
@@ -24,7 +34,8 @@ pub fn main() -> () {
 /// Get the database connection
 #[cfg(not(test))]
 fn get_connection() -> Connection {
-    Connection::connect(env::var("DATABASE_URI").unwrap(), TlsMode::None).unwrap()
+    let db_uri = env::var("DATABASE_URI").expect("No connection string found!");
+    Connection::connect(db_uri, TlsMode::None).expect("Unable to connect to database!")
 }
 
 /// Represents a fake database connection

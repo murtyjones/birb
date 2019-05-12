@@ -14,8 +14,8 @@
         },
         "secrets": [
             {
-                "name"     : "ROCKET_DATABASES",
-                "valueFrom": "${ROCKET_DATABASES}"
+                "name"     : "DATABASE_URI",
+                "valueFrom": "${DATABASE_URI}"
             }
         ]
     }

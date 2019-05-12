@@ -25,10 +25,6 @@ filer-status = { path = "../filer-status", version = "0.1.0" }
 version = "0.4.0"
 features = ["postgres_pool"]
 
-[lib]
-name = "edgar_worker_lib"
-path = "src/lib.rs"
-
 [[bin]]
-name = "edgar_worker_bin"
-path = "src/bin.rs"
+name="edgar-worker"
+path="src/main.rs"

@@ -56,6 +56,7 @@ impl FilerStatus {
     #[cfg(not(test))] // TODO use "failure" crate instead of reqwest::Error
     fn get_10q_doc(&self) -> Result<String, reqwest::Error> {
         let url = format!("https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK={}&type=10-Q&dateb=&owner=include&count=40", self.0.cik);
+        println!("Requesting from sec.gov");
         println!("{}", url);
         reqwest::get(url.as_str())?.text()
     }
