@@ -1,5 +1,7 @@
 extern crate api_lib;
 use std::env;
+
+use std::sync::mpsc::channel;
 use std::thread;
 use std::time::Duration;
 
@@ -12,11 +14,24 @@ use postgres::{Connection, TlsMode};
 
 /// Find a filer with no status and update it.
 pub fn main() -> () {
+    // Only make requests to the SEC every 5 seconds for now,
+    // to be on the safe side.
+    const SECONDS_DELAY: u16 = 5;
+
+    // Create channels for sending and receieving
+    let (one_tx, one_rx) = channel();
+
     // Spawn one second timer
     thread::spawn(move || loop {
-        thread::sleep(Duration::from_secs(1));
-        update_one_filer();
+        thread::sleep(Duration::from_secs(SECONDS_DELAY.into()));
+        one_tx.send("next iteration").unwrap();
     });
+
+    loop {
+        let _ = one_rx.try_recv().map(|_| {
+            update_one_filer();
+        });
+    }
 }
 
 fn update_one_filer() -> () {
