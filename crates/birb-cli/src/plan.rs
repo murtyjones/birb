@@ -154,6 +154,7 @@ impl Subcommand for Plan {
                            -target=aws_ecs_service.birb-edgar-service \
                            -target=aws_iam_role.ecs-instance-role \
                            -target=aws_iam_role_policy_attachment.ecs-instance-role-attachment \
+                           -target=aws_iam_role_policy_attachment.ecs-instance-role-attachment-secrets \
                            -target=aws_iam_instance_profile.ecs-instance-profile \
                            -target=aws_iam_role.ecs-service-role \
                            -target=aws_iam_role_policy_attachment.ecs-service-role-attachment \

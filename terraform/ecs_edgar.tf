@@ -2,7 +2,7 @@ data "template_file" "birb_edgar_worker_app" {
   template = "${file("terraform/templates/ecs/birb_edgar_worker.json.tpl")}"
 
   vars {
-    repo_url         = "${aws_ecr_repository.birb_api_repo.repository_url}"
+    repo_url         = "${aws_ecr_repository.birb_edgar_worker_repo.repository_url}"
     app_name         = "birb-edgar"
     cpu              = "${var.birb_edgar_worker_cpu}"
     memory           = "${var.birb_edgar_worker_memory}"
@@ -75,7 +75,7 @@ resource "aws_ecs_cluster" "birb-edgar-cluster" {
 resource "aws_ecs_task_definition" "birb-edgar-task" {
   family                   = "birb-edgar-worker-task"
   execution_role_arn       = "${aws_iam_role.ecs-instance-role.arn}"
-  container_definitions    = "${data.template_file.birb_api_app.rendered}"
+  container_definitions    = "${data.template_file.birb_edgar_worker_app.rendered}"
 }
 
 resource "aws_ecs_service" "birb-edgar-service" {
