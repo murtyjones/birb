@@ -1,4 +1,5 @@
 extern crate api_lib;
+extern crate openssl_probe;
 use std::env;
 
 use std::sync::mpsc::channel;
@@ -14,6 +15,7 @@ use postgres::{Connection, TlsMode};
 
 /// Find a filer with no status and update it.
 pub fn main() -> () {
+    openssl_probe::init_ssl_cert_env_vars();
     // Only make requests to the SEC every 5 seconds for now,
     // to be on the safe side.
     const SECONDS_DELAY: u16 = 5;
