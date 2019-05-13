@@ -73,7 +73,7 @@ resource "aws_security_group" "birb_rds" {
       "${aws_security_group.bastion.id}",
 
       # Allow lambdas to access RDS
-      "${aws_security_group.lambdas.id}",
+      "${aws_security_group.birb-edgar.id}",
     ]
   }
 
@@ -116,9 +116,9 @@ resource "aws_security_group" "bastion" {
 }
 
 # Lambdas will not be accessible from the internet, but able to make any outbound calls
-resource "aws_security_group" "lambdas" {
-  name        = "birb-lambdas-security-group"
-  description = "no inbound, only outband"
+resource "aws_security_group" "birb-edgar" {
+  name        = "birb-edgar-security-group"
+  description = "no inbound, only outbound"
   vpc_id      = "${aws_vpc.main.id}"
 
   egress {

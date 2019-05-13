@@ -372,7 +372,7 @@ impl Subcommand for AwsStateless {
                            -target=aws_security_group.ecs_task_workers \
                            -target=aws_security_group.birb_rds \
                            -target=aws_security_group.bastion \
-                           -target=aws_security_group.lambdas \
+                           -target=aws_security_group.birb-edgar \
                            terraform/
                 ",
                 )?;

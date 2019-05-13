@@ -25,8 +25,11 @@ data "template_file" "birb_edgar_worker_app" {
 resource "aws_launch_configuration" "ecs-launch-configuration" {
   name                 = "ecs-launch-configuration"
   image_id             = "ami-0bc08634af113cccb"
-  instance_type        = "t2.micro"
+  instance_type        = "t3.medium"
   iam_instance_profile = "${aws_iam_instance_profile.ecs-instance-profile.id}"
+  security_groups = [
+    "${aws_security_group.birb-edgar.id}"
+  ]
 
   root_block_device {
     volume_type           = "standard"
