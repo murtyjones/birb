@@ -192,7 +192,6 @@ impl Subcommand for AwsEdgar {
                        -target=aws_iam_instance_profile.ecs-instance-profile \
                        -target=aws_iam_role.ecs-service-role \
                        -target=aws_iam_role_policy_attachment.ecs-service-role-attachment \
-                       -target=aws_ecr_repository.birb_edgar_worker_repo \
                        terraform/
                 ",
                 )?;
