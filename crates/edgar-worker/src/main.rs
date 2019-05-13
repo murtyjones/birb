@@ -118,8 +118,8 @@ mod test {
     use super::*;
 
     #[test]
-    fn test_do_filer_status_update() {
-        let _r = main();
+    fn test_update_one_filer() {
+        let _r = update_one_filer();
     }
 
 }
