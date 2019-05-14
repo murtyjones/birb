@@ -1,4 +1,4 @@
-FROM scratch
+FROM alpine:latest
 
 # This is run from the project-root/out which has the binary in it as well
 COPY ./edgar-worker /edgar-worker
