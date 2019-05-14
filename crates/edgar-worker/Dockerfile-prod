@@ -1,8 +1,12 @@
+# alpine is needed so that ca-certificates can be installed
 FROM alpine:latest
 
 # This is run from the project-root/out which has the binary in it as well
 COPY ./edgar-worker /edgar-worker
 
+# Install ca-certificates so that outgoing requests to sec.gov, etc.
+# can have their SSL certificates verified. This has to do with
+# the fact that OpenSSL is being statically included in our binary.
 RUN apk --no-cache add ca-certificates
 
 ENTRYPOINT ["/edgar-worker"]
