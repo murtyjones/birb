@@ -17,7 +17,6 @@ lambda_runtime = "0.2.0"
 simple_logger = "1.0.1"
 log = "0.4.6"
 more-asserts = "0.2.1"
-openssl-probe = "0.1.2"
 
 api = { path = "../api", version = "0.1.0" }
 filer-status = { path = "../filer-status", version = "0.1.0" }
