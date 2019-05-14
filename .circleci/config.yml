@@ -36,8 +36,8 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v10-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
-            - v10-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
+            - v1-cargo-cache-{{ arch }}-{{ .Branch }}-{{ checksum "Cargo.lock" }} # Cache for the branch that you're on
+            - v1-cargo-cache-{{ arch }}-{{ checksum "Cargo.lock" }} # If that doesn't exist, use the default cache across all branches
       - attach_workspace:
           at: bb-cli-workspace
 
@@ -52,8 +52,8 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v10-cargo-cache-{{ arch }}-{{ .Branch }} # Cache for the branch that you're on
-            - v10-cargo-cache-{{ arch }}- # If that doesn't exist, use the default cache across all branches
+            - v1-cargo-cache-{{ arch }}-{{ .Branch }}-{{ checksum "Cargo.lock" }} # Cache for the branch that you're on
+            - v1-cargo-cache-{{ arch }}-{{ checksum "Cargo.lock" }} # If that doesn't exist, use the default cache across all branches
       - attach_workspace:
           at: bb-cli-workspace
       - run:
@@ -69,7 +69,7 @@ jobs:
           name: Deploy edgar worker binary
           command: scripts/build_push_edgar_worker.sh
       - save_cache:
-          key: v10-cargo-cache-{{ arch }}-{{ .Branch }}
+          key: v1-cargo-cache-{{ arch }}-{{ .Branch }}-{{ checksum "Cargo.lock" }}
           paths:
             - target
             - /usr/local/cargo
