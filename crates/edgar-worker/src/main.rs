@@ -14,9 +14,9 @@ use postgres::{Connection, TlsMode};
 
 /// Find a filer with no status and update it.
 pub fn main() -> () {
-    // Only make requests to the SEC every 5 seconds for now,
-    // to be on the safe side.
-    const SECONDS_DELAY: u16 = 5;
+    // Only make one request to the SEC every 3 seconds,
+    // to be on the safe side until the worker is well tested.
+    const SECONDS_DELAY: u16 = 3;
 
     // Create channels for sending and receieving
     let (one_tx, one_rx) = channel();
