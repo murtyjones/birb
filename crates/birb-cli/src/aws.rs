@@ -6,6 +6,9 @@ pub enum Aws {
     /// Deploy all infrastructure
     #[structopt(name = "all")]
     All(AwsAll),
+    /// Deploy the API
+    #[structopt(name = "api")]
+    Api(AwsApi),
     /// Deploy the Edgar worker
     #[structopt(name = "edgar")]
     Edgar(AwsEdgar),
@@ -33,6 +36,7 @@ impl Subcommand for Aws {
     fn run(&self) -> Result<(), failure::Error> {
         match self {
             Aws::All(all) => all.run(),
+            Aws::Api(api) => api.run(),
             Aws::Edgar(edgar) => edgar.run(),
             Aws::Bastion(bastion) => bastion.run(),
             Aws::RDS(rds) => rds.run(),
@@ -53,7 +57,16 @@ pub enum AwsAll {
     Down,
 }
 
-/// Deploy the Edgar Worker
+/// Manage the API infrastructure
+#[derive(Debug, StructOpt)]
+pub enum AwsApi {
+    #[structopt(name = "up")]
+    Up,
+    #[structopt(name = "down")]
+    Down,
+}
+
+/// Manage the Edgar Worker infrastructure
 #[derive(Debug, StructOpt)]
 pub enum AwsEdgar {
     #[structopt(name = "up")]
@@ -145,6 +158,88 @@ impl Subcommand for TfPlan {
     }
 }
 
+impl Subcommand for AwsApi {
+    fn run(&self) -> Result<(), failure::Error> {
+        match self {
+            AwsApi::Up => {
+                // Not currently worrying about whether or not the deploy was successful
+                let _plan = run_str_in_bash(
+                    "
+                    terraform plan -var-file=terraform/production.secret.tfvars \
+                       -out=plan \
+                       -target=aws_alb.main \
+                       -target=aws_alb_target_group.app \
+                       -target=aws_alb_listener.front_end \
+                       -target=aws_security_group.lb \
+                       -target=aws_security_group.lb \
+                       -target=aws_ecs_cluster.main \
+                       -target=aws_ecs_service.main \
+                       -target=aws_ecs_task_definition.app \
+                       -target=aws_appautoscaling_target.target \
+                       -target=aws_appautoscaling_policy.up \
+                       -target=aws_appautoscaling_policy.down \
+                       -target=aws_cloudwatch_metric_alarm.service_cpu_high \
+                       -target=aws_cloudwatch_metric_alarm.service_cpu_low \
+                       -target=aws_cloudwatch_log_group.birb_api_log_group \
+                       -target=aws_cloudwatch_log_stream.birb_api_log_stream \
+                       -target=aws_iam_role.autoscale_role \
+                       -target=aws_iam_policy.autoscale_policy \
+                       -target=aws_iam_role_policy_attachment.autoscale-attach \
+                       -target=aws_iam_role.task_execution_role \
+                       -target=aws_iam_policy.task_execution_policy \
+                       -target=aws_iam_role_policy_attachment.task-execution-attach \
+                       -target=aws_route53_record.birb \
+                       -target=aws_security_group.lb \
+                       -target=aws_security_group.ecs_tasks \
+                       terraform/
+                ",
+                )?;
+
+                let _result = run_str_in_bash(
+                    "
+                    bb aws plan up
+                ",
+                )?;
+            }
+            AwsApi::Down => {
+                let _reuslt = run_str_in_bash(
+                    "
+                    terraform destroy -var-file=terraform/production.secret.tfvars \
+                       -auto-approve \
+                       -target=aws_alb.main \
+                       -target=aws_alb_target_group.app \
+                       -target=aws_alb_listener.front_end \
+                       -target=aws_security_group.lb \
+                       -target=aws_security_group.lb \
+                       -target=aws_ecs_cluster.main \
+                       -target=aws_ecs_service.main \
+                       -target=aws_ecs_task_definition.app \
+                       -target=aws_appautoscaling_target.target \
+                       -target=aws_appautoscaling_policy.up \
+                       -target=aws_appautoscaling_policy.down \
+                       -target=aws_cloudwatch_metric_alarm.service_cpu_high \
+                       -target=aws_cloudwatch_metric_alarm.service_cpu_low \\
+                       -target=aws_cloudwatch_log_group.birb_api_log_group \
+                       -target=aws_cloudwatch_log_stream.birb_api_log_stream \
+                       -target=aws_iam_role.autoscale_role \
+                       -target=aws_iam_policy.autoscale_policy \
+                       -target=aws_iam_role_policy_attachment.autoscale-attach \
+                       -target=aws_iam_role.task_execution_role \
+                       -target=aws_iam_policy.task_execution_policy \
+                       -target=aws_iam_role_policy_attachment.task-execution-attach \
+                       -target=aws_route53_record.birb \
+                       -target=aws_security_group.lb \
+                       -target=aws_security_group.ecs_tasks \
+                       terraform/
+                ",
+                )?;
+            }
+        }
+
+        Ok(())
+    }
+}
+
 impl Subcommand for AwsEdgar {
     fn run(&self) -> Result<(), failure::Error> {
         match self {
@@ -152,21 +247,7 @@ impl Subcommand for AwsEdgar {
                 // Not currently worrying about whether or not the deploy was successful
                 let _plan = run_str_in_bash(
                     "
-                    terraform plan -var-file=terraform/production.secret.tfvars \
-                       -out=plan \
-                       -target=aws_launch_configuration.ecs-launch-configuration \
-                       -target=aws_autoscaling_group.ecs-autoscaling-group \
-                       -target=aws_ecs_cluster.birb-edgar-cluster \
-                       -target=aws_ecs_task_definition.birb-edgar-task \
-                       -target=aws_ecs_service.birb-edgar-service \
-                       -target=aws_iam_role.ecs-instance-role \
-                       -target=aws_iam_role_policy_attachment.ecs-instance-role-attachment \
-                       -target=aws_iam_role_policy_attachment.ecs-instance-role-attachment-secrets \
-                       -target=aws_iam_instance_profile.ecs-instance-profile \
-                       -target=aws_iam_role.ecs-service-role \
-                       -target=aws_iam_role_policy_attachment.ecs-service-role-attachment \
-                       -target=aws_ecr_repository.birb_edgar_worker_repo \
-                       terraform/
+                    bb plan edgar
                 ",
                 )?;
 
@@ -369,7 +450,6 @@ impl Subcommand for AwsStateless {
                            -target=aws_secretsmanager_secret_version.DATABASE_URI \
                            -target=aws_security_group.lb \
                            -target=aws_security_group.ecs_tasks \
-                           -target=aws_security_group.ecs_task_workers \
                            -target=aws_security_group.birb_rds \
                            -target=aws_security_group.bastion \
                            -target=aws_security_group.birb-edgar \

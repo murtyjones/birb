@@ -64,8 +64,18 @@ impl Subcommand for Plan {
                     "
                     terraform plan -var-file=terraform/production.secret.tfvars \
                            -out=plan \
-                           -target=aws_lambda_function.edgar_worker \
-                           -target=aws_iam_role.edgar_worker \
+                           -target=aws_launch_configuration.ecs-launch-configuration \
+                           -target=aws_autoscaling_group.ecs-autoscaling-group \
+                           -target=aws_ecs_cluster.birb-edgar-cluster \
+                           -target=aws_ecs_task_definition.birb-edgar-task \
+                           -target=aws_ecs_service.birb-edgar-service \
+                           -target=aws_iam_role.ecs-instance-role \
+                           -target=aws_iam_role_policy_attachment.ecs-instance-role-attachment \
+                           -target=aws_iam_role_policy_attachment.ecs-instance-role-attachment-secrets \
+                           -target=aws_iam_instance_profile.ecs-instance-profile \
+                           -target=aws_iam_role.ecs-service-role \
+                           -target=aws_iam_role_policy_attachment.ecs-service-role-attachment \
+                           -target=aws_ecr_repository.birb_edgar_worker_repo \
                            terraform/
                 ",
                 )
@@ -190,7 +200,6 @@ impl Subcommand for Plan {
                            -target=aws_secretsmanager_secret_version.DATABASE_URI \
                            -target=aws_security_group.lb \
                            -target=aws_security_group.ecs_tasks \
-                           -target=aws_security_group.ecs_task_workers \
                            -target=aws_security_group.birb_rds \
                            -target=aws_security_group.bastion \
                            -target=aws_security_group.birb-edgar \
