@@ -6,6 +6,6 @@ COPY ./edgar-worker /edgar-worker
 ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 ENV SSL_CERT_DIR=/etc/ssl/certs
 
-RUN apt-get install ca-certificates
+RUN apk add ca-certificates
 
 ENTRYPOINT ["/edgar-worker"]
