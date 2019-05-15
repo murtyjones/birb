@@ -54,7 +54,7 @@ EOF
 # need an ASG so we can easily add more ecs host nodes as necessary
 resource "aws_autoscaling_group" "ecs-autoscaling-group" {
   name             = "ecs-autoscaling-group"
-  max_size         = "2"
+  max_size         = "1"
   min_size         = "1"
   desired_capacity = "1"
 

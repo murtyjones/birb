@@ -268,11 +268,14 @@ impl Subcommand for AwsEdgar {
                        -target=aws_ecs_task_definition.birb-edgar-task \
                        -target=aws_ecs_service.birb-edgar-service \
                        -target=aws_iam_role.ecs-instance-role \
+                       -target=aws_iam_policy.ecs-instance-policy-secrets \
                        -target=aws_iam_role_policy_attachment.ecs-instance-role-attachment \
                        -target=aws_iam_role_policy_attachment.ecs-instance-role-attachment-secrets \
                        -target=aws_iam_instance_profile.ecs-instance-profile \
                        -target=aws_iam_role.ecs-service-role \
                        -target=aws_iam_role_policy_attachment.ecs-service-role-attachment \
+                       -target=aws_cloudwatch_log_group.birb_edgar_worker_log_group \
+                       -target=aws_cloudwatch_log_stream.birb_edgar_worker_log_stream \
                        terraform/
                 ",
                 )?;

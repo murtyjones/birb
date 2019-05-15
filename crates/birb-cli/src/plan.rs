@@ -59,7 +59,6 @@ impl Subcommand for Plan {
                 Ok(())
             }
             Plan::Edgar => {
-                // TODO make this actually plan the right things
                 run_str_in_bash(
                     "
                     terraform plan -var-file=terraform/production.secret.tfvars \
@@ -70,12 +69,26 @@ impl Subcommand for Plan {
                            -target=aws_ecs_task_definition.birb-edgar-task \
                            -target=aws_ecs_service.birb-edgar-service \
                            -target=aws_iam_role.ecs-instance-role \
+                           -target=aws_iam_policy.ecs-instance-policy-secrets \
                            -target=aws_iam_role_policy_attachment.ecs-instance-role-attachment \
                            -target=aws_iam_role_policy_attachment.ecs-instance-role-attachment-secrets \
                            -target=aws_iam_instance_profile.ecs-instance-profile \
                            -target=aws_iam_role.ecs-service-role \
                            -target=aws_iam_role_policy_attachment.ecs-service-role-attachment \
                            -target=aws_ecr_repository.birb_edgar_worker_repo \
+                           -target=aws_cloudwatch_log_group.birb_edgar_worker_log_group \
+                           -target=aws_cloudwatch_log_stream.birb_edgar_worker_log_stream \
+                           -target=aws_vpc.main \
+                           -target=aws_subnet.private \
+                           -target=aws_subnet.public \
+                           -target=aws_internet_gateway.gw \
+                           -target=aws_route.internet_access \
+                           -target=aws_eip.gw \
+                           -target=aws_nat_gateway.gw \
+                           -target=aws_route_table.private \
+                           -target=aws_route_table_association.private \
+                           -target=aws_secretsmanager_secret.DATABASE_URI \
+                           -target=aws_secretsmanager_secret_version.DATABASE_URI \
                            terraform/
                 ",
                 )
