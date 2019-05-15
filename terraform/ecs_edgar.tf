@@ -25,7 +25,7 @@ data "template_file" "birb_edgar_app" {
 resource "aws_launch_configuration" "edgar_launch_configuration" {
   name_prefix          = "edgar-launch-config-"
   image_id             = "ami-0bc08634af113cccb"
-  instance_type        = "t3.micro"
+  instance_type        = "t3.small"
   iam_instance_profile = "${aws_iam_instance_profile.edgar_instance_profile.id}"
 
   security_groups = [

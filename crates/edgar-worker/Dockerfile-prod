@@ -9,4 +9,7 @@ COPY ./edgar-worker /edgar-worker
 # the fact that OpenSSL is being statically included in our binary.
 RUN apk --no-cache add ca-certificates
 
+# Set log level
+ENV RUST_LOG=info
+
 ENTRYPOINT ["/edgar-worker"]

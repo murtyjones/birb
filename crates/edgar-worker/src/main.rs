@@ -1,6 +1,7 @@
 extern crate api_lib;
 #[macro_use]
 extern crate log;
+extern crate env_logger;
 use api_lib::models::filer::Model as Filer;
 use filer_status_lib::FilerStatus;
 use postgres::{Connection, TlsMode};
@@ -11,6 +12,9 @@ use std::time::Duration;
 
 /// Find a filer with no status and update it.
 pub fn main() -> () {
+    // Initialize logging
+    env_logger::init();
+
     // Make one request to SEC.gov every 2 seconds
     const SECONDS_DELAY: u16 = 2;
 
