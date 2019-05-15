@@ -1,6 +1,5 @@
 use crate::bb_filesystem::bb_root_dir;
 use crate::{run_str_in_bash, Subcommand};
-use std::path::PathBuf;
 
 /// SSH into DB via Bastion
 #[derive(Debug, StructOpt)]

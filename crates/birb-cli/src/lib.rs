@@ -9,7 +9,6 @@
 
 #[macro_use]
 extern crate structopt;
-#[macro_use]
 extern crate failure;
 
 mod aws;

@@ -1,5 +1,3 @@
-use crate::bash_completion::BashCompletionGenerator;
-use crate::bb_filesystem::bb_cli_dir;
 use crate::{run_str_in_bash, Subcommand};
 
 #[derive(Debug, StructOpt)]
@@ -20,9 +18,7 @@ impl Subcommand for Seed {
     fn run(&self) -> Result<(), failure::Error> {
         match self {
             Seed::Up(up) => {
-                let cmd = format!(
-                    "./scripts/seed.sh {} up", up.env
-                );
+                let cmd = format!("./scripts/seed.sh {} up", up.env);
                 run_str_in_bash(cmd.as_str()).unwrap();
                 Ok(())
             }

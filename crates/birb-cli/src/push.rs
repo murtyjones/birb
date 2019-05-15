@@ -1,5 +1,3 @@
-use crate::bash_completion::BashCompletionGenerator;
-use crate::bb_filesystem::bb_cli_dir;
 use crate::{run_str_in_bash, Subcommand};
 
 /// Deploy different applications / services
