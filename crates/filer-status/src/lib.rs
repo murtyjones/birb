@@ -5,7 +5,6 @@
 #![deny(missing_docs)]
 
 extern crate api_lib;
-extern crate bson;
 extern crate failure;
 #[macro_use]
 extern crate html5ever;
