@@ -1,6 +1,6 @@
 [
     {
-        "name"            : "birb-api-app",
+        "name"            : "birb-api",
         "image"           : "${repo_url}",
         "cpu"             : ${birb_api_cpu},
         "memory"          : ${birb_api_memory},
@@ -8,7 +8,7 @@
         "logConfiguration": {
             "logDriver": "awslogs",
             "options"  : {
-                "awslogs-group"        : "/ecs/birb-api-app",
+                "awslogs-group"        : "/ecs/birb-api",
                 "awslogs-region"       : "${aws_region}",
                 "awslogs-stream-prefix": "ecs"
             }

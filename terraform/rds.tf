@@ -1,9 +1,9 @@
-resource "aws_db_subnet_group" "birb" {
+resource "aws_db_subnet_group" "rds_subnet" {
   name       = "birb"
   subnet_ids = ["${aws_subnet.private.*.id}"]
 }
 
-resource "aws_db_instance" "birb" {
+resource "aws_db_instance" "rds_instance" {
   name                   = "${var.rds_db_name}"
   identifier             = "birb"
   username               = "${var.rds_username}"
@@ -14,8 +14,8 @@ resource "aws_db_instance" "birb" {
   instance_class         = "${var.rds_instance}"
   allocated_storage      = "10"
   storage_encrypted      = false
-  vpc_security_group_ids = ["${aws_security_group.birb_rds.id}"]
-  db_subnet_group_name   = "${aws_db_subnet_group.birb.name}"
+  vpc_security_group_ids = ["${aws_security_group.rds_security_group.id}"]
+  db_subnet_group_name   = "${aws_db_subnet_group.rds_subnet.name}"
   multi_az               = "${var.multi_az}"
   storage_type           = "gp2"
   publicly_accessible    = false

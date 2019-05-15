@@ -2,7 +2,7 @@ data "template_file" "birb_api_app" {
   template = "${file("terraform/templates/ecs/birb_api_app.json.tpl")}"
 
   vars {
-    repo_url         = "${aws_ecr_repository.birb_api_repo.repository_url}"
+    repo_url         = "${aws_ecr_repository.api_repo.repository_url}"
     app_name         = "birb-api"
     birb_api_cpu     = "${var.birb_api_cpu}"
     birb_api_memory  = "${var.birb_api_memory}"
@@ -13,15 +13,15 @@ data "template_file" "birb_api_app" {
 }
 
 # API Cluster
-resource "aws_ecs_cluster" "main" {
+resource "aws_ecs_cluster" "api_cluster" {
   name = "birb-api-cluster"
 }
 
 # API Service
-resource "aws_ecs_service" "main" {
+resource "aws_ecs_service" "api_service" {
   name            = "birb-api-service"
-  cluster         = "${aws_ecs_cluster.main.id}"
-  task_definition = "${aws_ecs_task_definition.app.arn}"
+  cluster         = "${aws_ecs_cluster.api_cluster.id}"
+  task_definition = "${aws_ecs_task_definition.api_task.arn}"
   desired_count   = "${var.app_count}"
   launch_type     = "FARGATE"
 
@@ -32,19 +32,19 @@ resource "aws_ecs_service" "main" {
   }
 
   load_balancer {
-    target_group_arn = "${aws_alb_target_group.app.id}"
-    container_name   = "birb-api-app"
+    target_group_arn = "${aws_alb_target_group.api_target_group.id}"
+    container_name   = "birb-api"
     container_port   = "${var.app_port}"
   }
 
   depends_on = [
-    "aws_alb_listener.front_end",
+    "aws_alb_listener.api_lb_listener",
   ]
 }
 
 # API Task Definition
-resource "aws_ecs_task_definition" "app" {
-  family                   = "birb-api-app-task"
+resource "aws_ecs_task_definition" "api_task" {
+  family                   = "birb-api-task"
   execution_role_arn       = "${aws_iam_role.task_execution_role.arn}"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]

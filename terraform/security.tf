@@ -41,7 +41,7 @@ resource "aws_security_group" "ecs_tasks" {
 }
 
 # ECS/Bastion accessible from approved IPs (w/ SSH), able to call out to anywhere (including RDS)
-resource "aws_security_group" "birb_rds" {
+resource "aws_security_group" "rds_security_group" {
   name        = "birb-rds"
   description = "specify inbound access rules"
   vpc_id      = "${aws_vpc.main.id}"

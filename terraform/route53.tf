@@ -8,8 +8,8 @@ resource "aws_route53_record" "birb" {
   type    = "A"
 
   alias {
-    name                   = "${aws_alb.main.dns_name}"
-    zone_id                = "${aws_alb.main.zone_id}"
+    name                   = "${aws_alb.api_load_balancer.dns_name}"
+    zone_id                = "${aws_alb.api_load_balancer.zone_id}"
     evaluate_target_health = true
   }
 }

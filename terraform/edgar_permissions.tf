@@ -1,5 +1,5 @@
-resource "aws_iam_role" "ecs-instance-role" {
-  name               = "ecs-instance-role"
+resource "aws_iam_role" "edgar_instance_role" {
+  name               = "edgar_instance_role"
   path               = "/"
   assume_role_policy = "${data.aws_iam_policy_document.ecs-instance-policy.json}"
 }
@@ -19,8 +19,8 @@ data "aws_iam_policy_document" "ecs-instance-policy" {
   }
 }
 
-resource "aws_iam_policy" "ecs-instance-policy-secrets" {
-  name = "ecs-instance-policy-secrets"
+resource "aws_iam_policy" "edgar_resource_access_policy" {
+  name = "edgar_resource_access_policy"
   path = "/"
 
   policy = <<EOF
@@ -37,8 +37,8 @@ resource "aws_iam_policy" "ecs-instance-policy-secrets" {
                 "logs:PutLogEvents"
             ],
             "Resource": [
-                "${aws_cloudwatch_log_group.birb_edgar_worker_log_group.arn}",
-                "${aws_cloudwatch_log_stream.birb_edgar_worker_log_stream.arn}"
+                "${aws_cloudwatch_log_group.edgar_log_group.arn}",
+                "${aws_cloudwatch_log_stream.edgar_log_stream.arn}"
             ]
         },
         {
@@ -55,38 +55,38 @@ resource "aws_iam_policy" "ecs-instance-policy-secrets" {
 EOF
 }
 
-resource "aws_iam_role_policy_attachment" "ecs-instance-role-attachment" {
-  role       = "${aws_iam_role.ecs-instance-role.name}"
+resource "aws_iam_role_policy_attachment" "edgar_instance_role_attachment" {
+  role       = "${aws_iam_role.edgar_instance_role.name}"
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
 }
 
-resource "aws_iam_role_policy_attachment" "ecs-instance-role-attachment-secrets" {
-  role       = "${aws_iam_role.ecs-instance-role.name}"
-  policy_arn = "${aws_iam_policy.ecs-instance-policy-secrets.arn}"
+resource "aws_iam_role_policy_attachment" "edgar_resource_access_attachment" {
+  role       = "${aws_iam_role.edgar_instance_role.name}"
+  policy_arn = "${aws_iam_policy.edgar_resource_access_policy.arn}"
 }
 
-resource "aws_iam_instance_profile" "ecs-instance-profile" {
-  name = "ecs-instance-profile"
+resource "aws_iam_instance_profile" "edgar_instance_profile" {
+  name = "edgar_instance_profile"
   path = "/"
-  role = "${aws_iam_role.ecs-instance-role.id}"
+  role = "${aws_iam_role.edgar_instance_role.id}"
 
   provisioner "local-exec" {
     command = "sleep 60"
   }
 }
 
-resource "aws_iam_role" "ecs-service-role" {
-  name               = "ecs-service-role"
+resource "aws_iam_role" "edgar_service_role" {
+  name               = "edgar_service_role"
   path               = "/"
-  assume_role_policy = "${data.aws_iam_policy_document.ecs-service-policy.json}"
+  assume_role_policy = "${data.aws_iam_policy_document.edgar_service_policy.json}"
 }
 
-resource "aws_iam_role_policy_attachment" "ecs-service-role-attachment" {
-  role       = "${aws_iam_role.ecs-service-role.name}"
+resource "aws_iam_role_policy_attachment" "edgar_service_role_attachment" {
+  role       = "${aws_iam_role.edgar_service_role.name}"
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceRole"
 }
 
-data "aws_iam_policy_document" "ecs-service-policy" {
+data "aws_iam_policy_document" "edgar_service_policy" {
   statement {
     actions = ["sts:AssumeRole"]
 

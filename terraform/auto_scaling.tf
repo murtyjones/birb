@@ -1,6 +1,6 @@
-resource "aws_appautoscaling_target" "target" {
+resource "aws_appautoscaling_target" "api_autoscaling_target" {
   service_namespace  = "ecs"
-  resource_id        = "service/${aws_ecs_cluster.main.name}/${aws_ecs_service.main.name}"
+  resource_id        = "service/${aws_ecs_cluster.api_cluster.name}/${aws_ecs_service.api_service.name}"
   scalable_dimension = "ecs:service:DesiredCount"
   role_arn           = "${aws_iam_role.autoscale_role.arn}"
   min_capacity       = 1
@@ -8,10 +8,10 @@ resource "aws_appautoscaling_target" "target" {
 }
 
 # Automatically scale capacity up by one
-resource "aws_appautoscaling_policy" "up" {
+resource "aws_appautoscaling_policy" "api_scale_up" {
   name               = "birb_api_scale_up"
   service_namespace  = "ecs"
-  resource_id        = "service/${aws_ecs_cluster.main.name}/${aws_ecs_service.main.name}"
+  resource_id        = "service/${aws_ecs_cluster.api_cluster.name}/${aws_ecs_service.api_service.name}"
   scalable_dimension = "ecs:service:DesiredCount"
 
   step_scaling_policy_configuration {
@@ -25,14 +25,14 @@ resource "aws_appautoscaling_policy" "up" {
     }
   }
 
-  depends_on = ["aws_appautoscaling_target.target"]
+  depends_on = ["aws_appautoscaling_target.api_autoscaling_target"]
 }
 
 # Automatically scale capacity down by one
-resource "aws_appautoscaling_policy" "down" {
+resource "aws_appautoscaling_policy" "api_scale_down" {
   name               = "birb_api_scale_down"
   service_namespace  = "ecs"
-  resource_id        = "service/${aws_ecs_cluster.main.name}/${aws_ecs_service.main.name}"
+  resource_id        = "service/${aws_ecs_cluster.api_cluster.name}/${aws_ecs_service.api_service.name}"
   scalable_dimension = "ecs:service:DesiredCount"
 
   step_scaling_policy_configuration {
@@ -46,11 +46,11 @@ resource "aws_appautoscaling_policy" "down" {
     }
   }
 
-  depends_on = ["aws_appautoscaling_target.target"]
+  depends_on = ["aws_appautoscaling_target.api_autoscaling_target"]
 }
 
 # Cloudwatch alarm that triggers the autoscaling up policy
-resource "aws_cloudwatch_metric_alarm" "service_cpu_high" {
+resource "aws_cloudwatch_metric_alarm" "api_cpu_utilization_high" {
   alarm_name          = "birb_api_cpu_utilization_high"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = "2"
@@ -61,15 +61,15 @@ resource "aws_cloudwatch_metric_alarm" "service_cpu_high" {
   threshold           = "85"
 
   dimensions {
-    ClusterName = "${aws_ecs_cluster.main.name}"
-    ServiceName = "${aws_ecs_service.main.name}"
+    ClusterName = "${aws_ecs_cluster.api_cluster.name}"
+    ServiceName = "${aws_ecs_service.api_service.name}"
   }
 
-  alarm_actions = ["${aws_appautoscaling_policy.up.arn}"]
+  alarm_actions = ["${aws_appautoscaling_policy.api_scale_up.arn}"]
 }
 
 # Cloudwatch alarm that triggers the autoscaling down policy
-resource "aws_cloudwatch_metric_alarm" "service_cpu_low" {
+resource "aws_cloudwatch_metric_alarm" "api_cpu_utilization_low" {
   alarm_name          = "birb_api_cpu_utilization_low"
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods  = "2"
@@ -80,9 +80,9 @@ resource "aws_cloudwatch_metric_alarm" "service_cpu_low" {
   threshold           = "10"
 
   dimensions {
-    ClusterName = "${aws_ecs_cluster.main.name}"
-    ServiceName = "${aws_ecs_service.main.name}"
+    ClusterName = "${aws_ecs_cluster.api_cluster.name}"
+    ServiceName = "${aws_ecs_service.api_service.name}"
   }
 
-  alarm_actions = ["${aws_appautoscaling_policy.down.arn}"]
+  alarm_actions = ["${aws_appautoscaling_policy.api_scale_down.arn}"]
 }

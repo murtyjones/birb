@@ -32,7 +32,7 @@ resource "aws_iam_policy" "autoscale_policy" {
                 "ecs:UpdateService"
             ],
             "Resource": [
-                "${aws_ecs_cluster.main.arn}"
+                "${aws_ecs_cluster.api_cluster.arn}"
             ]
         },
         {
@@ -42,7 +42,7 @@ resource "aws_iam_policy" "autoscale_policy" {
                 "cloudwatch:PutMetricAlarm"
             ],
             "Resource": [
-                "${aws_ecs_cluster.main.arn}"
+                "${aws_ecs_cluster.api_cluster.arn}"
             ]
         }
     ]
@@ -50,7 +50,7 @@ resource "aws_iam_policy" "autoscale_policy" {
 EOF
 }
 
-resource "aws_iam_role_policy_attachment" "autoscale-attach" {
+resource "aws_iam_role_policy_attachment" "api_autoscale_attachment" {
   depends_on = ["aws_iam_role.autoscale_role"]
   role       = "${aws_iam_role.autoscale_role.name}"
   policy_arn = "${aws_iam_policy.autoscale_policy.arn}"
@@ -91,7 +91,7 @@ resource "aws_iam_policy" "task_execution_policy" {
                 "ecs:UpdateService"
             ],
             "Resource": [
-                "${aws_ecs_cluster.main.arn}"
+                "${aws_ecs_cluster.api_cluster.arn}"
             ]
         },
         {
@@ -104,8 +104,8 @@ resource "aws_iam_policy" "task_execution_policy" {
                 "logs:PutLogEvents"
             ],
             "Resource": [
-                "${aws_cloudwatch_log_group.birb_api_log_group.arn}",
-                "${aws_cloudwatch_log_stream.birb_api_log_stream.arn}"
+                "${aws_cloudwatch_log_group.api_log_group.arn}",
+                "${aws_cloudwatch_log_stream.api_log_stream.arn}"
             ]
         },
         {
@@ -131,7 +131,7 @@ resource "aws_iam_policy" "task_execution_policy" {
 EOF
 }
 
-resource "aws_iam_role_policy_attachment" "task-execution-attach" {
+resource "aws_iam_role_policy_attachment" "api_execution_attachment" {
   depends_on = ["aws_iam_role.task_execution_role"]
   role       = "${aws_iam_role.task_execution_role.name}"
   policy_arn = "${aws_iam_policy.task_execution_policy.arn}"
