@@ -5,8 +5,7 @@ build-release:
 	# build binary
 	docker run --rm \
 		-v cargo-cache:/usr/local/cargo \
-		-v target-cache:$$PWD/target \
-		-v mac-cargo-cache:$$HOME/.cargo/registry \
+		-v cargo-bin-cache:$$HOME/.cargo/bin \
 		-v $$PWD:/volume \
 		-w /volume \
 		-it clux/muslrust:nightly \
