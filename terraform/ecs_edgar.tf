@@ -23,9 +23,9 @@ data "template_file" "birb_edgar_app" {
 # so that we can ssh into an ecs host from bastion box
 
 resource "aws_launch_configuration" "edgar_launch_configuration" {
-  name                 = "edgar_launch_configuration"
+  name_prefix          = "edgar-launch-config-"
   image_id             = "ami-0bc08634af113cccb"
-  instance_type        = "t3.small"
+  instance_type        = "t3.micro"
   iam_instance_profile = "${aws_iam_instance_profile.edgar_instance_profile.id}"
   security_groups = [
     "${aws_security_group.birb-edgar.id}"
