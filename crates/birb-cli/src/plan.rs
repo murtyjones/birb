@@ -63,21 +63,21 @@ impl Subcommand for Plan {
                     "
                     terraform plan -var-file=terraform/production.secret.tfvars \
                            -out=plan \
-                           -target=aws_launch_configuration.ecs-launch-configuration \
-                           -target=aws_autoscaling_group.ecs-autoscaling-group \
-                           -target=aws_ecs_cluster.birb-edgar-cluster \
-                           -target=aws_ecs_task_definition.birb-edgar-task \
-                           -target=aws_ecs_service.birb-edgar-service \
-                           -target=aws_iam_role.ecs-instance-role \
-                           -target=aws_iam_policy.ecs-instance-policy-secrets \
-                           -target=aws_iam_role_policy_attachment.ecs-instance-role-attachment \
-                           -target=aws_iam_role_policy_attachment.ecs-instance-role-attachment-secrets \
-                           -target=aws_iam_instance_profile.ecs-instance-profile \
-                           -target=aws_iam_role.ecs-service-role \
-                           -target=aws_iam_role_policy_attachment.ecs-service-role-attachment \
-                           -target=aws_ecr_repository.birb_edgar_worker_repo \
-                           -target=aws_cloudwatch_log_group.birb_edgar_worker_log_group \
-                           -target=aws_cloudwatch_log_stream.birb_edgar_worker_log_stream \
+                           -target=aws_launch_configuration.edgar_launch_configuration \
+                           -target=aws_autoscaling_group.edgar_autoscaling \
+                           -target=aws_ecs_cluster.edgar_cluster \
+                           -target=aws_ecs_task_definition.edgar_task \
+                           -target=aws_ecs_service.edgar_service \
+                           -target=aws_iam_role.edgar_instance_role \
+                           -target=aws_iam_policy.edgar_resource_access_policy \
+                           -target=aws_iam_role_policy_attachment.edgar_instance_role_attachment \
+                           -target=aws_iam_role_policy_attachment.edgar_resource_access_attachment \
+                           -target=aws_iam_instance_profile.edgar_instance_profile \
+                           -target=aws_iam_role.edgar_service_role \
+                           -target=aws_iam_role_policy_attachment.edgar_service_role_attachment \
+                           -target=aws_ecr_repository.edgar_repo \
+                           -target=aws_cloudwatch_log_group.edgar_log_group \
+                           -target=aws_cloudwatch_log_stream.edgar_log_stream \
                            -target=aws_vpc.main \
                            -target=aws_subnet.private \
                            -target=aws_subnet.public \
@@ -129,7 +129,7 @@ impl Subcommand for Plan {
                     "
                     terraform plan -var-file=terraform/production.secret.tfvars \
                            -out=plan \
-                           -target=aws_db_instance.birb \
+                           -target=aws_db_instance.rds_instance \
                            terraform/
                 ",
                 )
@@ -141,9 +141,9 @@ impl Subcommand for Plan {
                     "
                     terraform plan -var-file=terraform/production.secret.tfvars \
                            -out=plan \
-                           -target=aws_db_instance.birb \
-                           -target=aws_ecr_repository.birb_api_repo \
-                           -target=aws_ecr_repository.birb_edgar_worker_repo \
+                           -target=aws_db_instance.rds_instance \
+                           -target=aws_ecr_repository.api_repo \
+                           -target=aws_ecr_repository.edgar_repo \
                            terraform/
                 ",
                 )
@@ -155,36 +155,36 @@ impl Subcommand for Plan {
                     "
                       terraform plan -var-file=terraform/production.secret.tfvars \
                            -out=plan \
-                           -target=aws_alb.main \
-                           -target=aws_alb_target_group.app \
-                           -target=aws_alb_listener.front_end \
+                           -target=aws_alb.api_load_balancer \
+                           -target=aws_alb_target_group.api_target_group \
+                           -target=aws_alb_listener.api_lb_listener \
                            -target=aws_security_group.lb \
                            -target=aws_security_group.lb \
                            -target=aws_instance.bastion \
                            -target=aws_key_pair.bastion_key \
-                           -target=aws_ecs_cluster.main \
-                           -target=aws_ecs_service.main \
-                           -target=aws_ecs_task_definition.app \
-                           -target=aws_launch_configuration.ecs-launch-configuration \
-                           -target=aws_autoscaling_group.ecs-autoscaling-group \
-                           -target=aws_appautoscaling_target.target \
-                           -target=aws_appautoscaling_policy.up \
-                           -target=aws_appautoscaling_policy.down \
-                           -target=aws_cloudwatch_metric_alarm.service_cpu_high \
-                           -target=aws_cloudwatch_metric_alarm.service_cpu_low \
-                           -target=aws_ecs_cluster.birb-edgar-cluster \
-                           -target=aws_ecs_task_definition.birb-edgar-task \
-                           -target=aws_ecs_service.birb-edgar-service \
-                           -target=aws_iam_role.ecs-instance-role \
-                           -target=aws_iam_role_policy_attachment.ecs-instance-role-attachment \
-                           -target=aws_iam_role_policy_attachment.ecs-instance-role-attachment-secrets \
-                           -target=aws_iam_instance_profile.ecs-instance-profile \
-                           -target=aws_iam_role.ecs-service-role \
-                           -target=aws_iam_role_policy_attachment.ecs-service-role-attachment \
-                           -target=aws_cloudwatch_log_group.birb_api_log_group \
-                           -target=aws_cloudwatch_log_stream.birb_api_log_stream \
-                           -target=aws_cloudwatch_log_group.birb_edgar_worker_log_group \
-                           -target=aws_cloudwatch_log_stream.birb_edgar_worker_log_stream \
+                           -target=aws_ecs_cluster.api_cluster \
+                           -target=aws_ecs_service.api_service \
+                           -target=aws_ecs_task_definition.api_task \
+                           -target=aws_launch_configuration.edgar_launch_configuration \
+                           -target=aws_autoscaling_group.edgar_autoscaling \
+                           -target=aws_appautoscaling_target.api_autoscaling_target \
+                           -target=aws_appautoscaling_policy.api_scale_up \
+                           -target=aws_appautoscaling_policy.api_scale_down \
+                           -target=aws_cloudwatch_metric_alarm.api_cpu_utilization_high \
+                           -target=aws_cloudwatch_metric_alarm.api_cpu_utilization_low \
+                           -target=aws_ecs_cluster.edgar_cluster \
+                           -target=aws_ecs_task_definition.edgar_task \
+                           -target=aws_ecs_service.edgar_service \
+                           -target=aws_iam_role.edgar_instance_role \
+                           -target=aws_iam_role_policy_attachment.edgar_instance_role_attachment \
+                           -target=aws_iam_role_policy_attachment.edgar_resource_access_attachment \
+                           -target=aws_iam_instance_profile.edgar_instance_profile \
+                           -target=aws_iam_role.edgar_service_role \
+                           -target=aws_iam_role_policy_attachment.edgar_service_role_attachment \
+                           -target=aws_cloudwatch_log_group.api_log_group \
+                           -target=aws_cloudwatch_log_stream.api_log_stream \
+                           -target=aws_cloudwatch_log_group.edgar_log_group \
+                           -target=aws_cloudwatch_log_stream.edgar_log_stream \
                            -target=aws_vpc.main \
                            -target=aws_subnet.private \
                            -target=aws_subnet.public \
@@ -202,10 +202,10 @@ impl Subcommand for Plan {
                            -target=local_file.rds_db_password \
                            -target=aws_iam_role.autoscale_role \
                            -target=aws_iam_policy.autoscale_policy \
-                           -target=aws_iam_role_policy_attachment.autoscale-attach \
+                           -target=aws_iam_role_policy_attachment.api_autoscale_attachment \
                            -target=aws_iam_role.task_execution_role \
                            -target=aws_iam_policy.task_execution_policy \
-                           -target=aws_iam_role_policy_attachment.task-execution-attach \
+                           -target=aws_iam_role_policy_attachment.api_execution_attachment \
                            -target=aws_route53_record.birb \
                            -target=aws_secretsmanager_secret.ROCKET_DATABASES \
                            -target=aws_secretsmanager_secret_version.ROCKET_DATABASES \
@@ -213,7 +213,7 @@ impl Subcommand for Plan {
                            -target=aws_secretsmanager_secret_version.DATABASE_URI \
                            -target=aws_security_group.lb \
                            -target=aws_security_group.ecs_tasks \
-                           -target=aws_security_group.birb_rds \
+                           -target=aws_security_group.rds_security_group \
                            -target=aws_security_group.bastion \
                            -target=aws_security_group.birb-edgar \
                            terraform/
