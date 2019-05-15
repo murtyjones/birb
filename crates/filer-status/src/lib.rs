@@ -10,15 +10,15 @@ extern crate failure;
 #[macro_use]
 extern crate html5ever;
 extern crate reqwest;
-
-use std::default::Default;
-use std::string::String;
-
+#[macro_use]
+extern crate log;
 use api_lib::models::filer::Model as Filer;
 use html5ever::driver::parse_document;
 use html5ever::driver::ParseOpts;
 use html5ever::rcdom::{Handle, NodeData, RcDom};
 use html5ever::serialize::serialize;
+use std::default::Default;
+use std::string::String;
 use tendril::stream::TendrilSink;
 
 #[cfg(test)] use std::fs;
@@ -56,8 +56,8 @@ impl FilerStatus {
     #[cfg(not(test))] // TODO use "failure" crate instead of reqwest::Error
     fn get_10q_doc(&self) -> Result<String, reqwest::Error> {
         let url = format!("https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK={}&type=10-Q&dateb=&owner=include&count=40", self.0.cik);
-        println!("Requesting from sec.gov");
-        println!("{}", url);
+        info!("Requesting from sec.gov");
+        info!("url: {}", url);
         reqwest::get(url.as_str())?.text()
     }
 

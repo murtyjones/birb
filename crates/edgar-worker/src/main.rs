@@ -1,16 +1,13 @@
 extern crate api_lib;
+#[macro_use]
+extern crate log;
+use api_lib::models::filer::Model as Filer;
+use filer_status_lib::FilerStatus;
+use postgres::{Connection, TlsMode};
 use std::env;
-
 use std::sync::mpsc::channel;
 use std::thread;
 use std::time::Duration;
-
-use api_lib::models::filer::Model as Filer;
-use filer_status_lib::FilerStatus;
-
-use std::error::Error;
-
-use postgres::{Connection, TlsMode};
 
 /// Find a filer with no status and update it.
 pub fn main() -> () {
@@ -72,7 +69,7 @@ fn get_cik_for_unset_filer(conn: &Connection) -> String {
     );
     match result {
         Ok(rows) => {
-            println!("{} rows found", rows.len());
+            info!("{} rows found", rows.len());
             // Panic if # of results != 1
             assert_eq!(rows.len(), 1);
             rows.get(0) // get first (and only) result
@@ -98,7 +95,7 @@ fn save_new_filer_status(conn: &Connection, active: &bool, cik: &String) -> () {
     );
     match result {
         Ok(updated) => {
-            println!("{} rows updated with new filer status", updated);
+            info!("{} rows updated with new filer status", updated);
             assert_eq!(updated, 1);
         }
         Err(_) => panic!("Unable to update filer status for {}", cik),

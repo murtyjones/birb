@@ -12,6 +12,4 @@ pub fn main() {
     let mut fs = FilerStatus::new(f);
 
     fs.set_is_active();
-    println!("{:?}", fs);
-    // TODO save in database
 }
