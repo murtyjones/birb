@@ -27,8 +27,9 @@ resource "aws_launch_configuration" "edgar_launch_configuration" {
   image_id             = "ami-0bc08634af113cccb"
   instance_type        = "t3.micro"
   iam_instance_profile = "${aws_iam_instance_profile.edgar_instance_profile.id}"
+
   security_groups = [
-    "${aws_security_group.birb-edgar.id}"
+    "${aws_security_group.birb-edgar.id}",
   ]
 
   root_block_device {
