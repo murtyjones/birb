@@ -99,6 +99,9 @@ impl Subcommand for Plan {
                     terraform plan -var-file=terraform/production.secret.tfvars \
                            -out=plan \
                            -target=aws_instance.bastion \
+                           -target=aws_key_pair.bastion_key \
+                           -target=aws_subnet.public \
+                           -target=aws_route.internet_access \
                            terraform/
                 ",
                 )
