@@ -25,6 +25,11 @@ Company Name                                                  Form Type   CIK   
 
 ## Parsing the Index
 1. Check if the index has already been processed by searching for it by `year` and `quarter` in the **`edgar_indexes`** table. If it has been processed (IE `status` = `PROCESSED`), skip the next steps. Otherwise do the following for each row in the index:
+    1. **Upsert the `edgar_indexes` table:**
+        - `index_name` (e.g. `company.idx`)
+        - `index_year` (e.g. `2018`) <-- Integer
+        - `index_quarter` (e.g. `3`) <-- Integer
+        - `status` (e.g. null) <-- enum (`PROCESSED`, `FAILED`, `null`)
     1. **Upsert the company into the `companies` table, with the following fields:**
         - `name` (e.g. `1 800 FLOWERS COM INC`)
         - `cik` (e.g. `0001084869`) <-- Primary Key for the table
@@ -34,8 +39,5 @@ Company Name                                                  Form Type   CIK   
         - `date_filed` (e.g. `2018-09-14`) <-- Date field type
         - `form_type` (e.g. `10-K`) <-- String
         - `file_short_url` (e.g. `edgar/data/1084869/0001437749-18-017027.txt`)
-2. Once all of these upsertions are done for each company, upsert the **`edgar_indexes`** table:
-    - `index_name` (e.g. `company.idx`)
-    - `index_year` (e.g. `2018`) <-- Integer
-    - `index_quarter` (e.g. `3`) <-- Integer
-    - `status` (e.g. `PROCESSED`) <-- enum (`PROCESSED`, `FAILED`, `null`)
+2. Once all of these upsertions are done for each company, update the **`edgar_indexes`** table:
+    - `status` (`PROCESSED`)
