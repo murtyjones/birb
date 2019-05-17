@@ -4,7 +4,7 @@ set -e
 
 MIGRATE_DIRECTORY=db/migrations
 ENV=$1
-ACTION=$2
+ACTION=${@:2} # all arguments from 2 onwards
 
 # if less than 2 args (environment, action), exit
 if [ $# -lt 2 ]; then
