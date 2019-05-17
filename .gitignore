@@ -28,3 +28,6 @@ terraform/out
 
 # generated files used by terraform in building infrastructure
 terraform/in
+
+# ignore edgar indexes given how large they are
+data/edgar-indexes

@@ -1,5 +1,5 @@
-resource "aws_s3_bucket" "edgar_indexes" {
-  bucket = "edgar-indexes"
+resource "aws_s3_bucket" "birb_edgar_indexes" {
+  bucket = "birb-edgar-indexes"
   acl    = "private"
 
   tags = {

@@ -145,6 +145,7 @@ impl Subcommand for Plan {
                            -target=aws_db_instance.rds_instance \
                            -target=aws_ecr_repository.api_repo \
                            -target=aws_ecr_repository.edgar_repo \
+                           -target=aws_s3_bucket.birb_edgar_indexes \
                            terraform/
                 ",
                 )
