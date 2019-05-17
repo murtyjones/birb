@@ -36,6 +36,6 @@ Company Name                                                  Form Type   CIK   
         - `file_short_url` (e.g. `edgar/data/1084869/0001437749-18-017027.txt`)
 2. Once all of these upsertions are done for each company, upsert the **`edgar_indexes`** table:
     - `index_name` (e.g. `company.idx`)
-    - `year` (e.g. `2018`) <-- Date
-    - `quarter` (e.g. `3`) <-- Number
+    - `index_year` (e.g. `2018`) <-- Integer
+    - `index_quarter` (e.g. `3`) <-- Integer
     - `status` (e.g. `PROCESSED`) <-- enum (`PROCESSED`, `FAILED`, `null`)
