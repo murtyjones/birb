@@ -9,7 +9,6 @@ members = [
   "crates/api",
   "crates/birb-cli",
   "crates/filing-metadata",
-  "crates/filer-status",
   "crates/edgar-worker",
 ]
 

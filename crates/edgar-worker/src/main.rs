@@ -2,8 +2,6 @@ extern crate api_lib;
 #[macro_use]
 extern crate log;
 extern crate env_logger;
-use api_lib::models::filer::Model as Filer;
-use filer_status_lib::FilerStatus;
 use postgres::{Connection, TlsMode};
 use std::env;
 use std::sync::mpsc::channel;
@@ -29,97 +27,7 @@ pub fn main() -> () {
 
     loop {
         let _ = one_rx.try_recv().map(|_| {
-            update_one_filer();
+            // make request...
         });
     }
-}
-
-fn update_one_filer() -> () {
-    let conn = get_connection();
-    let cik = get_cik_for_unset_filer(&conn);
-    // Get Latest status for filer
-    let filer = Filer { cik };
-    let mut filer_status: FilerStatus = FilerStatus::new(filer);
-    filer_status.set_is_active();
-
-    // Save result to database
-    save_new_filer_status(&conn, &filer_status.1, &filer_status.0.cik);
-}
-
-/// Get the database connection
-#[cfg(not(test))]
-fn get_connection() -> Connection {
-    let db_uri = env::var("DATABASE_URI").expect("No connection string found!");
-    Connection::connect(db_uri, TlsMode::None).expect("Unable to connect to database!")
-}
-
-/// Represents a fake database connection
-#[cfg(test)]
-struct MockConnection {}
-
-/// Get the mock database connection
-#[cfg(test)]
-fn get_connection() -> MockConnection {
-    MockConnection {}
-}
-
-/// Get the CIK of a filer who does not yet have a filing status
-#[cfg(not(test))]
-fn get_cik_for_unset_filer(conn: &Connection) -> String {
-    // Get a random filer with no `active` field set.
-    let result = conn.query(
-        "SELECT * FROM filer WHERE active IS NULL ORDER BY random() LIMIT 1;",
-        &[],
-    );
-    match result {
-        Ok(rows) => {
-            info!("{} rows found", rows.len());
-            // Panic if # of results != 1
-            assert_eq!(rows.len(), 1);
-            rows.get(0) // get first (and only) result
-                .get(0) // get
-        }
-        Err(_) => panic!("Can't get filer!"),
-    }
-}
-
-/// Get a mock CIK of a filer who does not yet have a filing status
-#[cfg(test)]
-fn get_cik_for_unset_filer(_conn: &MockConnection) -> String {
-    String::from("0000000000")
-}
-
-/// Update filing status in the database for a given filer
-#[cfg(not(test))]
-fn save_new_filer_status(conn: &Connection, active: &bool, cik: &String) -> () {
-    // TODO: Fix the fact that this execute invocation seems to hang. Not sure why.
-    let result = conn.execute(
-        "UPDATE filer SET active = $1 WHERE cik = $2",
-        &[&active, &cik],
-    );
-    match result {
-        Ok(updated) => {
-            info!("{} rows updated with new filer status", updated);
-            assert_eq!(updated, 1);
-        }
-        Err(_) => panic!("Unable to update filer status for {}", cik),
-    }
-}
-
-/// Mocks the result of an updated filing status - IE, nothing returned
-#[cfg(test)]
-fn save_new_filer_status(_conn: &MockConnection, _active: &bool, _cik: &String) -> () {
-    // Do nothing
-    ()
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    #[test]
-    fn test_update_one_filer() {
-        let _r = update_one_filer();
-    }
-
 }
