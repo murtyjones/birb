@@ -18,6 +18,9 @@ pub enum Aws {
     /// Deploy the Database
     #[structopt(name = "rds")]
     RDS(AwsRDS),
+    /// S3 bucket
+    #[structopt(name = "s3")]
+    S3(AwsS3),
     /// Deploy whatever change is held by the "plan" file
     #[structopt(name = "plan")]
     Plan(TfPlan),
@@ -44,6 +47,7 @@ impl Subcommand for Aws {
             Aws::Output(output) => output.run(),
             Aws::Stateful(stateful) => stateful.run(),
             Aws::Stateless(stateless) => stateless.run(),
+            Aws::S3(s3) => s3.run(),
         }
     }
 }
@@ -116,6 +120,22 @@ pub enum AwsRDS {
     #[structopt(name = "up")]
     Up,
 }
+
+/// Manage AWS infrastructure
+#[derive(Debug, StructOpt)]
+pub enum AwsS3 {
+    #[structopt(name = "upload")]
+    Upload(S3Buckets),
+}
+
+/// Which AWS buckets can be uploaded to
+#[derive(Debug, StructOpt)]
+pub enum S3Buckets {
+    #[structopt(name = "edgar-indexes")]
+    EdgarIndexes,
+}
+
+pub struct EdgarIndexes {}
 
 impl Subcommand for AwsAll {
     fn run(&self) -> Result<(), failure::Error> {
@@ -459,6 +479,25 @@ impl Subcommand for AwsStateless {
                            terraform/
                 ",
                 )?;
+            }
+        }
+
+        Ok(())
+    }
+}
+
+impl Subcommand for AwsS3 {
+    fn run(&self) -> Result<(), failure::Error> {
+        match self {
+            AwsS3::Upload(s3_upload) => {
+                match s3_upload {
+                    S3Buckets::EdgarIndexes => {
+                        // Not currently worrying about whether or not the deploy was successful
+                        let _result = run_str_in_bash(
+                            "aws s3 cp data/edgar-indexes s3://birb-edgar-indexes/ --recursive",
+                        )?;
+                    }
+                }
             }
         }
 
