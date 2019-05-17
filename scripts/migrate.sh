@@ -13,7 +13,7 @@ if [ $# -lt 2 ]; then
 fi
 
 if [ $ENV = "prod" ]; then
-    echo "This is will seed the production database! If you are sure you want to do this please type 'yes'"
+    echo "This is will migrate the production database! If you are sure you want to do this please type 'yes'"
     read -p "> "  confirmation
     if [ $confirmation != "yes" ]; then
         echo "Exiting."

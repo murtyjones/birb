@@ -2,7 +2,7 @@ use crate::{run_str_in_bash, Subcommand};
 
 #[derive(Debug, StructOpt)]
 pub enum Seed {
-    /// Perform "up" migrations
+    /// Perform seeds
     #[structopt(name = "up")]
     Up(Up),
 }
