@@ -17,7 +17,7 @@ jobs:
           key: cli-release-v1-{{ .Branch }}
           paths:
             - /usr/local/cargo
-            - $HOME/.cargo/bin
+            - ~/.cargo/bin
       - run:
           name: Make birb-cli binary available to other jobs
           command: |
@@ -74,7 +74,7 @@ jobs:
           key: v2-cargo-cache-{{ .Branch }}-{{ checksum "date" }}
           paths:
             - /usr/local/cargo
-            - $HOME/.cargo/bin
+            - ~/.cargo/bin
 
 workflows:
   version: 2
