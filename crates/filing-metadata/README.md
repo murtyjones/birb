@@ -23,8 +23,15 @@ Company Name                                                  Form Type   CIK   
 (~195,000 more rows)
 ```
 
-## Parsing the Index
-1. Check if the index has already been processed by searching for it by `year` and `quarter` in the **`edgar_indexes`** table. If it has been processed (IE `status` = `PROCESSED`), skip the next steps. Otherwise do the following for each row in the index:
+### Parsing the Index
+#### Pseudocode
+1. For a given index file, find the starting character index of each column.
+    - e.g. In the above example `Company Name` column starts at index `0`.
+    - e.g. In the above example `Form Type` column starts at index `63`.
+2. For each line after the divider (`------`...), get all the text between index ranges, trim it, and store it.
+    - e.g. For each row, get all values between index `0` and `63`, trim the whitespace, and save as `company_name`
+### Storing the Filing Metadata
+1. Check if the index has already been processed by searching for it by `year` and `quarter` in the **`edgar_indexes`** table. If it has been processed (IE `status` = `PROCESSED`), skip the next steps. Otherwise, parse it (see `Parsing the Index` section) and do the following for each row in the index:
     1. **Upsert the `edgar_indexes` table:**
         - `index_name` (e.g. `company.idx`)
         - `index_year` (e.g. `2018`) <-- Integer
