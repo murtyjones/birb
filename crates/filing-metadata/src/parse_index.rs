@@ -11,7 +11,7 @@ use std::vec::Vec;
 // By default, struct field names are deserialized based on the position of
 // a corresponding field in the CSV data's header record.
 #[derive(Debug, Deserialize)]
-pub struct FilingMetdata {
+pub struct FilingMetadata {
     short_cik: String,
     company_name: String,
     form_type: String,
@@ -20,7 +20,7 @@ pub struct FilingMetdata {
 }
 
 /// Deserializes an index
-pub fn main(data: &'static str) -> Result<Vec<FilingMetdata>, Box<Error>> {
+pub fn main(data: String) -> Result<Vec<FilingMetadata>, Box<Error>> {
     let trimmed_data = trim_index(data);
     let mut rdr = csv::ReaderBuilder::new()
         .has_headers(false)
@@ -33,14 +33,14 @@ pub fn main(data: &'static str) -> Result<Vec<FilingMetdata>, Box<Error>> {
 
         // Notice that we need to provide a type hint for automatic
         // deserialization.
-        let record: FilingMetdata = result?;
+        let record: FilingMetadata = result?;
         filing_metadatas.push(record);
     }
     Ok(filing_metadatas)
 }
 
 /// Trims the first lines of an edgar index.
-fn trim_index(data: &'static str) -> String {
+fn trim_index(data: String) -> String {
     let mut trimmed_data = String::from("");
     for (i, line) in data.lines().enumerate() {
         if i <= 10 {
@@ -57,7 +57,9 @@ mod test {
     use super::*;
     #[test]
     fn test_main() {
-        let example_index = include_str!("../../../data/edgar-indexes/2016/QTR1/master.idx");
+        let example_index = String::from(include_str!(
+            "../../../data/edgar-indexes/2016/QTR1/master.idx"
+        ));
         let mut filing_metadatas = main(example_index).expect("Couldn't parse index");
         // total lines in file: 308910
         // ignored lines: 11
@@ -65,7 +67,7 @@ mod test {
         assert_eq!(308_899, filing_metadatas.len());
         let final_item = filing_metadatas
             .pop()
-            .expect("Couldn't unwrap last filer in collection");
+            .expect("Couldn't get last filer in collection");
         assert_eq!(final_item.short_cik, String::from("99947"));
         assert_eq!(
             final_item.company_name,

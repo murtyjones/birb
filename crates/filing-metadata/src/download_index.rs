@@ -3,42 +3,10 @@ use rusoto_core::credential::ChainProvider;
 use rusoto_core::request::HttpClient;
 use rusoto_core::Region;
 use rusoto_s3::{GetObjectRequest, S3Client, S3};
-use std::fmt;
 use std::time::{Duration, Instant};
 
-#[derive(Copy, Clone)]
-pub enum Year {
-    TwentySixteen = 2016,
-    TwentySeventeen = 2017,
-    TwentyEighteen = 2018,
-    TwentyNineteen = 2019,
-}
-
-#[derive(Copy, Clone)]
-pub enum Quarter {
-    One = 1,
-    Two = 2,
-    Three = 3,
-    Four = 4,
-}
-
-impl fmt::Display for Year {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let printable = match *self {
-            _ => *self as i32,
-        };
-        write!(f, "{}", printable)
-    }
-}
-
-impl fmt::Display for Quarter {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let printable = match *self {
-            _ => *self as i32,
-        };
-        write!(f, "{}", printable)
-    }
-}
+use crate::time_periods::Quarter;
+use crate::time_periods::Year;
 
 /// Gets an index file given a quarter and year
 pub fn main(q: Quarter, y: Year) -> Vec<u8> {
