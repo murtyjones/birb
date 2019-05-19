@@ -50,7 +50,7 @@ pub fn main(q: Quarter, y: Year) -> Vec<u8> {
         Region::UsEast1,
     );
     let bucket = format!("birb-edgar-indexes");
-    let filename = format!("{}/QTR{}/company.idx", y, q);
+    let filename = format!("{}/QTR{}/master.idx", y, q);
     get_object(&client, &bucket, &filename)
 }
 

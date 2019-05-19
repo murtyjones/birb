@@ -4,36 +4,36 @@ The SEC makes metadata about company filings available for programmatic download
 This index is updated daily with new filings for each quarter until the final day of the quarter.
 
 ## Index Structure
-`company.idx`, which this crate uses, looks like this:
+`master.idx`, which this crate uses, looks like this:
 ```
-Description:           Master Index of EDGAR Dissemination Feed by Company Name
-Last Data Received:    September 30, 2018
+Description:           Master Index of EDGAR Dissemination Feed
+Last Data Received:    March 31, 2016
 Comments:              webmaster@sec.gov
 Anonymous FTP:         ftp://ftp.sec.gov/edgar/
- 
- 
- 
- 
-Company Name                                                  Form Type   CIK         Date Filed  File Name
----------------------------------------------------------------------------------------------------------------------------------------------
-'Laine's Bake Shop LLC, Series of BG Consortium LLC           C/A         1732207     2018-08-16  edgar/data/1732207/0001670254-18-000376.txt         
-01VC Fund II, L.P.                                            D           1746009     2018-07-20  edgar/data/1746009/0001213900-18-009448.txt         
-1 800 FLOWERS COM INC                                         10-K        1084869     2018-09-14  edgar/data/1084869/0001437749-18-017027.txt
+Cloud HTTP:            https://www.sec.gov/Archives/
 
-(~195,000 more rows)
+ 
+ 
+ 
+CIK|Company Name|Form Type|Date Filed|Filename
+--------------------------------------------------------------------------------
+1000032|BINCH JAMES G|4|2016-03-02|edgar/data/1000032/0001209191-16-104477.txt
+1000032|BINCH JAMES G|4|2016-03-11|edgar/data/1000032/0001209191-16-107917.txt
+1000045|NICHOLAS FINANCIAL INC|10-Q|2016-02-09|edgar/data/1000045/0001193125-16-454777.txt
+1000045|NICHOLAS FINANCIAL INC|8-K/A|2016-02-01|edgar/data/1000045/0001193125-16-445158.txt
+1000045|NICHOLAS FINANCIAL INC|8-K|2016-01-28|edgar/data/1000045/0001193125-16-440817.txt
+1000045|NICHOLAS FINANCIAL INC|SC 13G/A|2016-02-16|edgar/data/1000045/0001193125-16-465272.txt
+
+(~380,000 more rows)
 ```
 
 ### Parsing the Index
 #### Pseudocode
-1. For a given index file, find the starting character index of each column.
-    - e.g. In the above example `Company Name` column starts at index `0`.
-    - e.g. In the above example `Form Type` column starts at index `63`.
-2. For each line after the divider (`------`...), get all the text between index ranges, trim it, and store it.
-    - e.g. For each row, get all values between index `0` and `63`, trim the whitespace, and save as `company_name`
+For everything after line 11 (`-----`...), we parse using the `|` delimiter and deserialize into a struct.
 ### Storing the Filing Metadata
 1. Check if the index has already been processed by searching for it by `year` and `quarter` in the **`edgar_indexes`** table. If it has been processed (IE `status` = `PROCESSED`), skip the next steps. Otherwise, parse it (see `Parsing the Index` section) and do the following for each row in the index:
     1. **Upsert the `edgar_indexes` table:**
-        - `index_name` (e.g. `company.idx`)
+        - `index_name` (e.g. `master.idx`)
         - `index_year` (e.g. `2018`) <-- Integer
         - `index_quarter` (e.g. `3`) <-- Integer
         - `status` (e.g. null) <-- enum (`PROCESSED`, `FAILED`, `null`)
