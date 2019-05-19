@@ -8,3 +8,5 @@ edition = "2018"
 rusoto_core = "0.38.0"
 rusoto_s3 = "0.38.0"
 futures = "0.1.27"
+csv = "1.0.7"
+serde = { version = "1.0.91", features = ["derive"] }

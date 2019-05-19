@@ -9,18 +9,19 @@ current_year_quarter=$(date +%Y)QTR$(( ($(date +%-m)-1)/3+1 ))
 BASE_EDGAR_INDEXES_FOLDER=data/edgar-indexes
 
 # Upsert edgar indexes folder
-mkdir -p $BASE_EDGAR_INDEXES_FOLDER
+mkdir -p ${BASE_EDGAR_INDEXES_FOLDER}
 
 # Function to get the index for a quarter if it isn't
 # already downloaded to our indexes folder
 download_index () {
-    FILE=$1"/company.idx"
-    if test -f "$FILE"; then
-        echo "$FILE exists, not downloading."
+    FILENAME="master.idx"
+    FILEPATH=$1"/"$FILENAME
+    if test -f "$FILEPATH"; then
+        echo "$FILEPATH exists, not downloading."
     else
-        echo "$FILE doesn't exist, downloading."
-        curl "https://www.sec.gov/Archives/edgar/full-index/$2/$3/company.idx" -o ${FILE}
-        # wget  -P $1 "https://www.sec.gov/Archives/edgar/full-index/$2/$3/company.idx"
+        echo "$FILEPATH doesn't exist, downloading."
+        curl "https://www.sec.gov/Archives/edgar/full-index/$2/$3/$FILENAME" -o ${FILEPATH}
+        # wget  -P $1 "https://www.sec.gov/Archives/edgar/full-index/$2/$3/$FILE"
     fi
 }
 
