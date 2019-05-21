@@ -16,7 +16,26 @@ fn get_connection() -> Connection {
     Connection::connect(db_uri, TlsMode::None).expect("Unable to connect to database!")
 }
 
-fn do_query(conn: &Connection, q: &Quarter, y: &Year) {
+enum ShouldProcess {
+    Yes,
+    No,
+}
+
+#[derive(Debug, ToSql, FromSql)]
+#[postgres(name = "index_status")]
+enum IndexStatus {
+    #[postgres(name = "PROCESSED")]
+    Processed,
+    #[postgres(name = "FAILED")]
+    Failed,
+}
+
+#[derive(Debug)]
+struct Record {
+    status: Option<IndexStatus>,
+}
+
+fn do_query(conn: &Connection, q: &Quarter, y: &Year) -> Result<ShouldProcess, failure::Error> {
     let q_as_num = *q as i32;
     let y_as_num = *y as i32;
     let result = conn.query(
@@ -31,17 +50,24 @@ fn do_query(conn: &Connection, q: &Quarter, y: &Year) {
 
     match result {
         Ok(r) => {
-            assert!(r.len() >= 0);
-            assert!(r.len() < 2);
             println!("Records: {}", r.len());
+            assert!(r.len() < 2);
+            if 0 == r.len() {
+                return Ok(ShouldProcess::Yes);
+            }
+            let record = Record {
+                status: r.get(0).get("status"),
+            };
+            println!("{:?}", record);
+            match record.status {
+                Some(IndexStatus::Processed) => {}
+                Some(IndexStatus::Failed) => {}
+                None => {}
+            }
+            Ok(ShouldProcess::Yes)
         }
         Err(e) => {
-            println!("{}", e);
+            panic!("{}", e);
         }
     }
-
-    //    for row in  {
-    //        let status: String = row.get(3);
-    //        println!("{:?}", status);
-    //    }
 }
