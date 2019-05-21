@@ -5,9 +5,9 @@ use std::env;
 use crate::time_periods::Quarter;
 use crate::time_periods::Year;
 
-pub fn main(q: Quarter, y: Year) {
+pub fn main(q: Quarter, y: Year) -> Result<ShouldProcess, failure::Error> {
     let conn = get_connection();
-    let query = do_query(&conn, &q, &y);
+    should_process_for_quarter(&conn, &q, &y)
 }
 
 /// Get the database connection
@@ -16,7 +16,7 @@ fn get_connection() -> Connection {
     Connection::connect(db_uri, TlsMode::None).expect("Unable to connect to database!")
 }
 
-enum ShouldProcess {
+pub enum ShouldProcess {
     Yes,
     No,
 }
@@ -35,12 +35,17 @@ struct Record {
     status: Option<IndexStatus>,
 }
 
-fn do_query(conn: &Connection, q: &Quarter, y: &Year) -> Result<ShouldProcess, failure::Error> {
+fn should_process_for_quarter(
+    conn: &Connection,
+    q: &Quarter,
+    y: &Year,
+) -> Result<ShouldProcess, failure::Error> {
+    // TODO if provided quarter == current quarter, set status to `null` and return 'Yes'
     let q_as_num = *q as i32;
     let y_as_num = *y as i32;
     let result = conn.query(
         "
-            SELECT * FROM edgar_indexes
+            SELECT * FROM edgar_index
             WHERE index_name='master.idx'
             AND index_quarter=$1
             AND index_year=$2
@@ -50,9 +55,9 @@ fn do_query(conn: &Connection, q: &Quarter, y: &Year) -> Result<ShouldProcess, f
 
     match result {
         Ok(r) => {
-            println!("Records: {}", r.len());
             assert!(r.len() < 2);
             if 0 == r.len() {
+                insert_index_record(conn, q, y);
                 return Ok(ShouldProcess::Yes);
             }
             let record = Record {
@@ -60,11 +65,37 @@ fn do_query(conn: &Connection, q: &Quarter, y: &Year) -> Result<ShouldProcess, f
             };
             println!("{:?}", record);
             match record.status {
-                Some(IndexStatus::Processed) => {}
-                Some(IndexStatus::Failed) => {}
-                None => {}
+                Some(IndexStatus::Processed) => {
+                    return Ok(ShouldProcess::No);
+                }
+                Some(IndexStatus::Failed) => {
+                    return Ok(ShouldProcess::Yes);
+                }
+                None => {
+                    return Ok(ShouldProcess::No);
+                }
             }
-            Ok(ShouldProcess::Yes)
+        }
+        Err(e) => {
+            panic!("{}", e);
+        }
+    }
+}
+
+fn insert_index_record(conn: &Connection, q: &Quarter, y: &Year) {
+    let q_as_num = *q as i32;
+    let y_as_num = *y as i32;
+    let r = conn.execute(
+        "
+        INSERT INTO edgar_index
+        (index_name, index_quarter, index_year)
+        VALUES ('master.idx', $1, $2)
+    ",
+        &[&q_as_num, &y_as_num],
+    );
+    match r {
+        Ok(records_updated) => {
+            assert_eq!(1, records_updated);
         }
         Err(e) => {
             panic!("{}", e);

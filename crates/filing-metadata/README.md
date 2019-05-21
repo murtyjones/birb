@@ -31,8 +31,8 @@ CIK|Company Name|Form Type|Date Filed|Filename
 #### Pseudocode
 For everything after line 11 (`-----`...), we parse using the `|` delimiter and deserialize into a struct.
 ### Storing the Filing Metadata
-1. Check if the index has already been processed by searching for it by `year` and `quarter` in the **`edgar_indexes`** table. If it has been processed (IE `status` = `PROCESSED`), skip the next steps. Otherwise, parse it (see `Parsing the Index` section) and do the following for each row in the index:
-    1. **Upsert the `edgar_indexes` table:**
+1. Check if the index has already been processed by searching for it by `year` and `quarter` in the **`edgar_index`** table. If it has been processed (IE `status` = `PROCESSED`), skip the next steps. Otherwise, parse it (see `Parsing the Index` section) and do the following for each row in the index:
+    1. **Upsert the `edgar_index` table:**
         - `index_name` (e.g. `master.idx`)
         - `index_year` (e.g. `2018`) <-- Integer
         - `index_quarter` (e.g. `3`) <-- Integer
@@ -46,5 +46,5 @@ For everything after line 11 (`-----`...), we parse using the `|` delimiter and 
         - `date_filed` (e.g. `2018-09-14`) <-- Date field type
         - `form_type` (e.g. `10-K`) <-- String
         - `file_short_url` (e.g. `edgar/data/1084869/0001437749-18-017027.txt`)
-2. Once all of these upsertions are done for each company, update the **`edgar_indexes`** table:
+2. Once all of these upsertions are done for each company, update the **`edgar_index`** table:
     - `status` (`PROCESSED`)

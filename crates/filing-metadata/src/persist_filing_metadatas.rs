@@ -7,7 +7,7 @@ use crate::time_periods::Year;
 
 pub fn main(q: Quarter, y: Year, d: Vec<FilingMetadata>) {
     let conn = get_connection();
-    let query = build_query(q, y, d);
+    persist_companies(&conn, &q, &y, d);
 }
 
 /// Get the database connection
@@ -16,21 +16,28 @@ fn get_connection() -> Connection {
     Connection::connect(db_uri, TlsMode::None).expect("Unable to connect to database!")
 }
 
-fn build_query(q: Quarter, y: Year, d: Vec<FilingMetadata>) {
-    let mut query = String::from("BEGIN;\n");
-    // TODO build tx query from filing metadata
-    query.push_str("COMMIT;\n");
-}
+fn persist_companies(conn: &Connection, q: &Quarter, y: &Year, d: Vec<FilingMetadata>) -> () {
+    let q_as_num = *q as i32;
+    let y_as_num = *y as i32;
 
-fn persist(conn: &Connection, query: &String) -> () {
-    let result = conn.execute(query, &[]);
-    match result {
-        Ok(updated) => {
-            println!("{} rows updated with new filer status", updated);
-            assert_eq!(updated, 1);
-        }
-        Err(_) => panic!("Unable to persist"),
+    let trans = conn.transaction().expect("Couldn't begin transaction");
+
+    let stmt = trans
+        .prepare(
+            "
+             INSERT INTO company
+             (short_cik, company_name)
+             VALUES ($1, $2)
+             ON CONFLICT (short_cik) DO NOTHING;
+             ",
+        )
+        .expect("Couldn't prepare statement for execution");
+    for each in d {
+        stmt.execute(&[&each.short_cik, &each.company_name])
+            .expect("Couldn't execute update");
     }
+
+    trans.commit().unwrap()
 }
 
 #[cfg(test)]

@@ -12,11 +12,11 @@ use std::vec::Vec;
 // a corresponding field in the CSV data's header record.
 #[derive(Debug, Deserialize)]
 pub struct FilingMetadata {
-    short_cik: String,
-    company_name: String,
-    form_type: String,
-    date_filed: String,
-    filename: String,
+    pub short_cik: String,
+    pub company_name: String,
+    pub form_type: String,
+    pub date_filed: String,
+    pub filename: String,
 }
 
 /// Deserializes an index

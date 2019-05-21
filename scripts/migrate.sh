@@ -29,7 +29,7 @@ elif [ $ENV = "local" ]; then
     DB_PASSWORD=develop
     DB_NAME=postgres
 else
-    echo "Unrecognized environment specified!"
+    echo "Unrecognized environment specified! Please specify a valid one (e.g. local, prod)"
     exit 2;
 fi
 

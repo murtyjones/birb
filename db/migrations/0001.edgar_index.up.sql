@@ -10,7 +10,7 @@ $$ LANGUAGE plpgsql;
 -- the status of a given edgar index
 CREATE TYPE index_status AS ENUM ('PROCESSED', 'FAILED');
 
-CREATE TABLE IF NOT EXISTS edgar_indexes (
+CREATE TABLE IF NOT EXISTS edgar_index (
   index_name VARCHAR (30) NOT NULL
   ,index_year INTEGER
   ,index_quarter INTEGER
@@ -21,6 +21,6 @@ CREATE TABLE IF NOT EXISTS edgar_indexes (
 );
 
 CREATE TRIGGER set_timestamp
-BEFORE UPDATE ON edgar_indexes
+BEFORE UPDATE ON edgar_index
 FOR EACH ROW
 EXECUTE PROCEDURE trigger_set_timestamp();
