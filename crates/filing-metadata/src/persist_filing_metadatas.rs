@@ -2,6 +2,7 @@ use crate::parse_index::FilingMetadata;
 use postgres::{Connection, TlsMode};
 use std::env;
 
+use crate::should_process_for_quarter::IndexStatus;
 use crate::time_periods::Quarter;
 use crate::time_periods::Year;
 
@@ -36,6 +37,20 @@ fn persist_companies(conn: &Connection, q: &Quarter, y: &Year, d: Vec<FilingMeta
         stmt.execute(&[&each.short_cik, &each.company_name])
             .expect("Couldn't execute update");
     }
+
+    trans
+        .execute(
+            "
+            UPDATE edgar_index
+            SET status = $1
+            WHERE
+            index_name = 'master.idx'
+            AND index_quarter = $2
+            AND index_year = $3
+        ",
+            &[&IndexStatus::Processed, &q_as_num, &y_as_num],
+        )
+        .expect("Couldn't update index status");
 
     trans.commit().unwrap()
 }

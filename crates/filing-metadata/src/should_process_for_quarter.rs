@@ -23,7 +23,7 @@ pub enum ShouldProcess {
 
 #[derive(Debug, ToSql, FromSql)]
 #[postgres(name = "index_status")]
-enum IndexStatus {
+pub enum IndexStatus {
     #[postgres(name = "PROCESSED")]
     Processed,
     #[postgres(name = "FAILED")]
@@ -47,8 +47,8 @@ fn should_process_for_quarter(
         "
             SELECT * FROM edgar_index
             WHERE index_name='master.idx'
-            AND index_quarter=$1
-            AND index_year=$2
+            AND index_quarter = $1
+            AND index_year = $2
         ",
         &[&q_as_num, &y_as_num],
     );
@@ -63,7 +63,6 @@ fn should_process_for_quarter(
             let record = Record {
                 status: r.get(0).get("status"),
             };
-            println!("{:?}", record);
             match record.status {
                 Some(IndexStatus::Processed) => {
                     return Ok(ShouldProcess::No);
@@ -72,12 +71,12 @@ fn should_process_for_quarter(
                     return Ok(ShouldProcess::Yes);
                 }
                 None => {
-                    return Ok(ShouldProcess::No);
+                    return Ok(ShouldProcess::Yes);
                 }
             }
         }
         Err(e) => {
-            panic!("{}", e);
+            panic!("Couldn't determine whether to process {}Q{}", q, y);
         }
     }
 }
@@ -98,7 +97,7 @@ fn insert_index_record(conn: &Connection, q: &Quarter, y: &Year) {
             assert_eq!(1, records_updated);
         }
         Err(e) => {
-            panic!("{}", e);
+            panic!("Couldn't insert record for {}Q{}", q, y);
         }
     }
 }
