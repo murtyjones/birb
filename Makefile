@@ -4,4 +4,5 @@
 
 make fmeta:
 	DATABASE_URI=postgres://postgres:develop@localhost:5432/postgres \
+	AWS \
 	cargo run -p filing-metadata
