@@ -34,3 +34,4 @@ data/edgar-indexes
 
 # makefile is ignored so that local commands can be thrown in at will with secrets as needed
 Makefile
+makefile
