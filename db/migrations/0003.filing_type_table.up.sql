@@ -8,7 +8,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TABLE IF NOT EXISTS filing_type (
-    filing_name VARCHAR (10) PRIMARY KEY
+    filing_name VARCHAR (20) PRIMARY KEY
     , description TEXT
     , is_processable BOOLEAN NOT NULL DEFAULT FALSE
     , created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()

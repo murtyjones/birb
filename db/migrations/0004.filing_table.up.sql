@@ -10,7 +10,10 @@ $$ LANGUAGE plpgsql;
 CREATE TABLE IF NOT EXISTS filing (
     id SERIAL PRIMARY KEY
     , company_short_cik VARCHAR (10) REFERENCES company(short_cik)
-    , filing_type VARCHAR (10) REFERENCES filing_type(filing_name)
+    , filing_name VARCHAR (20) REFERENCES filing_type
+    , filing_edgar_url TEXT
+    , filing_quarter INTEGER
+    , filing_year INTEGER
     , created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     , updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
