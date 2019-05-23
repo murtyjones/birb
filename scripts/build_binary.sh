@@ -3,6 +3,9 @@
 # Exit immediately if any step errors:
 set -e
 
+# crate to build a binary from:
+PACKAGE=$1
+
 # Go to project root
 cd $(git rev-parse --show-toplevel)
 
@@ -12,8 +15,8 @@ docker pull clux/muslrust:nightly
 # build binary
 docker run --rm \
     -v cargo-cache:/usr/local/cargo \
-    -v cargo-bin-cache:$$HOME/.cargo/bin \
-    -v $$PWD:/volume \
+    -v cargo-bin-cache:$HOME/.cargo/bin \
+    -v $PWD:/volume \
     -w /volume \
     -it clux/muslrust:nightly \
-    cargo build -p $(package) --release
+    cargo build -p ${PACKAGE} --release

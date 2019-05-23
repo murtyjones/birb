@@ -63,7 +63,7 @@ jobs:
           command: mv bb-cli-workspace/bb ./
       - run:
           name: Build edgar worker binary
-          command: make build-release package=edgar-worker
+          command: scripts/build_binary.sh edgar-worker
       - run:
           name: Upgrade AWS CLI Latest Version
           command: pip install --upgrade awscli
