@@ -537,6 +537,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "filing-data"
+version = "0.1.0"
+dependencies = [
+ "csv 1.0.7 (registry+https://github.com/rust-lang/crates.io-index)",
+ "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "filing-metadata 0.1.0",
+ "futures 0.1.27 (registry+https://github.com/rust-lang/crates.io-index)",
+ "postgres 0.15.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "postgres-derive 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rusoto_core 0.38.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rusoto_s3 0.38.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde 1.0.91 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "filing-metadata"
 version = "0.1.0"
 dependencies = [
