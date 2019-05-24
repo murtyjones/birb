@@ -49,6 +49,17 @@ resource "aws_iam_policy" "edgar_resource_access_policy" {
             "Resource": [
                 "${aws_secretsmanager_secret.DATABASE_URI.arn}"
             ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject"
+            ],
+            "Resource": [
+                "${aws_s3_bucket.birb_edgar_filings.arn}",
+                "${aws_s3_bucket.birb_edgar_indexes.arn}"
+            ]
         }
     ]
 }
