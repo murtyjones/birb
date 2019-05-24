@@ -4,7 +4,7 @@ extern crate postgres;
 extern crate postgres_derive;
 extern crate futures;
 
-mod download_index;
+pub mod download_index;
 mod parse_index;
 mod persist_filing_metadatas;
 mod should_process_for_quarter;

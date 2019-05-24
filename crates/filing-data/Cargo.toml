@@ -5,12 +5,13 @@ authors = ["Marty Jones <murtin.jones@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-rusoto_core = "0.38.0"
-rusoto_s3 = "0.38.0"
+rusoto_core = "0.38"
+rusoto_s3 = "0.38"
 failure = "0.1.5"
 futures = "0.1.27"
 csv = "1.0.7"
 serde = { version = "1.0.91", features = ["derive"] }
 postgres = "0.15"
 postgres-derive = "0.3"
+reqwest = "0.9"
 filing-metadata = { path = "../filing-metadata", version = "0.1" }

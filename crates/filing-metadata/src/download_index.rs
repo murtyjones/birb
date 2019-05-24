@@ -2,7 +2,7 @@ use futures::{Future, Stream};
 use rusoto_core::credential::ChainProvider;
 use rusoto_core::request::HttpClient;
 use rusoto_core::Region;
-use rusoto_s3::{GetObjectRequest, S3Client, S3};
+use rusoto_s3::{GetObjectRequest, PutObjectRequest, S3Client, S3};
 use std::time::{Duration, Instant};
 
 use crate::time_periods::Quarter;
@@ -10,21 +10,27 @@ use crate::time_periods::Year;
 
 /// Gets an index file given a quarter and year
 pub fn main(q: Quarter, y: Year) -> Vec<u8> {
-    let mut chain = ChainProvider::new();
-    chain.set_timeout(Duration::from_millis(200));
-    let client = S3Client::new_with(
-        HttpClient::new().expect("failed to create request dispatcher"),
-        chain,
-        Region::UsEast1,
-    );
     let bucket = format!("birb-edgar-indexes");
     let filename = format!("{}/QTR{}/master.idx", y, q);
-    get_object(&client, &bucket, &filename)
+    let client = get_s3_client();
+    get_s3_object(&client, &bucket, &filename)
+}
+
+pub fn get_s3_client() -> S3Client {
+    #[cfg(debug_assertions)]
+    let mut credentials = ChainProvider::new();
+    #[cfg(not(debug_assertions))]
+    let mut credentials = InstanceMetadataProvider::new();
+    S3Client::new_with(
+        HttpClient::new().expect("failed to create request dispatcher"),
+        credentials,
+        Region::UsEast1,
+    )
 }
 
 #[cfg(not(test))]
 /// Gets an S3 object
-fn get_object(client: &S3Client, bucket: &str, filename: &str) -> Vec<u8> {
+pub fn get_s3_object(client: &S3Client, bucket: &str, filename: &str) -> Vec<u8> {
     let get_req = GetObjectRequest {
         bucket: bucket.to_owned(),
         key: filename.to_owned(),
@@ -34,7 +40,7 @@ fn get_object(client: &S3Client, bucket: &str, filename: &str) -> Vec<u8> {
     let result = client
         .get_object(get_req)
         .sync()
-        .expect("Couldn't GET object");
+        .expect("Couldn't GET S3 object");
 
     let stream = result.body.unwrap();
     let body = stream.concat2().wait().unwrap();
@@ -44,10 +50,29 @@ fn get_object(client: &S3Client, bucket: &str, filename: &str) -> Vec<u8> {
 }
 
 #[cfg(test)]
-fn get_object(_c: &S3Client, _b: &str, _f: &str) -> Vec<u8> {
+fn get_s3_object(_c: &S3Client, _b: &str, _f: &str) -> Vec<u8> {
     // TODO make this return a real index document
     // for parser testing
     vec![1, 2, 3]
+}
+
+pub fn store_s3_document(
+    client: &S3Client,
+    bucket: &str,
+    file_path: &str,
+    contents: Vec<u8>,
+) -> Result<(), failure::Error> {
+    let put_req = PutObjectRequest {
+        bucket: bucket.to_owned(),
+        key: file_path.to_owned(),
+        body: Some(contents.into()),
+        ..Default::default()
+    };
+    client
+        .put_object(put_req)
+        .sync()
+        .expect("Couldn't PUT S3 object.");
+    Ok(())
 }
 
 #[cfg(test)]
