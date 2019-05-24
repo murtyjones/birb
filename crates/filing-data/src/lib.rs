@@ -5,18 +5,12 @@ extern crate postgres_derive;
 extern crate reqwest;
 use futures::{Future, Stream};
 use postgres::{Connection, TlsMode};
-use rusoto_core::credential::ChainProvider;
-use rusoto_core::credential::InstanceMetadataProvider;
-use rusoto_core::request::HttpClient;
-use rusoto_core::Region;
-use rusoto_s3::{GetObjectRequest, S3Client, S3};
 use std::env;
 extern crate filing_metadata;
 
 mod filing;
 use filing::Filing;
 use filing_metadata::download_index::{get_s3_client, store_s3_document};
-use filing_metadata::should_process_for_quarter::IndexStatus;
 
 static BASE_EDGAR_URL: &'static str = "https://www.sec.gov/Archives/";
 

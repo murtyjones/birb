@@ -1,5 +1,5 @@
 use futures::{Future, Stream};
-use rusoto_core::credential::ChainProvider;
+use rusoto_core::credential::{ChainProvider, InstanceMetadataProvider};
 use rusoto_core::request::HttpClient;
 use rusoto_core::Region;
 use rusoto_s3::{GetObjectRequest, PutObjectRequest, S3Client, S3};
