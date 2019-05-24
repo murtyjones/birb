@@ -14,3 +14,6 @@ serde = { version = "1.0.91", features = ["derive"] }
 postgres = "0.15"
 postgres-derive = "0.3"
 
+[[bin]]
+name = "filing_metadata_bin"
+path = "src/bin.rs"
