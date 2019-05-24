@@ -7,7 +7,7 @@ extern crate futures;
 pub mod download_index;
 mod parse_index;
 mod persist_filing_metadatas;
-mod should_process_for_quarter;
+pub mod should_process_for_quarter;
 pub mod time_periods;
 
 use should_process_for_quarter::ShouldProcess;

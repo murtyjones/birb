@@ -16,6 +16,7 @@ extern crate filing_metadata_lib;
 mod filing;
 use filing::Filing;
 use filing_metadata_lib::download_index::{get_s3_client, store_s3_document};
+use filing_metadata_lib::should_process_for_quarter::IndexStatus;
 
 static BASE_EDGAR_URL: &'static str = "https://www.sec.gov/Archives/";
 
@@ -27,10 +28,12 @@ pub fn main() {
         Some(f) => {
             println!("Here it is: {:?}", f);
             let bucket = format!("birb-edgar-filings");
-            let file_path = f.filing_edgar_url;
-            let document_contents = get_edgar_filing(&file_path).into_bytes();
+            let file_path = &f.filing_edgar_url;
+            let document_contents = get_edgar_filing(file_path).into_bytes();
             println!("Storing doc with file path: {:?}", file_path);
             store_s3_document(&s3_client, &bucket, &file_path, document_contents);
+            println!("Updating status for collected to 'true'");
+            persist_document_storage_status(&conn, &f);
         }
         None => {
             println!("No records left to collect. Have a drink instead.");
@@ -78,4 +81,19 @@ fn get_edgar_filing(file_path: &String) -> String {
         .expect("Couldn't make request")
         .text()
         .expect("Couldn't get text from request")
+}
+
+fn persist_document_storage_status(conn: &Connection, filing: &Filing) {
+    let r = conn
+        .execute(
+            "
+        UPDATE filing
+        SET collected = true
+        WHERE id = $1
+
+    ",
+            &[&filing.id],
+        )
+        .expect("Couldn't perform update");
+    assert_eq!(r, 1);
 }
