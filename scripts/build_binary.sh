@@ -15,7 +15,7 @@ docker pull clux/muslrust:nightly
 # build binary
 docker run --rm \
     -v cargo-cache:/usr/local/cargo \
-    -v cargo-bin-cache:$HOME/.cargo/bin \
+    -v cargo-bin-cache:$HOME/.cargo \
     -v $PWD:/volume \
     -w /volume \
     -it clux/muslrust:nightly \
