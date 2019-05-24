@@ -11,12 +11,12 @@ use rusoto_core::request::HttpClient;
 use rusoto_core::Region;
 use rusoto_s3::{GetObjectRequest, S3Client, S3};
 use std::env;
-extern crate filing_metadata_lib;
+extern crate filing_metadata;
 
 mod filing;
 use filing::Filing;
-use filing_metadata_lib::download_index::{get_s3_client, store_s3_document};
-use filing_metadata_lib::should_process_for_quarter::IndexStatus;
+use filing_metadata::download_index::{get_s3_client, store_s3_document};
+use filing_metadata::should_process_for_quarter::IndexStatus;
 
 static BASE_EDGAR_URL: &'static str = "https://www.sec.gov/Archives/";
 

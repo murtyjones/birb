@@ -1,7 +1,9 @@
 extern crate api_lib;
+extern crate filing_data;
 #[macro_use]
 extern crate log;
 extern crate env_logger;
+use filing_data::main as get_one_filing;
 use postgres::{Connection, TlsMode};
 use std::env;
 use std::sync::mpsc::channel;
@@ -26,8 +28,8 @@ pub fn main() -> () {
     });
 
     loop {
-        let _ = one_rx.try_recv().map(|_| {
-            // make request...
+        let _ = one_rx.try_recv().map(|_message| {
+            get_one_filing();
         });
     }
 }

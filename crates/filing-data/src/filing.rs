@@ -1,5 +1,5 @@
-use filing_metadata_lib::time_periods::Quarter;
-use filing_metadata_lib::time_periods::Year;
+use filing_metadata::time_periods::Quarter;
+use filing_metadata::time_periods::Year;
 
 #[derive(Debug, FromSql)]
 pub struct Filing {
