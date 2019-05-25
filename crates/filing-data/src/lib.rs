@@ -45,10 +45,13 @@ fn get_filing_record(conn: &Connection) -> Option<Filing> {
     let rows = conn
         .query(
             "
-        SELECT * FROM filing
-        WHERE collected = false
+        SELECT * FROM filing f
+        JOIN filing_type ft
+        ON f.filing_name=ft.filing_name
+        WHERE f.collected = false
+        AND ft.collectible = true
         ORDER BY random()
-        LIMIT 1",
+        LIMIT 1;",
             &[],
         )
         .expect("Couldn't retrieve a random filing!");
