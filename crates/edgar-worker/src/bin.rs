@@ -1,5 +1,6 @@
 extern crate api_lib;
 extern crate filing_data;
+extern crate filing_metadata;
 #[macro_use]
 extern crate log;
 extern crate env_logger;
@@ -29,7 +30,8 @@ pub fn main() -> () {
 
     loop {
         let _ = one_rx.try_recv().map(|_message| {
-            get_one_filing();
+            filing_metadata::do_for_all_time_periods();
+            //            get_one_filing();
         });
     }
 }

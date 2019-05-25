@@ -12,6 +12,7 @@ log = "0.4.6"
 
 api = { path = "../api", version = "0.1.0" }
 filing-data = { path = "../filing-data", version = "0.1.0" }
+filing-metadata = { path = "../filing-metadata", version = "0.1.0" }
 
 [dependencies.rocket_contrib]
 version = "0.4.1"
