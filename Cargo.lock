@@ -616,9 +616,11 @@ name = "filing-data"
 version = "0.1.0"
 dependencies = [
  "csv 1.0.7 (registry+https://github.com/rust-lang/crates.io-index)",
+ "env_logger 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "filing-metadata 0.1.0",
  "futures 0.1.27 (registry+https://github.com/rust-lang/crates.io-index)",
+ "log 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "postgres 0.15.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "postgres-derive 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "reqwest 0.9.17 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -632,8 +634,10 @@ name = "filing-metadata"
 version = "0.1.0"
 dependencies = [
  "csv 1.0.7 (registry+https://github.com/rust-lang/crates.io-index)",
+ "env_logger 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "futures 0.1.27 (registry+https://github.com/rust-lang/crates.io-index)",
+ "log 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "postgres 0.15.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "postgres-derive 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "rusoto_core 0.38.0 (registry+https://github.com/rust-lang/crates.io-index)",

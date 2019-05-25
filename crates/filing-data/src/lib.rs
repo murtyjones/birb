@@ -2,6 +2,9 @@
 extern crate postgres;
 #[macro_use]
 extern crate postgres_derive;
+#[macro_use]
+extern crate log;
+extern crate env_logger;
 extern crate reqwest;
 use futures::{Future, Stream};
 use postgres::{Connection, TlsMode};
@@ -15,22 +18,23 @@ use filing_metadata::download_index::{get_s3_client, store_s3_document};
 static BASE_EDGAR_URL: &'static str = "https://www.sec.gov/Archives/";
 
 pub fn main() {
+    env_logger::init();
     let conn = get_connection();
     let s3_client = get_s3_client();
     let filing_record = get_filing_record(&conn);
     match filing_record {
         Some(f) => {
-            println!("Here it is: {:?}", f);
+            info!("Here it is: {:?}", f.id);
             let bucket = format!("birb-edgar-filings");
             let file_path = &f.filing_edgar_url;
             let document_contents = get_edgar_filing(file_path).into_bytes();
-            println!("Storing doc with file path: {:?}", file_path);
+            info!("Storing doc with file path: {:?}", file_path);
             store_s3_document(&s3_client, &bucket, &file_path, document_contents);
-            println!("Updating status for collected to 'true'");
+            info!("Updating status for collected to 'true'");
             persist_document_storage_status(&conn, &f);
         }
         None => {
-            println!("No records left to collect. Have a drink instead.");
+            info!("No records left to collect. Have a drink instead.");
         }
     }
 }
