@@ -38,8 +38,9 @@ jobs:
       - run: date +%F > date
       - restore_cache:
           keys:
-            - v1-cargo-cache-{{ .Branch }}-{{ checksum "Cargo.lock" }} # Cache for the branch that you're on
-            - v1-cargo-cache-{{ checksum "Cargo.lock" }} # If that doesn't exist, use the default cache across all branches
+            - v1-cargo-cache-{{ .Branch }}-{{ checksum "Cargo.lock" }} # Cache for the branch that you're on with this lockfile
+            - v1-cargo-cache-{{ checksum "Cargo.lock" }} # If that doesn't exist, use the default cache across all branches with this lockfile
+            - v1-cargo-cache- # If that doesn't exist, use the default cache across all branches
       - attach_workspace:
           at: bb-cli-workspace
 
@@ -55,8 +56,9 @@ jobs:
       - run: date +%F > date
       - restore_cache:
           keys:
-            - v1-cargo-cache-{{ .Branch }}-{{ checksum "Cargo.lock" }} # Cache for the branch that you're on
-            - v1-cargo-cache-{{ checksum "Cargo.lock" }} # If that doesn't exist, use the default cache across all branches
+            - v1-cargo-cache-{{ .Branch }}-{{ checksum "Cargo.lock" }} # Cache for the branch that you're on with this lockfile
+            - v1-cargo-cache-{{ checksum "Cargo.lock" }} # If that doesn't exist, use the default cache across all branches with this lockfile
+            - v1-cargo-cache- # If that doesn't exist, use the default cache across all branches
       - attach_workspace:
           at: bb-cli-workspace
       - run:
