@@ -89,5 +89,5 @@ fn persist_document_storage_status(conn: &Connection, filing: &Filing) {
             &[&filing.id],
         )
         .expect("Couldn't perform update");
-    assert_eq!(r, 1);
+    assert_eq!(r, 1, "Expected one record to to be updated!");
 }

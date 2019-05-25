@@ -1,0 +1,3 @@
+ALTER TABLE filing_type
+ADD COLUMN collectible BOOLEAN NOT NULL DEFAULT FALSE;
+
