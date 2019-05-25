@@ -30,8 +30,7 @@ pub fn main() -> () {
 
     loop {
         let _ = one_rx.try_recv().map(|_message| {
-            filing_metadata::do_for_all_time_periods();
-            //            get_one_filing();
+            get_one_filing();
         });
     }
 }
