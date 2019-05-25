@@ -18,7 +18,6 @@ use filing_metadata::download_index::{get_s3_client, store_s3_document};
 static BASE_EDGAR_URL: &'static str = "https://www.sec.gov/Archives/";
 
 pub fn main() {
-    env_logger::init();
     let conn = get_connection();
     let s3_client = get_s3_client();
     let filing_record = get_filing_record(&conn);

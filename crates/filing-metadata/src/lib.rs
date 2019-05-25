@@ -19,7 +19,6 @@ use time_periods::Quarter;
 use time_periods::Year;
 
 pub fn do_for_time_period(q: Quarter, y: Year) {
-    env_logger::init();
     let should_process = should_process_for_quarter::main(q, y);
     match should_process {
         Ok(ShouldProcess::Yes) => {

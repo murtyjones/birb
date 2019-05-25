@@ -18,7 +18,7 @@ fn build_binary(package: &str) {
         docker pull clux/muslrust:nightly
 
         # build binary
-        make build-release package={}
+        scripts/build_binary.sh {}
     ",
         package
     );

@@ -57,8 +57,8 @@ resource "aws_iam_policy" "edgar_resource_access_policy" {
                 "s3:PutObject"
             ],
             "Resource": [
-                "${aws_s3_bucket.birb_edgar_filings.arn}",
-                "${aws_s3_bucket.birb_edgar_indexes.arn}"
+                "${aws_s3_bucket.birb_edgar_filings.arn}/*",
+                "${aws_s3_bucket.birb_edgar_indexes.arn}/*"
             ]
         }
     ]
