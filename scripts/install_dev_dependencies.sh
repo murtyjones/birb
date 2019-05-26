@@ -29,3 +29,6 @@ cargo install --force cargo-watch
 
 # Install dbmigrate
 cargo install --force dbmigrate
+
+# Wasm pack for the web client
+cargo install wasm-pack
