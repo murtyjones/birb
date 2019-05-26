@@ -1,6 +1,5 @@
 [![CircleCI](https://circleci.com/gh/murtyjones/birb.svg?style=svg)](https://circleci.com/gh/murtyjones/birb)
 # birb
-An API.
 ## Getting Started
 1. `git clone https://github.com/murtyjones/birb.git`
 2. cd `birb`

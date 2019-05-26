@@ -6,9 +6,9 @@ pub enum Aws {
     /// Deploy all infrastructure
     #[structopt(name = "all")]
     All(AwsAll),
-    /// Deploy the API
-    #[structopt(name = "api")]
-    Api(AwsApi),
+    /// Deploy the Server
+    #[structopt(name = "server")]
+    Server(AwsServer),
     /// Deploy the Edgar worker
     #[structopt(name = "edgar")]
     Edgar(AwsEdgar),
@@ -39,7 +39,7 @@ impl Subcommand for Aws {
     fn run(&self) -> Result<(), failure::Error> {
         match self {
             Aws::All(all) => all.run(),
-            Aws::Api(api) => api.run(),
+            Aws::Server(server) => server.run(),
             Aws::Edgar(edgar) => edgar.run(),
             Aws::Bastion(bastion) => bastion.run(),
             Aws::RDS(rds) => rds.run(),
@@ -61,9 +61,9 @@ pub enum AwsAll {
     Down,
 }
 
-/// Manage the API infrastructure
+/// Manage the Server infrastructure
 #[derive(Debug, StructOpt)]
-pub enum AwsApi {
+pub enum AwsServer {
     #[structopt(name = "up")]
     Up,
     #[structopt(name = "down")]
@@ -178,10 +178,10 @@ impl Subcommand for TfPlan {
     }
 }
 
-impl Subcommand for AwsApi {
+impl Subcommand for AwsServer {
     fn run(&self) -> Result<(), failure::Error> {
         match self {
-            AwsApi::Up => {
+            AwsServer::Up => {
                 // Not currently worrying about whether or not the deploy was successful
                 let _plan = run_str_in_bash(
                     "
@@ -221,7 +221,7 @@ impl Subcommand for AwsApi {
                 ",
                 )?;
             }
-            AwsApi::Down => {
+            AwsServer::Down => {
                 let _reuslt = run_str_in_bash(
                     "
                     terraform destroy -var-file=terraform/production.secret.tfvars \

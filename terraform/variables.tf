@@ -68,7 +68,7 @@ variable "multi_az" {
 }
 
 variable "birb_server_certificate_arn" {
-  description = "The certificate ARN for the birb API"
+  description = "The certificate ARN for the birb server"
 }
 
 variable "marty_ip_address_1" {

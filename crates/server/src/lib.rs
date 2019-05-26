@@ -1,4 +1,4 @@
-//! API main thing
+//! Server main thing
 
 #![deny(missing_docs)]
 #![feature(proc_macro_hygiene, decl_macro)]

@@ -9,7 +9,7 @@ impl Subcommand for Watch {
         run_str_in_bash("bb docker restart").unwrap();
         run_str_in_bash("bb docker up-no-test").unwrap();
         run_str_in_bash("sleep 5s").unwrap();
-        run_str_in_bash("cargo watch -x \"run -p api\"").unwrap();
+        run_str_in_bash("cargo watch -x \"run -p server\"").unwrap();
         Ok(())
     }
 }

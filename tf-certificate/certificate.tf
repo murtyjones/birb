@@ -7,7 +7,7 @@ data "aws_route53_zone" "api" {
 # so that AWS's certificate issuance limit (20) isn't exhausted as we tear
 # down and rebuild the infrastructure at will.
 
-# When provisioning for the API:
+# When provisioning:
 
 # ...run this first:
 resource "aws_acm_certificate" "api" {
@@ -39,7 +39,7 @@ resource "aws_acm_certificate" "api" {
 
 
 
-# When provisioning for the API:
+# When provisioning:
 
 # ...run this first:
 resource "aws_acm_certificate" "www" {

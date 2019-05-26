@@ -6,8 +6,8 @@ pub enum Plan {
     #[structopt(name = "all")]
     All,
     /// Plan all infrastructure (ex. SSL certificates)
-    #[structopt(name = "api")]
-    Api,
+    #[structopt(name = "server")]
+    Server,
     /// Plan all infrastructure (ex. SSL certificates)
     #[structopt(name = "edgar")]
     Edgar,
@@ -42,7 +42,7 @@ impl Subcommand for Plan {
                 .unwrap();
                 Ok(())
             }
-            Plan::Api => {
+            Plan::Server => {
                 // TODO make this actually plan the right things
                 run_str_in_bash(
                     "

@@ -12,12 +12,12 @@ data "template_file" "birb_server_app" {
   }
 }
 
-# API Cluster
+# Server Cluster
 resource "aws_ecs_cluster" "server_cluster" {
   name = "birb-server-cluster"
 }
 
-# API Service
+# Server Service
 resource "aws_ecs_service" "server_service" {
   name            = "birb-server-service"
   cluster         = "${aws_ecs_cluster.server_cluster.id}"
@@ -42,7 +42,7 @@ resource "aws_ecs_service" "server_service" {
   ]
 }
 
-# API Task Definition
+# Server Task Definition
 resource "aws_ecs_task_definition" "server_task" {
   family                   = "birb-server-task"
   execution_role_arn       = "${aws_iam_role.task_execution_role.arn}"

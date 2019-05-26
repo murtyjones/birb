@@ -4,8 +4,8 @@ use crate::{run_str_in_bash, Subcommand};
 #[derive(Debug, StructOpt)]
 pub enum Build {
     /// Deploy the Edgar worker
-    #[structopt(name = "api")]
-    Api,
+    #[structopt(name = "server")]
+    Server,
     /// Deploys whatever change is held by the "plan" file
     #[structopt(name = "edgar")]
     Edgar,
@@ -28,7 +28,7 @@ fn build_binary(package: &str) {
 impl Subcommand for Build {
     fn run(&self) -> Result<(), failure::Error> {
         match self {
-            Build::Api => {
+            Build::Server => {
                 build_binary("api");
                 Ok(())
             }
