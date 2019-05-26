@@ -22,12 +22,12 @@ variable "health_check_path" {
   default = "/"
 }
 
-variable "birb_api_cpu" {
+variable "birb_server_cpu" {
   description = "Fargate instance CPU units to provision (1 vCPU = 1024 CPU units)"
   default     = "256"
 }
 
-variable "birb_api_memory" {
+variable "birb_server_memory" {
   description = "Fargate instance memory to provision (in MiB)"
   default     = "512"
 }
@@ -67,7 +67,7 @@ variable "multi_az" {
   default = false
 }
 
-variable "birb_api_certificate_arn" {
+variable "birb_server_certificate_arn" {
   description = "The certificate ARN for the birb API"
 }
 

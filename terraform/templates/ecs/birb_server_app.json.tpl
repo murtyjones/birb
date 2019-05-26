@@ -1,14 +1,14 @@
 [
     {
-        "name"            : "birb-api",
+        "name"            : "birb-server",
         "image"           : "${repo_url}",
-        "cpu"             : ${birb_api_cpu},
-        "memory"          : ${birb_api_memory},
+        "cpu"             : ${birb_server_cpu},
+        "memory"          : ${birb_server_memory},
         "networkMode"     : "awsvpc",
         "logConfiguration": {
             "logDriver": "awslogs",
             "options"  : {
-                "awslogs-group"        : "/ecs/birb-api",
+                "awslogs-group"        : "/ecs/birb-server",
                 "awslogs-region"       : "${aws_region}",
                 "awslogs-stream-prefix": "ecs"
             }

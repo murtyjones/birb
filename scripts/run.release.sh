@@ -5,4 +5,4 @@ cd $(git rev-parse --show-toplevel)
 
 cd ./crates/client
 
-../../target/x86_64-unknown-linux-musl/release/api
+../../target/x86_64-unknown-linux-musl/release/server

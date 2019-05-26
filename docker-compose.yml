@@ -15,7 +15,7 @@ services:
 
   test:
     build:
-      context: crates/api
+      context: crates/server
       dockerfile: Dockerfile-test
     volumes:
       - ./:/usr/src/app

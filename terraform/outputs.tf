@@ -1,6 +1,6 @@
 # Outputs to log:
 output "alb_hostname" {
-  value = "${aws_alb.api_load_balancer.dns_name}"
+  value = "${aws_alb.server_load_balancer.dns_name}"
 }
 
 output "bastion_ip_address" {

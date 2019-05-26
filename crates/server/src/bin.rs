@@ -2,9 +2,9 @@
 
 #![deny(missing_docs)]
 
-extern crate api_lib;
+extern crate server_lib;
 
-use api_lib::launch;
+use server_lib::launch;
 
 /// Launch the server
 pub fn main() {

@@ -1,5 +1,5 @@
 [package]
-name = "api"
+name = "server"
 version = "0.1.0"
 authors = ["Marty Jones <murtin.jones@gmail.com>"]
 edition = "2018"
@@ -19,9 +19,9 @@ version = "0.4.0"
 features = ["postgres_pool"]
 
 [lib]
-name = "api_lib"
+name = "server_lib"
 path = "src/lib.rs"
 
 [[bin]]
-name = "api_bin"
+name = "server_bin"
 path = "src/bin.rs"

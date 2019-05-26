@@ -35,21 +35,6 @@ version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
-name = "api"
-version = "0.1.0"
-dependencies = [
- "cfg-if 0.1.9 (registry+https://github.com/rust-lang/crates.io-index)",
- "dotenv 0.14.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "isomorphic-app 0.1.0",
- "postgres 0.15.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "rocket 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "rocket_contrib 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde 1.0.91 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde_derive 1.0.91 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde_json 1.0.39 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
 name = "approx"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -555,13 +540,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "edgar-worker"
 version = "0.1.0"
 dependencies = [
- "api 0.1.0",
  "env_logger 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "filing-data 0.1.0",
  "filing-metadata 0.1.0",
  "log 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "postgres 0.15.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "rocket_contrib 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "server 0.1.0",
 ]
 
 [[package]]
@@ -2192,6 +2177,21 @@ dependencies = [
  "itoa 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.91 (registry+https://github.com/rust-lang/crates.io-index)",
  "url 1.7.2 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "server"
+version = "0.1.0"
+dependencies = [
+ "cfg-if 0.1.9 (registry+https://github.com/rust-lang/crates.io-index)",
+ "dotenv 0.14.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "isomorphic-app 0.1.0",
+ "postgres 0.15.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rocket 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rocket_contrib 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde 1.0.91 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde_derive 1.0.91 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde_json 1.0.39 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

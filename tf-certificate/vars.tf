@@ -1,5 +1,5 @@
 variable "domain" {
-  description = "Which domain to use. Service will be deployed at api.domain"
+  description = "Which domain to use."
   default     = "birb.io"
 }
 

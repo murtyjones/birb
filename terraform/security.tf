@@ -1,5 +1,6 @@
 # ALB allows access from anywhere and can call anywhere (in pratice, only goes to ECS) tasks
 resource "aws_security_group" "lb" {
+  # Technically should be `birb-server-ecs-tasks-security-group` but hard to replace oh well
   name        = "birb-api-load-balancer-security-group"
   description = "Allow access on port 443 only to ALB"
   vpc_id      = "${aws_vpc.main.id}"
@@ -21,6 +22,7 @@ resource "aws_security_group" "lb" {
 
 # Traffic to the ECS cluster should only come from the ALB; can call out to anywhere
 resource "aws_security_group" "ecs_tasks" {
+  # Technically should be `birb-server-ecs-tasks-security-group` but hard to replace oh well
   name        = "birb-api-ecs-tasks-security-group"
   description = "allow inbound access from the ALB only"
   vpc_id      = "${aws_vpc.main.id}"
