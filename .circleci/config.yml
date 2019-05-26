@@ -35,7 +35,6 @@ jobs:
     working_directory: ~/birb/app
     steps:
       - checkout
-      - run: date +%F > date
       - restore_cache:
           keys:
             - v1-cargo-cache-{{ .Branch }}-{{ checksum "Cargo.lock" }} # Cache for the branch that you're on with this lockfile
@@ -53,7 +52,6 @@ jobs:
     working_directory: ~/birb/app
     steps:
       - checkout
-      - run: date +%F > date
       - restore_cache:
           keys:
             - v1-cargo-cache-{{ .Branch }}-{{ checksum "Cargo.lock" }} # Cache for the branch that you're on with this lockfile
