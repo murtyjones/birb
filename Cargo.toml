@@ -11,6 +11,8 @@ members = [
   "crates/filing-metadata",
   "crates/filing-data",
   "crates/edgar-worker",
+  "crates/app",
+  "crates/client",
 ]
 
 [dependencies]
