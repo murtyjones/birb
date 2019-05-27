@@ -1,6 +1,8 @@
 #!/bin/bash
 
-cd $(git rev-parse --show-toplevel)
+cd $(dirname $0)
+
+set -e
 
 mkdir -p build/
 mkdir -p dist/
