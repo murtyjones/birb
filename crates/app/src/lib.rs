@@ -1,5 +1,8 @@
 #![feature(proc_macro_hygiene)]
 
+#[macro_use]
+extern crate log;
+
 pub use crate::state::*;
 pub use crate::store::*;
 use crate::views::*;

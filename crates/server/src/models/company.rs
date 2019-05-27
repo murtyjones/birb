@@ -10,8 +10,8 @@ pub struct Model {
 }
 
 /// Find an entity using its cik
-pub fn get_autocomplete_results(conn: &Connection, substr: String) -> Result<Model, &str> {
-    let results = conn
+pub fn get_autocomplete_results(conn: &Connection, substr: String) -> Result<Vec<Model>, &str> {
+    let rows = &conn
         .query(
             "
         SELECT * FROM company
@@ -21,11 +21,14 @@ pub fn get_autocomplete_results(conn: &Connection, substr: String) -> Result<Mod
             &[&substr],
         )
         .expect("Couldn't search for a company");
-
-    Ok(Model {
-        short_cik: results.get(0).get("short_cik"),
-        company_name: results.get(0).get("company_name"),
-    })
+    let mut binds = Vec::new();
+    for row in rows {
+        binds.push(Model {
+            short_cik: row.get("short_cik"),
+            company_name: row.get("company_name"),
+        });
+    }
+    Ok(binds)
 }
 
 #[cfg(test)]

@@ -8,7 +8,7 @@ use rocket_contrib::json::JsonValue;
 pub fn get(conn: DbConnection, substr: String) -> JsonValue {
     match models::company::get_autocomplete_results(&conn.0, substr) {
         Ok(filer) => json!(GetResponse {
-            object_type: ObjectTypes::Object,
+            object_type: ObjectTypes::List,
             has_more: false,
             data: json!(filer),
         }),
