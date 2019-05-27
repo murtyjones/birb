@@ -1,5 +1,5 @@
 [package]
-name = "isomorphic-app"
+name = "app"
 version = "0.1.0"
 authors = ["Chinedu Francis Nwafili <frankie.nwafili@gmail.com>"]
 edition = "2018"

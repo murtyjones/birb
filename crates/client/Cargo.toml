@@ -1,5 +1,5 @@
 [package]
-name = "isomorphic-client"
+name = "client"
 version = "0.1.0"
 authors = ["Chinedu Francis Nwafili <frankie.nwafili@gmail.com>"]
 edition = "2018"
@@ -10,7 +10,7 @@ crate-type = ["cdylib"]
 [dependencies]
 console_error_panic_hook = "0.1"
 console_log = "0.1.2"
-isomorphic-app = { path = "../app" }
+app = { path = "../app" }
 js-sys = "0.3.20"
 log = "0.4.6"
 virtual-dom-rs = "0.6.9"

@@ -47,6 +47,23 @@ jobs:
           name: Test edgar worker
           command: cargo test -p edgar-worker
 
+  test-server:
+    docker:
+      - image: rustlang/rust:nightly
+    working_directory: ~/birb/app
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-cargo-cache-{{ .Branch }}-{{ checksum "Cargo.lock" }} # Cache for the branch that you're on with this lockfile
+            - v1-cargo-cache-{{ checksum "Cargo.lock" }} # If that doesn't exist, use the default cache across all branches with this lockfile
+            - v1-cargo-cache- # If that doesn't exist, use the default cache across all branches
+      - attach_workspace:
+          at: bb-cli-workspace
+      - run:
+          name: Test edgar worker
+          command: cargo test -p edgar-worker
+
   build-deploy-edgar:
     machine: true
     working_directory: ~/birb/app
@@ -78,6 +95,37 @@ jobs:
             - /usr/local/cargo
             - $HOME/.cargo/registry
 
+  build-deploy-server:
+    machine: true
+    working_directory: ~/birb/app
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-cargo-cache-{{ .Branch }}-{{ checksum "Cargo.lock" }} # Cache for the branch that you're on with this lockfile
+            - v1-cargo-cache-{{ checksum "Cargo.lock" }} # If that doesn't exist, use the default cache across all branches with this lockfile
+            - v1-cargo-cache- # If that doesn't exist, use the default cache across all branches
+      - attach_workspace:
+          at: bb-cli-workspace
+      - run:
+          name: Get birb-cli binary
+          command: mv bb-cli-workspace/bb ./
+      - run:
+          name: Build edgar worker binary
+          command: scripts/build_binary.sh server
+      - run:
+          name: Upgrade AWS CLI Latest Version
+          command: pip install --upgrade awscli
+      - run:
+          name: Deploy edgar worker binary
+          command: scripts/build_push_server.sh
+      - save_cache:
+          key: v1-cargo-cache-{{ .Branch }}-{{ checksum "Cargo.lock" }}
+          paths:
+            - target
+            - /usr/local/cargo
+            - $HOME/.cargo/registry
+
 workflows:
   version: 2
   edgar:
@@ -89,3 +137,9 @@ workflows:
       - build-deploy-edgar:
           requires:
             - test-edgar
+      - test-server:
+          requires:
+            - install-birb-cli
+      - build-deploy-server:
+          requires:
+            - test-server
