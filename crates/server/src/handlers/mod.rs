@@ -1,5 +1,5 @@
 /// Filer route handlers
-pub mod filer;
+pub mod autocomplete_company;
 /// Health check handler
 pub mod health_check;
 /// Page not found handler

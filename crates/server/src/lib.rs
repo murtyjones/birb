@@ -68,7 +68,10 @@ fn rocket() -> rocket::Rocket {
         .mount("/static", StaticFiles::from(static_files.as_str()))
         .mount(
             "/api",
-            routes![handlers::health_check::get, handlers::filer::get],
+            routes![
+                handlers::health_check::get,
+                handlers::autocomplete_company::get
+            ],
         )
         .register(catchers![
             handlers::not_found::handler,

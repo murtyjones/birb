@@ -4,9 +4,9 @@ use crate::DbConnection;
 use rocket_contrib::json::JsonValue;
 
 /// Get a filer by its cik
-#[get("/filer/<cik>")]
-pub fn get(conn: DbConnection, cik: String) -> JsonValue {
-    match models::filer::find_one_by_cik(&conn.0, cik) {
+#[get("/autocomplete/<substr>")]
+pub fn get(conn: DbConnection, substr: String) -> JsonValue {
+    match models::company::get_autocomplete_results(&conn.0, substr) {
         Ok(filer) => json!(GetResponse {
             object_type: ObjectTypes::Object,
             has_more: false,

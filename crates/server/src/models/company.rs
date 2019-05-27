@@ -1,0 +1,35 @@
+use postgres::Connection;
+
+/// Model for a company
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Model {
+    /// Identifier
+    pub short_cik: String,
+    /// Company's name
+    pub company_name: String,
+}
+
+/// Find an entity using its cik
+pub fn get_autocomplete_results(conn: &Connection, substr: String) -> Result<Model, &str> {
+    let results = conn
+        .query(
+            "
+        SELECT * FROM company
+        WHERE company_name ILIKE ($1 || '%')
+        LIMIT 10;
+        ",
+            &[&substr],
+        )
+        .expect("Couldn't search for a company");
+
+    Ok(Model {
+        short_cik: results.get(0).get("short_cik"),
+        company_name: results.get(0).get("company_name"),
+    })
+}
+
+#[cfg(test)]
+mod test {
+    #[test]
+    fn get_autocomplete_results_unwraps() {}
+}
