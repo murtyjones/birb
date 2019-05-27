@@ -116,41 +116,4 @@ fn respond(path: String, initial_count: Option<u32>) -> Result<Response<'static>
 
 /// Test suite
 #[cfg(test)]
-mod test {
-    use super::rocket;
-    use rocket::http::{ContentType, Status};
-    use rocket::local::Client;
-
-    /// Health check should return OK
-    #[test]
-    fn good_health_check() {
-        let client = Client::new(rocket()).expect("valid rocket instance");
-        let res = client.get("/").header(ContentType::JSON).dispatch();
-        assert_eq!(res.status(), Status::Ok);
-    }
-
-    /// nonexistent route should Not Found
-    #[test]
-    fn bad_get() {
-        let client = Client::new(rocket()).expect("valid rocket instance");
-        let res = client
-            .get("/doesnotexist")
-            .header(ContentType::JSON)
-            .dispatch();
-        assert_eq!(res.status(), Status::NotFound);
-    }
-
-    /// Get a filer successfully
-    #[test]
-    fn get_tsla() {
-        let client = Client::new(rocket()).expect("valid rocket instance");
-        let mut res = client
-            .get("/filer/0001318605")
-            .header(ContentType::JSON)
-            .dispatch();
-        let body = res.body_string().unwrap();
-        assert_eq!(res.status(), Status::Ok);
-        assert!(body.contains("0001318605"));
-    }
-
-}
+mod test {}
