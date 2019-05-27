@@ -1,7 +1,7 @@
+use app;
+use app::Msg;
+use app::{App, Store};
 use console_error_panic_hook;
-use isomorphic_app;
-use isomorphic_app::Msg;
-use isomorphic_app::{App, Store};
 use js_sys::Reflect;
 use log::Level;
 use std::cell::RefCell;

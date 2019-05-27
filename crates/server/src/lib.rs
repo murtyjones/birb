@@ -15,8 +15,8 @@ extern crate dotenv;
 extern crate postgres;
 extern crate serde_json;
 
+use app::App;
 #[cfg(debug_assertions)] use dotenv::dotenv;
-use isomorphic_app::App;
 use rocket::http::ContentType;
 use rocket::response::Response;
 use rocket_contrib::serve::StaticFiles;
