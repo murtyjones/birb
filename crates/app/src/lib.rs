@@ -69,8 +69,6 @@ fn home_route(store: Provided<Rc<RefCell<Store>>>) -> VirtualNode {
     HomeView::new(Rc::clone(&store)).render()
 }
 
-// @book start on-visit-example
-
 #[route(
   path = "/contributors",
   on_visit = download_contributors_json
@@ -114,8 +112,6 @@ fn download_contributors_json(store: Provided<Rc<RefCell<Store>>>) {
     // Maybe make our `Store`'s msg handler for Msg::SetPath call `on_visit` inside of a RAF..
     raf_closure.forget();
 }
-
-// @book end on-visit-example
 
 fn make_router(store: Rc<RefCell<Store>>) -> Rc<Router> {
     let mut router = Router::default();

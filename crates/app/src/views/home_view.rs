@@ -28,6 +28,12 @@ impl View for HomeView {
         let click_count = &*click_count.to_string();
         let click_component = html! { <strong style="font-size: 30px">{ click_count }</strong> };
 
+        let autocomplete_dropdown = if self.store.borrow().click_count() > 1000 {
+            html! { <div>Dropdown content!</div> }
+        } else {
+            html! { <span></span> }
+        };
+
         html! {
         <div>
 
@@ -37,10 +43,13 @@ impl View for HomeView {
           <button onclick=move |_: web_sys::Event| store.borrow_mut().msg(&Msg::Click)>
             Click me!
           </button>
-          <div> In this time Ferris has made { click_count } new friends. </div>
-            <svg xmlns="http://www.w3.org/2000/svg">
-              <circle cx="50" cy="50" r="50"/>
-            </svg>
+          <input
+              type="text"
+              name="company"
+              autocomplete="off"
+              oninput=move |_: web_sys::Event| web_sys::console::log_1(&"Hi!".into())
+          />
+          { autocomplete_dropdown }
         </div>
         }
     }

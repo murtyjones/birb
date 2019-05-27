@@ -69,9 +69,7 @@ impl Client {
         window().set_onpopstate(Some(on_popstate.as_ref().unchecked_ref()));
         on_popstate.forget();
 
-        let root_node = document()
-            .get_element_by_id("isomorphic-rust-web-app")
-            .unwrap();
+        let root_node = document().get_element_by_id("birb-app-container").unwrap();
         let dom_updater = DomUpdater::new_replace_mount(app.render(), root_node);
 
         let store = Rc::clone(&app.store);
