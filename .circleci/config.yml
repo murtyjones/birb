@@ -29,6 +29,15 @@ jobs:
           paths:
             - bb
 
+  check:
+    docker:
+      - image: rustlang/rust:nightly
+    working_directory: ~/birb/app
+    steps:
+      - checkout
+      - run: cargo check --all
+
+
   test-edgar:
     docker:
       - image: rustlang/rust:nightly
@@ -131,15 +140,18 @@ workflows:
   edgar:
     jobs:
       - install-birb-cli
+      - check
       - test-edgar:
           requires:
             - install-birb-cli
+            - check
       - build-deploy-edgar:
           requires:
             - test-edgar
       - test-server:
           requires:
             - install-birb-cli
+            - check
       - build-deploy-server:
           requires:
             - test-server
