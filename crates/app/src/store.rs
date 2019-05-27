@@ -62,6 +62,12 @@ impl Store {
     }
 }
 
+impl Store {
+    pub fn get_autocomplete(&mut self) {
+        web_sys::console::log_1(&"action triggered".into());
+    }
+}
+
 impl Deref for Store {
     type Target = State;
 

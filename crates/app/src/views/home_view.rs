@@ -40,14 +40,11 @@ impl View for HomeView {
           { nav_bar }
 
           <span> The button has been clicked: { click_component } times! </span>
-          <button onclick=move |_: web_sys::Event| store.borrow_mut().msg(&Msg::Click)>
-            Click me!
-          </button>
           <input
               type="text"
               name="company"
               autocomplete="off"
-              oninput=move |_: web_sys::Event| web_sys::console::log_1(&"Hi!".into())
+              oninput=move |_: web_sys::Event| store.borrow_mut().get_autocomplete()
           />
           { autocomplete_dropdown }
         </div>
