@@ -161,6 +161,7 @@ impl Subcommand for Plan {
                            -target=aws_alb.server_load_balancer \
                            -target=aws_alb_target_group.server_target_group \
                            -target=aws_alb_listener.server_lb_listener \
+                           -target=aws_alb_listener.redirect_to_ssl \
                            -target=aws_security_group.lb \
                            -target=aws_security_group.lb \
                            -target=aws_instance.bastion \

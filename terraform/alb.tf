@@ -22,7 +22,7 @@ resource "aws_alb_target_group" "server_target_group" {
   }
 }
 
-# Redirect all traffic from the ALB to the target group
+# Forward all traffic from the ALB to the target group
 resource "aws_alb_listener" "server_lb_listener" {
   load_balancer_arn = "${aws_alb.server_load_balancer.id}"
   port              = "443"
@@ -33,5 +33,22 @@ resource "aws_alb_listener" "server_lb_listener" {
   default_action {
     target_group_arn = "${aws_alb_target_group.server_target_group.id}"
     type             = "forward"
+  }
+}
+
+# Redirect HTTP traffic to HTTPS
+resource "aws_alb_listener" "redirect_to_ssl" {
+  load_balancer_arn = "${aws_alb.server_load_balancer.arn}"
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type = "redirect"
+
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
   }
 }

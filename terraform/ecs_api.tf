@@ -2,13 +2,13 @@ data "template_file" "birb_server_app" {
   template = "${file("terraform/templates/ecs/birb_server_app.json.tpl")}"
 
   vars {
-    repo_url         = "${aws_ecr_repository.server_repo.repository_url}"
-    app_name         = "birb-server"
-    birb_server_cpu     = "${var.birb_server_cpu}"
-    birb_server_memory  = "${var.birb_server_memory}"
-    aws_region       = "${var.aws_region}"
-    app_port         = "${var.app_port}"
-    ROCKET_DATABASES = "${aws_secretsmanager_secret.ROCKET_DATABASES.arn}"
+    repo_url           = "${aws_ecr_repository.server_repo.repository_url}"
+    app_name           = "birb-server"
+    birb_server_cpu    = "${var.birb_server_cpu}"
+    birb_server_memory = "${var.birb_server_memory}"
+    aws_region         = "${var.aws_region}"
+    app_port           = "${var.app_port}"
+    ROCKET_DATABASES   = "${aws_secretsmanager_secret.ROCKET_DATABASES.arn}"
   }
 }
 
@@ -39,6 +39,7 @@ resource "aws_ecs_service" "server_service" {
 
   depends_on = [
     "aws_alb_listener.server_lb_listener",
+    "aws_alb_listener.redirect_to_ssl",
   ]
 }
 
