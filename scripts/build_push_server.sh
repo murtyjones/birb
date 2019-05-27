@@ -12,7 +12,7 @@ mkdir out
 
 # Copy built binary and Dockerfile to output folder
 cp ./crates/server/Dockerfile-prod out
-cp ./target/x86_64-unknown-linux-musl/release/server out
+cp ./target/x86_64-unknown-linux-musl/release/server_bin out
 
 # Set variables to use in the tagging process
 VERSION=$(git rev-parse HEAD)

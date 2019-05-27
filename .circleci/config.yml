@@ -117,7 +117,7 @@ jobs:
           name: Upgrade AWS CLI Latest Version
           command: pip install --upgrade awscli
       - run:
-          name: Deploy edgar worker binary
+          name: Deploy server binary
           command: scripts/build_push_server.sh
       - save_cache:
           key: v1-server-cache-{{ .Branch }}-{{ checksum "Cargo.lock" }}
