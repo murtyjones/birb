@@ -52,24 +52,24 @@ impl View for HomeView {
                 match autocomplete_timeout {
                     Some(timeout) => {
                         web_sys::window().unwrap().clear_timeout_with_handle(timeout);
-                        let on_anchor_click = Closure::wrap(Box::new(move |_event: web_sys::Event| {
+                        let debounced_request = Closure::wrap(Box::new(move |_event: web_sys::Event| {
                             debug!("Debounced!");
                         }) as Box<FnMut(_)>);
                         autocomplete_timeout = Some(web_sys::window().unwrap().set_timeout_with_callback_and_timeout_and_arguments_0(
-                            on_anchor_click.as_ref().unchecked_ref(),
+                            debounced_request.as_ref().unchecked_ref(),
                             3_000
                         ).unwrap());
-                        on_anchor_click.forget();
+                        debounced_request.forget();
                     }
                     None => {
-                        let on_anchor_click = Closure::wrap(Box::new(move |_event: web_sys::Event| {
+                        let debounced_request = Closure::wrap(Box::new(move |_event: web_sys::Event| {
                             debug!("Debounced!");
                         }) as Box<FnMut(_)>);
                         autocomplete_timeout = Some(web_sys::window().unwrap().set_timeout_with_callback_and_timeout_and_arguments_0(
-                            on_anchor_click.as_ref().unchecked_ref(),
+                            debounced_request.as_ref().unchecked_ref(),
                             3_000
                         ).unwrap());
-                        on_anchor_click.forget();
+                        debounced_request.forget();
                     }
                 }
               }
