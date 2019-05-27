@@ -52,26 +52,17 @@ impl View for HomeView {
                 match autocomplete_timeout {
                     Some(timeout) => {
                         web_sys::window().unwrap().clear_timeout_with_handle(timeout);
-                        let debounced_request = Closure::wrap(Box::new(move |_event: web_sys::Event| {
-                            debug!("Debounced!");
-                        }) as Box<FnMut(_)>);
-                        autocomplete_timeout = Some(web_sys::window().unwrap().set_timeout_with_callback_and_timeout_and_arguments_0(
-                            debounced_request.as_ref().unchecked_ref(),
-                            3_000
-                        ).unwrap());
-                        debounced_request.forget();
                     }
-                    None => {
-                        let debounced_request = Closure::wrap(Box::new(move |_event: web_sys::Event| {
-                            debug!("Debounced!");
-                        }) as Box<FnMut(_)>);
-                        autocomplete_timeout = Some(web_sys::window().unwrap().set_timeout_with_callback_and_timeout_and_arguments_0(
-                            debounced_request.as_ref().unchecked_ref(),
-                            3_000
-                        ).unwrap());
-                        debounced_request.forget();
-                    }
+                    None => {}
                 }
+                let debounced_request = Closure::wrap(Box::new(move |_event: web_sys::Event| {
+                    debug!("Debounced!");
+                }) as Box<FnMut(_)>);
+                autocomplete_timeout = Some(web_sys::window().unwrap().set_timeout_with_callback_and_timeout_and_arguments_0(
+                    debounced_request.as_ref().unchecked_ref(),
+                    200 // only make 200ms after using stops typing
+                ).unwrap());
+                debounced_request.forget();
               }
           />
           { autocomplete_dropdown }
