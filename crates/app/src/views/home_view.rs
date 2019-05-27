@@ -2,8 +2,10 @@ use crate::store::Store;
 use crate::views::nav_bar_view::ActivePage;
 use crate::views::nav_bar_view::NavBarView;
 use crate::Msg;
+use wasm_bindgen::JsCast;
 
 use virtual_dom_rs::prelude::*;
+use wasm_bindgen::prelude::*;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -34,6 +36,8 @@ impl View for HomeView {
             html! { <span></span> }
         };
 
+        let mut autocomplete_timeout: Option<i32> = None;
+
         html! {
         <div>
 
@@ -44,7 +48,31 @@ impl View for HomeView {
               type="text"
               name="company"
               autocomplete="off"
-              oninput=move |_: web_sys::Event| store.borrow_mut().get_autocomplete()
+              oninput=move |_: web_sys::Event| {
+                match autocomplete_timeout {
+                    Some(timeout) => {
+                        web_sys::window().unwrap().clear_timeout_with_handle(timeout);
+                        let on_anchor_click = Closure::wrap(Box::new(move |_event: web_sys::Event| {
+                            debug!("Debounced!");
+                        }) as Box<FnMut(_)>);
+                        autocomplete_timeout = Some(web_sys::window().unwrap().set_timeout_with_callback_and_timeout_and_arguments_0(
+                            on_anchor_click.as_ref().unchecked_ref(),
+                            3_000
+                        ).unwrap());
+                        on_anchor_click.forget();
+                    }
+                    None => {
+                        let on_anchor_click = Closure::wrap(Box::new(move |_event: web_sys::Event| {
+                            debug!("Debounced!");
+                        }) as Box<FnMut(_)>);
+                        autocomplete_timeout = Some(web_sys::window().unwrap().set_timeout_with_callback_and_timeout_and_arguments_0(
+                            on_anchor_click.as_ref().unchecked_ref(),
+                            3_000
+                        ).unwrap());
+                        on_anchor_click.forget();
+                    }
+                }
+              }
           />
           { autocomplete_dropdown }
         </div>
