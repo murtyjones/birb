@@ -1,16 +1,8 @@
+use models::Company;
 use postgres::Connection;
 
-/// Model for a company
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Model {
-    /// Identifier
-    pub short_cik: String,
-    /// Company's name
-    pub company_name: String,
-}
-
 /// Find an entity using its cik
-pub fn get_autocomplete_results(conn: &Connection, substr: String) -> Result<Vec<Model>, &str> {
+pub fn get_autocomplete_results(conn: &Connection, substr: String) -> Result<Vec<Company>, &str> {
     let rows = &conn
         .query(
             "
@@ -23,7 +15,7 @@ pub fn get_autocomplete_results(conn: &Connection, substr: String) -> Result<Vec
         .expect("Couldn't search for a company");
     let mut binds = Vec::new();
     for row in rows {
-        binds.push(Model {
+        binds.push(Company {
             short_cik: row.get("short_cik"),
             company_name: row.get("company_name"),
         });

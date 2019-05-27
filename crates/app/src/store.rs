@@ -1,3 +1,4 @@
+use crate::download_autocomplete_json;
 use crate::state::Msg;
 use crate::state::State;
 

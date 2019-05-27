@@ -30,43 +30,51 @@ impl View for HomeView {
         let click_count = &*click_count.to_string();
         let click_component = html! { <strong style="font-size: 30px">{ click_count }</strong> };
 
-        let autocomplete_dropdown = if self.store.borrow().click_count() > 1000 {
-            html! { <div>Dropdown content!</div> }
-        } else {
-            html! { <span></span> }
+        let autocomplete_dropdown = match self.store.borrow().autocomplete_results() {
+            Some(results) => {
+                html! { <div>Dropdown content!</div> }
+            }
+            None => {
+                html! { <div style="display: none;"></div> }
+            }
         };
 
         let mut autocomplete_timeout: Option<i32> = None;
 
         html! {
-        <div>
+                <div>
 
-          { nav_bar }
+                  { nav_bar }
 
-          <span> The button has been clicked: { click_component } times! </span>
-          <input
-              type="text"
-              name="company"
-              autocomplete="off"
-              oninput=move |_: web_sys::Event| {
-                match autocomplete_timeout {
-                    Some(timeout) => {
-                        web_sys::window().unwrap().clear_timeout_with_handle(timeout);
-                    }
-                    None => {}
+                  <span> The button has been clicked: { click_component } times! </span>
+                  <input
+                      id="company-autocomplete"
+                      type="text"
+                      name="company"
+                      autocomplete="off"
+                      oninput=move |_: web_sys::Event| {
+                        match autocomplete_timeout {
+                            Some(timeout) => {
+                                web_sys::window().unwrap().clear_timeout_with_handle(timeout);
+                            }
+                            None => {}
+                        }
+                        let debounced_request = Closure::wrap(Box::new(move |event: web_sys::Event| {
+                            // TODO: Figure out why event.target() object isn't working
+                            // Error: client.js:482 Uncaught TypeError: Cannot read property 'target' of undefined
+                            let target = event.target();
+        //                    let store = Rc::clone(&store);
+        //                    download_autocomplete_json(..., store);
+                        }) as Box<FnMut(_)>);
+                        autocomplete_timeout = Some(web_sys::window().unwrap().set_timeout_with_callback_and_timeout_and_arguments_0(
+                            debounced_request.as_ref().unchecked_ref(),
+                            200 // only make 200ms after using stops typing
+                        ).unwrap());
+                        debounced_request.forget();
+                      }
+                  />
+                  { autocomplete_dropdown }
+                </div>
                 }
-                let debounced_request = Closure::wrap(Box::new(move |_event: web_sys::Event| {
-                    debug!("Debounced!");
-                }) as Box<FnMut(_)>);
-                autocomplete_timeout = Some(web_sys::window().unwrap().set_timeout_with_callback_and_timeout_and_arguments_0(
-                    debounced_request.as_ref().unchecked_ref(),
-                    200 // only make 200ms after using stops typing
-                ).unwrap());
-                debounced_request.forget();
-              }
-          />
-          { autocomplete_dropdown }
-        </div>
-        }
     }
 }

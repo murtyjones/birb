@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # Go to project root
 cd $(git rev-parse --show-toplevel)
 

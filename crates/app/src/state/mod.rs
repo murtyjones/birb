@@ -1,3 +1,4 @@
+use models::Company;
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::cell::Cell;
@@ -11,7 +12,9 @@ pub struct State {
     click_count: Rc<Cell<u32>>,
     path: String,
     contributors: Option<Vec<PercyContributor>>,
+    autocomplete_results: Option<Vec<Company>>,
     has_initiated_contributors_download: bool,
+    has_initiated_auto_complete_download: bool,
 }
 
 impl State {
@@ -20,7 +23,9 @@ impl State {
             path: "/".to_string(),
             click_count: Rc::new(Cell::new(count)),
             contributors: None,
+            autocomplete_results: None,
             has_initiated_contributors_download: false,
+            has_initiated_auto_complete_download: false,
         }
     }
 
@@ -43,8 +48,14 @@ impl State {
             Msg::SetContributorsJson(json) => {
                 self.contributors = Some(json.into_serde().unwrap());
             }
+            Msg::SetAutoCompleteJson(json) => {
+                self.autocomplete_results = Some(json.into_serde().unwrap());
+            }
             Msg::InitiatedContributorsDownload => {
                 self.has_initiated_contributors_download = true;
+            }
+            Msg::InitiatedAutoCompleteRequest => {
+                self.has_initiated_auto_complete_download = true;
             }
         };
     }
@@ -61,8 +72,16 @@ impl State {
         &self.contributors
     }
 
+    pub fn autocomplete_results(&self) -> &Option<Vec<Company>> {
+        &self.autocomplete_results
+    }
+
     pub fn has_initiated_contributors_download(&self) -> &bool {
         &self.has_initiated_contributors_download
+    }
+
+    pub fn has_initiated_auto_complete_download(&self) -> &bool {
+        &self.has_initiated_auto_complete_download
     }
 }
 
@@ -91,7 +110,7 @@ mod tests {
 
     #[test]
     fn serialize_deserialize() {
-        let state_json = r#"{"click_count":5,"path":"/","contributors":null,"has_initiated_contributors_download":false}"#;
+        let state_json = r#"{"click_count":5,"path":"/","contributors":null,"has_initiated_contributors_download":false,"has_initiated_auto_complete_download":false,}"#;
 
         let state = State::from_json(state_json);
 
