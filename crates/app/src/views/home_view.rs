@@ -1,3 +1,4 @@
+use crate::download_autocomplete_json;
 use crate::store::Store;
 use crate::views::nav_bar_view::ActivePage;
 use crate::views::nav_bar_view::NavBarView;
@@ -42,8 +43,7 @@ impl View for HomeView {
         let mut autocomplete_timeout: Option<i32> = None;
 
         html! {
-                <div>
-
+            <div>
                   { nav_bar }
 
                   <span> The button has been clicked: { click_component } times! </span>
@@ -52,19 +52,21 @@ impl View for HomeView {
                       type="text"
                       name="company"
                       autocomplete="off"
-                      oninput=move |_: web_sys::Event| {
+                      oninput=move |event: web_sys::Event| {
                         match autocomplete_timeout {
                             Some(timeout) => {
                                 web_sys::window().unwrap().clear_timeout_with_handle(timeout);
                             }
                             None => {}
                         }
-                        let debounced_request = Closure::wrap(Box::new(move |event: web_sys::Event| {
-                            // TODO: Figure out why event.target() object isn't working
-                            // Error: client.js:482 Uncaught TypeError: Cannot read property 'target' of undefined
-                            let target = event.target();
-        //                    let store = Rc::clone(&store);
-        //                    download_autocomplete_json(..., store);
+                        let debounced_request = Closure::wrap(Box::new(move |_: web_sys::Event| {
+                            let value: String = event.target()
+                                .unwrap()
+                                .dyn_into::<web_sys::HtmlInputElement>()
+                                .unwrap()
+                                .value();
+                            // TODO figure out how to actually call this:
+                            // download_autocomplete_json(value, store);
                         }) as Box<FnMut(_)>);
                         autocomplete_timeout = Some(web_sys::window().unwrap().set_timeout_with_callback_and_timeout_and_arguments_0(
                             debounced_request.as_ref().unchecked_ref(),
@@ -74,7 +76,7 @@ impl View for HomeView {
                       }
                   />
                   { autocomplete_dropdown }
-                </div>
-                }
+            </div>
+        }
     }
 }
