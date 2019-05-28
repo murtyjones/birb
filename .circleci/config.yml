@@ -35,7 +35,18 @@ jobs:
     working_directory: ~/birb/app
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - v1-check-cache-{{ .Branch }}-{{ checksum "Cargo.lock" }} # Cache for the branch that you're on with this lockfile
+            - v1-check-cache-{{ checksum "Cargo.lock" }} # If that doesn't exist, use the default cache across all branches with this lockfile
+            - v1-check-cache- # If that doesn't exist, use the default cache across all branches
       - run: cargo check --all
+      - save_cache:
+          key: v1-check-cache-{{ .Branch }}-{{ checksum "Cargo.lock" }}
+          paths:
+            - target
+            - /usr/local/cargo
+            - $HOME/.cargo/registry
 
 
   test-edgar:
