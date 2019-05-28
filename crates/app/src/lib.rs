@@ -117,7 +117,7 @@ fn download_contributors_json(store: Provided<Rc<RefCell<Store>>>) {
     raf_closure.forget();
 }
 
-fn download_autocomplete_json(substr: String, store: Provided<Rc<RefCell<Store>>>) {
+pub fn download_autocomplete_json(substr: String, store: Rc<RefCell<Store>>) {
     // In order to check if the download has already been initiated, we must
     // wrap the possibility of a download attempt in a closure and pass it to
     // request_animation_frame. This is due to store already being mutably
