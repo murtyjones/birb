@@ -71,6 +71,9 @@ impl View for HomeView {
                             // TODO figure out how to actually call this
                             // Current error: expected an `FnMut<(web_sys::Event,)>` closure, found `[closure@crates/app/src/views/home_view.rs:58:31: 79:24 autocomplete_timeout:std::option::Option<i32>, store_ref:std::option::Option<std::rc::Rc<std::cell::RefCell<store::Store>>>]`
                             // download_autocomplete_json(value, store_ref.take().unwrap());
+
+                            
+                            // try sending a message using store_ref.take().unwrap()
                         }) as Box<FnMut(_)>);
                         autocomplete_timeout = Some(web_sys::window().unwrap().set_timeout_with_callback_and_timeout_and_arguments_0(
                             debounced_request.as_ref().unchecked_ref(),
