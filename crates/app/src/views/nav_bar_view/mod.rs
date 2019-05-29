@@ -51,7 +51,7 @@ static NAV_BAR_CSS: &'static str = css! {"
     background: linear-gradient(267deg,#2a38ef,#200994 50%,#1c2dab);
     color: white;
     display: flex;
-    font-family: Avenir-Next;
+    font-family: Helvetica;
     font-size: 20px;
     font-weight: bold;
     height: 50px;

@@ -3,6 +3,7 @@ use crate::views::nav_bar_view::ActivePage;
 use crate::views::nav_bar_view::NavBarView;
 use crate::Msg;
 use css_rs_macro::css;
+use models::Company;
 use wasm_bindgen::JsCast;
 
 use virtual_dom_rs::prelude::*;
@@ -43,19 +44,28 @@ impl View for SearchBarView {
             html! { <a href="/">8</a> },
         ];
 
-        let typeahead_results = match (
+        let typeahead_results: VirtualNode = match (
             self.store.borrow().is_typeahead_open(),
             self.store.borrow().autocomplete_results(),
         ) {
             (true, Some(results)) => {
+                let result_list = results
+                    .data
+                    .iter()
+                    .map(|x| {
+                        let name: &str = x.company_name.as_str();
+                        let link: String = format!("/companies/{}", x.short_cik.as_str());
+                        html! {
+                            <a href={ link }>{ name }</a>
+                        }
+                    })
+                    .collect::<Vec<VirtualNode>>();
                 html! {
-                    <div class="typeahead-results">
-                        { will_this_work }
-                    </div>
+                    <div class="typeahead-results">{ result_list }<div>
                 }
             }
             (true, None) => {
-                html! { <div class="typeahead-results">No Results</div> }
+                html! { <div class="typeahead-results"><a style="cursor: default;">No Results</a><div> }
             }
             (false, ..) => {
                 html! { <div style="display: none;"></div> }
@@ -92,22 +102,31 @@ impl View for SearchBarView {
 
 static TYPEAHEAD_CSS: &'static str = css! {"
 :host {
+  width: 250px;
   height: 20px;
-  width: 100px;
   overflow-y: visible;
   color: black;
+  margin: 0 auto;
 }
 
 :host > input {
+  width: 100%;
   border: none;
   border-radius: 3px;
   padding: 5px;
+  box-sizing: border-box;
 }
 
 :host > .typeahead-results > a {
+  width: 100%;
   display: block;
+  font-size: 12px;
+  color: black;
+  text-decoration: none;
+  font-weight: normal;
   background: white;
   padding: 5px 10px;
+  box-sizing: border-box;
   border-width: 1px 1px 0 1px;
   border-color: grey;
   border-style: solid;
