@@ -8,6 +8,7 @@ use wasm_bindgen::JsCast;
 use virtual_dom_rs::prelude::*;
 use wasm_bindgen::prelude::*;
 
+use crate::state::AutoCompleteResponse;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -42,15 +43,21 @@ impl View for SearchBarView {
             html! { <a href="/">8</a> },
         ];
 
-        let typeahead_results = match self.store.borrow().autocomplete_results() {
-            Some(results) => {
+        let typeahead_results = match (
+            self.store.borrow().is_typeahead_open(),
+            self.store.borrow().autocomplete_results(),
+        ) {
+            (true, Some(results)) => {
                 html! {
                     <div class="typeahead-results">
                         { will_this_work }
                     </div>
                 }
             }
-            None => {
+            (true, None) => {
+                html! { <div class="typeahead-results">No Results</div> }
+            }
+            (false, ..) => {
                 html! { <div style="display: none;"></div> }
             }
         };
