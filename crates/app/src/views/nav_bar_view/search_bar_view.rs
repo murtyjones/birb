@@ -132,7 +132,7 @@ static TYPEAHEAD_CSS: &'static str = css! {"
   border-style: solid;
 }
 
-:host > .typeahead-results > a:last-child {
+:host > .typeahead-results > a:last-of-type {
   border-bottom-width: 1px;
 }
 
