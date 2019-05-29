@@ -12,7 +12,7 @@ pub struct State {
     click_count: Rc<Cell<u32>>,
     path: String,
     contributors: Option<Vec<PercyContributor>>,
-    autocomplete_results: Option<Vec<Company>>,
+    autocomplete_results: Option<AutoCompleteResponse>,
     has_initiated_contributors_download: bool,
     has_initiated_auto_complete_download: bool,
 }
@@ -72,7 +72,7 @@ impl State {
         &self.contributors
     }
 
-    pub fn autocomplete_results(&self) -> &Option<Vec<Company>> {
+    pub fn autocomplete_results(&self) -> &Option<AutoCompleteResponse> {
         &self.autocomplete_results
     }
 
@@ -102,6 +102,13 @@ pub struct PercyContributor {
     pub login: String,
     /// Github profile URL. E.g. https://github.com/username
     pub html_url: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct AutoCompleteResponse {
+    pub data: Vec<Company>,
+    pub has_more: bool,
+    pub object_type: String,
 }
 
 #[cfg(test)]

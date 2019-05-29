@@ -2,7 +2,9 @@ use crate::download_autocomplete_json;
 use crate::state::Msg;
 use crate::state::State;
 
+use core::borrow::BorrowMut;
 use router_rs::prelude::Router;
+use std::cell::RefCell;
 use std::ops::Deref;
 use std::rc::Rc;
 
@@ -64,8 +66,8 @@ impl Store {
 }
 
 impl Store {
-    pub fn get_autocomplete(&mut self) {
-        info!("Hello!!")
+    pub fn get_autocomplete(&self, value: String, store: Rc<RefCell<Store>>) {
+        download_autocomplete_json(value, store);
     }
 }
 
