@@ -66,7 +66,7 @@ impl Store {
 }
 
 impl Store {
-    pub fn get_autocomplete(&self, value: String, store: Rc<RefCell<Store>>) {
+    pub fn get_typeahead_results(&self, value: String, store: Rc<RefCell<Store>>) {
         download_autocomplete_json(value, store);
     }
 }

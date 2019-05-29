@@ -15,6 +15,7 @@ pub struct State {
     autocomplete_results: Option<AutoCompleteResponse>,
     has_initiated_contributors_download: bool,
     has_initiated_auto_complete_download: bool,
+    is_typeahead_open: bool,
 }
 
 impl State {
@@ -26,6 +27,7 @@ impl State {
             autocomplete_results: None,
             has_initiated_contributors_download: false,
             has_initiated_auto_complete_download: false,
+            is_typeahead_open: false,
         }
     }
 
@@ -57,6 +59,9 @@ impl State {
             Msg::InitiatedAutoCompleteRequest => {
                 self.has_initiated_auto_complete_download = true;
             }
+            Msg::TypeaheadOpen(v) => {
+                self.is_typeahead_open = *v;
+            }
         };
     }
 
@@ -82,6 +87,10 @@ impl State {
 
     pub fn has_initiated_auto_complete_download(&self) -> &bool {
         &self.has_initiated_auto_complete_download
+    }
+
+    pub fn is_typeahead_open(&self) -> &bool {
+        &self.is_typeahead_open
     }
 }
 

@@ -11,4 +11,6 @@ pub enum Msg {
     InitiatedContributorsDownload,
     /// Represents whether the client is already fetching the autocomplete results
     InitiatedAutoCompleteRequest,
+    /// Represents that the typeahead is open
+    TypeaheadOpen(bool),
 }

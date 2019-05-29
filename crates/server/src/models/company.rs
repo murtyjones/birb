@@ -2,7 +2,7 @@ use models::Company;
 use postgres::Connection;
 
 /// Find an entity using its cik
-pub fn get_autocomplete_results(conn: &Connection, substr: String) -> Result<Vec<Company>, &str> {
+pub fn get_typeahead_results(conn: &Connection, substr: String) -> Result<Vec<Company>, &str> {
     let rows = &conn
         .query(
             "
@@ -26,5 +26,5 @@ pub fn get_autocomplete_results(conn: &Connection, substr: String) -> Result<Vec
 #[cfg(test)]
 mod test {
     #[test]
-    fn get_autocomplete_results_unwraps() {}
+    fn get_typeahead_results_unwraps() {}
 }

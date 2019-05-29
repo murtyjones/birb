@@ -23,7 +23,13 @@ impl SearchBarView {
 
 impl View for SearchBarView {
     fn render(&self) -> VirtualNode {
-        let store = Rc::clone(&self.store);
+        debug!(
+            "Typehead open: {:?}",
+            self.store.borrow().is_typeahead_open()
+        );
+        let store_for_onfocus = Rc::clone(&self.store);
+        let store_for_onblur = Rc::clone(&self.store);
+        let store_for_oninput = Rc::clone(&self.store);
 
         let will_this_work: Vec<VirtualNode> = vec![
             html! { <a href="/">1</a> },
@@ -56,13 +62,19 @@ impl View for SearchBarView {
                     type="text"
                     name="company"
                     autocomplete="off"
+                    onfocus=move |event: web_sys::Event| {
+                        store_for_onfocus.borrow_mut().msg(&Msg::TypeaheadOpen(true))
+                    }
+                    onblur=move |event: web_sys::Event| {
+                        store_for_onblur.borrow_mut().msg(&Msg::TypeaheadOpen(false))
+                    }
                     oninput=move |event: web_sys::Event| {
                         let value: String = event.target()
                             .unwrap()
                             .dyn_into::<web_sys::HtmlInputElement>()
                             .unwrap()
                             .value();
-                        store.borrow_mut().get_autocomplete(value, Rc::clone(&store));
+                        store_for_oninput.borrow_mut().get_typeahead_results(value, Rc::clone(&store_for_oninput));
                     }
                 />
                 { typeahead_results }
