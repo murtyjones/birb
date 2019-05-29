@@ -26,14 +26,14 @@ impl View for SearchBarView {
         let store = Rc::clone(&self.store);
 
         let will_this_work: Vec<VirtualNode> = vec![
-            html! { <a>1</a> },
-            html! { <a>2</a> },
-            html! { <a>3</a> },
-            html! { <a>4</a> },
-            html! { <a>5</a> },
-            html! { <a>6</a> },
-            html! { <a>7</a> },
-            html! { <a>8</a> },
+            html! { <a href="/">1</a> },
+            html! { <a href="/">2</a> },
+            html! { <a href="/">3</a> },
+            html! { <a href="/">4</a> },
+            html! { <a href="/">5</a> },
+            html! { <a href="/">6</a> },
+            html! { <a href="/">7</a> },
+            html! { <a href="/">8</a> },
         ];
 
         let typeahead_results = match self.store.borrow().autocomplete_results() {
@@ -96,6 +96,11 @@ static TYPEAHEAD_CSS: &'static str = css! {"
 
 :host > .typeahead-results > a:last-child {
   border-bottom-width: 1px;
+}
+
+:host > .typeahead-results > a:hover,
+:host > .typeahead-results > a:focus {
+  background: #DDD;
 }
 
 "};
