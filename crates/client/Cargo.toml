@@ -28,6 +28,7 @@ features = [
     "Event",
     "EventTarget",
     "History",
+    "KeyboardEvent",
     "Location",
     "Node",
     "NodeList",

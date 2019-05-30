@@ -75,6 +75,9 @@ impl Client {
         let store = Rc::clone(&app.store);
         intercept_relative_links(store);
 
+        let store = Rc::clone(&app.store);
+        key_event_listener(store);
+
         Client { app, dom_updater }
     }
 
@@ -124,12 +127,34 @@ fn intercept_relative_links(store: Rc<RefCell<Store>>) {
     on_anchor_click.forget();
 }
 
+// Listen for key events in order to all the user to interact with some
+// compenents (e.g. the typeahead)
+fn key_event_listener(store: Rc<RefCell<Store>>) {
+    let body = body();
+    let closure = Closure::wrap(Box::new(move |event: web_sys::Event| {
+        let key: String = event
+            .dyn_into::<web_sys::KeyboardEvent>()
+            .expect("Couldn't convert into html element")
+            .key();
+        web_sys::console::log_1(&format!("key pressed: {}", key).into());
+        let msg = &Msg::KeyDown(Some(key));
+        store.borrow_mut().msg(msg);
+    }) as Box<dyn FnMut(_)>);
+    body.add_event_listener_with_callback("keydown", closure.as_ref().unchecked_ref())
+        .expect("Couldn't add event listener!");
+    closure.forget();
+}
+
 fn window() -> web_sys::Window {
-    web_sys::window().unwrap()
+    web_sys::window().expect("Couldn't get window")
 }
 
 fn document() -> web_sys::Document {
-    window().document().unwrap()
+    window().document().expect("Couldn't get document")
+}
+
+fn body() -> web_sys::HtmlElement {
+    document().body().expect("Couldn't get body")
 }
 
 fn history() -> web_sys::History {

@@ -16,6 +16,7 @@ pub struct State {
     has_initiated_contributors_download: bool,
     has_initiated_auto_complete_download: bool,
     is_typeahead_open: bool,
+    key_down: Option<String>,
 }
 
 impl State {
@@ -28,6 +29,7 @@ impl State {
             has_initiated_contributors_download: false,
             has_initiated_auto_complete_download: false,
             is_typeahead_open: false,
+            key_down: None,
         }
     }
 
@@ -62,6 +64,14 @@ impl State {
             Msg::TypeaheadOpen(v) => {
                 self.is_typeahead_open = *v;
             }
+            Msg::KeyDown(v) => match v {
+                Some(key) => {
+                    self.key_down = Some(key.clone());
+                }
+                None => {
+                    self.key_down = None;
+                }
+            },
         };
     }
 
@@ -91,6 +101,10 @@ impl State {
 
     pub fn is_typeahead_open(&self) -> &bool {
         &self.is_typeahead_open
+    }
+
+    pub fn key_down(&self) -> &Option<String> {
+        &self.key_down
     }
 }
 

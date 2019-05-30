@@ -33,17 +33,6 @@ impl View for SearchBarView {
         let store_for_onblur = Rc::clone(&self.store);
         let store_for_oninput = Rc::clone(&self.store);
 
-        let will_this_work: Vec<VirtualNode> = vec![
-            html! { <a href="/">1</a> },
-            html! { <a href="/">2</a> },
-            html! { <a href="/">3</a> },
-            html! { <a href="/">4</a> },
-            html! { <a href="/">5</a> },
-            html! { <a href="/">6</a> },
-            html! { <a href="/">7</a> },
-            html! { <a href="/">8</a> },
-        ];
-
         let typeahead_results: VirtualNode = match (
             self.store.borrow().is_typeahead_open(),
             self.store.borrow().typeahead_results(),

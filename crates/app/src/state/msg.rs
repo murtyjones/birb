@@ -13,4 +13,6 @@ pub enum Msg {
     InitiatedTypeaheadRequest,
     /// Represents that the typeahead is open
     TypeaheadOpen(bool),
+    /// Represents the key the user pressed
+    KeyDown(Option<String>),
 }
