@@ -1,22 +1,22 @@
-use models::Company;
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::cell::Cell;
 use std::rc::Rc;
 
+mod top_nav;
+use top_nav::TopNavSearchBar;
+
 mod msg;
 pub use self::msg::Msg;
+use crate::state::top_nav::TypeaheadResponse;
 
 #[derive(Serialize, Deserialize)]
 pub struct State {
     click_count: Rc<Cell<u32>>,
     path: String,
     contributors: Option<Vec<PercyContributor>>,
-    typeahead_results: Option<TypeaheadResponse>,
     has_initiated_contributors_download: bool,
-    has_initiated_auto_complete_download: bool,
-    is_typeahead_open: bool,
-    typeahead_active_index: Option<i32>,
+    top_nav_search_bar: TopNavSearchBar,
 }
 
 impl State {
@@ -25,11 +25,8 @@ impl State {
             path: "/".to_string(),
             click_count: Rc::new(Cell::new(count)),
             contributors: None,
-            typeahead_results: None,
             has_initiated_contributors_download: false,
-            has_initiated_auto_complete_download: false,
-            is_typeahead_open: false,
-            typeahead_active_index: None,
+            top_nav_search_bar: TopNavSearchBar::new(),
         }
     }
 
@@ -53,16 +50,16 @@ impl State {
                 self.contributors = Some(json.into_serde().unwrap());
             }
             Msg::SetTypeaheadJson(json) => {
-                self.typeahead_results = Some(json.into_serde().unwrap());
+                self.top_nav_search_bar.typeahead_results = Some(json.into_serde().unwrap());
             }
             Msg::InitiatedContributorsDownload => {
                 self.has_initiated_contributors_download = true;
             }
             Msg::InitiatedTypeaheadRequest => {
-                self.has_initiated_auto_complete_download = true;
+                self.top_nav_search_bar.has_initiated_auto_complete_download = true;
             }
             Msg::TypeaheadOpen(v) => {
-                self.is_typeahead_open = *v;
+                self.top_nav_search_bar.is_typeahead_open = *v;
             }
             Msg::KeyDown(v) => match v {
                 Some(key) => {
@@ -85,24 +82,12 @@ impl State {
         &self.contributors
     }
 
-    pub fn typeahead_results(&self) -> &Option<TypeaheadResponse> {
-        &self.typeahead_results
+    pub fn top_nav_search_bar(&self) -> &TopNavSearchBar {
+        &self.top_nav_search_bar
     }
 
     pub fn has_initiated_contributors_download(&self) -> &bool {
         &self.has_initiated_contributors_download
-    }
-
-    pub fn has_initiated_auto_complete_download(&self) -> &bool {
-        &self.has_initiated_auto_complete_download
-    }
-
-    pub fn is_typeahead_open(&self) -> &bool {
-        &self.is_typeahead_open
-    }
-
-    pub fn typeahead_active_index(&self) -> &Option<i32> {
-        &self.typeahead_active_index
     }
 }
 
@@ -117,17 +102,17 @@ impl State {
 
     fn set_typeahead_active_index(&mut self, key: String) {
         match key.as_ref() {
-            "ArrowDown" | "Down" => match self.typeahead_active_index {
+            "ArrowDown" | "Down" => match self.top_nav_search_bar.typeahead_active_index {
                 Some(index) => {
-                    self.typeahead_active_index = Some(index + 1);
+                    self.top_nav_search_bar.typeahead_active_index = Some(index + 1);
                 }
-                None => self.typeahead_active_index = Some(0),
+                None => self.top_nav_search_bar.typeahead_active_index = Some(0),
             },
-            "ArrowUp" | "Up" => match self.typeahead_active_index {
+            "ArrowUp" | "Up" => match self.top_nav_search_bar.typeahead_active_index {
                 Some(index) => {
-                    self.typeahead_active_index = Some(index - 1);
+                    self.top_nav_search_bar.typeahead_active_index = Some(index - 1);
                 }
-                None => self.typeahead_active_index = Some(0),
+                None => self.top_nav_search_bar.typeahead_active_index = Some(0),
             },
             _ => {}
         }
@@ -141,13 +126,6 @@ pub struct PercyContributor {
     pub login: String,
     /// Github profile URL. E.g. https://github.com/username
     pub html_url: String,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct TypeaheadResponse {
-    pub data: Vec<Company>,
-    pub has_more: bool,
-    pub object_type: String,
 }
 
 #[cfg(test)]

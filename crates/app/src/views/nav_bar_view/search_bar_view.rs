@@ -9,7 +9,6 @@ use wasm_bindgen::JsCast;
 use virtual_dom_rs::prelude::*;
 use wasm_bindgen::prelude::*;
 
-use crate::state::TypeaheadResponse;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -111,10 +110,10 @@ static TYPEAHEAD_CSS: &'static str = css! {"
 
 fn build_typeahead_results(store: Rc<RefCell<Store>>) -> VirtualNode {
     match (
-        store.borrow().is_typeahead_open(),
-        store.borrow().typeahead_results(),
+        store.borrow().top_nav_search_bar().is_typeahead_open,
+        &store.borrow().top_nav_search_bar().typeahead_results,
     ) {
-        (truei, Some(results)) => {
+        (true, Some(results)) => {
             let result_list = results
                 .data
                 .iter()
@@ -122,13 +121,14 @@ fn build_typeahead_results(store: Rc<RefCell<Store>>) -> VirtualNode {
                 .map(|(i, each)| {
                     let name: &str = each.company_name.as_str();
                     let link: String = format!("/companies/{}", each.short_cik.as_str());
-                    let class: &str = match store.borrow().typeahead_active_index() {
-                        Some(index) => match *index == i as i32 {
-                            true => "active",
-                            false => "inactive",
-                        },
-                        None => "inactive",
-                    };
+                    let class: &str =
+                        match store.borrow().top_nav_search_bar().typeahead_active_index {
+                            Some(index) => match index == i as i32 {
+                                true => "active",
+                                false => "inactive",
+                            },
+                            None => "inactive",
+                        };
                     html! {
                         <a class={ class } href={ link }>{ name }</a>
                     }
