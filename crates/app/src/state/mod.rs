@@ -12,10 +12,7 @@ use crate::state::top_nav::TypeaheadResponse;
 
 #[derive(Serialize, Deserialize)]
 pub struct State {
-    click_count: Rc<Cell<u32>>,
     path: String,
-    contributors: Option<Vec<PercyContributor>>,
-    has_initiated_contributors_download: bool,
     top_nav_search_bar: TopNavSearchBar,
 }
 
@@ -23,9 +20,6 @@ impl State {
     pub fn new(count: u32) -> State {
         State {
             path: "/".to_string(),
-            click_count: Rc::new(Cell::new(count)),
-            contributors: None,
-            has_initiated_contributors_download: false,
             top_nav_search_bar: TopNavSearchBar::new(),
         }
     }
@@ -44,16 +38,9 @@ impl State {
 impl State {
     pub fn msg(&mut self, msg: &Msg) {
         match msg {
-            Msg::Click => self.increment_click(),
             Msg::SetPath(path) => self.set_path(path.to_string()),
-            Msg::SetContributorsJson(json) => {
-                self.contributors = Some(json.into_serde().unwrap());
-            }
             Msg::SetTypeaheadJson(json) => {
                 self.top_nav_search_bar.typeahead_results = Some(json.into_serde().unwrap());
-            }
-            Msg::InitiatedContributorsDownload => {
-                self.has_initiated_contributors_download = true;
             }
             Msg::InitiatedTypeaheadRequest => {
                 self.top_nav_search_bar.has_initiated_auto_complete_download = true;
@@ -70,32 +57,16 @@ impl State {
         };
     }
 
-    pub fn click_count(&self) -> u32 {
-        self.click_count.get()
-    }
-
     pub fn path(&self) -> &str {
         &self.path
-    }
-
-    pub fn contributors(&self) -> &Option<Vec<PercyContributor>> {
-        &self.contributors
     }
 
     pub fn top_nav_search_bar(&self) -> &TopNavSearchBar {
         &self.top_nav_search_bar
     }
-
-    pub fn has_initiated_contributors_download(&self) -> &bool {
-        &self.has_initiated_contributors_download
-    }
 }
 
 impl State {
-    fn increment_click(&mut self) {
-        self.click_count.set(self.click_count.get() + 1);
-    }
-
     fn set_path(&mut self, path: String) {
         self.path = path;
     }
@@ -145,12 +116,10 @@ mod tests {
 
     #[test]
     fn serialize_deserialize() {
-        let state_json = r#"{"click_count":5,"path":"/","contributors":null,"has_initiated_contributors_download":false,"has_initiated_auto_complete_download":false,}"#;
+        let state_json =
+            r#"{"click_count":5,"path":"/","has_initiated_auto_complete_download":false,}"#;
 
         let state = State::from_json(state_json);
-
-        assert_eq!(state.click_count(), 5);
-
         assert_eq!(&state.to_json(), state_json);
     }
 }

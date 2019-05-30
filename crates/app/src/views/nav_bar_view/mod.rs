@@ -29,8 +29,6 @@ impl View for NavBarView {
     fn render(&self) -> VirtualNode {
         // Links
         let home = NavBarItemView::new("/", "Isomorphic Web App", "");
-        let contributors =
-            NavBarItemView::new("/contributors", "Contributors", "margin-left: auto;");
 
         // Search bar
         let search_bar = SearchBarView::new(Rc::clone(&self.store));
@@ -39,7 +37,6 @@ impl View for NavBarView {
             <div class=NAV_BAR_CSS>
                 { home.render() }
                 { search_bar.render() }
-                { contributors.render() }
             </div>
         }
     }

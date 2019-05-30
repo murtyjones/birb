@@ -73,50 +73,6 @@ fn home_route(store: Provided<Rc<RefCell<Store>>>) -> VirtualNode {
     HomeView::new(Rc::clone(&store)).render()
 }
 
-#[route(
-  path = "/contributors",
-  on_visit = download_contributors_json
-)]
-fn contributors_route(store: Provided<Rc<RefCell<Store>>>) -> VirtualNode {
-    ContributorsView::new(Rc::clone(&store)).render()
-}
-
-fn download_contributors_json(store: Provided<Rc<RefCell<Store>>>) {
-    // In order to check if the download has already been initiated, we must
-    // wrap the possibility of a download attempt in a closure and pass it to
-    // request_animation_frame. This is due to store already being mutably
-    // borrowed, since this method will be called from the `Store.msg` function.
-    //
-    // TODO: Do this in `Store.msg` instead of needing to do it in every on_visit callback
-    let raf_closure = Closure::wrap(Box::new(move || {
-        if !store.borrow().has_initiated_contributors_download() {
-            store.borrow_mut().msg(&Msg::InitiatedContributorsDownload);
-
-            let store = Rc::clone(&store);
-            let callback = Closure::wrap(Box::new(move |json: JsValue| {
-                store.borrow_mut().msg(&Msg::SetContributorsJson(json));
-            }) as Box<FnMut(JsValue)>);
-            download_json(
-                "https://api.github.com/repos/chinedufn/percy/contributors",
-                callback.as_ref().unchecked_ref(),
-            );
-
-            // TODO: Store and drop the callback instead of leaking memory.
-            callback.forget();
-        }
-    }) as Box<FnMut()>);
-
-    web_sys::window()
-        .unwrap()
-        .request_animation_frame(raf_closure.as_ref().unchecked_ref())
-        .unwrap();
-
-    // TODO: We don't want to repeatedly forget this closure and should instead figure out a place
-    // to store it.
-    // Maybe make our `Store`'s msg handler for Msg::SetPath call `on_visit` inside of a RAF..
-    raf_closure.forget();
-}
-
 pub fn download_typeahead_json(substr: String, store: Rc<RefCell<Store>>) {
     let callback = Closure::wrap(Box::new(move |json: JsValue| {
         store.borrow_mut().msg(&Msg::SetTypeaheadJson(json));
@@ -133,7 +89,7 @@ fn make_router(store: Rc<RefCell<Store>>) -> Rc<Router> {
 
     router.provide(store);
 
-    router.set_route_handlers(create_routes![home_route, contributors_route]);
+    router.set_route_handlers(create_routes![home_route]);
 
     Rc::new(router)
 }

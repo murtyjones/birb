@@ -89,7 +89,7 @@ fn index(initial_count: Option<u32>) -> Result<Response<'static>, ()> {
 
 /// # Example
 ///
-/// localhost:7878/contributors?init=1200
+/// localhost:7878/companies?init=1200
 #[get("/<path>?<initial_count>")]
 fn catch_all(path: String, initial_count: Option<u32>) -> Result<Response<'static>, ()> {
     respond(path, initial_count)
