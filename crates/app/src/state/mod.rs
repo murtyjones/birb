@@ -101,20 +101,31 @@ impl State {
     }
 
     fn set_typeahead_active_index(&mut self, key: String) {
-        match key.as_ref() {
-            "ArrowDown" | "Down" => match self.top_nav_search_bar.typeahead_active_index {
-                Some(index) => {
-                    self.top_nav_search_bar.typeahead_active_index = Some(index + 1);
-                }
-                None => self.top_nav_search_bar.typeahead_active_index = Some(0),
+        match &self.top_nav_search_bar.typeahead_results {
+            Some(response) => match key.as_ref() {
+                "ArrowDown" | "Down" => match self.top_nav_search_bar.typeahead_active_index {
+                    Some(index) => {
+                        // go down one item in the list (or to the top of the list if at i == last index
+                        let last_index = (response.data.len() - 1) as i32;
+                        let new_index = if index + 1 > last_index { 0 } else { index + 1 };
+                        self.top_nav_search_bar.typeahead_active_index = Some(new_index);
+                    }
+                    None => self.top_nav_search_bar.typeahead_active_index = Some(0),
+                },
+                "ArrowUp" | "Up" => match self.top_nav_search_bar.typeahead_active_index {
+                    Some(index) => {
+                        // go up one item in the list (or to the bottom of the list if at i == 0
+                        let last_index = (response.data.len() - 1) as i32;
+                        let new_index = if index - 1 < 0 { last_index } else { index - 1 };
+                        self.top_nav_search_bar.typeahead_active_index = Some(new_index);
+                    }
+                    None => self.top_nav_search_bar.typeahead_active_index = Some(0),
+                },
+                _ => {}
             },
-            "ArrowUp" | "Up" => match self.top_nav_search_bar.typeahead_active_index {
-                Some(index) => {
-                    self.top_nav_search_bar.typeahead_active_index = Some(index - 1);
-                }
-                None => self.top_nav_search_bar.typeahead_active_index = Some(0),
-            },
-            _ => {}
+            None => {
+                self.top_nav_search_bar.typeahead_active_index = None;
+            }
         }
     }
 }
