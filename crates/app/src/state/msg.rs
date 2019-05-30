@@ -6,11 +6,11 @@ pub enum Msg {
     /// Deserializes JSON array of Github contributors to `Option<Vec<PercyContributor>>`
     SetContributorsJson(JsValue),
     /// Deserializes JSON array of Github contributors to `Option<Vec<Company>>`
-    SetAutoCompleteJson(JsValue),
+    SetTypeaheadJson(JsValue),
     /// Represents whether the client is already fetching the JSON array of Github contributors
     InitiatedContributorsDownload,
-    /// Represents whether the client is already fetching the autocomplete results
-    InitiatedAutoCompleteRequest,
+    /// Represents whether the client is already fetching the typeahead results
+    InitiatedTypeaheadRequest,
     /// Represents that the typeahead is open
     TypeaheadOpen(bool),
 }

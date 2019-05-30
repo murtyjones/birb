@@ -12,7 +12,7 @@ pub struct State {
     click_count: Rc<Cell<u32>>,
     path: String,
     contributors: Option<Vec<PercyContributor>>,
-    autocomplete_results: Option<AutoCompleteResponse>,
+    typeahead_results: Option<TypeaheadResponse>,
     has_initiated_contributors_download: bool,
     has_initiated_auto_complete_download: bool,
     is_typeahead_open: bool,
@@ -24,7 +24,7 @@ impl State {
             path: "/".to_string(),
             click_count: Rc::new(Cell::new(count)),
             contributors: None,
-            autocomplete_results: None,
+            typeahead_results: None,
             has_initiated_contributors_download: false,
             has_initiated_auto_complete_download: false,
             is_typeahead_open: false,
@@ -50,13 +50,13 @@ impl State {
             Msg::SetContributorsJson(json) => {
                 self.contributors = Some(json.into_serde().unwrap());
             }
-            Msg::SetAutoCompleteJson(json) => {
-                self.autocomplete_results = Some(json.into_serde().unwrap());
+            Msg::SetTypeaheadJson(json) => {
+                self.typeahead_results = Some(json.into_serde().unwrap());
             }
             Msg::InitiatedContributorsDownload => {
                 self.has_initiated_contributors_download = true;
             }
-            Msg::InitiatedAutoCompleteRequest => {
+            Msg::InitiatedTypeaheadRequest => {
                 self.has_initiated_auto_complete_download = true;
             }
             Msg::TypeaheadOpen(v) => {
@@ -77,8 +77,8 @@ impl State {
         &self.contributors
     }
 
-    pub fn autocomplete_results(&self) -> &Option<AutoCompleteResponse> {
-        &self.autocomplete_results
+    pub fn typeahead_results(&self) -> &Option<TypeaheadResponse> {
+        &self.typeahead_results
     }
 
     pub fn has_initiated_contributors_download(&self) -> &bool {
@@ -114,7 +114,7 @@ pub struct PercyContributor {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct AutoCompleteResponse {
+pub struct TypeaheadResponse {
     pub data: Vec<Company>,
     pub has_more: bool,
     pub object_type: String,

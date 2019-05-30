@@ -9,7 +9,7 @@ use wasm_bindgen::JsCast;
 use virtual_dom_rs::prelude::*;
 use wasm_bindgen::prelude::*;
 
-use crate::state::AutoCompleteResponse;
+use crate::state::TypeaheadResponse;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -46,7 +46,7 @@ impl View for SearchBarView {
 
         let typeahead_results: VirtualNode = match (
             self.store.borrow().is_typeahead_open(),
-            self.store.borrow().autocomplete_results(),
+            self.store.borrow().typeahead_results(),
         ) {
             (true, Some(results)) => {
                 let result_list = results

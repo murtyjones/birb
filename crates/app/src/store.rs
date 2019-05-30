@@ -1,4 +1,4 @@
-use crate::download_autocomplete_json;
+use crate::download_typeahead_json;
 use crate::state::Msg;
 use crate::state::State;
 
@@ -67,7 +67,7 @@ impl Store {
 
 impl Store {
     pub fn get_typeahead_results(&self, value: String, store: Rc<RefCell<Store>>) {
-        download_autocomplete_json(value, store);
+        download_typeahead_json(value, store);
     }
 }
 
