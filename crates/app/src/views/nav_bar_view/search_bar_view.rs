@@ -103,7 +103,8 @@ static TYPEAHEAD_CSS: &'static str = css! {"
 }
 
 :host > .typeahead-results > a:hover,
-:host > .typeahead-results > a:focus {
+:host > .typeahead-results > a:focus,
+:host > .typeahead-results > a.active {
   background: #DDD;
 }
 
@@ -118,11 +119,19 @@ fn build_typeahead_results(store: Rc<RefCell<Store>>) -> VirtualNode {
             let result_list = results
                 .data
                 .iter()
-                .map(|x| {
-                    let name: &str = x.company_name.as_str();
-                    let link: String = format!("/companies/{}", x.short_cik.as_str());
+                .enumerate()
+                .map(|(i, each)| {
+                    let name: &str = each.company_name.as_str();
+                    let link: String = format!("/companies/{}", each.short_cik.as_str());
+                    let class: &str = match store.borrow().typeahead_active_index() {
+                        Some(index) => match *index == i as i32 {
+                            true => "active",
+                            false => "inactive",
+                        },
+                        None => "inactive",
+                    };
                     html! {
-                        <a href={ link }>{ name }</a>
+                        <a class={ class } href={ link }>{ name }</a>
                     }
                 })
                 .collect::<Vec<VirtualNode>>();

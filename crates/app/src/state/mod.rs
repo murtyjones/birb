@@ -17,6 +17,7 @@ pub struct State {
     has_initiated_auto_complete_download: bool,
     is_typeahead_open: bool,
     key_down: Option<String>,
+    typeahead_active_index: Option<i32>,
 }
 
 impl State {
@@ -30,6 +31,7 @@ impl State {
             has_initiated_auto_complete_download: false,
             is_typeahead_open: false,
             key_down: None,
+            typeahead_active_index: None,
         }
     }
 
@@ -67,6 +69,8 @@ impl State {
             Msg::KeyDown(v) => match v {
                 Some(key) => {
                     self.key_down = Some(key.clone());
+                    // TODO figure out if this is the correct place for this logic.
+                    self.set_typeahead_active_index(key.clone());
                 }
                 None => {
                     self.key_down = None;
@@ -106,6 +110,10 @@ impl State {
     pub fn key_down(&self) -> &Option<String> {
         &self.key_down
     }
+
+    pub fn typeahead_active_index(&self) -> &Option<i32> {
+        &self.typeahead_active_index
+    }
 }
 
 impl State {
@@ -115,6 +123,24 @@ impl State {
 
     fn set_path(&mut self, path: String) {
         self.path = path;
+    }
+
+    fn set_typeahead_active_index(&mut self, key: String) {
+        match key.as_ref() {
+            "ArrowDown" | "Down" => match self.typeahead_active_index {
+                Some(index) => {
+                    self.typeahead_active_index = Some(index + 1);
+                }
+                None => self.typeahead_active_index = Some(0),
+            },
+            "ArrowUp" | "Up" => match self.typeahead_active_index {
+                Some(index) => {
+                    self.typeahead_active_index = Some(index - 1);
+                }
+                None => self.typeahead_active_index = Some(0),
+            },
+            _ => {}
+        }
     }
 }
 
