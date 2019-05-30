@@ -25,7 +25,6 @@ impl SearchBarView {
 
 impl View for SearchBarView {
     fn render(&self) -> VirtualNode {
-        debug!("Key downed: {:?}", self.store.borrow().key_down());
         let store_for_onfocus = Rc::clone(&self.store);
         let store_for_onblur = Rc::clone(&self.store);
         let store_for_oninput = Rc::clone(&self.store);
@@ -115,7 +114,7 @@ fn build_typeahead_results(store: Rc<RefCell<Store>>) -> VirtualNode {
         store.borrow().is_typeahead_open(),
         store.borrow().typeahead_results(),
     ) {
-        (true, Some(results)) => {
+        (truei, Some(results)) => {
             let result_list = results
                 .data
                 .iter()
