@@ -25,41 +25,13 @@ impl SearchBarView {
 
 impl View for SearchBarView {
     fn render(&self) -> VirtualNode {
-        debug!(
-            "Typehead open: {:?}",
-            self.store.borrow().is_typeahead_open()
-        );
+        debug!("Key downed: {:?}", self.store.borrow().key_down());
         let store_for_onfocus = Rc::clone(&self.store);
         let store_for_onblur = Rc::clone(&self.store);
         let store_for_oninput = Rc::clone(&self.store);
+        let store_for_typeahead_results = Rc::clone(&self.store);
 
-        let typeahead_results: VirtualNode = match (
-            self.store.borrow().is_typeahead_open(),
-            self.store.borrow().typeahead_results(),
-        ) {
-            (true, Some(results)) => {
-                let result_list = results
-                    .data
-                    .iter()
-                    .map(|x| {
-                        let name: &str = x.company_name.as_str();
-                        let link: String = format!("/companies/{}", x.short_cik.as_str());
-                        html! {
-                            <a href={ link }>{ name }</a>
-                        }
-                    })
-                    .collect::<Vec<VirtualNode>>();
-                html! {
-                    <div class="typeahead-results">{ result_list }<div>
-                }
-            }
-            (true, None) => {
-                html! { <div class="typeahead-results"><a style="cursor: default;">No Results</a><div> }
-            }
-            (false, ..) => {
-                html! { <div style="display: none;"></div> }
-            }
-        };
+        let typeahead_results = build_typeahead_results(store_for_typeahead_results);
 
         html! {
             <div class=TYPEAHEAD_CSS>
@@ -136,3 +108,33 @@ static TYPEAHEAD_CSS: &'static str = css! {"
 }
 
 "};
+
+fn build_typeahead_results(store: Rc<RefCell<Store>>) -> VirtualNode {
+    match (
+        store.borrow().is_typeahead_open(),
+        store.borrow().typeahead_results(),
+    ) {
+        (true, Some(results)) => {
+            let result_list = results
+                .data
+                .iter()
+                .map(|x| {
+                    let name: &str = x.company_name.as_str();
+                    let link: String = format!("/companies/{}", x.short_cik.as_str());
+                    html! {
+                        <a href={ link }>{ name }</a>
+                    }
+                })
+                .collect::<Vec<VirtualNode>>();
+            html! {
+                <div class="typeahead-results">{ result_list }<div>
+            }
+        }
+        (true, None) => {
+            html! { <div class="typeahead-results"><a style="cursor: default;">No Results</a><div> }
+        }
+        (false, ..) => {
+            html! { <div style="display: none;"></div> }
+        }
+    }
+}
