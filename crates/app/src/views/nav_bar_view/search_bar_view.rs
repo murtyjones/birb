@@ -87,11 +87,16 @@ impl View for SearchBarView {
                     }
                     oninput=move |event: web_sys::Event| {
                         let value: String = event.target()
-                            .unwrap()
+                            .expect("Couldn't unwrap event target")
                             .dyn_into::<web_sys::HtmlInputElement>()
-                            .unwrap()
+                            .expect("Couldn't convert into html element")
                             .value();
-                        store_for_oninput.borrow_mut().get_typeahead_results(value, Rc::clone(&store_for_oninput));
+                        if value.len() > 0 {
+                            store_for_oninput.borrow_mut().msg(&Msg::TypeaheadOpen(true));
+                            store_for_oninput.borrow_mut().get_typeahead_results(value, Rc::clone(&store_for_oninput));
+                        } else {
+                            store_for_oninput.borrow_mut().msg(&Msg::TypeaheadOpen(false));
+                        }
                     }
                 />
                 { typeahead_results }
