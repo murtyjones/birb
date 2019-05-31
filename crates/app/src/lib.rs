@@ -73,7 +73,7 @@ fn home_route(store: Provided<Rc<RefCell<Store>>>) -> VirtualNode {
     HomeView::new(Rc::clone(&store)).render()
 }
 
-#[route(path = "/company/:short_cik")]
+#[route(path = "/companies/:short_cik")]
 fn company_route(short_cik: String, store: Provided<Rc<RefCell<Store>>>) -> VirtualNode {
     CompanyView::new(Rc::clone(&store)).render()
 }

@@ -85,7 +85,8 @@ impl State {
                 (true, Some(response), Some(index)) => {
                     if response.data.len() > 0 {
                         let company = &response.data[index as usize];
-                        self.borrow_mut().msg(&Msg::SetPath("/company".into()));
+                        let link = format!("/companies/{}", company.short_cik);
+                        self.borrow_mut().msg(&Msg::SetPath(link));
                     }
                 }
                 _ => {}
@@ -127,15 +128,6 @@ impl State {
             }
         }
     }
-}
-
-// Serde ignores fields not in this struct when deserializing
-#[derive(Serialize, Deserialize)]
-pub struct PercyContributor {
-    /// Github username.
-    pub login: String,
-    /// Github profile URL. E.g. https://github.com/username
-    pub html_url: String,
 }
 
 #[cfg(test)]
