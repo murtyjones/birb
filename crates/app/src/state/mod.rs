@@ -96,7 +96,16 @@ impl State {
 
     /// If the escape key is pressed and the typeahead is open,
     /// close it
-    fn handle_typeahead_escape_key(&self, key: String) {}
+    fn handle_typeahead_escape_key(&mut self, key: String) {
+        let TopNavSearchBar {
+            is_typeahead_open, ..
+        } = self.top_nav_search_bar;
+        if is_typeahead_open && key == "Escape" || is_typeahead_open && key == "Esc"
+        /* IE/Edge */
+        {
+            self.borrow_mut().msg(&Msg::TypeaheadOpen(false))
+        }
+    }
 
     /// If search results exist and an arrow key is pressed,
     /// increment or decrement which menu item is focused
