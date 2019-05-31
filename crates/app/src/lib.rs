@@ -73,6 +73,11 @@ fn home_route(store: Provided<Rc<RefCell<Store>>>) -> VirtualNode {
     HomeView::new(Rc::clone(&store)).render()
 }
 
+#[route(path = "/company/:short_cik")]
+fn company_route(short_cik: String, store: Provided<Rc<RefCell<Store>>>) -> VirtualNode {
+    CompanyView::new(Rc::clone(&store)).render()
+}
+
 pub fn download_typeahead_json(substr: String, store: Rc<RefCell<Store>>) {
     let callback = Closure::wrap(Box::new(move |json: JsValue| {
         store.borrow_mut().msg(&Msg::SetTypeaheadJson(json));
@@ -89,7 +94,7 @@ fn make_router(store: Rc<RefCell<Store>>) -> Rc<Router> {
 
     router.provide(store);
 
-    router.set_route_handlers(create_routes![home_route]);
+    router.set_route_handlers(create_routes![home_route, company_route]);
 
     Rc::new(router)
 }
@@ -97,13 +102,4 @@ fn make_router(store: Rc<RefCell<Store>>) -> Rc<Router> {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn click_msg() {
-        let app = App::new(5, "/".to_string());
-
-        assert_eq!(app.store.borrow().click_count(), 5);
-        app.store.borrow_mut().msg(&Msg::Click);
-        assert_eq!(app.store.borrow().click_count(), 6);
-    }
 }

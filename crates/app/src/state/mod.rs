@@ -9,6 +9,7 @@ use top_nav::TopNavSearchBar;
 mod msg;
 pub use self::msg::Msg;
 use crate::state::top_nav::TypeaheadResponse;
+use core::borrow::BorrowMut;
 
 #[derive(Serialize, Deserialize)]
 pub struct State {
@@ -50,7 +51,9 @@ impl State {
             }
             Msg::KeyDown(v) => match v {
                 Some(key) => {
-                    self.set_typeahead_active_index(key.clone());
+                    self.handle_typeahead_enter_key(key.clone());
+                    self.handle_typeahead_escape_key(key.clone());
+                    self.handle_typeahead_arrow_keys(key.clone());
                 }
                 None => {}
             },
@@ -71,7 +74,32 @@ impl State {
         self.path = path;
     }
 
-    fn set_typeahead_active_index(&mut self, key: String) {
+    /// If the enter key is pressed and the typeahead is open,
+    /// go to the company page of the active menu item
+    fn handle_typeahead_enter_key(&mut self, key: String) {
+        if key == "Enter" {
+            let typeahead_active_index = self.top_nav_search_bar.typeahead_active_index;
+            let is_typeahead_open = self.top_nav_search_bar.is_typeahead_open;
+            let typeahead_results = &self.top_nav_search_bar.typeahead_results;
+            match (is_typeahead_open, typeahead_results, typeahead_active_index) {
+                (true, Some(response), Some(index)) => {
+                    if response.data.len() > 0 {
+                        let company = &response.data[index as usize];
+                        self.borrow_mut().msg(&Msg::SetPath("/company".into()));
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+
+    /// If the escape key is pressed and the typeahead is open,
+    /// close it
+    fn handle_typeahead_escape_key(&self, key: String) {}
+
+    /// If search results exist and an arrow key is pressed,
+    /// increment or decrement which menu item is focused
+    fn handle_typeahead_arrow_keys(&mut self, key: String) {
         match &self.top_nav_search_bar.typeahead_results {
             Some(response) => match key.as_ref() {
                 "ArrowDown" | "Down" => match self.top_nav_search_bar.typeahead_active_index {
