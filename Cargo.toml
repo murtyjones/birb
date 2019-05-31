@@ -8,6 +8,7 @@ edition = "2018"
 members = [
   "crates/server",
   "crates/birb-cli",
+  "crates/company-metadata",
   "crates/filing-metadata",
   "crates/filing-data",
   "crates/edgar-worker",
