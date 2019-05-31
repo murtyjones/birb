@@ -52,16 +52,13 @@ fn upsert_mappings(mappings: Vec<CikToTicker>) -> Result<(), failure::Error> {
     let conn = get_connection();
     let trans = conn.transaction().expect("Couldn't begin transaction");
 
+    // TODO figure out how to ignore insert errors when a short_cik foreign key isnt found
     let upsert_stmt = trans
         .prepare(
             "
-             BEGIN
-                 INSERT INTO ticker
-                 (ticker, exchange, company_short_cik)
-                 VALUES ($1, $2, $3);
-             EXCEPTION
-                THEN NULL;
-             END;
+             INSERT INTO ticker
+             (ticker, exchange, company_short_cik)
+             VALUES ($1, $2, $3);
              ",
         )
         .expect("Couldn't prepare company upsert statement for execution");
