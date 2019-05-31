@@ -39,7 +39,6 @@ jobs:
           keys:
             - v1-check-cache-{{ .Branch }}-{{ checksum "Cargo.lock" }} # Cache for the branch that you're on with this lockfile
             - v1-check-cache-{{ checksum "Cargo.lock" }} # If that doesn't exist, use the default cache across all branches with this lockfile
-            - v1-check-cache- # If that doesn't exist, use the default cache across all branches
       - run: cargo check --all
       - save_cache:
           key: v1-check-cache-{{ .Branch }}-{{ checksum "Cargo.lock" }}
@@ -59,7 +58,6 @@ jobs:
           keys:
             - v1-edgar-cache-{{ .Branch }}-{{ checksum "Cargo.lock" }} # Cache for the branch that you're on with this lockfile
             - v1-edgar-cache-{{ checksum "Cargo.lock" }} # If that doesn't exist, use the default cache across all branches with this lockfile
-            - v1-edgar-cache- # If that doesn't exist, use the default cache across all branches
       - attach_workspace:
           at: bb-cli-workspace
 
@@ -77,7 +75,6 @@ jobs:
           keys:
             - v1-server-cache-{{ .Branch }}-{{ checksum "Cargo.lock" }} # Cache for the branch that you're on with this lockfile
             - v1-server-cache-{{ checksum "Cargo.lock" }} # If that doesn't exist, use the default cache across all branches with this lockfile
-            - v1-server-cache- # If that doesn't exist, use the default cache across all branches
       - attach_workspace:
           at: bb-cli-workspace
       - run:
@@ -93,7 +90,6 @@ jobs:
           keys:
             - v1-edgar-cache-{{ .Branch }}-{{ checksum "Cargo.lock" }} # Cache for the branch that you're on with this lockfile
             - v1-edgar-cache-{{ checksum "Cargo.lock" }} # If that doesn't exist, use the default cache across all branches with this lockfile
-            - v1-edgar-cache- # If that doesn't exist, use the default cache across all branches
       - attach_workspace:
           at: bb-cli-workspace
       - run:
@@ -124,7 +120,6 @@ jobs:
           keys:
             - v1-server-cache-{{ .Branch }}-{{ checksum "Cargo.lock" }} # Cache for the branch that you're on with this lockfile
             - v1-server-cache-{{ checksum "Cargo.lock" }} # If that doesn't exist, use the default cache across all branches with this lockfile
-            - v1-server-cache- # If that doesn't exist, use the default cache across all branches
       - attach_workspace:
           at: bb-cli-workspace
       - run:
