@@ -39,7 +39,6 @@ impl Store {
 
                 self.state.msg(msg);
                 if let Some(after_route) = &self.after_route {
-                    debug!("hmmmm");
                     after_route(path.as_str());
                 }
             }
