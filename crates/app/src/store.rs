@@ -43,13 +43,15 @@ impl Store {
                     after_route(path.as_str());
                 }
             }
-            Msg::KeyDown(v) => match v {
-                Some(key) => {
-                    self.handle_typeahead_enter_key(key.clone());
-                    self.state.msg(msg);
+            Msg::KeyDown(v) => {
+                match v {
+                    Some(key) => {
+                        self.handle_typeahead_enter_key(key.clone());
+                    }
+                    None => {}
                 }
-                None => {}
-            },
+                self.state.msg(msg);
+            }
             _ => self.state.msg(msg),
         }
 
