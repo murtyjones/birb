@@ -33,8 +33,8 @@ pub struct App {
 }
 
 impl App {
-    pub fn new(count: u32, path: String) -> App {
-        let state = State::new(count);
+    pub fn new(path: String) -> App {
+        let state = State::new();
         let store = Rc::new(RefCell::new(Store::new(state)));
 
         store.borrow_mut().msg(&Msg::SetPath(path));

@@ -18,7 +18,7 @@ pub struct State {
 }
 
 impl State {
-    pub fn new(count: u32) -> State {
+    pub fn new() -> State {
         State {
             path: "/".to_string(),
             top_nav_search_bar: TopNavSearchBar::new(),

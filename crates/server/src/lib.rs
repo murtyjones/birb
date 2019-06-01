@@ -64,7 +64,7 @@ fn rocket() -> rocket::Rocket {
 
     return rocket::ignite()
         .attach(DbConnection::fairing())
-        .mount("/", routes![index, favicon, catch_all])
+        .mount("/", routes![index, favicon, company, catch_all])
         .mount("/static", StaticFiles::from(static_files.as_str()))
         .mount(
             "/api",
@@ -81,18 +81,26 @@ fn rocket() -> rocket::Rocket {
 
 /// # Example
 ///
-/// localhost:7878/?init=50
-#[get("/?<initial_count>")]
-fn index(initial_count: Option<u32>) -> Result<Response<'static>, ()> {
-    respond("/".to_string(), initial_count)
+/// localhost:7878/
+#[get("/")]
+fn index() -> Result<Response<'static>, ()> {
+    respond("/".to_string())
 }
 
 /// # Example
 ///
-/// localhost:7878/companies?init=1200
-#[get("/<path>?<initial_count>")]
-fn catch_all(path: String, initial_count: Option<u32>) -> Result<Response<'static>, ()> {
-    respond(path, initial_count)
+/// localhost:7878/thing
+#[get("/companies/<short_cik>")]
+fn company(short_cik: String) -> Result<Response<'static>, ()> {
+    respond("/companies/".to_string() + &*short_cik)
+}
+
+/// # Example
+///
+/// localhost:7878/thing
+#[get("/<path>")]
+fn catch_all(path: String) -> Result<Response<'static>, ()> {
+    respond(path)
 }
 
 /// Favicon
@@ -102,8 +110,8 @@ fn favicon() -> &'static str {
 }
 
 /// Responder
-fn respond(path: String, initial_count: Option<u32>) -> Result<Response<'static>, ()> {
-    let app = App::new(initial_count.unwrap_or(1000), path);
+fn respond(path: String) -> Result<Response<'static>, ()> {
+    let app = App::new(path);
     let state = app.store.borrow();
 
     let html = format!("{}", include_str!("../index.html"));
