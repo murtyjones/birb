@@ -12,7 +12,7 @@ pub enum Aws {
     /// Deploy the Edgar worker
     #[structopt(name = "edgar")]
     Edgar(AwsEdgar),
-    /// Deploy the Edgar worker
+    /// Deploy the bastion
     #[structopt(name = "bastion")]
     Bastion(AwsBastion),
     /// Deploy the Database
