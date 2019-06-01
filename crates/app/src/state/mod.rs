@@ -14,7 +14,7 @@ use core::borrow::BorrowMut;
 #[derive(Serialize, Deserialize)]
 pub struct State {
     path: String,
-    top_nav_search_bar: TopNavSearchBar,
+    pub top_nav_search_bar: TopNavSearchBar,
 }
 
 impl State {
@@ -51,7 +51,6 @@ impl State {
             }
             Msg::KeyDown(v) => match v {
                 Some(key) => {
-                    self.handle_typeahead_enter_key(key.clone());
                     self.handle_typeahead_escape_key(key.clone());
                     self.handle_typeahead_arrow_keys(key.clone());
                 }
@@ -78,26 +77,6 @@ impl State {
 impl State {
     fn set_path(&mut self, path: String) {
         self.path = path;
-    }
-
-    /// If the enter key is pressed and the typeahead is open,
-    /// go to the company page of the active menu item
-    fn handle_typeahead_enter_key(&mut self, key: String) {
-        if key == "Enter" {
-            let typeahead_active_index = self.top_nav_search_bar.typeahead_active_index;
-            let is_typeahead_open = self.top_nav_search_bar.is_typeahead_open;
-            let typeahead_results = &self.top_nav_search_bar.typeahead_results;
-            match (is_typeahead_open, typeahead_results, typeahead_active_index) {
-                (true, Some(response), Some(index)) => {
-                    if response.data.len() > 0 {
-                        let company = &response.data[index as usize];
-                        let link = format!("/companies/{}", company.short_cik);
-                        self.borrow_mut().msg(&Msg::SetPath(link));
-                    }
-                }
-                _ => {}
-            }
-        }
     }
 
     /// If the escape key is pressed and the typeahead is open,
