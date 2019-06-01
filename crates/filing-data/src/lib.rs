@@ -31,6 +31,7 @@ pub fn main() {
             store_s3_document(&s3_client, &bucket, &file_path, document_contents);
             info!("Updating status for collected to 'true'");
             persist_document_storage_status(&conn, &f);
+            info!("Done!");
         }
         None => {
             info!("No records left to collect. Have a drink instead.");

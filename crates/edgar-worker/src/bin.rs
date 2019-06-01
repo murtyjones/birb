@@ -16,8 +16,8 @@ pub fn main() -> () {
     // Initialize logging
     env_logger::init();
 
-    // Make one request to SEC.gov every 2 seconds
-    const SECONDS_DELAY: u16 = 2;
+    // Perform every 1 second
+    const SECONDS_DELAY: u16 = 1;
 
     // Create channels for sending and receieving
     let (one_tx, one_rx) = channel();
