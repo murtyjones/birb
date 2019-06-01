@@ -18,7 +18,7 @@ impl View for CompanyView {
     fn render(&self) -> VirtualNode {
         html! {
             <div class=COMPANY_CSS>
-                Hi!
+                This is a lovely company page
             </div>
         }
     }
@@ -26,15 +26,5 @@ impl View for CompanyView {
 
 static COMPANY_CSS: &'static str = css! {"
 :host {
-    align-items: center;
-    background: linear-gradient(267deg,#2a38ef,#200994 50%,#1c2dab);
-    color: white;
-    display: flex;
-    font-family: Helvetica;
-    font-size: 20px;
-    font-weight: bold;
-    height: 50px;
-    padding-left: 30px;
-    padding-right: 30px;
 }
 "};

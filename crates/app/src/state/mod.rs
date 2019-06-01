@@ -4,24 +4,24 @@ use std::cell::Cell;
 use std::rc::Rc;
 
 mod top_nav;
+use top_nav::TopNav;
 use top_nav::TopNavSearchBar;
 
 mod msg;
 pub use self::msg::Msg;
-use crate::state::top_nav::TypeaheadResponse;
 use core::borrow::BorrowMut;
 
 #[derive(Serialize, Deserialize)]
 pub struct State {
     path: String,
-    pub top_nav_search_bar: TopNavSearchBar,
+    pub top_nav: TopNav,
 }
 
 impl State {
     pub fn new() -> State {
         State {
             path: "/".to_string(),
-            top_nav_search_bar: TopNavSearchBar::new(),
+            top_nav: TopNav::new(),
         }
     }
 
@@ -41,13 +41,13 @@ impl State {
         match msg {
             Msg::SetPath(path) => self.set_path(path.to_string()),
             Msg::SetTypeaheadJson(json) => {
-                self.top_nav_search_bar.typeahead_results = Some(json.into_serde().unwrap());
+                self.top_nav.search_bar.typeahead_results = Some(json.into_serde().unwrap());
             }
             Msg::InitiatedTypeaheadRequest => {
-                self.top_nav_search_bar.has_initiated_auto_complete_download = true;
+                self.top_nav.search_bar.has_initiated_auto_complete_download = true;
             }
             Msg::TypeaheadOpen(v) => {
-                self.top_nav_search_bar.is_typeahead_open = *v;
+                self.top_nav.search_bar.is_typeahead_open = *v;
             }
             Msg::KeyDown(v) => match v {
                 Some(key) => {
@@ -69,8 +69,8 @@ impl State {
         &self.path
     }
 
-    pub fn top_nav_search_bar(&self) -> &TopNavSearchBar {
-        &self.top_nav_search_bar
+    pub fn top_nav(&self) -> &TopNav {
+        &self.top_nav
     }
 }
 
@@ -84,7 +84,7 @@ impl State {
     fn handle_typeahead_escape_key(&mut self, key: String) {
         let TopNavSearchBar {
             is_typeahead_open, ..
-        } = self.top_nav_search_bar;
+        } = self.top_nav.search_bar;
         if is_typeahead_open && key == "Escape" || is_typeahead_open && key == "Esc"
         /* IE/Edge */
         {
@@ -95,30 +95,30 @@ impl State {
     /// If search results exist and an arrow key is pressed,
     /// increment or decrement which menu item is focused
     fn handle_typeahead_arrow_keys(&mut self, key: String) {
-        match &self.top_nav_search_bar.typeahead_results {
+        match &self.top_nav.search_bar.typeahead_results {
             Some(response) => match key.as_ref() {
-                "ArrowDown" | "Down" => match self.top_nav_search_bar.typeahead_active_index {
+                "ArrowDown" | "Down" => match self.top_nav.search_bar.typeahead_active_index {
                     Some(index) => {
                         // go down one item in the list (or to the top of the list if at i == last index
                         let last_index = (response.data.len() - 1) as i32;
                         let new_index = if index + 1 > last_index { 0 } else { index + 1 };
-                        self.top_nav_search_bar.typeahead_active_index = Some(new_index);
+                        self.top_nav.search_bar.typeahead_active_index = Some(new_index);
                     }
-                    None => self.top_nav_search_bar.typeahead_active_index = Some(0),
+                    None => self.top_nav.search_bar.typeahead_active_index = Some(0),
                 },
-                "ArrowUp" | "Up" => match self.top_nav_search_bar.typeahead_active_index {
+                "ArrowUp" | "Up" => match self.top_nav.search_bar.typeahead_active_index {
                     Some(index) => {
                         // go up one item in the list (or to the bottom of the list if at i == 0
                         let last_index = (response.data.len() - 1) as i32;
                         let new_index = if index - 1 < 0 { last_index } else { index - 1 };
-                        self.top_nav_search_bar.typeahead_active_index = Some(new_index);
+                        self.top_nav.search_bar.typeahead_active_index = Some(new_index);
                     }
-                    None => self.top_nav_search_bar.typeahead_active_index = Some(0),
+                    None => self.top_nav.search_bar.typeahead_active_index = Some(0),
                 },
                 _ => {}
             },
             None => {
-                self.top_nav_search_bar.typeahead_active_index = None;
+                self.top_nav.search_bar.typeahead_active_index = None;
             }
         }
     }

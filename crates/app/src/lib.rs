@@ -7,6 +7,7 @@ extern crate models;
 pub use crate::state::*;
 pub use crate::store::*;
 use crate::views::*;
+use css_rs_macro::css;
 use router_rs::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -64,9 +65,46 @@ impl App {
 
 impl App {
     pub fn render(&self) -> VirtualNode {
-        self.router.view(self.store.borrow().path()).unwrap()
+        let top_nav = match &self.store.borrow().top_nav.is_visible {
+            true => {
+                let store = Rc::clone(&self.store);
+                NavBarView::new(store).render()
+            }
+            false => {
+                html! { <div style="display:none;"></div> }
+            }
+        };
+        let main = self.router.view(self.store.borrow().path()).unwrap();
+        html! {
+            <div id="app" class=MAIN_CONTAINER_STYLE>
+                <div id="header">
+                    { top_nav }
+                </div>
+                <div id="main">
+                    { main }
+                </div>
+            </div>
+        }
     }
 }
+
+static MAIN_CONTAINER_STYLE: &'static str = css! {"
+:host {
+  width: 100%;
+  height: 100%;
+}
+
+:host > #header {
+    position: relative;
+    z-index: 2;
+}
+
+:host > #main {
+    position: relative;
+    z-index: 1;
+}
+
+"};
 
 #[route(path = "/")]
 fn home_route(store: Provided<Rc<RefCell<Store>>>) -> VirtualNode {

@@ -1,9 +1,6 @@
 use crate::store::Store;
-use crate::views::nav_bar_view::ActivePage;
-use crate::views::nav_bar_view::NavBarView;
 use crate::Msg;
 use css_rs_macro::css;
-use models::Company;
 use wasm_bindgen::JsCast;
 
 use virtual_dom_rs::prelude::*;
@@ -68,8 +65,8 @@ impl View for SearchBarView {
 
 fn build_typeahead_results(store: Rc<RefCell<Store>>) -> VirtualNode {
     match (
-        store.borrow().top_nav_search_bar().is_typeahead_open,
-        &store.borrow().top_nav_search_bar().typeahead_results,
+        store.borrow().top_nav().search_bar.is_typeahead_open,
+        &store.borrow().top_nav().search_bar.typeahead_results,
     ) {
         (true, Some(results)) => {
             debug!("no!");
@@ -83,7 +80,7 @@ fn build_typeahead_results(store: Rc<RefCell<Store>>) -> VirtualNode {
                     let mut class =
                         String::from("company-autocomplete company-autocomplete-result");
                     class.push_str(
-                        match store.borrow().top_nav_search_bar().typeahead_active_index {
+                        match store.borrow().top_nav().search_bar.typeahead_active_index {
                             Some(index) => match index == i as i32 {
                                 true => " active",
                                 false => " inactive",
@@ -119,14 +116,15 @@ fn build_typeahead_results(store: Rc<RefCell<Store>>) -> VirtualNode {
 static TYPEAHEAD_CSS: &'static str = css! {"
 :host {
   width: 250px;
-  height: 20px;
+  height: 30px;
   overflow-y: visible;
   color: black;
-  margin: 0 auto;
+  margin-left: 80px;
 }
 
 :host > input {
   width: 100%;
+  height: 100%;
   border: none;
   border-radius: 3px;
   padding: 5px;

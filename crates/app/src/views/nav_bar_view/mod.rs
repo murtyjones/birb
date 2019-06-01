@@ -10,25 +10,19 @@ mod search_bar_view;
 use search_bar_view::SearchBarView;
 
 pub struct NavBarView {
-    active_page: ActivePage,
     store: Rc<RefCell<Store>>,
 }
 
 impl NavBarView {
-    pub fn new(active_page: ActivePage, store: Rc<RefCell<Store>>) -> NavBarView {
-        NavBarView { active_page, store }
+    pub fn new(store: Rc<RefCell<Store>>) -> NavBarView {
+        NavBarView { store }
     }
-}
-
-pub enum ActivePage {
-    Home,
-    Contributors,
 }
 
 impl View for NavBarView {
     fn render(&self) -> VirtualNode {
         // Links
-        let home = NavBarItemView::new("/", "Isomorphic Web App", "");
+        let home = NavBarItemView::new("/", "birb", "");
 
         // Search bar
         let search_bar = SearchBarView::new(Rc::clone(&self.store));
@@ -45,7 +39,7 @@ impl View for NavBarView {
 static NAV_BAR_CSS: &'static str = css! {"
 :host {
     align-items: center;
-    background: linear-gradient(267deg,#2a38ef,#200994 50%,#1c2dab);
+    background: #592E56;
     color: white;
     display: flex;
     font-family: Helvetica;

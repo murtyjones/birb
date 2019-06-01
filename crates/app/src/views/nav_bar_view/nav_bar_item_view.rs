@@ -31,11 +31,11 @@ static NAV_BAR_ITEM_CSS: &'static str = css! {"
 :host {
     border-bottom: solid transparent 3px;
     cursor: pointer;
-    color: white;
+    color: #E7CEF2;
     text-decoration: none;
 }
 
 :host:hover {
-    border-bottom: solid white 3px;
+    border-bottom: solid #E7CEF2 3px;
 }
 "};

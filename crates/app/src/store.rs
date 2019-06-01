@@ -85,9 +85,9 @@ impl Store {
     /// go to the company page of the active menu item
     fn handle_typeahead_enter_key(&mut self, key: String) {
         if key == "Enter" {
-            let typeahead_active_index = self.top_nav_search_bar.typeahead_active_index;
-            let is_typeahead_open = self.top_nav_search_bar.is_typeahead_open;
-            let typeahead_results = &self.top_nav_search_bar.typeahead_results;
+            let typeahead_active_index = self.top_nav.search_bar.typeahead_active_index;
+            let is_typeahead_open = self.top_nav.search_bar.is_typeahead_open;
+            let typeahead_results = &self.top_nav.search_bar.typeahead_results;
             match (is_typeahead_open, typeahead_results, typeahead_active_index) {
                 (true, Some(response), Some(index)) => {
                     if response.data.len() > 0 {

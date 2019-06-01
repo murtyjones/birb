@@ -1,7 +1,23 @@
 use models::Company;
 use serde::{Deserialize, Serialize};
 
-/// Base response object for a GET request
+/// Relates to the top nav
+#[derive(Serialize, Deserialize)]
+pub struct TopNav {
+    pub is_visible: bool,
+    pub search_bar: TopNavSearchBar,
+}
+
+impl TopNav {
+    pub fn new() -> TopNav {
+        TopNav {
+            is_visible: true,
+            search_bar: TopNavSearchBar::new(),
+        }
+    }
+}
+
+/// Relates to the top nav's company search
 #[derive(Serialize, Deserialize)]
 pub struct TopNavSearchBar {
     pub typeahead_results: Option<TypeaheadResponse>,
