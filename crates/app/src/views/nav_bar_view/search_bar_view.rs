@@ -32,9 +32,10 @@ impl View for SearchBarView {
         let typeahead_results = build_typeahead_results(store_for_typeahead_results);
 
         html! {
-            <div class=TYPEAHEAD_CSS>
+            <div id="company-autocomplete-container" class=TYPEAHEAD_CSS>
                 <input
-                    id="company-autocomplete"
+                    id="company-autocomplete-input"
+                    class="company-autocomplete company-autocomplete-input"
                     type="text"
                     name="company"
                     autocomplete="off"
@@ -42,9 +43,10 @@ impl View for SearchBarView {
                         store_for_onfocus.borrow_mut().msg(&Msg::TypeaheadOpen(true))
                     }
                     onblur=move |event: web_sys::Event| {
-                        store_for_onblur.borrow_mut().msg(&Msg::TypeaheadOpen(false))
+                        // blur is handled in state via handle_typeahead_blur_click
                     }
                     oninput=move |event: web_sys::Event| {
+                        // TODO debounce
                         let value: String = event.target()
                             .expect("Couldn't unwrap event target")
                             .dyn_into::<web_sys::HtmlInputElement>()
@@ -60,6 +62,56 @@ impl View for SearchBarView {
                 />
                 { typeahead_results }
             </div>
+        }
+    }
+}
+
+fn build_typeahead_results(store: Rc<RefCell<Store>>) -> VirtualNode {
+    match (
+        store.borrow().top_nav_search_bar().is_typeahead_open,
+        &store.borrow().top_nav_search_bar().typeahead_results,
+    ) {
+        (true, Some(results)) => {
+            debug!("no!");
+            let result_list = results
+                .data
+                .iter()
+                .enumerate()
+                .map(|(i, each)| {
+                    let name: &str = each.company_name.as_str();
+                    let link: String = format!("/companies/{}", each.short_cik.as_str());
+                    let mut class =
+                        String::from("company-autocomplete company-autocomplete-result");
+                    class.push_str(
+                        match store.borrow().top_nav_search_bar().typeahead_active_index {
+                            Some(index) => match index == i as i32 {
+                                true => " active",
+                                false => " inactive",
+                            },
+                            None => " inactive",
+                        },
+                    );
+                    html! {
+                        <a class={ class } href={ link }>{ name }</a>
+                    }
+                })
+                .collect::<Vec<VirtualNode>>();
+            html! {
+                <div class="company-autocomplete company-autocomplete-results">{ result_list }<div>
+            }
+        }
+        (true, None) => {
+            html! {
+                <div class="company-autocomplete company-autocomplete-results">
+                    <a class="company-autocomplete company-autocomplete-result" style="cursor: default;">
+                        No Results
+                    </a>
+                <div>
+            }
+        }
+        (false, ..) => {
+            debug!("no!");
+            html! { <div style="display: none;"></div> }
         }
     }
 }
@@ -81,7 +133,7 @@ static TYPEAHEAD_CSS: &'static str = css! {"
   box-sizing: border-box;
 }
 
-:host > .typeahead-results > a {
+:host > .company-autocomplete-results > a.company-autocomplete-result {
   width: 100%;
   display: block;
   font-size: 12px;
@@ -96,53 +148,14 @@ static TYPEAHEAD_CSS: &'static str = css! {"
   border-style: solid;
 }
 
-:host > .typeahead-results > a:last-of-type {
+:host > .company-autocomplete-results > a.company-autocomplete-result:last-of-type {
   border-bottom-width: 1px;
 }
 
-:host > .typeahead-results > a:hover,
-:host > .typeahead-results > a:focus,
-:host > .typeahead-results > a.active {
+:host > .company-autocomplete-results > a:hover,
+:host > .company-autocomplete-results > a:focus,
+:host > .company-autocomplete-results > a.active {
   background: #DDD;
 }
 
 "};
-
-fn build_typeahead_results(store: Rc<RefCell<Store>>) -> VirtualNode {
-    match (
-        store.borrow().top_nav_search_bar().is_typeahead_open,
-        &store.borrow().top_nav_search_bar().typeahead_results,
-    ) {
-        (true, Some(results)) => {
-            let result_list = results
-                .data
-                .iter()
-                .enumerate()
-                .map(|(i, each)| {
-                    let name: &str = each.company_name.as_str();
-                    let link: String = format!("/companies/{}", each.short_cik.as_str());
-                    let class: &str =
-                        match store.borrow().top_nav_search_bar().typeahead_active_index {
-                            Some(index) => match index == i as i32 {
-                                true => "active",
-                                false => "inactive",
-                            },
-                            None => "inactive",
-                        };
-                    html! {
-                        <a class={ class } href={ link }>{ name }</a>
-                    }
-                })
-                .collect::<Vec<VirtualNode>>();
-            html! {
-                <div class="typeahead-results">{ result_list }<div>
-            }
-        }
-        (true, None) => {
-            html! { <div class="typeahead-results"><a style="cursor: default;">No Results</a><div> }
-        }
-        (false, ..) => {
-            html! { <div style="display: none;"></div> }
-        }
-    }
-}

@@ -1,4 +1,5 @@
 use wasm_bindgen::JsValue;
+use web_sys::Element;
 
 pub enum Msg {
     SetPath(String),
@@ -10,4 +11,6 @@ pub enum Msg {
     TypeaheadOpen(bool),
     /// Represents the key the user pressed
     KeyDown(Option<String>),
+    /// Represents that the user has clicked
+    Click(Option<Element>),
 }

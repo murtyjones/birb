@@ -57,6 +57,12 @@ impl State {
                 }
                 None => {}
             },
+            Msg::Click(target) => match target {
+                Some(element) => {
+                    self.handle_typeahead_blur_click(element.clone());
+                }
+                None => {}
+            },
         };
     }
 
@@ -135,6 +141,14 @@ impl State {
             None => {
                 self.top_nav_search_bar.typeahead_active_index = None;
             }
+        }
+    }
+}
+
+impl State {
+    fn handle_typeahead_blur_click(&mut self, element: web_sys::Element) {
+        if !element.class_name().contains("company-autocomplete") {
+            self.borrow_mut().msg(&Msg::TypeaheadOpen(false))
         }
     }
 }

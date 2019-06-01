@@ -75,8 +75,13 @@ impl Client {
         let store = Rc::clone(&app.store);
         intercept_relative_links(store);
 
+        // Listen for key events
         let store = Rc::clone(&app.store);
         key_event_listener(store);
+
+        // Listen for clicks
+        let store = Rc::clone(&app.store);
+        click_event_listener(store);
 
         Client { app, dom_updater }
     }
@@ -141,6 +146,24 @@ fn key_event_listener(store: Rc<RefCell<Store>>) {
         store.borrow_mut().msg(msg);
     }) as Box<dyn FnMut(_)>);
     body.add_event_listener_with_callback("keydown", closure.as_ref().unchecked_ref())
+        .expect("Couldn't add event listener!");
+    closure.forget();
+}
+
+// Listen for click events in order to all the user to interact with some
+// compenents (e.g. the typeahead)
+fn click_event_listener(store: Rc<RefCell<Store>>) {
+    let body = body();
+    let closure = Closure::wrap(Box::new(move |event: web_sys::Event| {
+        let target = event
+            .target()
+            .unwrap()
+            .dyn_into::<web_sys::Element>()
+            .unwrap();
+        let msg = &Msg::Click(Some(target));
+        store.borrow_mut().msg(msg);
+    }) as Box<dyn FnMut(_)>);
+    body.add_event_listener_with_callback("click", closure.as_ref().unchecked_ref())
         .expect("Couldn't add event listener!");
     closure.forget();
 }
