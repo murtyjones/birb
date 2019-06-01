@@ -84,7 +84,8 @@ pub enum AwsEdgar {
 pub enum AwsBastion {
     #[structopt(name = "up")]
     Up,
-    // TODO add down
+    #[structopt(name = "down")]
+    Down,
 }
 
 /// Get the outputs
@@ -322,6 +323,18 @@ impl Subcommand for AwsBastion {
                 let _result = run_str_in_bash(
                     "
                 bb aws plan up
+            ",
+                )?;
+            }
+            AwsBastion::Down => {
+                let _result = run_str_in_bash(
+                    "
+                terraform destroy -var-file=terraform/production.secret.tfvars \
+                           -auto-approve \
+                           -target=aws_instance.bastion \
+                           -target=aws_key_pair.bastion_key \
+                           -target=local_file.bastion_ip_address \
+                           terraform/
             ",
                 )?;
             }

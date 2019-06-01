@@ -102,6 +102,12 @@ impl Subcommand for Plan {
                            -target=aws_key_pair.bastion_key \
                            -target=aws_subnet.public \
                            -target=aws_route.internet_access \
+                           -target=local_file.bastion_ip_address \
+                           -target=local_file.rds_db_name \
+                           -target=local_file.rds_db_port \
+                           -target=local_file.rds_db_address \
+                           -target=local_file.rds_db_username \
+                           -target=local_file.rds_db_password \
                            terraform/
                 ",
                 )
