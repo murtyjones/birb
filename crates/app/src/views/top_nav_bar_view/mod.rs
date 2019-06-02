@@ -5,24 +5,24 @@ use std::rc::Rc;
 use virtual_dom_rs::prelude::*;
 
 mod nav_bar_item_view;
-use self::nav_bar_item_view::NavBarItemView;
+use self::nav_bar_item_view::TopNavBarItemView;
 mod search_bar_view;
 use search_bar_view::SearchBarView;
 
-pub struct NavBarView {
+pub struct TopNavBarView {
     store: Rc<RefCell<Store>>,
 }
 
-impl NavBarView {
-    pub fn new(store: Rc<RefCell<Store>>) -> NavBarView {
-        NavBarView { store }
+impl TopNavBarView {
+    pub fn new(store: Rc<RefCell<Store>>) -> TopNavBarView {
+        TopNavBarView { store }
     }
 }
 
-impl View for NavBarView {
+impl View for TopNavBarView {
     fn render(&self) -> VirtualNode {
         // Links
-        let home = NavBarItemView::new("/", "birb", "");
+        let home = TopNavBarItemView::new("/", "birb", "");
 
         // Search bar
         let search_bar = SearchBarView::new(Rc::clone(&self.store));

@@ -68,7 +68,7 @@ impl App {
         let top_nav = match &self.store.borrow().top_nav.is_visible {
             true => {
                 let store = Rc::clone(&self.store);
-                NavBarView::new(store).render()
+                TopNavBarView::new(store).render()
             }
             false => {
                 html! { <div style="display:none;"></div> }

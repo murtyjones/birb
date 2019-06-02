@@ -1,19 +1,19 @@
 use css_rs_macro::css;
 use virtual_dom_rs::prelude::*;
 
-pub struct NavBarItemView {
+pub struct TopNavBarItemView {
     path: &'static str,
     text: &'static str,
     style: &'static str,
 }
 
-impl NavBarItemView {
-    pub fn new(path: &'static str, text: &'static str, style: &'static str) -> NavBarItemView {
-        NavBarItemView { path, text, style }
+impl TopNavBarItemView {
+    pub fn new(path: &'static str, text: &'static str, style: &'static str) -> TopNavBarItemView {
+        TopNavBarItemView { path, text, style }
     }
 }
 
-impl View for NavBarItemView {
+impl View for TopNavBarItemView {
     fn render(&self) -> VirtualNode {
         html! {
             <a
