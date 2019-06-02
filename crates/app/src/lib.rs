@@ -74,8 +74,12 @@ impl App {
                     { top_nav }
                 </div>
                 <div id="main">
-                    { side_nav }
-                    { main }
+                    <div id="side-nav">
+                        { side_nav }
+                    </div>
+                    <div id="main-content">
+                        { main }
+                    </div>
                 </div>
             </div>
         }
@@ -126,6 +130,11 @@ static MAIN_CONTAINER_STYLE: &'static str = css! {"
 :host > #main {
     position: relative;
     z-index: 1;
+}
+
+:host > #main > #side-nav {
+    float: left;
+    width: 300px;
 }
 
 "};
