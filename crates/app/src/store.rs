@@ -94,6 +94,7 @@ impl Store {
                         let company = &response.data[index as usize];
                         let link = format!("/companies/{}", company.short_cik);
                         self.borrow_mut().msg(&Msg::SetPath(link));
+                        self.borrow_mut().msg(&Msg::TypeaheadOpen(false));
                     }
                 }
                 _ => {}

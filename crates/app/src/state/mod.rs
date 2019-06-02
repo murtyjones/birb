@@ -131,7 +131,9 @@ impl State {
 
 impl State {
     fn handle_typeahead_blur_click(&mut self, element: web_sys::Element) {
-        if !element.class_name().contains("company-autocomplete") {
+        if !element.class_name().contains("company-autocomplete")
+            || element.class_name().contains("company-autocomplete-result")
+        {
             self.borrow_mut().msg(&Msg::TypeaheadOpen(false))
         }
     }
