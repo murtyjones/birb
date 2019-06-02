@@ -8,6 +8,6 @@ pub struct SideNav {
 
 impl SideNav {
     pub fn new() -> SideNav {
-        SideNav { is_visible: true }
+        SideNav { is_visible: false }
     }
 }
