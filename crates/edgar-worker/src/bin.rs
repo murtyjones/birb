@@ -1,12 +1,9 @@
+extern crate env_logger;
 extern crate filing_data;
 extern crate filing_metadata;
-extern crate server_lib;
-#[macro_use]
 extern crate log;
-extern crate env_logger;
+extern crate server_lib;
 use filing_data::main as get_one_filing;
-use postgres::{Connection, TlsMode};
-use std::env;
 use std::sync::mpsc::channel;
 use std::thread;
 use std::time::Duration;
