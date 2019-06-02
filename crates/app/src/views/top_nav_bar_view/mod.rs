@@ -4,8 +4,8 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use virtual_dom_rs::prelude::*;
 
-mod nav_bar_item_view;
-use self::nav_bar_item_view::TopNavBarItemView;
+mod top_nav_bar_item_view;
+use self::top_nav_bar_item_view::TopNavBarItemView;
 mod search_bar_view;
 use search_bar_view::SearchBarView;
 

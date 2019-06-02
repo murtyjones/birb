@@ -1,8 +1,8 @@
 pub mod home_view;
 pub use self::home_view::*;
 
-pub mod nav_bar_view;
-pub use self::nav_bar_view::*;
+pub mod top_nav_bar_view;
+pub use self::top_nav_bar_view::*;
 
 pub mod company_view;
 pub use self::company_view::*;
