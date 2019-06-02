@@ -130,14 +130,52 @@ static MAIN_CONTAINER_STYLE: &'static str = css! {"
 
 "};
 
-#[route(path = "/")]
+#[route(
+    path = "/",
+    on_visit = hide_sidebar
+)]
 fn home_route(store: Provided<Rc<RefCell<Store>>>) -> VirtualNode {
     HomeView::new(Rc::clone(&store)).render()
 }
 
-#[route(path = "/companies/:short_cik")]
+#[route(
+    path = "/companies/:short_cik",
+    on_visit = show_sidebar
+)]
 fn company_route(short_cik: String, store: Provided<Rc<RefCell<Store>>>) -> VirtualNode {
     CompanyView::new(Rc::clone(&store)).render()
+}
+
+fn hide_sidebar(store: Provided<Rc<RefCell<Store>>>) {
+    toggle_sidebar(false, store);
+}
+
+fn show_sidebar(_short_cik: String, store: Provided<Rc<RefCell<Store>>>) {
+    toggle_sidebar(true, store);
+}
+
+fn toggle_sidebar(is_visible: bool, store: Provided<Rc<RefCell<Store>>>) {
+    // In order to check if the download has already been initiated, we must
+    // wrap the possibility of a download attempt in a closure and pass it to
+    // request_animation_frame. This is due to store already being mutably
+    // borrowed, since this method will be called from the `Store.msg` function.
+    //
+    // TODO: Do this in `Store.msg` instead of needing to do it in every on_visit callback
+    let raf_closure = Closure::wrap(Box::new(move || {
+        store
+            .borrow_mut()
+            .msg(&Msg::SetSideNavVisibility(is_visible));
+    }) as Box<FnMut()>);
+
+    web_sys::window()
+        .unwrap()
+        .request_animation_frame(raf_closure.as_ref().unchecked_ref())
+        .unwrap();
+
+    // TODO: We don't want to repeatedly forget this closure and should instead figure out a place
+    // to store it.
+    // Maybe make our `Store`'s msg handler for Msg::SetPath call `on_visit` inside of a RAF..
+    raf_closure.forget();
 }
 
 pub fn download_typeahead_json(substr: String, store: Rc<RefCell<Store>>) {
