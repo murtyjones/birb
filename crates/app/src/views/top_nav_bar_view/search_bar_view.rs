@@ -69,7 +69,6 @@ fn build_typeahead_results(store: Rc<RefCell<Store>>) -> VirtualNode {
         &store.borrow().top_nav().search_bar.typeahead_results,
     ) {
         (true, Some(results)) => {
-            debug!("no!");
             let result_list = results
                 .data
                 .iter()
@@ -107,7 +106,6 @@ fn build_typeahead_results(store: Rc<RefCell<Store>>) -> VirtualNode {
             }
         }
         (false, ..) => {
-            debug!("no!");
             html! { <div style="display: none;"></div> }
         }
     }

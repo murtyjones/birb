@@ -28,7 +28,7 @@ impl View for TopNavBarView {
         let search_bar = SearchBarView::new(Rc::clone(&self.store));
 
         html! {
-            <div class=NAV_BAR_CSS>
+            <div class=TOP_NAV_BAR_CSS>
                 { home.render() }
                 { search_bar.render() }
             </div>
@@ -36,7 +36,7 @@ impl View for TopNavBarView {
     }
 }
 
-static NAV_BAR_CSS: &'static str = css! {"
+static TOP_NAV_BAR_CSS: &'static str = css! {"
 :host {
     align-items: center;
     background: #592E56;

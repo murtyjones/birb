@@ -1,9 +1,11 @@
+mod side_nav;
+mod top_nav;
+
 use serde::{Deserialize, Serialize};
 use serde_json;
+use side_nav::SideNav;
 use std::cell::Cell;
 use std::rc::Rc;
-
-mod top_nav;
 use top_nav::TopNav;
 use top_nav::TopNavSearchBar;
 
@@ -15,6 +17,7 @@ use core::borrow::BorrowMut;
 pub struct State {
     path: String,
     pub top_nav: TopNav,
+    pub side_nav: SideNav,
 }
 
 impl State {
@@ -22,6 +25,7 @@ impl State {
         State {
             path: "/".to_string(),
             top_nav: TopNav::new(),
+            side_nav: SideNav::new(),
         }
     }
 
@@ -62,6 +66,7 @@ impl State {
                 }
                 None => {}
             },
+            Msg::SetSideNavVisibility(v) => self.set_side_nav_visibility(*v),
         };
     }
 
@@ -129,6 +134,12 @@ impl State {
         if !element.class_name().contains("company-autocomplete") {
             self.borrow_mut().msg(&Msg::TypeaheadOpen(false))
         }
+    }
+}
+
+impl State {
+    fn set_side_nav_visibility(&mut self, is_visible: bool) {
+        self.side_nav.is_visible = is_visible;
     }
 }
 

@@ -13,4 +13,6 @@ pub enum Msg {
     KeyDown(Option<String>),
     /// Represents that the user has clicked
     Click(Option<Element>),
+    /// Represents whether the side nav can be seen by the user
+    SetSideNavVisibility(bool),
 }

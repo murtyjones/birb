@@ -65,15 +65,8 @@ impl App {
 
 impl App {
     pub fn render(&self) -> VirtualNode {
-        let top_nav = match &self.store.borrow().top_nav.is_visible {
-            true => {
-                let store = Rc::clone(&self.store);
-                TopNavBarView::new(store).render()
-            }
-            false => {
-                html! { <div style="display:none;"></div> }
-            }
-        };
+        let top_nav = self.render_top_nav();
+        let side_nav = self.render_side_nav();
         let main = self.router.view(self.store.borrow().path()).unwrap();
         html! {
             <div id="app" class=MAIN_CONTAINER_STYLE>
@@ -81,9 +74,40 @@ impl App {
                     { top_nav }
                 </div>
                 <div id="main">
+                    { side_nav }
                     { main }
                 </div>
             </div>
+        }
+    }
+}
+
+/// Render the top nav
+impl App {
+    pub fn render_top_nav(&self) -> VirtualNode {
+        match &self.store.borrow().top_nav.is_visible {
+            true => {
+                let store = Rc::clone(&self.store);
+                TopNavBarView::new(store).render()
+            }
+            false => {
+                html! { <div style="display:none;"></div> }
+            }
+        }
+    }
+}
+
+/// Render the side nav
+impl App {
+    pub fn render_side_nav(&self) -> VirtualNode {
+        match &self.store.borrow().side_nav.is_visible {
+            true => {
+                let store = Rc::clone(&self.store);
+                SideNavBarView::new(store).render()
+            }
+            false => {
+                html! { <div style="display:none;"></div> }
+            }
         }
     }
 }
