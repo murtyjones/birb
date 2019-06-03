@@ -11,8 +11,12 @@ extern crate rocket_contrib;
 extern crate serde_derive;
 #[macro_use]
 extern crate cfg_if;
-extern crate dotenv;
+#[macro_use]
 extern crate postgres;
+#[macro_use]
+extern crate postgres_derive;
+extern crate dotenv;
+extern crate failure;
 extern crate serde_json;
 
 use app::App;
@@ -22,12 +26,12 @@ use rocket::response::Response;
 use rocket_contrib::serve::StaticFiles;
 use std::io::Cursor;
 
+/// Logic for retrieval
+pub mod getters;
 /// Route handlers
 pub mod handlers;
 /// Response types
 pub mod meta;
-/// DB models
-pub mod models;
 
 // If in test mode, using the test connection string from ROCKET_DATABASES,
 // otherwise use `postgres_datastore` from ROCKET_DATABASES
@@ -70,7 +74,8 @@ fn rocket() -> rocket::Rocket {
             "/api",
             routes![
                 handlers::health_check::get,
-                handlers::autocomplete_company::get
+                handlers::autocomplete_company::get,
+                handlers::company::get_filing_info
             ],
         )
         .register(catchers![

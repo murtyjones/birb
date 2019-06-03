@@ -1225,6 +1225,8 @@ dependencies = [
 name = "models"
 version = "0.1.0"
 dependencies = [
+ "postgres 0.15.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "postgres-derive 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.91 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_derive 1.0.91 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -2195,8 +2197,10 @@ dependencies = [
  "app 0.1.0",
  "cfg-if 0.1.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "dotenv 0.14.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "models 0.1.0",
  "postgres 0.15.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "postgres-derive 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "rocket 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "rocket_contrib 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.91 (registry+https://github.com/rust-lang/crates.io-index)",
