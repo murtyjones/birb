@@ -1,0 +1,12 @@
+[package]
+name = "filing-parser"
+version = "0.1.0"
+authors = ["Marty Jones <murtin.jones@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+html5ever = "*"
+xml5ever = "*"
+tendril = "*"
+regex = "*"
+lazy_static = "*"

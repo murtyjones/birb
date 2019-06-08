@@ -10,6 +10,7 @@ members = [
   "crates/birb-cli",
   "crates/filing-metadata",
   "crates/filing-data",
+  "crates/filing-parser",
   "crates/edgar-worker",
   "crates/app",
   "crates/client",
