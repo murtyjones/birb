@@ -36,51 +36,57 @@ lazy_static! {
 
 pub struct DomifiedFiling {
     pub dom: RcDom,
-    pub is_income_statement_header_located: bool,
+    pub path_to_income_statement_node: Option<Vec<i32>>,
 }
 
 impl DomifiedFiling {
     fn new(filing_contents: String) -> DomifiedFiling {
         DomifiedFiling {
             dom: parse_document(RcDom::default(), Default::default()).one(filing_contents),
-            is_income_statement_header_located: false,
+            path_to_income_statement_node: None,
         }
     }
 
-    fn get_doc(&self) -> &Rc<Node> {
-        &self.dom.document
+    fn get_doc(&self) -> Rc<Node> {
+        Rc::clone(&self.dom.document)
     }
 
     fn is_income_statement_header_node(&self, text: &str) -> bool {
         INCOME_STATEMENT_HEADER_REGEX.is_match(text)
     }
 
-    fn walker(&mut self, handle: &Handle) {
+    fn start_walker(&mut self) {
+        let doc = self.get_doc();
+        let path_to_node = vec![0];
+        self.walker(&doc, path_to_node);
+    }
+
+    fn walker(&mut self, handle: &Handle, path_to_node: Vec<i32>) {
         let node = handle;
 
         match node.data {
             NodeData::Text { ref contents } => {
                 let text = contents.borrow();
                 if self.is_income_statement_header_node(&text) {
-                    println!("\n\n\n{}", &text);
-                    println!("\n\n\n{:?}", &node);
-                    self.borrow_mut().is_income_statement_header_located = true;
-                    ()
+                    self.borrow_mut().path_to_income_statement_node = Some(path_to_node.clone());
                 }
             }
             _ => {}
         }
 
-        for child in node
-            .children
-            .borrow()
-            .iter()
-            .filter(|child| match child.data {
-                NodeData::Text { .. } | NodeData::Element { .. } => true,
-                _ => false,
-            })
+        for (i, child) in
+            node.children
+                .borrow()
+                .iter()
+                .enumerate()
+                .filter(|(_i, child)| match child.data {
+                    NodeData::Text { .. } | NodeData::Element { .. } => true,
+                    _ => false,
+                })
         {
-            &self.walker(child);
+            let mut path_to_child_node = path_to_node.clone();
+            path_to_child_node.push(i as i32);
+            &self.walker(child, path_to_child_node);
         }
     }
 }
@@ -114,8 +120,7 @@ mod test {
         // To parse a string into a tree of nodes, we need to invoke
         // `parse_document` and supply it with a TreeSink implementation (RcDom).
         let mut filing = DomifiedFiling::new(filing_contents);
-        let doc = &Rc::clone(filing.get_doc());
-        filing.walker(doc);
+        filing.start_walker();
         filing
     }
 
@@ -137,7 +142,7 @@ mod test {
         for filer in &STATIC_10_Q_FILING_NAMES {
             let filing = run_for_one(filer);
             assert!(
-                filing.is_income_statement_header_located,
+                filing.path_to_income_statement_node != None,
                 "There should be at least one income statement header in every document!"
             );
         }
