@@ -69,7 +69,9 @@ impl DomifiedFiling {
         match node.data {
             NodeData::Text { ref contents } => {
                 let text = contents.borrow();
-                if self.is_income_statement_header_node(&text) {
+                let is_viable_node = self.is_income_statement_header_node(&text);
+                let is_node_available = self.borrow_mut().path_to_income_statement_node == None;
+                if is_viable_node && is_node_available {
                     self.borrow_mut().path_to_income_statement_node = Some(path_to_node.clone());
                     ()
                 }
@@ -97,20 +99,21 @@ impl DomifiedFiling {
         match &self.path_to_income_statement_node {
             Some(path) => {
                 let doc = self.get_doc();
-                self.save_income_statement_node(&doc, path.to_owned().borrow_mut());
+                self.get_node_location(&doc, path.to_owned().borrow_mut());
             }
             None => panic!("Can't get income statement node if none was found!"),
         }
     }
 
-    fn save_income_statement_node(&mut self, handle: &Handle, path: &mut Vec<i32>) {
+    fn get_node_location(&mut self, handle: &Handle, path: &[i32]) {
         if path.len() == 0 {
             self.borrow_mut().income_statement_node = Some(handle.clone());
+            ()
+        } else {
+            let i = &path[0];
+            let child = &handle.children.borrow()[*i as usize];
+            self.get_node_location(child, &path[1..]);
         }
-        path.reverse();
-        let i = path.pop().expect("Couldn't get path value");
-        let child = &handle.children.borrow()[i as usize];
-        self.save_income_statement_node(child, path);
     }
 }
 
@@ -132,7 +135,7 @@ mod test {
     const INCOME_STMT_HEADER_INNER_HTML: [&'static str; 4] = [
         "Consolidated Statements of Income (Loss) ",
         "CONDENSED CONSOLIDATED STATEMENTS OF INCOME",
-        "<b>CONDENSED CONSOLIDATED STATEMENTS OF OPERATIONS AND COMPREHENSIVE LOSS</b>",
+        "CONDENSED CONSOLIDATED STATEMENTS OF OPERATIONS AND COMPREHENSIVE LOSS",
         "CONSOLIDATED STATEMENTS OF INCOME",
     ];
 
@@ -174,14 +177,21 @@ mod test {
 
     #[test]
     fn test_income_statement_header_location_is_correct() {
-        let mut i = 0;
-        for filer in &STATIC_10_Q_FILING_NAMES {
+        for i in 0..STATIC_10_Q_FILING_NAMES.len() {
+            let filer = STATIC_10_Q_FILING_NAMES[i];
             let expected_node_contents = INCOME_STMT_HEADER_INNER_HTML[i];
             let mut filing = make_struct(filer);
             filing.start_walker();
             filing.set_income_statement_node();
-            panic!("{:?}", filing.income_statement_node);
-            i += 1;
+            let node = filing.income_statement_node.unwrap();
+            match node.data {
+                NodeData::Text { ref contents } => {
+                    let mut c = String::new();
+                    c.push_str(&contents.borrow());
+                    assert_eq!(expected_node_contents, c);
+                }
+                _ => panic!("Wrong node!"),
+            }
         }
     }
 }
