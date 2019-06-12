@@ -57,7 +57,7 @@ impl DomifiedFiling {
 
     fn start_walker(&mut self) {
         let doc = self.get_doc();
-        let path_to_node = vec![0];
+        let path_to_node = vec![];
         self.walker(&doc, path_to_node);
     }
 
@@ -69,6 +69,7 @@ impl DomifiedFiling {
                 let text = contents.borrow();
                 if self.is_income_statement_header_node(&text) {
                     self.borrow_mut().path_to_income_statement_node = Some(path_to_node.clone());
+                    ()
                 }
             }
             _ => {}
@@ -89,6 +90,24 @@ impl DomifiedFiling {
             &self.walker(child, path_to_child_node);
         }
     }
+
+    fn get_income_statement_node(&self) {
+        match &self.path_to_income_statement_node {
+            Some(path) => {
+                let doc = self.get_doc();
+                self.go_to_node(&doc, path);
+            }
+            None => panic!("Can't get income statement node if none was found!"),
+        }
+    }
+
+    fn go_to_node(&self, handle: &Handle, path: &Vec<i32>) {
+        let mut node = handle;
+        for i in path.iter() {
+            let child = &node.children.borrow()[*i as usize];
+            node = child;
+        }
+    }
 }
 
 #[cfg(test)]
@@ -106,6 +125,13 @@ mod test {
         "./examples/0001004434-17-000011.txt",
     ];
 
+    const INCOME_STMT_HEADER_INNER_HTML: [&'static str; 4] = [
+        "Consolidated Statements of Income (Loss) ",
+        "CONDENSED CONSOLIDATED STATEMENTS OF INCOME",
+        "<b>CONDENSED CONSOLIDATED STATEMENTS OF OPERATIONS AND COMPREHENSIVE LOSS</b>",
+        "CONSOLIDATED STATEMENTS OF INCOME",
+    ];
+
     fn get_file_contents(filing_name: &'static str) -> String {
         let path = Path::new(filing_name);
         let mut file = File::open(path).expect("Couldn't open file");
@@ -115,36 +141,42 @@ mod test {
         contents
     }
 
-    fn run_for_one(filing_name: &'static str) -> DomifiedFiling {
+    fn make_struct(filing_name: &'static str) -> DomifiedFiling {
         let filing_contents = get_file_contents(filing_name);
         // To parse a string into a tree of nodes, we need to invoke
         // `parse_document` and supply it with a TreeSink implementation (RcDom).
         let mut filing = DomifiedFiling::new(filing_contents);
-        filing.start_walker();
         filing
     }
 
     #[test]
     fn test_income_statement_known_header_examples() {
-        const INCOME_STMT_HEADER_INNER_HTML: [&'static str; 4] = [
-            "Consolidated Statements of Income (Loss) ",
-            "CONDENSED CONSOLIDATED STATEMENTS OF INCOME",
-            "<b>CONDENSED CONSOLIDATED STATEMENTS OF OPERATIONS AND COMPREHENSIVE LOSS</b>",
-            "CONSOLIDATED STATEMENTS OF INCOME",
-        ];
         for each in &INCOME_STMT_HEADER_INNER_HTML {
             assert!(INCOME_STATEMENT_HEADER_REGEX.is_match(&each));
         }
     }
 
     #[test]
-    fn test_income_statement_header_is_found() {
+    fn test_income_statement_header_location_is_found() {
         for filer in &STATIC_10_Q_FILING_NAMES {
-            let filing = run_for_one(filer);
+            let mut filing = make_struct(filer);
+            filing.start_walker();
             assert!(
                 filing.path_to_income_statement_node != None,
                 "There should be at least one income statement header in every document!"
             );
+        }
+    }
+
+    #[test]
+    fn test_income_statement_header_location_is_correct() {
+        let mut i = 0;
+        for filer in &STATIC_10_Q_FILING_NAMES {
+            let expected_node_contents = INCOME_STMT_HEADER_INNER_HTML[i];
+            let mut filing = make_struct(filer);
+            filing.start_walker();
+            filing.get_income_statement_node();
+            i += 1;
         }
     }
 }
