@@ -22,26 +22,25 @@ use regex::{Regex, RegexBuilder};
 
 lazy_static! {
     static ref INCOME_STATEMENT_HEADER_PATTERN: &'static str =
-        r"<.+?>\s*consolidated\s+statements\s+of\s+(income|operations).*?</.+?>";
+        r"^(<b>)*(condensed)*\s*consolidated\s+statements\s+of\s+(income|operations)\s*(\(loss\))*(and comprehensive loss)*(</b>)*\s*$";
     static ref INCOME_STATEMENT_HEADER_REGEX: Regex =
         RegexBuilder::new(&INCOME_STATEMENT_HEADER_PATTERN)
             .case_insensitive(true)
             .multi_line(true)
-            .dot_matches_new_line(true)
             .build()
             .expect("Couldn't build income statement regex!");
 }
 
 pub struct DomifiedFiling {
     pub dom: RcDom,
-    pub income_statement_header_node_count: i32,
+    pub is_income_statement_header_located: bool,
 }
 
 impl DomifiedFiling {
     fn new(filing_contents: String) -> DomifiedFiling {
         DomifiedFiling {
             dom: parse_document(RcDom::default(), Default::default()).one(filing_contents),
-            income_statement_header_node_count: 0,
+            is_income_statement_header_located: false,
         }
     }
 
@@ -61,7 +60,9 @@ impl DomifiedFiling {
                 let text = contents.borrow();
                 if self.is_income_statement_header_node(&text) {
                     println!("\n\n\n{}", &text);
-                    self.borrow_mut().income_statement_header_node_count += 1;
+                    println!("\n\n\n{:?}", &node);
+                    self.borrow_mut().is_income_statement_header_located = true;
+                    ()
                 }
             }
             _ => {}
@@ -88,7 +89,13 @@ mod test {
     use std::io::prelude::*;
     use std::path::Path;
 
-    const STATIC_10_Q_FILING_NAMES: [&'static str; 1] = ["./src/0001193125-18-037381.txt"];
+    // TODO use S3 when running these in CI.
+    const STATIC_10_Q_FILING_NAMES: [&'static str; 4] = [
+        "./examples/0001193125-18-037381.txt",
+        "./examples/0001000623-17-000125.txt",
+        "./examples/0001437749-16-025027.txt",
+        "./examples/0001004434-17-000011.txt",
+    ];
 
     fn get_file_contents(filing_name: &'static str) -> String {
         let path = Path::new(filing_name);
@@ -110,23 +117,25 @@ mod test {
     }
 
     #[test]
-    fn test_income_statement_count_greater_than_0() {
-        for filer in &STATIC_10_Q_FILING_NAMES {
-            let filing = run_for_one(filer);
-            assert!(
-                filing.income_statement_header_node_count > 0,
-                "There should be at least one income statement header in every document!"
-            );
+    fn test_income_statement_known_header_examples() {
+        const INCOME_STMT_HEADER_INNER_HTML: [&'static str; 4] = [
+            "Consolidated Statements of Income (Loss) ",
+            "CONDENSED CONSOLIDATED STATEMENTS OF INCOME",
+            "<b>CONDENSED CONSOLIDATED STATEMENTS OF OPERATIONS AND COMPREHENSIVE LOSS</b>",
+            "CONSOLIDATED STATEMENTS OF INCOME",
+        ];
+        for each in &INCOME_STMT_HEADER_INNER_HTML {
+            assert_eq!(true, INCOME_STATEMENT_HEADER_REGEX.is_match(&each));
         }
     }
 
     #[test]
-    fn test_income_statement_count_less_than_2() {
+    fn test_income_statement_header_is_found() {
         for filer in &STATIC_10_Q_FILING_NAMES {
             let filing = run_for_one(filer);
-            assert!(
-                filing.income_statement_header_node_count < 2,
-                format!("There should only be one income statement header in every document! Relevant doc: {}", filer)
+            assert_eq!(
+                true, filing.is_income_statement_header_located,
+                "There should be at least one income statement header in every document!"
             );
         }
     }
