@@ -1,5 +1,5 @@
 // standard library / core
-use core::borrow::BorrowMut;
+use core::borrow::{Borrow, BorrowMut};
 use std::rc::Rc;
 
 // xml
@@ -37,6 +37,7 @@ lazy_static! {
 pub struct DomifiedFiling {
     pub dom: RcDom,
     pub path_to_income_statement_node: Option<Vec<i32>>,
+    pub income_statement_node: Option<Handle>,
 }
 
 impl DomifiedFiling {
@@ -44,6 +45,7 @@ impl DomifiedFiling {
         DomifiedFiling {
             dom: parse_document(RcDom::default(), Default::default()).one(filing_contents),
             path_to_income_statement_node: None,
+            income_statement_node: None,
         }
     }
 
@@ -91,22 +93,24 @@ impl DomifiedFiling {
         }
     }
 
-    fn get_income_statement_node(&self) {
+    fn set_income_statement_node(&mut self) {
         match &self.path_to_income_statement_node {
             Some(path) => {
                 let doc = self.get_doc();
-                self.go_to_node(&doc, path);
+                self.save_income_statement_node(&doc, path.to_owned().borrow_mut());
             }
             None => panic!("Can't get income statement node if none was found!"),
         }
     }
 
-    fn go_to_node(&self, handle: &Handle, path: &Vec<i32>) {
-        let mut node = handle;
-        for i in path.iter() {
-            let child = &node.children.borrow()[*i as usize];
-            node = child;
+    fn save_income_statement_node(&mut self, handle: &Handle, path: &mut Vec<i32>) {
+        if path.len() == 0 {
+            self.borrow_mut().income_statement_node = Some(handle.clone());
         }
+        path.reverse();
+        let i = path.pop().expect("Couldn't get path value");
+        let child = &handle.children.borrow()[i as usize];
+        self.save_income_statement_node(child, path);
     }
 }
 
@@ -175,7 +179,8 @@ mod test {
             let expected_node_contents = INCOME_STMT_HEADER_INNER_HTML[i];
             let mut filing = make_struct(filer);
             filing.start_walker();
-            filing.get_income_statement_node();
+            filing.set_income_statement_node();
+            panic!("{:?}", filing.income_statement_node);
             i += 1;
         }
     }
