@@ -18,11 +18,18 @@ use xml5ever::tree_builder::TreeSink;
 
 // regex requires
 use core::borrow::BorrowMut;
-use regex::Regex;
+use regex::{Regex, RegexBuilder};
 
 lazy_static! {
-    static ref RE: Regex =
-        Regex::new(r"consolidated\s+statements\s+of\s+(income|operations)").unwrap();
+    static ref INCOME_STATEMENT_HEADER_PATTERN: &'static str =
+        r"<.+?>\s*consolidated\s+statements\s+of\s+(income|operations).*?</.+?>";
+    static ref INCOME_STATEMENT_HEADER_REGEX: Regex =
+        RegexBuilder::new(&INCOME_STATEMENT_HEADER_PATTERN)
+            .case_insensitive(true)
+            .multi_line(true)
+            .dot_matches_new_line(true)
+            .build()
+            .expect("Couldn't build income statement regex!");
 }
 
 pub struct DomifiedFiling {
@@ -42,8 +49,8 @@ impl DomifiedFiling {
         &self.dom.document
     }
 
-    fn is_income_statement_header_node(text: &str) -> bool {
-        RE.is_match(text)
+    fn is_income_statement_header_node(&self, text: &str) -> bool {
+        INCOME_STATEMENT_HEADER_REGEX.is_match(text)
     }
 
     fn walker(&mut self, handle: &Handle) {
@@ -52,7 +59,8 @@ impl DomifiedFiling {
         match node.data {
             NodeData::Text { ref contents } => {
                 let text = contents.borrow();
-                if RE.is_match(&text) {
+                if self.is_income_statement_header_node(&text) {
+                    println!("\n\n\n{}", &text);
                     self.borrow_mut().income_statement_header_node_count += 1;
                 }
             }
