@@ -4,9 +4,7 @@ extern crate xml5ever;
 extern crate lazy_static;
 
 // Std requires
-use std::ascii::escape_default;
 use std::default::Default;
-use std::io;
 use std::rc::*;
 use std::string::String;
 
@@ -14,19 +12,31 @@ use std::string::String;
 use xml5ever::driver::parse_document;
 use xml5ever::rcdom::{Handle, Node, NodeData, RcDom};
 use xml5ever::tendril::TendrilSink;
-use xml5ever::tree_builder::TreeSink;
 
 // regex requires
 use core::borrow::BorrowMut;
 use regex::{Regex, RegexBuilder};
 
 lazy_static! {
-    static ref INCOME_STATEMENT_HEADER_PATTERN: &'static str =
-        r"^(<b>)*(condensed)*\s*consolidated\s+statements\s+of\s+(income|operations)\s*(\(loss\))*(and comprehensive loss)*(</b>)*\s*$";
+    static ref INCOME_STATEMENT_HEADER_PATTERN: &'static str = r"
+        ^
+        (<b>)*                          # Optional closing tag
+        (condensed)*\s*                 # The word 'condensed' may be at the beginning
+        consolidated\s+                 # 'consolidated '
+        statements\s+                   # 'statements '
+        of\s+                           # 'of '
+        (income|operations)\s*          # 'income' or 'operations', possibly with a space
+        (\(loss\))*                     # The word '(loss)' may be at the end
+        (and\s+comprehensive\s+loss)*   # The term '(and comprehensive loss)' may be at the end
+        (</b>)*                         # Optional closing tag
+        \s*                             # Optional whitespace
+        $
+    ";
     static ref INCOME_STATEMENT_HEADER_REGEX: Regex =
         RegexBuilder::new(&INCOME_STATEMENT_HEADER_PATTERN)
             .case_insensitive(true)
             .multi_line(true)
+            .ignore_whitespace(true)
             .build()
             .expect("Couldn't build income statement regex!");
 }
@@ -125,7 +135,7 @@ mod test {
             "CONSOLIDATED STATEMENTS OF INCOME",
         ];
         for each in &INCOME_STMT_HEADER_INNER_HTML {
-            assert_eq!(true, INCOME_STATEMENT_HEADER_REGEX.is_match(&each));
+            assert!(INCOME_STATEMENT_HEADER_REGEX.is_match(&each));
         }
     }
 
@@ -133,8 +143,8 @@ mod test {
     fn test_income_statement_header_is_found() {
         for filer in &STATIC_10_Q_FILING_NAMES {
             let filing = run_for_one(filer);
-            assert_eq!(
-                true, filing.is_income_statement_header_located,
+            assert!(
+                filing.is_income_statement_header_located,
                 "There should be at least one income statement header in every document!"
             );
         }
