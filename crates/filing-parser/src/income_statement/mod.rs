@@ -194,8 +194,8 @@ mod test {
             let file = &FILES[i];
             let mut domified_filing = make_struct(&file.path);
             domified_filing.start_walker();
-            assert!(
-                domified_filing.path_to_income_statement_node != None,
+            assert_ne!(
+                domified_filing.path_to_income_statement_node, None,
                 "There should be at least one income statement header in every document!"
             );
         }
