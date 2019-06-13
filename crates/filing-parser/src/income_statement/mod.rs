@@ -126,36 +126,36 @@ mod test {
     use std::path::Path;
 
     struct TestableFiling {
-        filing_name: String,
+        path: String,
         header_inner_html: String,
     }
 
     lazy_static! {
         static ref FILES: Vec<TestableFiling> = vec![
             TestableFiling {
-                filing_name: String::from("./examples/0001193125-18-037381.txt"),
+                path: String::from("./examples/0001193125-18-037381.txt"),
                 header_inner_html: String::from("Consolidated Statements of Income (Loss) "),
             },
             TestableFiling {
-                filing_name: String::from("./examples/0001000623-17-000125.txt"),
+                path: String::from("./examples/0001000623-17-000125.txt"),
                 header_inner_html: String::from("CONDENSED CONSOLIDATED STATEMENTS OF INCOME"),
             },
             TestableFiling {
-                filing_name: String::from("./examples/0001437749-16-025027.txt"),
+                path: String::from("./examples/0001437749-16-025027.txt"),
                 header_inner_html: String::from(
                     "CONDENSED CONSOLIDATED STATEMENTS OF OPERATIONS AND COMPREHENSIVE LOSS"
                 ),
             },
             TestableFiling {
-                filing_name: String::from("./examples/0001004434-17-000011.txt"),
+                path: String::from("./examples/0001004434-17-000011.txt"),
                 header_inner_html: String::from("CONSOLIDATED STATEMENTS OF INCOME"),
             },
             TestableFiling {
-                filing_name: String::from("./examples/0001185185-16-005721.txt"),
+                path: String::from("./examples/0001185185-16-005721.txt"),
                 header_inner_html: String::from("CONSOLIDATED STATEMENTS OF OPERATIONS"),
             },
             TestableFiling {
-                filing_name: String::from("./examples/0001437749-16-036870.txt"),
+                path: String::from("./examples/0001437749-16-036870.txt"),
                 header_inner_html: String::from(
                     "CONSOLIDATED STATEMENTS OF INCOME AND COMPREHENSIVE INCOME"
                 ),
@@ -163,8 +163,8 @@ mod test {
         ];
     }
 
-    fn get_file_contents(filing_name: &String) -> String {
-        let path = Path::new(filing_name.as_str());
+    fn get_file_contents(path: &String) -> String {
+        let path = Path::new(path.as_str());
         let mut file = File::open(path).expect("Couldn't open file");
         let mut contents = String::new();
         file.read_to_string(&mut contents)
@@ -172,12 +172,12 @@ mod test {
         contents
     }
 
-    fn make_struct(filing_name: &String) -> DomifiedFiling {
-        let filing_contents = get_file_contents(filing_name);
+    fn make_struct(path: &String) -> DomifiedFiling {
+        let filing_contents = get_file_contents(path);
         // To parse a string into a tree of nodes, we need to invoke
         // `parse_document` and supply it with a TreeSink implementation (RcDom).
-        let mut filing = DomifiedFiling::new(filing_contents);
-        filing
+        let domified_filing = DomifiedFiling::new(filing_contents);
+        domified_filing
     }
 
     #[test]
@@ -192,10 +192,10 @@ mod test {
     fn test_income_statement_header_location_is_found() {
         for i in 0..FILES.len() {
             let file = &FILES[i];
-            let mut filing = make_struct(&file.filing_name);
-            filing.start_walker();
+            let mut domified_filing = make_struct(&file.path);
+            domified_filing.start_walker();
             assert!(
-                filing.path_to_income_statement_node != None,
+                domified_filing.path_to_income_statement_node != None,
                 "There should be at least one income statement header in every document!"
             );
         }
@@ -205,15 +205,15 @@ mod test {
     fn test_income_statement_header_location_is_correct() {
         for i in 0..FILES.len() {
             let file = &FILES[i];
-            let mut filing = make_struct(&file.filing_name);
-            filing.start_walker();
-            filing.set_income_statement_node();
-            let node = filing.income_statement_node.unwrap();
+            let mut domified_filing = make_struct(&file.path);
+            domified_filing.start_walker();
+            domified_filing.set_income_statement_node();
+            let node = domified_filing.income_statement_node.unwrap();
             match node.data {
                 NodeData::Text { ref contents } => {
-                    let mut c = String::new();
-                    c.push_str(&contents.borrow());
-                    assert_eq!(file.header_inner_html, c);
+                    let mut stringified_contents = String::new();
+                    stringified_contents.push_str(&contents.borrow());
+                    assert_eq!(file.header_inner_html, stringified_contents);
                 }
                 _ => panic!("Wrong node!"),
             }
