@@ -1,5 +1,5 @@
 // standard library / core
-use core::borrow::{Borrow, BorrowMut};
+use core::borrow::BorrowMut;
 use std::rc::Rc;
 
 // xml
@@ -124,23 +124,40 @@ mod test {
     use std::io::prelude::*;
     use std::path::Path;
 
-    // TODO use S3 when running these in CI.
-    const STATIC_10_Q_FILING_NAMES: [&'static str; 4] = [
-        "./examples/0001193125-18-037381.txt",
-        "./examples/0001000623-17-000125.txt",
-        "./examples/0001437749-16-025027.txt",
-        "./examples/0001004434-17-000011.txt",
-    ];
+    struct StaticFile {
+        filing_name: String,
+        header_inner_html: String,
+    }
 
-    const INCOME_STMT_HEADER_INNER_HTML: [&'static str; 4] = [
-        "Consolidated Statements of Income (Loss) ",
-        "CONDENSED CONSOLIDATED STATEMENTS OF INCOME",
-        "CONDENSED CONSOLIDATED STATEMENTS OF OPERATIONS AND COMPREHENSIVE LOSS",
-        "CONSOLIDATED STATEMENTS OF INCOME",
-    ];
+    lazy_static! {
+        static ref FILES: Vec<StaticFile> = vec![
+            StaticFile {
+                filing_name: String::from("./examples/0001193125-18-037381.txt"),
+                header_inner_html: String::from("Consolidated Statements of Income (Loss) "),
+            },
+            StaticFile {
+                filing_name: String::from("./examples/0001000623-17-000125.txt"),
+                header_inner_html: String::from("CONDENSED CONSOLIDATED STATEMENTS OF INCOME"),
+            },
+            StaticFile {
+                filing_name: String::from("./examples/0001437749-16-025027.txt"),
+                header_inner_html: String::from(
+                    "CONDENSED CONSOLIDATED STATEMENTS OF OPERATIONS AND COMPREHENSIVE LOSS"
+                ),
+            },
+            StaticFile {
+                filing_name: String::from("./examples/0001004434-17-000011.txt"),
+                header_inner_html: String::from("CONSOLIDATED STATEMENTS OF INCOME"),
+            },
+            StaticFile {
+                filing_name: String::from("./examples/0001185185-16-005721.txt"),
+                header_inner_html: String::from("CONSOLIDATED STATEMENTS OF OPERATIONS"),
+            },
+        ];
+    }
 
-    fn get_file_contents(filing_name: &'static str) -> String {
-        let path = Path::new(filing_name);
+    fn get_file_contents(filing_name: &String) -> String {
+        let path = Path::new(filing_name.as_str());
         let mut file = File::open(path).expect("Couldn't open file");
         let mut contents = String::new();
         file.read_to_string(&mut contents)
@@ -148,7 +165,7 @@ mod test {
         contents
     }
 
-    fn make_struct(filing_name: &'static str) -> DomifiedFiling {
+    fn make_struct(filing_name: &String) -> DomifiedFiling {
         let filing_contents = get_file_contents(filing_name);
         // To parse a string into a tree of nodes, we need to invoke
         // `parse_document` and supply it with a TreeSink implementation (RcDom).
@@ -158,15 +175,17 @@ mod test {
 
     #[test]
     fn test_income_statement_known_header_examples() {
-        for each in &INCOME_STMT_HEADER_INNER_HTML {
-            assert!(INCOME_STATEMENT_HEADER_REGEX.is_match(&each));
+        for i in 0..FILES.len() {
+            let file = &FILES[i];
+            assert!(INCOME_STATEMENT_HEADER_REGEX.is_match(&file.header_inner_html));
         }
     }
 
     #[test]
     fn test_income_statement_header_location_is_found() {
-        for filer in &STATIC_10_Q_FILING_NAMES {
-            let mut filing = make_struct(filer);
+        for i in 0..FILES.len() {
+            let file = &FILES[i];
+            let mut filing = make_struct(&file.filing_name);
             filing.start_walker();
             assert!(
                 filing.path_to_income_statement_node != None,
@@ -177,10 +196,9 @@ mod test {
 
     #[test]
     fn test_income_statement_header_location_is_correct() {
-        for i in 0..STATIC_10_Q_FILING_NAMES.len() {
-            let filer = STATIC_10_Q_FILING_NAMES[i];
-            let expected_node_contents = INCOME_STMT_HEADER_INNER_HTML[i];
-            let mut filing = make_struct(filer);
+        for i in 0..FILES.len() {
+            let file = &FILES[i];
+            let mut filing = make_struct(&file.filing_name);
             filing.start_walker();
             filing.set_income_statement_node();
             let node = filing.income_statement_node.unwrap();
@@ -188,7 +206,7 @@ mod test {
                 NodeData::Text { ref contents } => {
                     let mut c = String::new();
                     c.push_str(&contents.borrow());
-                    assert_eq!(expected_node_contents, c);
+                    assert_eq!(file.header_inner_html, c);
                 }
                 _ => panic!("Wrong node!"),
             }
