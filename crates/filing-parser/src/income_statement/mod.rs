@@ -5,9 +5,11 @@ use std::rc::Rc;
 // xml
 use xml5ever::driver::parse_document;
 use xml5ever::rcdom::{Handle, Node, NodeData, RcDom};
-use xml5ever::tendril::TendrilSink;
+use xml5ever::tendril::{SliceExt, TendrilSink};
+use xml5ever::{LocalName, Namespace, Prefix, QualName};
 
 // regex
+use html5ever::tree_builder::Attribute;
 use regex::{Regex, RegexBuilder};
 
 lazy_static! {
@@ -74,6 +76,22 @@ impl DomifiedFiling {
                 let is_node_available = self.borrow_mut().path_to_income_statement_node == None;
                 if is_viable_node && is_node_available {
                     self.borrow_mut().path_to_income_statement_node = Some(path_to_node.clone());
+                    let parent = node.parent.take().unwrap().upgrade().unwrap();
+                    match parent.data {
+                        NodeData::Element { ref attrs, .. } => {
+                            const COLORIZER: Attribute = Attribute {
+                                name: QualName::new(
+                                    None,
+                                    Namespace::from("http://www.w3.org/1999/xhtml"),
+                                    LocalName::from("style"),
+                                ),
+                                value: "background-color: red;".to_tendril(),
+                            };
+                            let mut s = Rc::new(attrs);
+                            s.borrow_mut().push(COLORIZER);
+                        }
+                        _ => panic!("Parent should be an element!"),
+                    }
                     ()
                 }
             }
