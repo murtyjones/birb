@@ -20,7 +20,8 @@ lazy_static! {
         of\s+                           # 'of '
         (income|operations)\s*          # 'income' or 'operations', possibly with a space
         (\(loss\))*                     # The word '(loss)' may be at the end
-        (and\s+comprehensive\s+loss)*   # The term '(and comprehensive loss)' may be at the end
+        (and\s+comprehensive\s+loss)*   # The term 'and comprehensive loss' may be at the end
+        (and\s+comprehensive\s+income)* # The term 'and comprehensive income' may be at the end
         (</b>)*                         # Optional closing tag
         \s*                             # Optional whitespace
         $
@@ -124,34 +125,40 @@ mod test {
     use std::io::prelude::*;
     use std::path::Path;
 
-    struct StaticFile {
+    struct TestableFiling {
         filing_name: String,
         header_inner_html: String,
     }
 
     lazy_static! {
-        static ref FILES: Vec<StaticFile> = vec![
-            StaticFile {
+        static ref FILES: Vec<TestableFiling> = vec![
+            TestableFiling {
                 filing_name: String::from("./examples/0001193125-18-037381.txt"),
                 header_inner_html: String::from("Consolidated Statements of Income (Loss) "),
             },
-            StaticFile {
+            TestableFiling {
                 filing_name: String::from("./examples/0001000623-17-000125.txt"),
                 header_inner_html: String::from("CONDENSED CONSOLIDATED STATEMENTS OF INCOME"),
             },
-            StaticFile {
+            TestableFiling {
                 filing_name: String::from("./examples/0001437749-16-025027.txt"),
                 header_inner_html: String::from(
                     "CONDENSED CONSOLIDATED STATEMENTS OF OPERATIONS AND COMPREHENSIVE LOSS"
                 ),
             },
-            StaticFile {
+            TestableFiling {
                 filing_name: String::from("./examples/0001004434-17-000011.txt"),
                 header_inner_html: String::from("CONSOLIDATED STATEMENTS OF INCOME"),
             },
-            StaticFile {
+            TestableFiling {
                 filing_name: String::from("./examples/0001185185-16-005721.txt"),
                 header_inner_html: String::from("CONSOLIDATED STATEMENTS OF OPERATIONS"),
+            },
+            TestableFiling {
+                filing_name: String::from("./examples/0001437749-16-036870.txt"),
+                header_inner_html: String::from(
+                    "CONSOLIDATED STATEMENTS OF INCOME AND COMPREHENSIVE INCOME"
+                ),
             },
         ];
     }
