@@ -79,7 +79,7 @@ impl DomifiedFiling {
                     let parent = node.parent.take().unwrap().upgrade().unwrap();
                     match parent.data {
                         NodeData::Element { ref attrs, .. } => {
-                            const COLORIZER: Attribute = Attribute {
+                            let colorizer: Attribute = Attribute {
                                 name: QualName::new(
                                     None,
                                     Namespace::from("http://www.w3.org/1999/xhtml"),
@@ -87,8 +87,8 @@ impl DomifiedFiling {
                                 ),
                                 value: "background-color: red;".to_tendril(),
                             };
-                            let mut s = Rc::new(attrs);
-                            s.borrow_mut().push(COLORIZER);
+                            attrs.borrow_mut().push(colorizer);
+                            // TODO write to a local file and see if the background color shows up in the correct place for all example files.
                         }
                         _ => panic!("Parent should be an element!"),
                     }
