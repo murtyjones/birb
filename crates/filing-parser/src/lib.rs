@@ -1,5 +1,6 @@
 extern crate regex;
-extern crate xml5ever;
+#[macro_use]
+extern crate html5ever;
 #[macro_use]
 extern crate lazy_static;
 

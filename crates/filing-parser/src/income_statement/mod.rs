@@ -2,15 +2,16 @@
 use core::borrow::BorrowMut;
 use std::rc::Rc;
 
-// xml
-use xml5ever::driver::parse_document;
-use xml5ever::rcdom::{Handle, Node, NodeData, RcDom};
-use xml5ever::tendril::{SliceExt, TendrilSink};
-use xml5ever::{LocalName, Namespace, Prefix, QualName};
+// html parsing
+use html5ever::driver::parse_document;
+use html5ever::rcdom::{Handle, Node, NodeData, RcDom};
+use html5ever::tendril::{SliceExt, TendrilSink};
+use html5ever::{LocalName, Namespace, Prefix, QualName};
 
 // regex
 use html5ever::tree_builder::Attribute;
 use regex::{Regex, RegexBuilder};
+use std::ascii::escape_default;
 
 lazy_static! {
     static ref INCOME_STATEMENT_HEADER_PATTERN: &'static str = r"
@@ -134,6 +135,69 @@ impl DomifiedFiling {
             self.get_node_location(child, &path[1..]);
         }
     }
+
+    fn start_write_to_output(&mut self, output: &String) {
+        let doc = self.get_doc();
+        let contents = String::new();
+        self.write_to_output(&doc, contents, output);
+    }
+
+    fn write_to_output(
+        &mut self,
+        handle: &Handle,
+        mut file_contents: String,
+        output: &String,
+    ) -> String {
+        let node = handle;
+        match node.data {
+            NodeData::Document => {
+                file_contents.push_str("#Document\n");
+            }
+
+            NodeData::Doctype {
+                ref name,
+                ref public_id,
+                ref system_id,
+            } => {
+                file_contents.push_str(
+                    format!("<!DOCTYPE {} \"{}\" \"{}\">", name, public_id, system_id).as_str(),
+                );
+            }
+
+            NodeData::Text { ref contents } => {
+                let mut stringified_contents = String::new();
+                stringified_contents.push_str(&contents.borrow());
+                file_contents.push_str(stringified_contents.as_str());
+            }
+
+            NodeData::Comment { ref contents } => {
+                // println!("<!-- {} -->", escape_default(contents))
+            }
+
+            NodeData::Element {
+                ref name,
+                ref attrs,
+                ..
+            } => {
+                assert!(name.ns == ns!(html));
+                let mut stringified_contents = String::new();
+                stringified_contents.push_str(format!("<{}", name.local).as_str());
+                for attr in attrs.borrow().iter() {
+                    assert!(attr.name.ns == ns!());
+                    stringified_contents
+                        .push_str(format!(" {}=\"{}\"", attr.name.local, attr.value).as_str());
+                }
+                stringified_contents.push_str(">");
+            }
+
+            NodeData::ProcessingInstruction { .. } => unreachable!(),
+        }
+
+        for child in node.children.borrow().iter() {
+            self.write_to_output(&child, file_contents, output);
+        }
+        file_contents
+    }
 }
 
 #[cfg(test)]
@@ -146,6 +210,7 @@ mod test {
     struct TestableFiling {
         path: String,
         header_inner_html: String,
+        output: String,
     }
 
     lazy_static! {
@@ -153,30 +218,36 @@ mod test {
             TestableFiling {
                 path: String::from("./examples/0001193125-18-037381.txt"),
                 header_inner_html: String::from("Consolidated Statements of Income (Loss) "),
+                output: String::from("./examples/output/0001193125-18-037381.txt"),
             },
             TestableFiling {
                 path: String::from("./examples/0001000623-17-000125.txt"),
                 header_inner_html: String::from("CONDENSED CONSOLIDATED STATEMENTS OF INCOME"),
+                output: String::from("./examples/output/0001000623-17-000125.txt"),
             },
             TestableFiling {
                 path: String::from("./examples/0001437749-16-025027.txt"),
                 header_inner_html: String::from(
                     "CONDENSED CONSOLIDATED STATEMENTS OF OPERATIONS AND COMPREHENSIVE LOSS"
                 ),
+                output: String::from("./examples/output/0001437749-16-025027.txt"),
             },
             TestableFiling {
                 path: String::from("./examples/0001004434-17-000011.txt"),
                 header_inner_html: String::from("CONSOLIDATED STATEMENTS OF INCOME"),
+                output: String::from("./examples/output/0001004434-17-000011.txt"),
             },
             TestableFiling {
                 path: String::from("./examples/0001185185-16-005721.txt"),
                 header_inner_html: String::from("CONSOLIDATED STATEMENTS OF OPERATIONS"),
+                output: String::from("./examples/output/0001185185-16-005721.txt"),
             },
             TestableFiling {
                 path: String::from("./examples/0001437749-16-036870.txt"),
                 header_inner_html: String::from(
                     "CONSOLIDATED STATEMENTS OF INCOME AND COMPREHENSIVE INCOME"
                 ),
+                output: String::from("./examples/output/0001437749-16-036870.txt"),
             },
         ];
     }
@@ -226,6 +297,7 @@ mod test {
             let mut domified_filing = make_struct(&file.path);
             domified_filing.start_walker();
             domified_filing.set_income_statement_node();
+            domified_filing.start_write_to_output(&file.output);
             let node = domified_filing.income_statement_node.unwrap();
             match node.data {
                 NodeData::Text { ref contents } => {
