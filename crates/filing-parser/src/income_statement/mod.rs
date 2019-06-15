@@ -138,13 +138,13 @@ impl DomifiedFiling {
         }
     }
 
-    fn start_set_file_contents(&mut self, output: &String) {
+    fn start_set_file_contents(&mut self) {
         let doc = self.get_doc();
         let mut contents = String::new();
-        self.set_file_contents(&doc, output);
+        self.set_file_contents(&doc);
     }
 
-    fn set_file_contents(&mut self, handle: &Handle, output: &String) {
+    fn set_file_contents(&mut self, handle: &Handle) {
         let node = handle;
         match node.data {
             NodeData::Document => {
@@ -180,7 +180,8 @@ impl DomifiedFiling {
                 let mut stringified_contents = String::new();
                 stringified_contents.push_str(format!("<{}", name.local).as_str());
                 for attr in attrs.borrow().iter() {
-                    assert!(attr.name.ns == ns!());
+                    // TODO not sure if this assertion is needed
+                    //                    assert!(attr.name.ns == ns!());
                     stringified_contents
                         .push_str(format!(" {}=\"{}\"", attr.name.local, attr.value).as_str());
                 }
@@ -191,7 +192,7 @@ impl DomifiedFiling {
         }
 
         for child in node.children.borrow().iter() {
-            self.set_file_contents(&child, output);
+            self.set_file_contents(&child);
         }
     }
 }
@@ -293,7 +294,9 @@ mod test {
             let mut domified_filing = make_struct(&file.path);
             domified_filing.start_walker();
             domified_filing.set_income_statement_node();
-            domified_filing.start_set_file_contents(&file.output);
+            domified_filing.start_set_file_contents();
+            std::fs::write(&file.output, domified_filing.file_contents)
+                .expect("Unable to write file");
             let node = domified_filing.income_statement_node.unwrap();
             match node.data {
                 NodeData::Text { ref contents } => {
