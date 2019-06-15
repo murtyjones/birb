@@ -138,13 +138,13 @@ impl DomifiedFiling {
         }
     }
 
-    fn start_write_to_output(&mut self, output: &String) {
+    fn start_set_file_contents(&mut self, output: &String) {
         let doc = self.get_doc();
         let mut contents = String::new();
-        self.write_to_output(&doc, output);
+        self.set_file_contents(&doc, output);
     }
 
-    fn write_to_output(&mut self, handle: &Handle, output: &String) {
+    fn set_file_contents(&mut self, handle: &Handle, output: &String) {
         let node = handle;
         match node.data {
             NodeData::Document => {
@@ -191,7 +191,7 @@ impl DomifiedFiling {
         }
 
         for child in node.children.borrow().iter() {
-            self.write_to_output(&child, output);
+            self.set_file_contents(&child, output);
         }
     }
 }
@@ -293,7 +293,7 @@ mod test {
             let mut domified_filing = make_struct(&file.path);
             domified_filing.start_walker();
             domified_filing.set_income_statement_node();
-            domified_filing.start_write_to_output(&file.output);
+            domified_filing.start_set_file_contents(&file.output);
             let node = domified_filing.income_statement_node.unwrap();
             match node.data {
                 NodeData::Text { ref contents } => {
