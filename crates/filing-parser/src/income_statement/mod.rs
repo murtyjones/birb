@@ -42,6 +42,7 @@ pub struct DomifiedFiling {
     pub dom: RcDom,
     pub path_to_income_statement_node: Option<Vec<i32>>,
     pub income_statement_node: Option<Handle>,
+    pub file_contents: String,
 }
 
 impl DomifiedFiling {
@@ -50,6 +51,7 @@ impl DomifiedFiling {
             dom: parse_document(RcDom::default(), Default::default()).one(filing_contents),
             path_to_income_statement_node: None,
             income_statement_node: None,
+            file_contents: String::new(),
         }
     }
 
@@ -138,20 +140,15 @@ impl DomifiedFiling {
 
     fn start_write_to_output(&mut self, output: &String) {
         let doc = self.get_doc();
-        let contents = String::new();
-        self.write_to_output(&doc, contents, output);
+        let mut contents = String::new();
+        self.write_to_output(&doc, output);
     }
 
-    fn write_to_output(
-        &mut self,
-        handle: &Handle,
-        mut file_contents: String,
-        output: &String,
-    ) -> String {
+    fn write_to_output(&mut self, handle: &Handle, output: &String) {
         let node = handle;
         match node.data {
             NodeData::Document => {
-                file_contents.push_str("#Document\n");
+                self.file_contents.push_str("#Document\n");
             }
 
             NodeData::Doctype {
@@ -159,7 +156,7 @@ impl DomifiedFiling {
                 ref public_id,
                 ref system_id,
             } => {
-                file_contents.push_str(
+                self.file_contents.push_str(
                     format!("<!DOCTYPE {} \"{}\" \"{}\">", name, public_id, system_id).as_str(),
                 );
             }
@@ -167,7 +164,7 @@ impl DomifiedFiling {
             NodeData::Text { ref contents } => {
                 let mut stringified_contents = String::new();
                 stringified_contents.push_str(&contents.borrow());
-                file_contents.push_str(stringified_contents.as_str());
+                self.file_contents.push_str(stringified_contents.as_str());
             }
 
             NodeData::Comment { ref contents } => {
@@ -194,9 +191,8 @@ impl DomifiedFiling {
         }
 
         for child in node.children.borrow().iter() {
-            self.write_to_output(&child, file_contents, output);
+            self.write_to_output(&child, output);
         }
-        file_contents
     }
 }
 
