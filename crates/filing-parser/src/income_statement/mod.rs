@@ -80,8 +80,21 @@ impl DomifiedFiling {
                     let parent = node.parent.take().unwrap().upgrade().unwrap();
                     match parent.data {
                         NodeData::Element { ref attrs, .. } => {
+                            
+                            /*
+                             * TODO: Once it's verified that the income statement parser works
+                             * correctly, remove the red background styling stuff below
+                             * and use a custom id e.g. "x-birb-income-statement-header"
+                             */
+                            
+                            // Remove the style attribute if it exists
+                            attrs
+                                .borrow_mut()
+                                .retain(|attr| &attr.name.local != "style");
+
+                            // Add the custom style attribute
                             let colorizer: Attribute = Attribute {
-                                name: QualName::new(None, ns!(html), LocalName::from("style")),
+                                name: QualName::new(None, ns!(), local_name!("style")),
                                 value: "background-color: red;".to_tendril(),
                             };
                             attrs.borrow_mut().push(colorizer);
