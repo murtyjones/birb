@@ -80,13 +80,12 @@ impl DomifiedFiling {
                     let parent = node.parent.take().unwrap().upgrade().unwrap();
                     match parent.data {
                         NodeData::Element { ref attrs, .. } => {
-                            
                             /*
                              * TODO: Once it's verified that the income statement parser works
                              * correctly, remove the red background styling stuff below
                              * and use a custom id e.g. "x-birb-income-statement-header"
                              */
-                            
+
                             // Remove the style attribute if it exists
                             attrs
                                 .borrow_mut()
@@ -144,7 +143,7 @@ impl DomifiedFiling {
         }
     }
 
-    fn write_file_contents(&mut self, path: &String) {
+    fn write_file_contents(&mut self, path: String) {
         let doc: &Rc<Node> = &self.get_doc();
         let buffer = std::fs::File::create(path).expect("Could't create file.");
         html5ever::serialize::serialize(
@@ -166,44 +165,45 @@ mod test {
     struct TestableFiling {
         path: String,
         header_inner_html: String,
-        output: String,
     }
 
     lazy_static! {
         static ref FILES: Vec<TestableFiling> = vec![
             TestableFiling {
-                path: String::from("./examples/0001193125-18-037381.txt"),
+                path: String::from("./examples/10-Q/input/0001193125-18-037381.txt"),
                 header_inner_html: String::from("Consolidated Statements of Income (Loss) "),
-                output: String::from("./examples/output/0001193125-18-037381.html"),
             },
             TestableFiling {
-                path: String::from("./examples/0001000623-17-000125.txt"),
+                path: String::from("./examples/10-Q/input/0001000623-17-000125.txt"),
                 header_inner_html: String::from("CONDENSED CONSOLIDATED STATEMENTS OF INCOME"),
-                output: String::from("./examples/output/0001000623-17-000125.html"),
             },
             TestableFiling {
-                path: String::from("./examples/0001437749-16-025027.txt"),
+                path: String::from("./examples/10-Q/input/0001437749-16-025027.txt"),
                 header_inner_html: String::from(
                     "CONDENSED CONSOLIDATED STATEMENTS OF OPERATIONS AND COMPREHENSIVE LOSS"
                 ),
-                output: String::from("./examples/output/0001437749-16-025027.html"),
             },
             TestableFiling {
-                path: String::from("./examples/0001004434-17-000011.txt"),
+                path: String::from("./examples/10-Q/input/0001004434-17-000011.txt"),
                 header_inner_html: String::from("CONSOLIDATED STATEMENTS OF INCOME"),
-                output: String::from("./examples/output/0001004434-17-000011.html"),
             },
             TestableFiling {
-                path: String::from("./examples/0001185185-16-005721.txt"),
+                path: String::from("./examples/10-Q/input/0001185185-16-005721.txt"),
                 header_inner_html: String::from("CONSOLIDATED STATEMENTS OF OPERATIONS"),
-                output: String::from("./examples/output/0001185185-16-005721.html"),
             },
             TestableFiling {
-                path: String::from("./examples/0001437749-16-036870.txt"),
+                path: String::from("./examples/10-Q/input/0001437749-16-036870.txt"),
                 header_inner_html: String::from(
                     "CONSOLIDATED STATEMENTS OF INCOME AND COMPREHENSIVE INCOME"
                 ),
-                output: String::from("./examples/output/0001437749-16-036870.html"),
+            },
+            TestableFiling {
+                path: String::from("./examples/10-Q/input/0001193125-16-454777.txt"),
+                header_inner_html: String::from("Consolidated Statements of Income "),
+            },
+            TestableFiling {
+                path: String::from("./examples/10-Q/input/0001193125-17-160261.txt"),
+                header_inner_html: String::from("CONSOLIDATED STATEMENTS OF OPERATIONS "),
             },
         ];
     }
@@ -249,11 +249,17 @@ mod test {
     #[test]
     fn test_income_statement_header_location_is_correct() {
         for i in 0..FILES.len() {
+            // Arrange
             let file = &FILES[i];
             let mut domified_filing = make_struct(&file.path);
+            let output_path = String::from(format!("./examples/10-Q/output/{}.html", i));
+
+            // Act
             domified_filing.start_walker();
             domified_filing.set_income_statement_node();
-            domified_filing.write_file_contents(&file.output);
+            domified_filing.write_file_contents(output_path);
+
+            // Assert
             let node = domified_filing.income_statement_node.unwrap();
             match node.data {
                 NodeData::Text { ref contents } => {
