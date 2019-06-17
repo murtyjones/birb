@@ -42,7 +42,6 @@ pub struct DomifiedFiling {
     pub dom: RcDom,
     pub path_to_income_statement_node: Option<Vec<i32>>,
     pub income_statement_node: Option<Handle>,
-    pub file_contents: String,
 }
 
 impl DomifiedFiling {
@@ -51,7 +50,6 @@ impl DomifiedFiling {
             dom: parse_document(RcDom::default(), Default::default()).one(filing_contents),
             path_to_income_statement_node: None,
             income_statement_node: None,
-            file_contents: String::new(),
         }
     }
 
@@ -83,15 +81,10 @@ impl DomifiedFiling {
                     match parent.data {
                         NodeData::Element { ref attrs, .. } => {
                             let colorizer: Attribute = Attribute {
-                                name: QualName::new(
-                                    None,
-                                    Namespace::from("http://www.w3.org/1999/xhtml"),
-                                    LocalName::from("style"),
-                                ),
+                                name: QualName::new(None, ns!(html), LocalName::from("style")),
                                 value: "background-color: red;".to_tendril(),
                             };
                             attrs.borrow_mut().push(colorizer);
-                            // TODO write to a local file and see if the background color shows up in the correct place for all example files.
                         }
                         _ => panic!("Parent should be an element!"),
                     }
@@ -138,62 +131,15 @@ impl DomifiedFiling {
         }
     }
 
-    fn start_set_file_contents(&mut self) {
-        let doc = self.get_doc();
-        let mut contents = String::new();
-        self.set_file_contents(&doc);
-    }
-
-    fn set_file_contents(&mut self, handle: &Handle) {
-        let node = handle;
-        match node.data {
-            NodeData::Document => {
-                self.file_contents.push_str("#Document\n");
-            }
-
-            NodeData::Doctype {
-                ref name,
-                ref public_id,
-                ref system_id,
-            } => {
-                self.file_contents.push_str(
-                    format!("<!DOCTYPE {} \"{}\" \"{}\">", name, public_id, system_id).as_str(),
-                );
-            }
-
-            NodeData::Text { ref contents } => {
-                let mut stringified_contents = String::new();
-                stringified_contents.push_str(&contents.borrow());
-                self.file_contents.push_str(stringified_contents.as_str());
-            }
-
-            NodeData::Comment { ref contents } => {
-                // println!("<!-- {} -->", escape_default(contents))
-            }
-
-            NodeData::Element {
-                ref name,
-                ref attrs,
-                ..
-            } => {
-                assert!(name.ns == ns!(html));
-                let mut stringified_contents = String::new();
-                stringified_contents.push_str(format!("<{}", name.local).as_str());
-                for attr in attrs.borrow().iter() {
-                    // TODO not sure if this assertion is needed
-                    //                    assert!(attr.name.ns == ns!());
-                    stringified_contents
-                        .push_str(format!(" {}=\"{}\"", attr.name.local, attr.value).as_str());
-                }
-                stringified_contents.push_str(">");
-            }
-
-            NodeData::ProcessingInstruction { .. } => unreachable!(),
-        }
-
-        for child in node.children.borrow().iter() {
-            self.set_file_contents(&child);
-        }
+    fn write_file_contents(&mut self, path: &String) {
+        let doc: &Rc<Node> = &self.get_doc();
+        let buffer = std::fs::File::create(path).expect("Could't create file.");
+        html5ever::serialize::serialize(
+            buffer,
+            doc,
+            html5ever::serialize::SerializeOpts::default(),
+        )
+        .expect("Couldn't write to file.");
     }
 }
 
@@ -215,36 +161,36 @@ mod test {
             TestableFiling {
                 path: String::from("./examples/0001193125-18-037381.txt"),
                 header_inner_html: String::from("Consolidated Statements of Income (Loss) "),
-                output: String::from("./examples/output/0001193125-18-037381.txt"),
+                output: String::from("./examples/output/0001193125-18-037381.html"),
             },
             TestableFiling {
                 path: String::from("./examples/0001000623-17-000125.txt"),
                 header_inner_html: String::from("CONDENSED CONSOLIDATED STATEMENTS OF INCOME"),
-                output: String::from("./examples/output/0001000623-17-000125.txt"),
+                output: String::from("./examples/output/0001000623-17-000125.html"),
             },
             TestableFiling {
                 path: String::from("./examples/0001437749-16-025027.txt"),
                 header_inner_html: String::from(
                     "CONDENSED CONSOLIDATED STATEMENTS OF OPERATIONS AND COMPREHENSIVE LOSS"
                 ),
-                output: String::from("./examples/output/0001437749-16-025027.txt"),
+                output: String::from("./examples/output/0001437749-16-025027.html"),
             },
             TestableFiling {
                 path: String::from("./examples/0001004434-17-000011.txt"),
                 header_inner_html: String::from("CONSOLIDATED STATEMENTS OF INCOME"),
-                output: String::from("./examples/output/0001004434-17-000011.txt"),
+                output: String::from("./examples/output/0001004434-17-000011.html"),
             },
             TestableFiling {
                 path: String::from("./examples/0001185185-16-005721.txt"),
                 header_inner_html: String::from("CONSOLIDATED STATEMENTS OF OPERATIONS"),
-                output: String::from("./examples/output/0001185185-16-005721.txt"),
+                output: String::from("./examples/output/0001185185-16-005721.html"),
             },
             TestableFiling {
                 path: String::from("./examples/0001437749-16-036870.txt"),
                 header_inner_html: String::from(
                     "CONSOLIDATED STATEMENTS OF INCOME AND COMPREHENSIVE INCOME"
                 ),
-                output: String::from("./examples/output/0001437749-16-036870.txt"),
+                output: String::from("./examples/output/0001437749-16-036870.html"),
             },
         ];
     }
@@ -294,9 +240,7 @@ mod test {
             let mut domified_filing = make_struct(&file.path);
             domified_filing.start_walker();
             domified_filing.set_income_statement_node();
-            domified_filing.start_set_file_contents();
-            std::fs::write(&file.output, domified_filing.file_contents)
-                .expect("Unable to write file");
+            domified_filing.write_file_contents(&file.output);
             let node = domified_filing.income_statement_node.unwrap();
             match node.data {
                 NodeData::Text { ref contents } => {
