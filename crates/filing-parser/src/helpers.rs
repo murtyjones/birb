@@ -17,20 +17,20 @@ pub fn same_node(x: &Handle, y: &Handle) -> bool {
 }
 
 pub fn get_parent_and_index(target: &Handle) -> Option<(Handle, i32)> {
-    let child: &Node = target.borrow();
-    let mut parent = child
-        .parent
-        .take()
-        .unwrap()
-        .upgrade()
-        .expect("dangling weak pointer");
-    let children = &parent.children.borrow_mut();
-    match children
-        .iter()
-        .enumerate()
-        .find(|&(_, n)| same_node(n, target))
-    {
-        Some((i, _)) => Some((Rc::clone(&parent), i as i32)),
-        None => panic!("have parent but couldn't find in parent's children!"),
+    let parent = target.parent.take();
+    match parent {
+        Some(n) => {
+            let parent = n.upgrade().expect("dangling weak pointer");
+            let children = &parent.children.borrow();
+            match children
+                .iter()
+                .enumerate()
+                .find(|&(_, n)| same_node(n, target))
+            {
+                Some((i, _)) => Some((Rc::clone(&parent), i as i32)),
+                None => panic!("Have parent but couldn't find in parent's children!"),
+            }
+        }
+        None => panic!("No parent!"),
     }
 }

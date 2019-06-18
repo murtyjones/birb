@@ -54,6 +54,7 @@ pub struct DomifiedFiling {
     pub viable_header_node_has_table_nearby: Option<bool>,
 }
 
+#[allow(dead_code)]
 impl DomifiedFiling {
     fn new(filing_contents: String) -> DomifiedFiling {
         DomifiedFiling {
@@ -110,21 +111,13 @@ impl DomifiedFiling {
         offset_over: i32,
     ) -> bool {
         let mut node = handle;
-        for i in 0..=offset_up {
-            let mut node = &node.parent.take().unwrap().upgrade().unwrap();
-            // TODO Avoid needing to check whether `i` is the last element. This has to do with changing
-            // the node to be the parent node but then having that go out of scope after the for loop.
-            if i == offset_up {
-                let parent_and_index =
-                    get_parent_and_index(node).expect("Couldn't get parent node and index.");
-                let sibling_index_from_parent = parent_and_index.1 + offset_over;
-                let mut node = &parent_and_index.0;
-                let mut node = &node.children.borrow()[sibling_index_from_parent as usize];
-                return self.node_is_table_element(node);
-            }
-            return false;
-        }
-        false
+
+        let parent_and_index =
+            get_parent_and_index(node).expect("Couldn't get parent node and index.");
+        let sibling_index_from_parent = parent_and_index.1 + offset_over;
+        let mut node = &parent_and_index.0;
+        let mut node = &node.children.borrow()[sibling_index_from_parent as usize];
+        return self.node_is_table_element(node);
     }
 
     fn node_is_table_element(&mut self, node: &Handle) -> bool {
