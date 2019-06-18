@@ -17,11 +17,12 @@ lazy_static! {
     static ref INCOME_STATEMENT_HEADER_PATTERN: &'static str = r"
         ^
         (<b>)*                          # Optional closing tag
-        (condensed)*\s*                 # The word 'condensed' may be at the beginning
+        (condensed)*\s*                 # The word 'condensed' may be at the beginning (before 'consolidated')
         consolidated\s+                 # 'consolidated '
+        (condensed)*\s*                 # The word 'condensed' may be at the beginning (after 'consolidated')
         statements\s+                   # 'statements '
         of\s+                           # 'of '
-        (income|operations)\s*          # 'income' or 'operations', possibly with a space
+        (income|operations|earnings)\s* # 'income' or 'operations' or 'earnings', possibly with a space
         (\(loss\))*                     # The word '(loss)' may be at the end
         (and\s+comprehensive\s+loss)*   # The term 'and comprehensive loss' may be at the end
         (and\s+comprehensive\s+income)* # The term 'and comprehensive income' may be at the end
