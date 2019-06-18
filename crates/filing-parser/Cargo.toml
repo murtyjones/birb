@@ -7,6 +7,8 @@ edition = "2018"
 [dependencies]
 html5ever = "*"
 xml5ever = "*"
+markup5ever = "*"
 tendril = "*"
 regex = "*"
 lazy_static = "*"
+mac = "*"

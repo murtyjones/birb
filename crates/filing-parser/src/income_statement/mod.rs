@@ -1,5 +1,6 @@
 // standard library / core
-use core::borrow::BorrowMut;
+use core::borrow::{Borrow, BorrowMut};
+use std::cell::RefCell;
 use std::rc::Rc;
 
 // html parsing
@@ -12,6 +13,9 @@ use html5ever::{LocalName, Namespace, Prefix, QualName};
 use html5ever::tree_builder::Attribute;
 use regex::{Regex, RegexBuilder};
 use std::ascii::escape_default;
+
+// helpers
+use crate::helpers::get_parent_and_index;
 
 lazy_static! {
     static ref INCOME_STATEMENT_HEADER_PATTERN: &'static str = r"
@@ -39,18 +43,25 @@ lazy_static! {
             .expect("Couldn't build income statement regex!");
 }
 
+const MAX_LEVELS_UP: i32 = 3;
+const MAX_LEVELS_OVER: i32 = 3;
+
 pub struct DomifiedFiling {
     pub dom: RcDom,
-    pub path_to_income_statement_node: Option<Vec<i32>>,
-    pub income_statement_node: Option<Handle>,
+    pub income_statement_table_found: bool,
+    pub path_to_income_statement_header_node: Option<Vec<i32>>,
+    pub viable_income_statement_header_node: Option<Handle>,
+    pub viable_header_node_has_table_nearby: Option<bool>,
 }
 
 impl DomifiedFiling {
     fn new(filing_contents: String) -> DomifiedFiling {
         DomifiedFiling {
             dom: parse_document(RcDom::default(), Default::default()).one(filing_contents),
-            path_to_income_statement_node: None,
-            income_statement_node: None,
+            income_statement_table_found: false,
+            path_to_income_statement_header_node: None,
+            viable_income_statement_header_node: None,
+            viable_header_node_has_table_nearby: None,
         }
     }
 
@@ -58,7 +69,7 @@ impl DomifiedFiling {
         Rc::clone(&self.dom.document)
     }
 
-    fn is_income_statement_header_node(&self, text: &str) -> bool {
+    fn has_income_statement_header_text(&self, text: &str) -> bool {
         INCOME_STATEMENT_HEADER_REGEX.is_match(text)
     }
 
@@ -68,36 +79,77 @@ impl DomifiedFiling {
         self.walker(&doc, path_to_node);
     }
 
+    fn current_node_is_income_statement_header(
+        &mut self,
+        handle: &Handle,
+        node_contents: String,
+    ) -> bool {
+        // If the node text doesn't match the income statement RegExp, return false
+        if !self.has_income_statement_header_text(&node_contents) {
+            return false;
+        }
+
+        // for X levels up and Y levels over, try to find a table element.
+        // If one is found at any point, return true.
+        for i in 0..=MAX_LEVELS_UP {
+            for j in 0..=MAX_LEVELS_OVER {
+                if self.offset_node_is_a_table_element(handle, i, j) {
+                    return true;
+                }
+            }
+        }
+
+        // If we didn't find a nearby table, return false
+        false
+    }
+
+    fn offset_node_is_a_table_element(
+        &mut self,
+        handle: &Handle,
+        offset_up: i32,
+        offset_over: i32,
+    ) -> bool {
+        let mut node = handle;
+        for i in 0..=offset_up {
+            node = &node.parent.take().unwrap().upgrade().unwrap();
+        }
+        let parent_and_index =
+            get_parent_and_index(node).expect("Couldn't get parent node and index.");
+        let sibling_index_from_parent = parent_and_index.1 + offset_over;
+        node = &parent_and_index.0;
+        node = &node.children.borrow()[sibling_index_from_parent as usize];
+        panic!("{:?}", node);
+    }
+
+    fn node_is_table_element(&mut self, node: &Handle) -> bool {
+        match node.data {
+            NodeData::Element { ref name, .. } => {
+                panic!("elem name == {:?}", name.local);
+            }
+            _ => false,
+        }
+    }
+
     fn walker(&mut self, handle: &Handle, path_to_node: Vec<i32>) {
         let node = handle;
 
+        // If the income statement was already found, stop walking the DOM
+        if self.income_statement_table_found {
+            return ();
+        }
+
         match node.data {
             NodeData::Text { ref contents } => {
-                let text = contents.borrow();
-                let is_viable_node = self.is_income_statement_header_node(&text);
-                let is_node_available = self.borrow_mut().path_to_income_statement_node == None;
-                if is_viable_node && is_node_available {
-                    self.borrow_mut().path_to_income_statement_node = Some(path_to_node.clone());
+                let mut text = String::new();
+                text.push_str(&contents.borrow());
+                if self.current_node_is_income_statement_header(handle, text) {
+                    self.borrow_mut().path_to_income_statement_header_node =
+                        Some(path_to_node.clone());
+                    self.borrow_mut().income_statement_table_found == true;
                     let parent = node.parent.take().unwrap().upgrade().unwrap();
                     match parent.data {
                         NodeData::Element { ref attrs, .. } => {
-                            /*
-                             * TODO: Once it's verified that the income statement parser works
-                             * correctly, remove the red background styling stuff below
-                             * and use a custom id e.g. "x-birb-income-statement-header"
-                             */
-
-                            // Remove the style attribute if it exists
-                            attrs
-                                .borrow_mut()
-                                .retain(|attr| &attr.name.local != "style");
-
-                            // Add the custom style attribute
-                            let colorizer: Attribute = Attribute {
-                                name: QualName::new(None, ns!(), local_name!("style")),
-                                value: "background-color: red;".to_tendril(),
-                            };
-                            attrs.borrow_mut().push(colorizer);
+                            self.attach_style_to_header(attrs);
                         }
                         _ => panic!("Parent should be an element!"),
                     }
@@ -123,8 +175,28 @@ impl DomifiedFiling {
         }
     }
 
-    fn set_income_statement_node(&mut self) {
-        match &self.path_to_income_statement_node {
+    fn attach_style_to_header(&mut self, attrs: &RefCell<Vec<Attribute>>) {
+        /*
+         * TODO: Once it's verified that the income statement parser works
+         * correctly, remove the red background styling stuff below
+         * and use a custom id e.g. "x-birb-income-statement-header"
+         */
+
+        // Remove the style attribute if it exists
+        attrs
+            .borrow_mut()
+            .retain(|attr| &attr.name.local != "style");
+
+        // Add the custom style attribute
+        let colorizer: Attribute = Attribute {
+            name: QualName::new(None, ns!(), local_name!("style")),
+            value: "background-color: red;".to_tendril(),
+        };
+        attrs.borrow_mut().push(colorizer);
+    }
+
+    fn set_viable_income_statement_header_node(&mut self) {
+        match &self.path_to_income_statement_header_node {
             Some(path) => {
                 let doc = self.get_doc();
                 self.get_node_location(&doc, path.to_owned().borrow_mut());
@@ -135,7 +207,7 @@ impl DomifiedFiling {
 
     fn get_node_location(&mut self, handle: &Handle, path: &[i32]) {
         if path.len() == 0 {
-            self.borrow_mut().income_statement_node = Some(handle.clone());
+            self.borrow_mut().viable_income_statement_header_node = Some(handle.clone());
             ()
         } else {
             let i = &path[0];
@@ -144,6 +216,7 @@ impl DomifiedFiling {
         }
     }
 
+    #[cfg(test)]
     fn write_file_contents(&mut self, path: String) {
         let doc: &Rc<Node> = &self.get_doc();
         let buffer = std::fs::File::create(path).expect("Could't create file.");
@@ -169,45 +242,49 @@ mod test {
     }
 
     lazy_static! {
-        static ref FILES: Vec<TestableFiling> = vec![
-            TestableFiling {
-                path: String::from("./examples/10-Q/input/0001193125-18-037381.txt"),
-                header_inner_html: String::from("Consolidated Statements of Income (Loss) "),
-            },
-            TestableFiling {
-                path: String::from("./examples/10-Q/input/0001000623-17-000125.txt"),
-                header_inner_html: String::from("CONDENSED CONSOLIDATED STATEMENTS OF INCOME"),
-            },
-            TestableFiling {
-                path: String::from("./examples/10-Q/input/0001437749-16-025027.txt"),
-                header_inner_html: String::from(
-                    "CONDENSED CONSOLIDATED STATEMENTS OF OPERATIONS AND COMPREHENSIVE LOSS"
-                ),
-            },
-            TestableFiling {
-                path: String::from("./examples/10-Q/input/0001004434-17-000011.txt"),
-                header_inner_html: String::from("CONSOLIDATED STATEMENTS OF INCOME"),
-            },
-            TestableFiling {
-                path: String::from("./examples/10-Q/input/0001185185-16-005721.txt"),
-                header_inner_html: String::from("CONSOLIDATED STATEMENTS OF OPERATIONS"),
-            },
-            TestableFiling {
-                path: String::from("./examples/10-Q/input/0001437749-16-036870.txt"),
-                header_inner_html: String::from(
-                    "CONSOLIDATED STATEMENTS OF INCOME AND COMPREHENSIVE INCOME"
-                ),
-            },
-            TestableFiling {
-                path: String::from("./examples/10-Q/input/0001193125-16-454777.txt"),
-                header_inner_html: String::from("Consolidated Statements of Income "),
-            },
-            TestableFiling {
-                path: String::from("./examples/10-Q/input/0001193125-17-160261.txt"),
-                header_inner_html: String::from("CONSOLIDATED STATEMENTS OF OPERATIONS "),
-            },
-        ];
-    }
+            static ref FILES: Vec<TestableFiling> = vec![
+    //            TestableFiling {
+    //                path: String::from("./examples/10-Q/input/0001193125-18-037381.txt"),
+    //                header_inner_html: String::from("Consolidated Statements of Income (Loss) "),
+    //            },
+    //            TestableFiling {
+    //                path: String::from("./examples/10-Q/input/0001000623-17-000125.txt"),
+    //                header_inner_html: String::from("CONDENSED CONSOLIDATED STATEMENTS OF INCOME"),
+    //            },
+    //            TestableFiling {
+    //                path: String::from("./examples/10-Q/input/0001437749-16-025027.txt"),
+    //                header_inner_html: String::from(
+    //                    "CONDENSED CONSOLIDATED STATEMENTS OF OPERATIONS AND COMPREHENSIVE LOSS"
+    //                ),
+    //            },
+    //            TestableFiling {
+    //                path: String::from("./examples/10-Q/input/0001004434-17-000011.txt"),
+    //                header_inner_html: String::from("CONSOLIDATED STATEMENTS OF INCOME"),
+    //            },
+    //            TestableFiling {
+    //                path: String::from("./examples/10-Q/input/0001185185-16-005721.txt"),
+    //                header_inner_html: String::from("CONSOLIDATED STATEMENTS OF OPERATIONS"),
+    //            },
+    //            TestableFiling {
+    //                path: String::from("./examples/10-Q/input/0001437749-16-036870.txt"),
+    //                header_inner_html: String::from(
+    //                    "CONSOLIDATED STATEMENTS OF INCOME AND COMPREHENSIVE INCOME"
+    //                ),
+    //            },
+    //            TestableFiling {
+    //                path: String::from("./examples/10-Q/input/0001193125-16-454777.txt"),
+    //                header_inner_html: String::from("Consolidated Statements of Income "),
+    //            },
+    //            TestableFiling {
+    //                path: String::from("./examples/10-Q/input/0001193125-17-160261.txt"),
+    //                header_inner_html: String::from("CONSOLIDATED STATEMENTS OF OPERATIONS "),
+    //            },
+                TestableFiling {
+                    path: String::from("./examples/10-Q/input/0001001288-16-000069.txt"),
+                    header_inner_html: String::from("Consolidated Condensed Statements of Earnings "),
+                },
+            ];
+        }
 
     fn get_file_contents(path: &String) -> String {
         let path = Path::new(path.as_str());
@@ -241,7 +318,7 @@ mod test {
             let mut domified_filing = make_struct(&file.path);
             domified_filing.start_walker();
             assert_ne!(
-                domified_filing.path_to_income_statement_node, None,
+                domified_filing.path_to_income_statement_header_node, None,
                 "There should be at least one income statement header in every document!"
             );
         }
@@ -257,11 +334,11 @@ mod test {
 
             // Act
             domified_filing.start_walker();
-            domified_filing.set_income_statement_node();
+            domified_filing.set_viable_income_statement_header_node();
             domified_filing.write_file_contents(output_path);
 
             // Assert
-            let node = domified_filing.income_statement_node.unwrap();
+            let node = domified_filing.viable_income_statement_header_node.unwrap();
             match node.data {
                 NodeData::Text { ref contents } => {
                     let mut stringified_contents = String::new();
