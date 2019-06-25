@@ -117,7 +117,7 @@ impl DomifiedFiling {
         let sibling_index_from_parent = parent_and_index.1 + offset_over;
         let mut node = &parent_and_index.0;
         let mut node = &node.children.borrow()[sibling_index_from_parent as usize];
-        return self.node_is_table_element(node);
+        self.node_is_table_element(node)
     }
 
     fn node_is_table_element(&mut self, node: &Handle) -> bool {

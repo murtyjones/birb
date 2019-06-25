@@ -17,6 +17,7 @@ pub fn same_node(x: &Handle, y: &Handle) -> bool {
 }
 
 pub fn get_parent_and_index(target: &Handle) -> Option<(Handle, i32)> {
+    // TODO this will hopefully be fixed soon:
     let parent = target.parent.take();
     match parent {
         Some(n) => {
