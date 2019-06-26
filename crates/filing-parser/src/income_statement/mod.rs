@@ -2,6 +2,7 @@
 use core::borrow::{Borrow, BorrowMut};
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::rc::Weak;
 
 // html parsing
 use html5ever::driver::parse_document;
@@ -43,8 +44,11 @@ lazy_static! {
             .expect("Couldn't build income statement regex!");
 }
 
-const MAX_LEVELS_UP: i32 = 2;
-const MAX_LEVELS_OVER: i32 = 2;
+const MAX_LEVELS_UP: i32 = 1;
+// TODO: In the actual rendering of a document, this looks like it should only be a few levels over.
+// However when html5ever parses it into a dom, 8 levels over is required. Could just be because of text nodes,
+// but it's worth ensuring that there isn't whitespace or something being converted to a node unneccesarily.
+const MAX_LEVELS_OVER: i32 = 8;
 
 pub struct DomifiedFiling {
     pub dom: RcDom,
@@ -84,18 +88,19 @@ impl DomifiedFiling {
         &mut self,
         handle: &Handle,
         node_contents: String,
+        parent: &Handle,
+        child_index: i32,
     ) -> bool {
         // If the node text doesn't match the income statement RegExp, return false
         if !self.has_income_statement_header_text(&node_contents) {
             return false;
         }
-
-        let mut parents_and_indexes: Vec<(Rc<Node>, i32)> =
-            vec![get_parent_and_index(handle).expect("Couldn't get parent node and index.")];
+        let mut parents_and_indexes: Vec<(Rc<Node>, i32)> = vec![(Rc::clone(&parent), child_index)];
 
         // get parents several levels up:
         for i in 1..=MAX_LEVELS_UP {
-            let prev_node = &parents_and_indexes[(i as usize) - 1].0;
+            let prev_node_index = (i as usize) - 1;
+            let prev_node = &parents_and_indexes[prev_node_index].0;
             parents_and_indexes.push(
                 get_parent_and_index(prev_node).expect("Couldn't get parent node and index."),
             );
@@ -108,16 +113,6 @@ impl DomifiedFiling {
             let child_index = each.1;
             for sibling_index in 1..=MAX_LEVELS_OVER {
                 if self.offset_node_is_a_table_element(parent, child_index, sibling_index) {
-                    return true;
-                }
-            }
-        }
-
-        // for X levels up and Y levels over, try to find a table element.
-        // If one is found at any point, return true.
-        for i in 0..=MAX_LEVELS_UP {
-            for j in 0..=MAX_LEVELS_OVER {
-                if self.offset_node_is_a_table_element(handle, i, j) {
                     return true;
                 }
             }
@@ -146,7 +141,10 @@ impl DomifiedFiling {
 
     fn node_is_table_element(&mut self, node: &Handle) -> bool {
         match node.data {
-            NodeData::Element { ref name, .. } => &name.local == "table",
+            NodeData::Element { ref name, .. } => {
+                println!("<{}>", &name.local);
+                &name.local == "table"
+            }
             _ => false,
         }
     }
@@ -161,13 +159,19 @@ impl DomifiedFiling {
 
         match node.data {
             NodeData::Text { ref contents } => {
+                let (parent, child_index) =
+                    get_parent_and_index(handle).expect("Couldn't get parent node and index.");
                 let mut node_contents = String::new();
                 node_contents.push_str(&contents.borrow());
-                if self.current_node_is_income_statement_header(handle, node_contents) {
+                if self.current_node_is_income_statement_header(
+                    handle,
+                    node_contents,
+                    &parent,
+                    child_index,
+                ) {
                     self.borrow_mut().path_to_income_statement_header_node =
                         Some(path_to_node.clone());
                     self.borrow_mut().income_statement_table_found == true;
-                    let parent = node.parent.take().unwrap().upgrade().unwrap();
                     match parent.data {
                         NodeData::Element { ref attrs, .. } => {
                             self.attach_style_to_header(attrs);
