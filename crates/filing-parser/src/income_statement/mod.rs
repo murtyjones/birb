@@ -137,7 +137,7 @@ impl DomifiedFiling {
         let children = &parent.children.borrow();
         // There may not be a sibling at the offset specified, in which case
         // we return "false"
-        if children.len() - 1 < sibling_index_from_parent as usize {
+        if (children.len() as i32 - 1) < sibling_index_from_parent as i32 {
             return false;
         }
         let mut sibling = &children[sibling_index_from_parent as usize];
