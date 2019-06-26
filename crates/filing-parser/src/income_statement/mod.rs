@@ -90,6 +90,29 @@ impl DomifiedFiling {
             return false;
         }
 
+        let mut parents_and_indexes: Vec<(Rc<Node>, i32)> =
+            vec![get_parent_and_index(handle).expect("Couldn't get parent node and index.")];
+
+        // get parents several levels up:
+        for i in 1..=MAX_LEVELS_UP {
+            let prev_node = &parents_and_indexes[(i as usize) - 1].0;
+            parents_and_indexes.push(
+                get_parent_and_index(prev_node).expect("Couldn't get parent node and index."),
+            );
+        }
+
+        // for each parent, check if a sibling near to the current child is a table element.
+        // if any are, return true.
+        for each in parents_and_indexes {
+            let parent = &each.0;
+            let child_index = each.1;
+            for sibling_index in 1..=MAX_LEVELS_OVER {
+                if self.offset_node_is_a_table_element(parent, child_index, sibling_index) {
+                    return true;
+                }
+            }
+        }
+
         // for X levels up and Y levels over, try to find a table element.
         // If one is found at any point, return true.
         for i in 0..=MAX_LEVELS_UP {
@@ -106,18 +129,19 @@ impl DomifiedFiling {
 
     fn offset_node_is_a_table_element(
         &mut self,
-        handle: &Handle,
-        offset_up: i32,
-        offset_over: i32,
+        parent: &Handle,
+        child_index: i32,
+        sibling_offset: i32,
     ) -> bool {
-        let mut node = handle;
-
-        let parent_and_index =
-            get_parent_and_index(node).expect("Couldn't get parent node and index.");
-        let sibling_index_from_parent = parent_and_index.1 + offset_over;
-        let mut node = &parent_and_index.0;
-        let mut node = &node.children.borrow()[sibling_index_from_parent as usize];
-        self.node_is_table_element(node)
+        let sibling_index_from_parent = child_index + sibling_offset;
+        let children = &parent.children.borrow();
+        // There may not be a sibling at the offset specified, in which case
+        // we return "false"
+        if children.len() - 1 < sibling_index_from_parent as usize {
+            return false;
+        }
+        let mut sibling = &children[sibling_index_from_parent as usize];
+        self.node_is_table_element(sibling)
     }
 
     fn node_is_table_element(&mut self, node: &Handle) -> bool {
