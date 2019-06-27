@@ -44,11 +44,11 @@ lazy_static! {
             .expect("Couldn't build income statement regex!");
 }
 
-const MAX_LEVELS_UP: i32 = 1;
+const MAX_LEVELS_UP: i32 = 2;
 // TODO: In the actual rendering of a document, this looks like it should only be a few levels over.
 // However when html5ever parses it into a dom, 8 levels over is required. Could just be because of text nodes,
 // but it's worth ensuring that there isn't whitespace or something being converted to a node unneccesarily.
-const MAX_LEVELS_OVER: i32 = 8;
+const MAX_LEVELS_OVER: i32 = 10;
 
 pub struct DomifiedFiling {
     pub dom: RcDom,
@@ -90,10 +90,10 @@ impl DomifiedFiling {
         node_contents: String,
         parent: &Handle,
         child_index: i32,
-    ) -> bool {
-        // If the node text doesn't match the income statement RegExp, return false
+    ) {
+        // If the node text doesn't match the income statement RegExp, exit
         if !self.has_income_statement_header_text(&node_contents) {
-            return false;
+            return ();
         }
         let mut parents_and_indexes: Vec<(Rc<Node>, i32)> = vec![(Rc::clone(&parent), child_index)];
 
@@ -112,14 +112,11 @@ impl DomifiedFiling {
             let parent = &each.0;
             let child_index = each.1;
             for sibling_index in 1..=MAX_LEVELS_OVER {
-                if self.offset_node_is_a_table_element(parent, child_index, sibling_index) {
-                    return true;
+                if !self.income_statement_table_found {
+                    self.offset_node_is_a_table_element(parent, child_index, sibling_index);
                 }
             }
         }
-
-        // If we didn't find a nearby table, return false
-        false
     }
 
     fn offset_node_is_a_table_element(
@@ -127,25 +124,45 @@ impl DomifiedFiling {
         parent: &Handle,
         child_index: i32,
         sibling_offset: i32,
-    ) -> bool {
+    ) {
         let sibling_index_from_parent = child_index + sibling_offset;
         let children = &parent.children.borrow();
         // There may not be a sibling at the offset specified, in which case
         // we return "false"
         if (children.len() as i32 - 1) < sibling_index_from_parent as i32 {
-            return false;
+            return ();
         }
         let mut sibling = &children[sibling_index_from_parent as usize];
-        self.node_is_table_element(sibling)
+        self.node_is_table_element(sibling);
     }
 
-    fn node_is_table_element(&mut self, node: &Handle) -> bool {
+    fn node_is_table_element(&mut self, node: &Handle) {
+        if self.income_statement_table_found {
+            return ();
+        }
+
         match node.data {
             NodeData::Element { ref name, .. } => {
                 println!("<{}>", &name.local);
-                &name.local == "table"
+                if &name.local == "table" {
+                    self.borrow_mut().income_statement_table_found = true;
+                    return;
+                }
             }
-            _ => false,
+            _ => {}
+        }
+
+        for (i, child) in
+            node.children
+                .borrow()
+                .iter()
+                .enumerate()
+                .filter(|(_i, child)| match child.data {
+                    NodeData::Text { .. } | NodeData::Element { .. } => true,
+                    _ => false,
+                })
+        {
+            self.node_is_table_element(child);
         }
     }
 
@@ -163,15 +180,16 @@ impl DomifiedFiling {
                     get_parent_and_index(handle).expect("Couldn't get parent node and index.");
                 let mut node_contents = String::new();
                 node_contents.push_str(&contents.borrow());
-                if self.current_node_is_income_statement_header(
+                self.current_node_is_income_statement_header(
                     handle,
                     node_contents,
                     &parent,
                     child_index,
-                ) {
+                );
+
+                if self.income_statement_table_found {
                     self.borrow_mut().path_to_income_statement_header_node =
                         Some(path_to_node.clone());
-                    self.borrow_mut().income_statement_table_found == true;
                     match parent.data {
                         NodeData::Element { ref attrs, .. } => {
                             self.attach_style_to_header(attrs);
@@ -267,49 +285,49 @@ mod test {
     }
 
     lazy_static! {
-                static ref FILES: Vec<TestableFiling> = vec![
-                    TestableFiling {
-                        path: String::from("./examples/10-Q/input/0001193125-18-037381.txt"),
-                        header_inner_html: String::from("Consolidated Statements of Income (Loss) "),
-                    },
-        //            TestableFiling {
-        //                path: String::from("./examples/10-Q/input/0001000623-17-000125.txt"),
-        //                header_inner_html: String::from("CONDENSED CONSOLIDATED STATEMENTS OF INCOME"),
-        //            },
-        //            TestableFiling {
-        //                path: String::from("./examples/10-Q/input/0001437749-16-025027.txt"),
-        //                header_inner_html: String::from(
-        //                    "CONDENSED CONSOLIDATED STATEMENTS OF OPERATIONS AND COMPREHENSIVE LOSS"
-        //                ),
-        //            },
-        //            TestableFiling {
-        //                path: String::from("./examples/10-Q/input/0001004434-17-000011.txt"),
-        //                header_inner_html: String::from("CONSOLIDATED STATEMENTS OF INCOME"),
-        //            },
-        //            TestableFiling {
-        //                path: String::from("./examples/10-Q/input/0001185185-16-005721.txt"),
-        //                header_inner_html: String::from("CONSOLIDATED STATEMENTS OF OPERATIONS"),
-        //            },
-        //            TestableFiling {
-        //                path: String::from("./examples/10-Q/input/0001437749-16-036870.txt"),
-        //                header_inner_html: String::from(
-        //                    "CONSOLIDATED STATEMENTS OF INCOME AND COMPREHENSIVE INCOME"
-        //                ),
-        //            },
-        //            TestableFiling {
-        //                path: String::from("./examples/10-Q/input/0001193125-16-454777.txt"),
-        //                header_inner_html: String::from("Consolidated Statements of Income "),
-        //            },
-        //            TestableFiling {
-        //                path: String::from("./examples/10-Q/input/0001193125-17-160261.txt"),
-        //                header_inner_html: String::from("CONSOLIDATED STATEMENTS OF OPERATIONS "),
-        //            },
-    //                TestableFiling {
-    //                    path: String::from("./examples/10-Q/input/0001001288-16-000069.txt"),
-    //                    header_inner_html: String::from("Consolidated Condensed Statements of Earnings "),
-    //                },
-                ];
-            }
+                    static ref FILES: Vec<TestableFiling> = vec![
+                      TestableFiling {
+                              path: String::from("./examples/10-Q/input/0001193125-18-037381.txt"),
+                              header_inner_html: String::from("Consolidated Statements of Income (Loss) "),
+                          },
+                        TestableFiling {
+                            path: String::from("./examples/10-Q/input/0001000623-17-000125.txt"),
+                            header_inner_html: String::from("CONDENSED CONSOLIDATED STATEMENTS OF INCOME"),
+                        },
+    //                    TestableFiling {
+    //                        path: String::from("./examples/10-Q/input/0001437749-16-025027.txt"),
+    //                        header_inner_html: String::from(
+    //                            "CONDENSED CONSOLIDATED STATEMENTS OF OPERATIONS AND COMPREHENSIVE LOSS"
+    //                        ),
+    //                    },
+            //            TestableFiling {
+            //                path: String::from("./examples/10-Q/input/0001004434-17-000011.txt"),
+            //                header_inner_html: String::from("CONSOLIDATED STATEMENTS OF INCOME"),
+            //            },
+            //            TestableFiling {
+            //                path: String::from("./examples/10-Q/input/0001185185-16-005721.txt"),
+            //                header_inner_html: String::from("CONSOLIDATED STATEMENTS OF OPERATIONS"),
+            //            },
+            //            TestableFiling {
+            //                path: String::from("./examples/10-Q/input/0001437749-16-036870.txt"),
+            //                header_inner_html: String::from(
+            //                    "CONSOLIDATED STATEMENTS OF INCOME AND COMPREHENSIVE INCOME"
+            //                ),
+            //            },
+            //            TestableFiling {
+            //                path: String::from("./examples/10-Q/input/0001193125-16-454777.txt"),
+            //                header_inner_html: String::from("Consolidated Statements of Income "),
+            //            },
+            //            TestableFiling {
+            //                path: String::from("./examples/10-Q/input/0001193125-17-160261.txt"),
+            //                header_inner_html: String::from("CONSOLIDATED STATEMENTS OF OPERATIONS "),
+            //            },
+        //                TestableFiling {
+        //                    path: String::from("./examples/10-Q/input/0001001288-16-000069.txt"),
+        //                    header_inner_html: String::from("Consolidated Condensed Statements of Earnings "),
+        //                },
+                    ];
+                }
 
     fn get_file_contents(path: &String) -> String {
         let path = Path::new(path.as_str());
