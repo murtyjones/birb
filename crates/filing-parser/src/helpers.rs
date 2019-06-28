@@ -1,15 +1,7 @@
+use aws::s3;
 use core::borrow::{Borrow, BorrowMut};
 use html5ever::rcdom::{Handle, Node, RcDom};
 use std::rc::Rc;
-
-//macro_rules! unwrap_or_return {
-//    ( $e:expr ) => {
-//        match $e {
-//            Ok(x) => x,
-//            Err(_) => return,
-//        }
-//    };
-//}
 
 pub fn same_node(x: &Handle, y: &Handle) -> bool {
     // FIXME: This shouldn't really need to touch the borrow flags, right?

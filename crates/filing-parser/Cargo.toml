@@ -12,3 +12,4 @@ tendril = "*"
 regex = "*"
 lazy_static = "*"
 mac = "*"
+aws = { path = "../aws", version = "*" }

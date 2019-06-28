@@ -6,15 +6,16 @@ edition = "2018"
 
 [workspace]
 members = [
-  "crates/server",
-  "crates/birb-cli",
-  "crates/filing-metadata",
-  "crates/filing-data",
-  "crates/filing-parser",
-  "crates/edgar-worker",
   "crates/app",
+  "crates/aws",
+  "crates/birb-cli",
   "crates/client",
+  "crates/edgar-worker",
+  "crates/filing-data",
+  "crates/filing-metadata",
+  "crates/filing-parser",
   "crates/models",
+  "crates/server",
 ]
 
 [dependencies]

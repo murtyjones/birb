@@ -8,41 +8,18 @@ use std::rc::Weak;
 use html5ever::driver::parse_document;
 use html5ever::rcdom::{Handle, Node, NodeData, RcDom};
 use html5ever::tendril::{SliceExt, TendrilSink};
+use html5ever::tree_builder::Attribute;
 use html5ever::{LocalName, Namespace, Prefix, QualName};
 
 // regex
-use html5ever::tree_builder::Attribute;
-use regex::{Regex, RegexBuilder};
+use crate::regexes::income_statement::INCOME_STATEMENT_HEADER_REGEX;
 use std::ascii::escape_default;
 
 // helpers
 use crate::helpers::get_parent_and_index;
 
-lazy_static! {
-    static ref INCOME_STATEMENT_HEADER_PATTERN: &'static str = r"
-        ^
-        (<b>)*                          # Optional closing tag
-        (condensed)*\s*                 # The word 'condensed' may be at the beginning (before 'consolidated')
-        consolidated\s+                 # 'consolidated '
-        (condensed)*\s*                 # The word 'condensed' may be at the beginning (after 'consolidated')
-        statements\s+                   # 'statements '
-        of\s+                           # 'of '
-        (income|operations|earnings)\s* # 'income' or 'operations' or 'earnings', possibly with a space
-        (\(loss\))*                     # The word '(loss)' may be at the end
-        (and\s+comprehensive\s+loss)*   # The term 'and comprehensive loss' may be at the end
-        (and\s+comprehensive\s+income)* # The term 'and comprehensive income' may be at the end
-        (</b>)*                         # Optional closing tag
-        \s*                             # Optional whitespace
-        $
-    ";
-    static ref INCOME_STATEMENT_HEADER_REGEX: Regex =
-        RegexBuilder::new(&INCOME_STATEMENT_HEADER_PATTERN)
-            .case_insensitive(true)
-            .multi_line(true)
-            .ignore_whitespace(true)
-            .build()
-            .expect("Couldn't build income statement regex!");
-}
+// test files
+use crate::test_files::FILES;
 
 const MAX_LEVELS_UP: i32 = 4;
 // TODO: In the actual rendering of a document, this looks like it should only be a few levels over.
@@ -283,56 +260,6 @@ mod test {
     use std::io::prelude::*;
     use std::path::Path;
 
-    struct TestableFiling {
-        path: String,
-        header_inner_html: String,
-    }
-
-    lazy_static! {
-        static ref FILES: Vec<TestableFiling> = vec![
-            TestableFiling {
-                path: String::from("./examples/10-Q/input/0001193125-18-037381.txt"),
-                header_inner_html: String::from("Consolidated Statements of Income (Loss) "),
-            },
-            TestableFiling {
-                path: String::from("./examples/10-Q/input/0001000623-17-000125.txt"),
-                header_inner_html: String::from("CONDENSED CONSOLIDATED STATEMENTS OF INCOME"),
-            },
-            TestableFiling {
-                path: String::from("./examples/10-Q/input/0001437749-16-025027.txt"),
-                header_inner_html: String::from(
-                    "CONDENSED CONSOLIDATED STATEMENTS OF OPERATIONS AND COMPREHENSIVE LOSS"
-                ),
-            },
-            TestableFiling {
-                path: String::from("./examples/10-Q/input/0001004434-17-000011.txt"),
-                header_inner_html: String::from("CONSOLIDATED STATEMENTS OF INCOME"),
-            },
-            TestableFiling {
-                path: String::from("./examples/10-Q/input/0001185185-16-005721.txt"),
-                header_inner_html: String::from("CONSOLIDATED STATEMENTS OF OPERATIONS"),
-            },
-            TestableFiling {
-                path: String::from("./examples/10-Q/input/0001437749-16-036870.txt"),
-                header_inner_html: String::from(
-                    "CONSOLIDATED STATEMENTS OF INCOME AND COMPREHENSIVE INCOME"
-                ),
-            },
-            TestableFiling {
-                path: String::from("./examples/10-Q/input/0001193125-16-454777.txt"),
-                header_inner_html: String::from("Consolidated Statements of Income "),
-            },
-            TestableFiling {
-                path: String::from("./examples/10-Q/input/0001193125-17-160261.txt"),
-                header_inner_html: String::from("CONSOLIDATED STATEMENTS OF OPERATIONS "),
-            },
-            TestableFiling {
-                path: String::from("./examples/10-Q/input/0001001288-16-000069.txt"),
-                header_inner_html: String::from("CONSOLIDATED CONDENSED STATEMENTS OF EARNINGS"),
-            },
-        ];
-    }
-
     fn get_file_contents(path: &String) -> String {
         let path = Path::new(path.as_str());
         let mut file = File::open(path).expect("Couldn't open file");
@@ -348,14 +275,6 @@ mod test {
         // `parse_document` and supply it with a TreeSink implementation (RcDom).
         let domified_filing = DomifiedFiling::new(filing_contents);
         domified_filing
-    }
-
-    #[test]
-    fn test_income_statement_known_header_regex_examples() {
-        for i in 0..FILES.len() {
-            let file = &FILES[i];
-            assert!(INCOME_STATEMENT_HEADER_REGEX.is_match(&file.header_inner_html));
-        }
     }
 
     #[test]
