@@ -142,10 +142,15 @@ impl DomifiedFiling {
         }
 
         match node.data {
-            NodeData::Element { ref name, .. } => {
+            NodeData::Element {
+                ref name,
+                ref attrs,
+                ..
+            } => {
                 println!("<{}>", &name.local);
                 if &name.local == "table" {
                     self.borrow_mut().income_statement_table_found = true;
+                    self.attach_style_to_header(attrs);
                     return ();
                 }
             }
