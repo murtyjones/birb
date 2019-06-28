@@ -27,7 +27,7 @@ impl Subcommand for Test {
             Test::FilingParser => {
                 run_str_in_bash(
                     r#"
-                    cargo run --bin download_examples
+                    cargo run -p filing-parser --bin download_examples
                     cargo test -p filing-parser
                 "#,
                 )
