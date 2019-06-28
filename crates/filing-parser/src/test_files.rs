@@ -56,5 +56,10 @@ lazy_static! {
             path: String::from("./examples/10-Q/input/0001001288-16-000069.txt"),
             header_inner_html: String::from("CONSOLIDATED CONDENSED STATEMENTS OF EARNINGS"),
         },
+        TestableFiling {
+            s3: String::from("edgar/data/100625/0001493152-17-009297.txt"),
+            path: String::from("./examples/10-Q/input/0001493152-17-009297.txt"),
+            header_inner_html: String::from("Condensed\nStatements of Operations"),
+        },
     ];
 }
