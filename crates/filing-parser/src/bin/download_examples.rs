@@ -11,6 +11,7 @@ pub fn path_exists(file_path: &String) -> bool {
 }
 
 fn write_to_file(file_path: &String, data: Vec<u8>) -> std::io::Result<()> {
+    println!("{:?}", absolute_path);
     let mut pos = 0;
     let mut buffer = File::create(file_path)?;
 
@@ -28,6 +29,7 @@ fn main() {
         let file = &FILES[i];
         if !path_exists(&file.path) {
             let data = s3::get_s3_object(&client, "birb-edgar-filings", file.s3.as_str());
+            println!("{}", data.len());
             write_to_file(&file.path, data);
         }
     }
