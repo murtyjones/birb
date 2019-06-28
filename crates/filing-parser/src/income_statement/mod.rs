@@ -44,7 +44,7 @@ lazy_static! {
             .expect("Couldn't build income statement regex!");
 }
 
-const MAX_LEVELS_UP: i32 = 2;
+const MAX_LEVELS_UP: i32 = 3;
 // TODO: In the actual rendering of a document, this looks like it should only be a few levels over.
 // However when html5ever parses it into a dom, 8 levels over is required. Could just be because of text nodes,
 // but it's worth ensuring that there isn't whitespace or something being converted to a node unneccesarily.
@@ -146,7 +146,7 @@ impl DomifiedFiling {
                 println!("<{}>", &name.local);
                 if &name.local == "table" {
                     self.borrow_mut().income_statement_table_found = true;
-                    return;
+                    return ();
                 }
             }
             _ => {}
@@ -186,7 +186,6 @@ impl DomifiedFiling {
                     &parent,
                     child_index,
                 );
-
                 if self.income_statement_table_found {
                     self.borrow_mut().path_to_income_statement_header_node =
                         Some(path_to_node.clone());
@@ -285,49 +284,49 @@ mod test {
     }
 
     lazy_static! {
-                    static ref FILES: Vec<TestableFiling> = vec![
-                      TestableFiling {
-                              path: String::from("./examples/10-Q/input/0001193125-18-037381.txt"),
-                              header_inner_html: String::from("Consolidated Statements of Income (Loss) "),
-                          },
-                        TestableFiling {
-                            path: String::from("./examples/10-Q/input/0001000623-17-000125.txt"),
-                            header_inner_html: String::from("CONDENSED CONSOLIDATED STATEMENTS OF INCOME"),
-                        },
-    //                    TestableFiling {
-    //                        path: String::from("./examples/10-Q/input/0001437749-16-025027.txt"),
-    //                        header_inner_html: String::from(
-    //                            "CONDENSED CONSOLIDATED STATEMENTS OF OPERATIONS AND COMPREHENSIVE LOSS"
-    //                        ),
-    //                    },
-            //            TestableFiling {
-            //                path: String::from("./examples/10-Q/input/0001004434-17-000011.txt"),
-            //                header_inner_html: String::from("CONSOLIDATED STATEMENTS OF INCOME"),
-            //            },
-            //            TestableFiling {
-            //                path: String::from("./examples/10-Q/input/0001185185-16-005721.txt"),
-            //                header_inner_html: String::from("CONSOLIDATED STATEMENTS OF OPERATIONS"),
-            //            },
-            //            TestableFiling {
-            //                path: String::from("./examples/10-Q/input/0001437749-16-036870.txt"),
-            //                header_inner_html: String::from(
-            //                    "CONSOLIDATED STATEMENTS OF INCOME AND COMPREHENSIVE INCOME"
-            //                ),
-            //            },
-            //            TestableFiling {
-            //                path: String::from("./examples/10-Q/input/0001193125-16-454777.txt"),
-            //                header_inner_html: String::from("Consolidated Statements of Income "),
-            //            },
-            //            TestableFiling {
-            //                path: String::from("./examples/10-Q/input/0001193125-17-160261.txt"),
-            //                header_inner_html: String::from("CONSOLIDATED STATEMENTS OF OPERATIONS "),
-            //            },
-        //                TestableFiling {
-        //                    path: String::from("./examples/10-Q/input/0001001288-16-000069.txt"),
-        //                    header_inner_html: String::from("Consolidated Condensed Statements of Earnings "),
-        //                },
-                    ];
-                }
+                static ref FILES: Vec<TestableFiling> = vec![
+                  TestableFiling {
+                          path: String::from("./examples/10-Q/input/0001193125-18-037381.txt"),
+                          header_inner_html: String::from("Consolidated Statements of Income (Loss) "),
+                      },
+                    TestableFiling {
+                        path: String::from("./examples/10-Q/input/0001000623-17-000125.txt"),
+                        header_inner_html: String::from("CONDENSED CONSOLIDATED STATEMENTS OF INCOME"),
+                    },
+                    TestableFiling {
+                        path: String::from("./examples/10-Q/input/0001437749-16-025027.txt"),
+                        header_inner_html: String::from(
+                            "CONDENSED CONSOLIDATED STATEMENTS OF OPERATIONS AND COMPREHENSIVE LOSS"
+                        ),
+                    },
+        //            TestableFiling {
+        //                path: String::from("./examples/10-Q/input/0001004434-17-000011.txt"),
+        //                header_inner_html: String::from("CONSOLIDATED STATEMENTS OF INCOME"),
+        //            },
+        //            TestableFiling {
+        //                path: String::from("./examples/10-Q/input/0001185185-16-005721.txt"),
+        //                header_inner_html: String::from("CONSOLIDATED STATEMENTS OF OPERATIONS"),
+        //            },
+        //            TestableFiling {
+        //                path: String::from("./examples/10-Q/input/0001437749-16-036870.txt"),
+        //                header_inner_html: String::from(
+        //                    "CONSOLIDATED STATEMENTS OF INCOME AND COMPREHENSIVE INCOME"
+        //                ),
+        //            },
+        //            TestableFiling {
+        //                path: String::from("./examples/10-Q/input/0001193125-16-454777.txt"),
+        //                header_inner_html: String::from("Consolidated Statements of Income "),
+        //            },
+        //            TestableFiling {
+        //                path: String::from("./examples/10-Q/input/0001193125-17-160261.txt"),
+        //                header_inner_html: String::from("CONSOLIDATED STATEMENTS OF OPERATIONS "),
+        //            },
+    //                TestableFiling {
+    //                    path: String::from("./examples/10-Q/input/0001001288-16-000069.txt"),
+    //                    header_inner_html: String::from("Consolidated Condensed Statements of Earnings "),
+    //                },
+                ];
+            }
 
     fn get_file_contents(path: &String) -> String {
         let path = Path::new(path.as_str());
@@ -347,7 +346,7 @@ mod test {
     }
 
     #[test]
-    fn test_income_statement_known_header_examples() {
+    fn test_income_statement_known_header_regex_examples() {
         for i in 0..FILES.len() {
             let file = &FILES[i];
             assert!(INCOME_STATEMENT_HEADER_REGEX.is_match(&file.header_inner_html));
@@ -355,11 +354,15 @@ mod test {
     }
 
     #[test]
-    fn test_income_statement_header_location_is_found() {
+    fn test_income_statement_header_and_table_location_found() {
         for i in 0..FILES.len() {
             let file = &FILES[i];
             let mut domified_filing = make_struct(&file.path);
             domified_filing.start_walker();
+            assert_eq!(
+                domified_filing.income_statement_table_found, true,
+                "There should be a table for each income statement!"
+            );
             assert_ne!(
                 domified_filing.path_to_income_statement_header_node, None,
                 "There should be at least one income statement header in every document!"
