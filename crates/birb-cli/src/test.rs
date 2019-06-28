@@ -5,6 +5,9 @@ pub enum Test {
     /// Test everything
     #[structopt(name = "all")]
     All,
+    /// Test the filing-parser crate
+    #[structopt(name = "parser")]
+    FilingParser,
 }
 
 impl Subcommand for Test {
@@ -16,6 +19,16 @@ impl Subcommand for Test {
                     docker-compose down
                     docker-compose up -d
                     docker-compose run --rm test bash -c "cargo test --all"
+                "#,
+                )
+                .unwrap();
+                Ok(())
+            }
+            Test::FilingParser => {
+                run_str_in_bash(
+                    r#"
+                    cargo run --bin download_examples
+                    cargo test -p filing-parser
                 "#,
                 )
                 .unwrap();
