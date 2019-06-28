@@ -11,9 +11,14 @@ pub fn path_exists(file_path: &String) -> bool {
 }
 
 fn write_to_file(file_path: &String, data: Vec<u8>) -> std::io::Result<()> {
+
+    let relative_path = std::path::PathBuf::from(file_path);
+    let mut absolute_path = std::env::current_dir().expect("Need current dir!");
+    absolute_path.push(relative_path);
+
     println!("{:?}", absolute_path);
     let mut pos = 0;
-    let mut buffer = File::create(file_path)?;
+    let mut buffer = File::create(absolute_path).expect("Couldn't make file");
 
     while pos < data.len() {
         let bytes_written = buffer.write(&data[pos..])?;
