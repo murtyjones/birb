@@ -1,4 +1,3 @@
-use aws::s3;
 use core::borrow::{Borrow, BorrowMut};
 use html5ever::rcdom::{Handle, Node, RcDom};
 use std::rc::Rc;

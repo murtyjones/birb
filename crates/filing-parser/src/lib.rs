@@ -7,7 +7,7 @@ extern crate lazy_static;
 #[macro_use]
 extern crate mac;
 
-mod helpers;
-mod income_statement;
-mod regexes;
-mod test_files;
+pub mod helpers;
+pub mod income_statement;
+pub mod regexes;
+pub mod test_files;
