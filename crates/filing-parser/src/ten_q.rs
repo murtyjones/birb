@@ -77,12 +77,7 @@ impl ProcessedFiling {
         true
     }
 
-    fn _maybe_find_income_statement_table(
-        &mut self,
-        handle: &Handle,
-        parent: &Handle,
-        child_index: i32,
-    ) {
+    fn try_to_find_income_statement(&mut self, handle: &Handle, parent: &Handle, child_index: i32) {
         if !self.has_income_statement_regex(handle) {
             return ();
         };
@@ -107,6 +102,17 @@ impl ProcessedFiling {
                 if self.income_statement_table_node.is_none() {
                     self.offset_node_is_a_table_element(parent, child_index, sibling_index);
                 }
+            }
+        }
+
+        // If table was found, set table header stuff
+        if self.income_statement_table_node.is_some() {
+            self.borrow_mut().income_statement_header_node = Some(handle.clone());
+            match parent.data {
+                NodeData::Element { ref attrs, .. } => {
+                    self.add_red_bg_style(attrs);
+                }
+                _ => panic!("Parent should be an element!"),
             }
         }
     }
@@ -179,19 +185,11 @@ impl ProcessedFiling {
                     get_parent_and_index(handle).expect("Couldn't get parent node and index.");
 
                 // try to find the nearby income statement table
-                self._maybe_find_income_statement_table(handle, &parent, child_index);
+                self.try_to_find_income_statement(handle, &parent, child_index);
 
-                // If a table element was found near to the header, denoate this header as
-                // the table's header and attach some custom styling to it
+                // If header + table was found, exit
                 if self.income_statement_table_node.is_some() {
-                    self.borrow_mut().income_statement_header_node = Some(handle.clone());
-                    match parent.data {
-                        NodeData::Element { ref attrs, .. } => {
-                            self.add_red_bg_style(attrs);
-                        }
-                        _ => panic!("Parent should be an element!"),
-                    }
-                    ()
+                    return ();
                 }
             }
             _ => {}
