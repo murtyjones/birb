@@ -63,7 +63,7 @@ impl ProcessedFiling {
         // TODO add other processing steps here
     }
 
-    fn try_find_income_statement_table(
+    fn _find_income_statement_table(
         &mut self,
         handle: &Handle,
         node_contents: String,
@@ -165,7 +165,7 @@ impl ProcessedFiling {
                 let mut node_contents = String::new();
                 node_contents.push_str(&contents.borrow());
 
-                self.try_find_income_statement_table(handle, node_contents, &parent, child_index);
+                self._find_income_statement_table(handle, node_contents, &parent, child_index);
 
                 if self.income_statement_table_node.is_some() {
                     self.borrow_mut().income_statement_header_node = Some(handle.clone());
