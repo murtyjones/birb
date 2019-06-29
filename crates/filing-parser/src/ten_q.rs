@@ -7,7 +7,7 @@ use std::rc::Weak;
 // html parsing
 use html5ever::driver::parse_document;
 use html5ever::rcdom::{Handle, Node, NodeData, RcDom};
-use html5ever::tendril::{SliceExt, TendrilSink};
+use html5ever::tendril::{SliceExt, StrTendril, TendrilSink};
 use html5ever::tree_builder::Attribute;
 use html5ever::{LocalName, Namespace, Prefix, QualName};
 
@@ -16,7 +16,7 @@ use crate::regexes::income_statement::INCOME_STATEMENT_HEADER_REGEX;
 use std::ascii::escape_default;
 
 // helpers
-use crate::helpers::get_parent_and_index;
+use crate::helpers::{get_parent_and_index, tendril_to_string};
 
 // test files
 use crate::test_files::FILES;
@@ -43,37 +43,50 @@ impl ProcessedFiling {
         };
 
         // Process the filing
-        p_f.process_filing();
+        p_f.process();
 
         // Return the processed document
         p_f
     }
 
+    /// Gets the Node containing the entire parsed document
     fn get_doc(&self) -> Rc<Node> {
         Rc::clone(&self.dom.document)
     }
 
-    fn has_income_statement_header_text(&self, text: &str) -> bool {
-        INCOME_STATEMENT_HEADER_REGEX.is_match(text)
-    }
-
-    fn process_filing(&mut self) {
+    /// Does it all!
+    fn process(&mut self) {
         let doc = self.get_doc();
-        self.find_income_statement_table(&doc);
+        self.maybe_find_income_statement_table(&doc);
         // TODO add other processing steps here
     }
 
-    fn _find_income_statement_table(
+    fn has_income_statement_regex(&self, handle: &Handle) -> bool {
+        match handle.data {
+            NodeData::Text { ref contents } => {
+                let contents = tendril_to_string(contents);
+                // If the node text doesn't match the income statement RegExp, exit
+                if !INCOME_STATEMENT_HEADER_REGEX.is_match(contents.as_str()) {
+                    return false;
+                }
+            }
+            _ => {
+                return false;
+            }
+        }
+        true
+    }
+
+    fn _maybe_find_income_statement_table(
         &mut self,
         handle: &Handle,
-        node_contents: String,
         parent: &Handle,
         child_index: i32,
     ) {
-        // If the node text doesn't match the income statement RegExp, exit
-        if !self.has_income_statement_header_text(&node_contents) {
+        if !self.has_income_statement_regex(handle) {
             return ();
-        }
+        };
+
         let mut parents_and_indexes: Vec<(Rc<Node>, i32)> = vec![(Rc::clone(&parent), child_index)];
 
         // get parents several levels up:
@@ -129,20 +142,22 @@ impl ProcessedFiling {
                 println!("<{}>", &name.local);
                 if &name.local == "table" {
                     self.borrow_mut().income_statement_table_node = Some(Rc::clone(node));
-                    self.attach_style_to_header(attrs);
+                    self.add_red_bg_style(attrs);
                     return ();
                 }
             }
             _ => {}
         }
 
+        /// Iterate through text and node children looking for
+        /// a table element
         for (i, child) in
             node.children
                 .borrow()
                 .iter()
                 .enumerate()
                 .filter(|(_i, child)| match child.data {
-                    NodeData::Text { .. } | NodeData::Element { .. } => true,
+                    NodeData::Element { .. } => true,
                     _ => false,
                 })
         {
@@ -150,10 +165,10 @@ impl ProcessedFiling {
         }
     }
 
-    fn find_income_statement_table(&mut self, handle: &Handle) {
+    fn maybe_find_income_statement_table(&mut self, handle: &Handle) {
         let node = handle;
 
-        // If the income statement was already found, stop walking the DOM
+        // If the income statement was already found, exit
         if self.income_statement_table_node.is_some() {
             return ();
         }
@@ -162,16 +177,17 @@ impl ProcessedFiling {
             NodeData::Text { ref contents } => {
                 let (parent, child_index) =
                     get_parent_and_index(handle).expect("Couldn't get parent node and index.");
-                let mut node_contents = String::new();
-                node_contents.push_str(&contents.borrow());
 
-                self._find_income_statement_table(handle, node_contents, &parent, child_index);
+                // try to find the nearby income statement table
+                self._maybe_find_income_statement_table(handle, &parent, child_index);
 
+                // If a table element was found near to the header, denoate this header as
+                // the table's header and attach some custom styling to it
                 if self.income_statement_table_node.is_some() {
                     self.borrow_mut().income_statement_header_node = Some(handle.clone());
                     match parent.data {
                         NodeData::Element { ref attrs, .. } => {
-                            self.attach_style_to_header(attrs);
+                            self.add_red_bg_style(attrs);
                         }
                         _ => panic!("Parent should be an element!"),
                     }
@@ -191,27 +207,26 @@ impl ProcessedFiling {
                     _ => false,
                 })
         {
-            &self.find_income_statement_table(child);
+            &self.maybe_find_income_statement_table(child);
         }
     }
 
-    fn attach_style_to_header(&mut self, attrs: &RefCell<Vec<Attribute>>) {
-        /*
-         * TODO: Once it's verified that the income statement parser works
-         * correctly, remove the red background styling stuff below
-         * and use a custom id e.g. "x-birb-income-statement-header"
-         */
-
-        // Remove the style attribute if it exists
+    /// Temporary method that attaches styling for visual confrimation.
+    /// eventually this should attach a custom data ID.
+    /// Something like: x-birb-income-statement-header
+    fn add_red_bg_style(&mut self, attrs: &RefCell<Vec<Attribute>>) {
+        // Remove the style attribute if it exists (TODO remove this):
         attrs
             .borrow_mut()
             .retain(|attr| &attr.name.local != "style");
 
-        // Add the custom style attribute
+        // Add the custom style attribute (TODO make this add a custom ID instead):
         let colorizer: Attribute = Attribute {
             name: QualName::new(None, ns!(), local_name!("style")),
             value: "background-color: red;".to_tendril(),
         };
+
+        // Add the new attributes to the element:
         attrs.borrow_mut().push(colorizer);
     }
 }
