@@ -45,6 +45,7 @@ impl ProcessedFiling {
         // Process the filing
         p_f.process_filing();
 
+        // Return the processed document
         p_f
     }
 
@@ -58,8 +59,8 @@ impl ProcessedFiling {
 
     fn process_filing(&mut self) {
         let doc = self.get_doc();
-        let path_to_node = vec![];
-        self._process_filing(&doc, path_to_node);
+        self.find_income_statement_table(&doc);
+        // TODO add other processing steps here
     }
 
     fn try_find_income_statement_table(
@@ -149,7 +150,7 @@ impl ProcessedFiling {
         }
     }
 
-    fn _process_filing(&mut self, handle: &Handle, path_to_node: Vec<i32>) {
+    fn find_income_statement_table(&mut self, handle: &Handle) {
         let node = handle;
 
         // If the income statement was already found, stop walking the DOM
@@ -190,9 +191,7 @@ impl ProcessedFiling {
                     _ => false,
                 })
         {
-            let mut path_to_child_node = path_to_node.clone();
-            path_to_child_node.push(i as i32);
-            &self._process_filing(child, path_to_child_node);
+            &self.find_income_statement_table(child);
         }
     }
 
