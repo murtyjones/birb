@@ -256,12 +256,13 @@ impl DomifiedFiling {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::helpers::get_abs_path;
     use std::fs::File;
     use std::io::prelude::*;
     use std::path::Path;
 
     fn get_file_contents(path: &String) -> String {
-        let path = Path::new(path.as_str());
+        let path = get_abs_path(path);
         let mut file = File::open(path).expect("Couldn't open file");
         let mut contents = String::new();
         file.read_to_string(&mut contents)

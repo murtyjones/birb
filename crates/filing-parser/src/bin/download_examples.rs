@@ -1,22 +1,13 @@
 extern crate filing_parser;
 
 use aws::s3;
+use filing_parser::helpers::{get_abs_path, path_exists};
 use filing_parser::test_files::FILES;
 use std::fs::{metadata, File};
 use std::io::prelude::*;
-use std::path::Path;
-
-pub fn path_exists(file_path: &String) -> bool {
-    Path::new(file_path).exists()
-}
 
 fn write_to_file(file_path: &String, data: Vec<u8>) -> std::io::Result<()> {
-
-    let relative_path = std::path::PathBuf::from(file_path);
-    let mut absolute_path = std::env::current_dir().expect("Need current dir!");
-    absolute_path.push(relative_path);
-
-    println!("{:?}", absolute_path);
+    let absolute_path = get_abs_path(file_path);
     let mut pos = 0;
     let mut buffer = File::create(absolute_path).expect("Couldn't make file");
 
