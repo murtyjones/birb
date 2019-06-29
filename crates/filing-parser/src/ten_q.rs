@@ -27,24 +27,29 @@ const MAX_LEVELS_UP: i32 = 4;
 // but it's worth ensuring that there isn't whitespace or something being converted to a node unneccesarily.
 const MAX_LEVELS_OVER: i32 = 10;
 
-pub struct DomifiedFiling {
+pub struct ProcessedFiling {
     pub dom: RcDom,
     pub income_statement_table_found: bool,
     pub path_to_income_statement_header_node: Option<Vec<i32>>,
-    pub viable_income_statement_header_node: Option<Handle>,
+    pub income_statement_header_node: Option<Handle>,
     pub viable_header_node_has_table_nearby: Option<bool>,
 }
 
 #[allow(dead_code)]
-impl DomifiedFiling {
-    fn new(filing_contents: String) -> DomifiedFiling {
-        DomifiedFiling {
+impl ProcessedFiling {
+    fn new(filing_contents: String) -> ProcessedFiling {
+        let mut p_f = ProcessedFiling {
             dom: parse_document(RcDom::default(), Default::default()).one(filing_contents),
             income_statement_table_found: false,
             path_to_income_statement_header_node: None,
-            viable_income_statement_header_node: None,
+            income_statement_header_node: None,
             viable_header_node_has_table_nearby: None,
-        }
+        };
+
+        // Process the filing
+        p_f.start_walker();
+
+        p_f
     }
 
     fn get_doc(&self) -> Rc<Node> {
@@ -171,6 +176,7 @@ impl DomifiedFiling {
                 if self.income_statement_table_found {
                     self.borrow_mut().path_to_income_statement_header_node =
                         Some(path_to_node.clone());
+                    self.borrow_mut().income_statement_header_node = Some(handle.clone());
                     match parent.data {
                         NodeData::Element { ref attrs, .. } => {
                             self.attach_style_to_header(attrs);
@@ -218,29 +224,10 @@ impl DomifiedFiling {
         };
         attrs.borrow_mut().push(colorizer);
     }
+}
 
-    fn set_viable_income_statement_header_node(&mut self) {
-        match &self.path_to_income_statement_header_node {
-            Some(path) => {
-                let doc = self.get_doc();
-                self.get_node_location(&doc, path.to_owned().borrow_mut());
-            }
-            None => panic!("Can't get income statement node if none was found!"),
-        }
-    }
-
-    fn get_node_location(&mut self, handle: &Handle, path: &[i32]) {
-        if path.len() == 0 {
-            self.borrow_mut().viable_income_statement_header_node = Some(handle.clone());
-            ()
-        } else {
-            let i = &path[0];
-            let child = &handle.children.borrow()[*i as usize];
-            self.get_node_location(child, &path[1..]);
-        }
-    }
-
-    #[cfg(test)]
+#[cfg(test)]
+impl ProcessedFiling {
     fn write_file_contents(&mut self, path: String) {
         let doc: &Rc<Node> = &self.get_doc();
         let buffer = std::fs::File::create(path).expect("Could't create file.");
@@ -270,26 +257,25 @@ mod test {
         contents
     }
 
-    fn make_struct(path: &String) -> DomifiedFiling {
+    fn make_processed_filing(path: &String) -> ProcessedFiling {
         let filing_contents = get_file_contents(path);
         // To parse a string into a tree of nodes, we need to invoke
         // `parse_document` and supply it with a TreeSink implementation (RcDom).
-        let domified_filing = DomifiedFiling::new(filing_contents);
-        domified_filing
+        let processed_filing = ProcessedFiling::new(filing_contents);
+        processed_filing
     }
 
     #[test]
     fn test_income_statement_header_and_table_location_found() {
         for i in 0..FILES.len() {
             let file = &FILES[i];
-            let mut domified_filing = make_struct(&file.path);
-            domified_filing.start_walker();
+            let mut processed_filing = make_processed_filing(&file.path);
             assert_eq!(
-                domified_filing.income_statement_table_found, true,
+                processed_filing.income_statement_table_found, true,
                 "There should be a table for each income statement!"
             );
             assert_ne!(
-                domified_filing.path_to_income_statement_header_node, None,
+                processed_filing.path_to_income_statement_header_node, None,
                 "There should be at least one income statement header in every document!"
             );
         }
@@ -300,16 +286,14 @@ mod test {
         for i in 0..FILES.len() {
             // Arrange
             let file = &FILES[i];
-            let mut domified_filing = make_struct(&file.path);
+            let mut processed_filing = make_processed_filing(&file.path);
             let output_path = String::from(format!("./examples/10-Q/output/{}.html", i));
 
             // Act
-            domified_filing.start_walker();
-            domified_filing.set_viable_income_statement_header_node();
-            domified_filing.write_file_contents(output_path);
+            processed_filing.write_file_contents(output_path);
 
             // Assert
-            let node = domified_filing.viable_income_statement_header_node.unwrap();
+            let node = processed_filing.income_statement_header_node.unwrap();
             match node.data {
                 NodeData::Text { ref contents } => {
                     let mut stringified_contents = String::new();
