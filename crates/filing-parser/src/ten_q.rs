@@ -61,6 +61,85 @@ impl ProcessedFiling {
         // TODO add other processing steps here
     }
 
+    fn maybe_find_income_statement_table(&mut self, handle: &Handle) {
+        let node = handle;
+        // If the income statement was already found, exit
+        if self.income_statement_table_node.is_some() {
+            return ();
+        }
+        // try to find the nearby income statement table
+        self.try_to_find_income_statement(handle);
+        // If header + table was found, exit
+        if self.income_statement_table_node.is_some() {
+            return ();
+        }
+        self.next_iteration(node);
+    }
+
+    fn next_iteration(&mut self, handle: &Handle) {
+        for (i, child) in handle
+            .children
+            .borrow()
+            .iter()
+            .enumerate()
+            .filter(|(_i, child)| match child.data {
+                NodeData::Text { .. } | NodeData::Element { .. } => true,
+                _ => false,
+            })
+        {
+            &self.maybe_find_income_statement_table(child);
+        }
+    }
+
+    fn try_to_find_income_statement(&mut self, handle: &Handle) {
+        match handle.data {
+            NodeData::Text { ref contents } => {
+                let (parent, child_index) =
+                    get_parent_and_index(handle).expect("Couldn't get parent node and index.");
+                if !self.has_income_statement_regex(handle) {
+                    return ();
+                };
+
+                let mut parents_and_indexes: Vec<(Rc<Node>, i32)> =
+                    vec![(Rc::clone(&parent), child_index)];
+
+                // get parents several levels up:
+                for i in 1..=MAX_LEVELS_UP {
+                    let prev_node_index = (i as usize) - 1;
+                    let prev_node = &parents_and_indexes[prev_node_index].0;
+                    parents_and_indexes.push(
+                        get_parent_and_index(prev_node)
+                            .expect("Couldn't get parent node and index."),
+                    );
+                }
+
+                // for each parent, check if a sibling near to the current child is a table element.
+                // if any are, return true.
+                for each in parents_and_indexes {
+                    let parent = &each.0;
+                    let child_index = each.1;
+                    for sibling_index in 1..=MAX_LEVELS_OVER {
+                        if self.income_statement_table_node.is_none() {
+                            self.offset_node_is_a_table_element(parent, child_index, sibling_index);
+                        }
+                    }
+                }
+
+                // If table was found, set table header stuff
+                if self.income_statement_table_node.is_some() {
+                    self.borrow_mut().income_statement_header_node = Some(handle.clone());
+                    match parent.data {
+                        NodeData::Element { ref attrs, .. } => {
+                            self.add_red_bg_style(attrs);
+                        }
+                        _ => panic!("Parent should be an element!"),
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+
     fn has_income_statement_regex(&self, handle: &Handle) -> bool {
         match handle.data {
             NodeData::Text { ref contents } => {
@@ -75,46 +154,6 @@ impl ProcessedFiling {
             }
         }
         true
-    }
-
-    fn try_to_find_income_statement(&mut self, handle: &Handle, parent: &Handle, child_index: i32) {
-        if !self.has_income_statement_regex(handle) {
-            return ();
-        };
-
-        let mut parents_and_indexes: Vec<(Rc<Node>, i32)> = vec![(Rc::clone(&parent), child_index)];
-
-        // get parents several levels up:
-        for i in 1..=MAX_LEVELS_UP {
-            let prev_node_index = (i as usize) - 1;
-            let prev_node = &parents_and_indexes[prev_node_index].0;
-            parents_and_indexes.push(
-                get_parent_and_index(prev_node).expect("Couldn't get parent node and index."),
-            );
-        }
-
-        // for each parent, check if a sibling near to the current child is a table element.
-        // if any are, return true.
-        for each in parents_and_indexes {
-            let parent = &each.0;
-            let child_index = each.1;
-            for sibling_index in 1..=MAX_LEVELS_OVER {
-                if self.income_statement_table_node.is_none() {
-                    self.offset_node_is_a_table_element(parent, child_index, sibling_index);
-                }
-            }
-        }
-
-        // If table was found, set table header stuff
-        if self.income_statement_table_node.is_some() {
-            self.borrow_mut().income_statement_header_node = Some(handle.clone());
-            match parent.data {
-                NodeData::Element { ref attrs, .. } => {
-                    self.add_red_bg_style(attrs);
-                }
-                _ => panic!("Parent should be an element!"),
-            }
-        }
     }
 
     fn offset_node_is_a_table_element(
@@ -168,48 +207,6 @@ impl ProcessedFiling {
                 })
         {
             self.node_is_table_element(child);
-        }
-    }
-
-    fn maybe_find_income_statement_table(&mut self, handle: &Handle) {
-        let node = handle;
-
-        // If the income statement was already found, exit
-        if self.income_statement_table_node.is_some() {
-            return ();
-        }
-
-        match node.data {
-            NodeData::Text { ref contents } => {
-                let (parent, child_index) =
-                    get_parent_and_index(handle).expect("Couldn't get parent node and index.");
-
-                // try to find the nearby income statement table
-                self.try_to_find_income_statement(handle, &parent, child_index);
-
-                // If header + table was found, exit
-                if self.income_statement_table_node.is_some() {
-                    return ();
-                }
-            }
-            _ => {}
-        }
-
-        self.next_iteration(node);
-    }
-
-    fn next_iteration(&mut self, handle: &Handle) {
-        for (i, child) in handle
-            .children
-            .borrow()
-            .iter()
-            .enumerate()
-            .filter(|(_i, child)| match child.data {
-                NodeData::Text { .. } | NodeData::Element { .. } => true,
-                _ => false,
-            })
-        {
-            &self.maybe_find_income_statement_table(child);
         }
     }
 
