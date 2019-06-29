@@ -195,15 +195,19 @@ impl ProcessedFiling {
             _ => {}
         }
 
-        for (i, child) in
-            node.children
-                .borrow()
-                .iter()
-                .enumerate()
-                .filter(|(_i, child)| match child.data {
-                    NodeData::Text { .. } | NodeData::Element { .. } => true,
-                    _ => false,
-                })
+        self.next_iteration(node);
+    }
+
+    fn next_iteration(&mut self, handle: &Handle) {
+        for (i, child) in handle
+            .children
+            .borrow()
+            .iter()
+            .enumerate()
+            .filter(|(_i, child)| match child.data {
+                NodeData::Text { .. } | NodeData::Element { .. } => true,
+                _ => false,
+            })
         {
             &self.maybe_find_income_statement_table(child);
         }
