@@ -29,10 +29,8 @@ const MAX_LEVELS_OVER: i32 = 10;
 
 pub struct ProcessedFiling {
     pub dom: RcDom,
-    pub income_statement_table_found: bool,
-    pub path_to_income_statement_header_node: Option<Vec<i32>>,
+    pub income_statement_table_node: Option<Handle>,
     pub income_statement_header_node: Option<Handle>,
-    pub viable_header_node_has_table_nearby: Option<bool>,
 }
 
 #[allow(dead_code)]
@@ -40,14 +38,12 @@ impl ProcessedFiling {
     fn new(filing_contents: String) -> ProcessedFiling {
         let mut p_f = ProcessedFiling {
             dom: parse_document(RcDom::default(), Default::default()).one(filing_contents),
-            income_statement_table_found: false,
-            path_to_income_statement_header_node: None,
+            income_statement_table_node: None,
             income_statement_header_node: None,
-            viable_header_node_has_table_nearby: None,
         };
 
         // Process the filing
-        p_f.start_walker();
+        p_f.process_filing();
 
         p_f
     }
@@ -60,13 +56,13 @@ impl ProcessedFiling {
         INCOME_STATEMENT_HEADER_REGEX.is_match(text)
     }
 
-    fn start_walker(&mut self) {
+    fn process_filing(&mut self) {
         let doc = self.get_doc();
         let path_to_node = vec![];
-        self.walker(&doc, path_to_node);
+        self._process_filing(&doc, path_to_node);
     }
 
-    fn current_node_is_income_statement_header(
+    fn try_find_income_statement_table(
         &mut self,
         handle: &Handle,
         node_contents: String,
@@ -94,7 +90,7 @@ impl ProcessedFiling {
             let parent = &each.0;
             let child_index = each.1;
             for sibling_index in 1..=MAX_LEVELS_OVER {
-                if !self.income_statement_table_found {
+                if self.income_statement_table_node.is_none() {
                     self.offset_node_is_a_table_element(parent, child_index, sibling_index);
                 }
             }
@@ -119,7 +115,7 @@ impl ProcessedFiling {
     }
 
     fn node_is_table_element(&mut self, node: &Handle) {
-        if self.income_statement_table_found {
+        if self.income_statement_table_node.is_some() {
             return ();
         }
 
@@ -131,7 +127,7 @@ impl ProcessedFiling {
             } => {
                 println!("<{}>", &name.local);
                 if &name.local == "table" {
-                    self.borrow_mut().income_statement_table_found = true;
+                    self.borrow_mut().income_statement_table_node = Some(Rc::clone(node));
                     self.attach_style_to_header(attrs);
                     return ();
                 }
@@ -153,11 +149,11 @@ impl ProcessedFiling {
         }
     }
 
-    fn walker(&mut self, handle: &Handle, path_to_node: Vec<i32>) {
+    fn _process_filing(&mut self, handle: &Handle, path_to_node: Vec<i32>) {
         let node = handle;
 
         // If the income statement was already found, stop walking the DOM
-        if self.income_statement_table_found {
+        if self.income_statement_table_node.is_some() {
             return ();
         }
 
@@ -167,15 +163,10 @@ impl ProcessedFiling {
                     get_parent_and_index(handle).expect("Couldn't get parent node and index.");
                 let mut node_contents = String::new();
                 node_contents.push_str(&contents.borrow());
-                self.current_node_is_income_statement_header(
-                    handle,
-                    node_contents,
-                    &parent,
-                    child_index,
-                );
-                if self.income_statement_table_found {
-                    self.borrow_mut().path_to_income_statement_header_node =
-                        Some(path_to_node.clone());
+
+                self.try_find_income_statement_table(handle, node_contents, &parent, child_index);
+
+                if self.income_statement_table_node.is_some() {
                     self.borrow_mut().income_statement_header_node = Some(handle.clone());
                     match parent.data {
                         NodeData::Element { ref attrs, .. } => {
@@ -201,7 +192,7 @@ impl ProcessedFiling {
         {
             let mut path_to_child_node = path_to_node.clone();
             path_to_child_node.push(i as i32);
-            &self.walker(child, path_to_child_node);
+            &self._process_filing(child, path_to_child_node);
         }
     }
 
@@ -270,13 +261,13 @@ mod test {
         for i in 0..FILES.len() {
             let file = &FILES[i];
             let mut processed_filing = make_processed_filing(&file.path);
-            assert_eq!(
-                processed_filing.income_statement_table_found, true,
+            assert!(
+                processed_filing.income_statement_table_node.is_some(),
                 "There should be a table for each income statement!"
             );
-            assert_ne!(
-                processed_filing.path_to_income_statement_header_node, None,
-                "There should be at least one income statement header in every document!"
+            assert!(
+                processed_filing.income_statement_header_node.is_some(),
+                "There should be a header node for each income statement!"
             );
         }
     }
