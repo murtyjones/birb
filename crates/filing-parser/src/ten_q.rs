@@ -17,16 +17,16 @@ use crate::regexes::income_statement::INCOME_STATEMENT_HEADER_REGEX;
 use std::ascii::escape_default;
 
 // helpers
-use crate::helpers::{get_parent_and_index, tendril_to_string};
+use crate::helpers::{get_parent_and_index, get_parents_and_indexes, tendril_to_string};
 
 // test files
 use crate::test_files::FILES;
 
-const MAX_LEVELS_UP: i32 = 4;
+pub const MAX_LEVELS_UP: i32 = 4;
 // TODO: In the actual rendering of a document, this looks like it should only be a few levels over.
 // However when html5ever parses it into a dom, 8 levels over is required. Could just be because of text nodes,
 // but it's worth ensuring that there isn't whitespace or something being converted to a node unneccesarily.
-const MAX_LEVELS_OVER: i32 = 10;
+pub const MAX_LEVELS_OVER: i32 = 10;
 
 pub struct ProcessedFiling {
     pub dom: RcDom,
@@ -55,7 +55,7 @@ impl ProcessedFiling {
 
         // Process the filing
         let result = p_f.process();
-        if let Err(e) = p_f.process() {
+        if let Err(e) = result {
             return Err(e);
         }
 
@@ -98,7 +98,7 @@ impl ProcessedFiling {
             return ();
         }
         // try to find the nearby income statement table
-        self.try_to_find_income_statement(handle);
+        self.process_income_statement_if_text_node(handle);
         // If header + table was found, exit
         if self.income_statement_table_node.is_some() {
             return ();
@@ -121,52 +121,43 @@ impl ProcessedFiling {
         }
     }
 
-    fn try_to_find_income_statement(&mut self, handle: &Handle) {
-        match handle.data {
-            NodeData::Text { ref contents } => {
-                let (parent, child_index) =
-                    get_parent_and_index(handle).expect("Couldn't get parent node and index.");
-                if !self.has_income_statement_regex(handle) {
-                    return ();
-                };
+    fn process_income_statement_if_text_node(&mut self, handle: &Handle) {
+        if let NodeData::Text { ref contents } = handle.data {
+            self.analyze_node_as_possible_income_statement(handle);
+        }
+    }
 
-                let mut parents_and_indexes: Vec<(Rc<Node>, i32)> =
-                    vec![(Rc::clone(&parent), child_index)];
+    fn analyze_node_as_possible_income_statement(&mut self, handle: &Handle) {
+        if !self.has_income_statement_regex(handle) {
+            return ();
+        };
 
-                // get parents several levels up:
-                for i in 1..=MAX_LEVELS_UP {
-                    let prev_node_index = (i as usize) - 1;
-                    let prev_node = &parents_and_indexes[prev_node_index].0;
-                    parents_and_indexes.push(
-                        get_parent_and_index(prev_node)
-                            .expect("Couldn't get parent node and index."),
-                    );
-                }
+        let (parent, child_index) =
+            get_parent_and_index(handle).expect("Couldn't get parent node and index.");
 
-                // for each parent, check if a sibling near to the current child is a table element.
-                // if any are, return true.
-                for each in parents_and_indexes {
-                    let parent = &each.0;
-                    let child_index = each.1;
-                    for sibling_index in 1..=MAX_LEVELS_OVER {
-                        if self.income_statement_table_node.is_none() {
-                            self.offset_node_is_a_table_element(parent, child_index, sibling_index);
-                        }
-                    }
-                }
+        let parents_and_indexes = get_parents_and_indexes(handle, &parent, child_index);
 
-                // If table was found, set table header stuff
-                if self.income_statement_table_node.is_some() {
-                    self.borrow_mut().income_statement_header_node = Some(handle.clone());
-                    match parent.data {
-                        NodeData::Element { ref attrs, .. } => {
-                            self.add_red_bg_style(attrs);
-                        }
-                        _ => panic!("Parent should be an element!"),
-                    }
+        // for each parent, check if a sibling near to the current child is a table element.
+        // if any are, return true.
+        for each in parents_and_indexes {
+            let parent = &each.0;
+            let child_index = each.1;
+            for sibling_index in 1..=MAX_LEVELS_OVER {
+                if self.income_statement_table_node.is_none() {
+                    self.offset_node_is_a_table_element(parent, child_index, sibling_index);
                 }
             }
-            _ => {}
+        }
+
+        // If table was found, set table header stuff
+        if self.income_statement_table_node.is_some() {
+            self.borrow_mut().income_statement_header_node = Some(handle.clone());
+            match parent.data {
+                NodeData::Element { ref attrs, .. } => {
+                    self.add_red_bg_style(attrs);
+                }
+                _ => panic!("Parent should be an element!"),
+            }
         }
     }
 

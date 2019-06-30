@@ -1,3 +1,4 @@
+use crate::ten_q::MAX_LEVELS_UP;
 use core::borrow::{Borrow, BorrowMut};
 use html5ever::rcdom::{Handle, Node, RcDom};
 use html5ever::tendril::{SliceExt, StrTendril, TendrilSink};
@@ -39,6 +40,25 @@ pub fn get_parent_and_index(target: &Handle) -> Option<(Handle, i32)> {
         }
         None => panic!("No parent!"),
     }
+}
+
+pub fn get_parents_and_indexes(
+    handle: &Handle,
+    immediate_parent: &Handle,
+    child_index: i32,
+) -> Vec<(Rc<Node>, i32)> {
+    let mut parents_and_indexes: Vec<(Rc<Node>, i32)> =
+        vec![(Rc::clone(&immediate_parent), child_index)];
+
+    // get parents several levels up:
+    for i in 1..=MAX_LEVELS_UP {
+        let prev_node_index = (i as usize) - 1;
+        let prev_node = &parents_and_indexes[prev_node_index].0;
+        parents_and_indexes
+            .push(get_parent_and_index(prev_node).expect("Couldn't get parent node and index."));
+    }
+
+    parents_and_indexes
 }
 
 pub fn tendril_to_string(text: &RefCell<StrTendril>) -> String {
