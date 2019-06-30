@@ -42,13 +42,11 @@ pub fn get_parent_and_index(target: &Handle) -> Option<(Handle, i32)> {
     }
 }
 
-pub fn get_parents_and_indexes(
-    handle: &Handle,
-    immediate_parent: &Handle,
-    child_index: i32,
-) -> Vec<(Rc<Node>, i32)> {
-    let mut parents_and_indexes: Vec<(Rc<Node>, i32)> =
-        vec![(Rc::clone(&immediate_parent), child_index)];
+pub fn get_parents_and_indexes(handle: &Handle) -> Vec<(Rc<Node>, i32)> {
+    let immediate_parent_and_index =
+        get_parent_and_index(handle).expect("Should have an immediate parent!");
+    // Seed the vector with the immediate parent to make the loop logic below work well.
+    let mut parents_and_indexes: Vec<(Rc<Node>, i32)> = vec![immediate_parent_and_index];
 
     // get parents several levels up:
     for i in 1..=MAX_LEVELS_UP {

@@ -17,7 +17,7 @@ use crate::regexes::income_statement::INCOME_STATEMENT_HEADER_REGEX;
 use std::ascii::escape_default;
 
 // helpers
-use crate::helpers::{get_parent_and_index, get_parents_and_indexes, tendril_to_string};
+use crate::helpers::{get_parents_and_indexes, tendril_to_string};
 
 // test files
 use crate::test_files::FILES;
@@ -132,16 +132,13 @@ impl ProcessedFiling {
             return ();
         };
 
-        let (parent, child_index) =
-            get_parent_and_index(handle).expect("Couldn't get parent node and index.");
-
-        let parents_and_indexes = get_parents_and_indexes(handle, &parent, child_index);
+        let parents_and_indexes = get_parents_and_indexes(handle);
 
         // for each parent, check if a sibling near to the current child is a table element.
         // if any are, return true.
-        for each in parents_and_indexes {
-            let parent = &each.0;
-            let child_index = each.1;
+        for each in &parents_and_indexes {
+            let parent = &Rc::clone(&each.0);
+            let child_index = each.1.clone();
             for sibling_index in 1..=MAX_LEVELS_OVER {
                 if self.income_statement_table_node.is_none() {
                     self.offset_node_is_a_table_element(parent, child_index, sibling_index);
@@ -149,10 +146,11 @@ impl ProcessedFiling {
             }
         }
 
-        // If table was found, set table header stuff
+        // If table was found, attach TEMPORARY red background to immediate parent
         if self.income_statement_table_node.is_some() {
             self.borrow_mut().income_statement_header_node = Some(handle.clone());
-            match parent.data {
+            let immediate_parent = &parents_and_indexes[0].0;
+            match immediate_parent.data {
                 NodeData::Element { ref attrs, .. } => {
                     self.add_red_bg_style(attrs);
                 }
