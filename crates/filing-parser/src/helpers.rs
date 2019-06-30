@@ -2,6 +2,7 @@ use crate::ten_q::MAX_LEVELS_UP;
 use core::borrow::{Borrow, BorrowMut};
 use html5ever::rcdom::{Handle, Node, NodeData, RcDom};
 use html5ever::tendril::{SliceExt, StrTendril, TendrilSink};
+use html5ever::{LocalName, QualName};
 use markup5ever::Attribute;
 use std::cell::RefCell;
 use std::path::{Path, PathBuf};
@@ -75,5 +76,16 @@ pub fn add_attribute(handle: &Handle, new_attr: Attribute, strip_attr: Option<&'
             attrs.borrow_mut().push(new_attr);
         }
         _ => panic!("Node should be an element!"),
+    }
+}
+
+pub fn create_x_birb_attr(name: &'static str) -> Attribute {
+    Attribute {
+        name: QualName::new(
+            None,
+            ns!(),
+            LocalName::from("x-birb-income-statement-table"),
+        ),
+        value: "".to_tendril(),
     }
 }
