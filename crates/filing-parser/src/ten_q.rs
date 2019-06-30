@@ -189,23 +189,18 @@ impl ProcessedFiling {
             return ();
         }
 
-        match node.data {
-            NodeData::Element {
-                ref name,
-                ref attrs,
-                ..
-            } => {
-                println!("<{}>", &name.local);
-                if &name.local == "table" {
-                    self.borrow_mut().income_statement_table_node = Some(Rc::clone(node));
-                    return ();
-                }
+        if let NodeData::Element {
+            ref name,
+            ref attrs,
+            ..
+        } = node.data
+        {
+            if &name.local == "table" {
+                self.borrow_mut().income_statement_table_node = Some(Rc::clone(node));
+                return ();
             }
-            _ => {}
         }
 
-        /// Iterate through text and node children looking for
-        /// a table element
         for (i, child) in
             node.children
                 .borrow()
