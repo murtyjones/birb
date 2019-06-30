@@ -66,13 +66,13 @@ pub fn tendril_to_string(text: &RefCell<StrTendril>) -> String {
     converted
 }
 
-pub fn attach_style(handle: &Handle, new_style: Attribute) {
+pub fn add_attribute(handle: &Handle, new_attr: Attribute, strip_attr: Option<&'static str>) {
     match handle.data {
         NodeData::Element { ref attrs, .. } => {
-            attrs
-                .borrow_mut()
-                .retain(|attr| &attr.name.local != "style");
-            attrs.borrow_mut().push(new_style);
+            if let Some(n) = strip_attr {
+                attrs.borrow_mut().retain(|attr| &attr.name.local != n);
+            }
+            attrs.borrow_mut().push(new_attr);
         }
         _ => panic!("Node should be an element!"),
     }

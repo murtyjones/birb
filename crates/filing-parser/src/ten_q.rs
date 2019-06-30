@@ -17,7 +17,7 @@ use crate::regexes::income_statement::INCOME_STATEMENT_HEADER_REGEX;
 use std::ascii::escape_default;
 
 // helpers
-use crate::helpers::{attach_style, get_parents_and_indexes, tendril_to_string};
+use crate::helpers::{add_attribute, get_parents_and_indexes, tendril_to_string};
 
 // test files
 use crate::test_files::FILES;
@@ -149,15 +149,26 @@ impl ProcessedFiling {
         if self.income_statement_table_node.is_some() {
             self.borrow_mut().income_statement_header_node = Some(handle.clone());
             // If table was found, attach TEMPORARY red background to immediate parent
-            // Add the custom style attribute (TODO make this add a custom ID instead):
+            // Add the custom style attribute (TODO remove this eventually):
             let colorizer: Attribute = Attribute {
                 name: QualName::new(None, ns!(), local_name!("style")),
                 value: "background-color: red;".to_tendril(),
             };
             let immediate_parent = &parents_and_indexes[0].0;
             let table_node = &self.income_statement_table_node.as_ref().unwrap();
-            attach_style(immediate_parent, colorizer.clone());
-            attach_style(table_node, colorizer.clone());
+            add_attribute(immediate_parent, colorizer.clone(), Some("style"));
+            add_attribute(table_node, colorizer.clone(), Some("style"));
+
+            // add income statement id
+            let custom_id = Attribute {
+                name: QualName::new(
+                    None,
+                    ns!(),
+                    LocalName::from("x-birb-income-statement-table"),
+                ),
+                value: "".to_tendril(),
+            };
+            add_attribute(table_node, custom_id.clone(), None);
         }
     }
 
