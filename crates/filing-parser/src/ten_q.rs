@@ -146,11 +146,19 @@ impl ProcessedFiling {
             }
         }
 
-        // If table was found, attach TEMPORARY red background to immediate parent
         if self.income_statement_table_node.is_some() {
             self.borrow_mut().income_statement_header_node = Some(handle.clone());
+            // If table was found, attach TEMPORARY red background to immediate parent
             let immediate_parent = &parents_and_indexes[0].0;
             match immediate_parent.data {
+                NodeData::Element { ref attrs, .. } => {
+                    self.add_red_bg_style(attrs);
+                }
+                _ => panic!("Parent should be an element!"),
+            }
+            let table_node = &self.income_statement_table_node;
+
+            match table_node.as_ref().unwrap().data {
                 NodeData::Element { ref attrs, .. } => {
                     self.add_red_bg_style(attrs);
                 }
@@ -189,10 +197,10 @@ impl ProcessedFiling {
             return ();
         }
         let mut sibling = &children[sibling_index_from_parent as usize];
-        self.node_is_table_element(sibling);
+        self.recursive_node_is_table_element(sibling);
     }
 
-    fn node_is_table_element(&mut self, node: &Handle) {
+    fn recursive_node_is_table_element(&mut self, node: &Handle) {
         if self.income_statement_table_node.is_some() {
             return ();
         }
@@ -206,7 +214,6 @@ impl ProcessedFiling {
                 println!("<{}>", &name.local);
                 if &name.local == "table" {
                     self.borrow_mut().income_statement_table_node = Some(Rc::clone(node));
-                    self.add_red_bg_style(attrs);
                     return ();
                 }
             }
@@ -225,14 +232,14 @@ impl ProcessedFiling {
                     _ => false,
                 })
         {
-            self.node_is_table_element(child);
+            self.recursive_node_is_table_element(child);
         }
     }
 
     /// Temporary method that attaches styling for visual confrimation.
     /// eventually this should attach a custom data ID.
     /// Something like: x-birb-income-statement-header
-    fn add_red_bg_style(&mut self, attrs: &RefCell<Vec<Attribute>>) {
+    fn add_red_bg_style(&self, attrs: &RefCell<Vec<Attribute>>) {
         // Remove the style attribute if it exists (TODO remove this):
         attrs
             .borrow_mut()
