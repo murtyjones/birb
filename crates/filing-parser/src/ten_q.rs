@@ -41,14 +41,14 @@ pub enum ProcessingStep {
 }
 
 #[derive(Debug, Fail, PartialEq)]
-enum ProcessingError {
+pub enum ProcessingError {
     #[fail(display = "No income statement found for CIK: {}", cik)]
     NoIncomeStatementFound { cik: String },
 }
 
 #[allow(dead_code)]
 impl ProcessedFiling {
-    fn new(filing_contents: String) -> Result<ProcessedFiling, ProcessingError> {
+    pub fn new(filing_contents: String) -> Result<ProcessedFiling, ProcessingError> {
         let mut p_f = ProcessedFiling {
             dom: parse_document(RcDom::default(), Default::default()).one(filing_contents),
             income_statement_table_node: None,
@@ -243,9 +243,8 @@ impl ProcessedFiling {
     }
 }
 
-#[cfg(test)]
 impl ProcessedFiling {
-    fn write_file_contents(&mut self, path: String) {
+    pub fn write_file_contents(&mut self, path: &String) {
         let doc: &Rc<Node> = &self.get_doc();
         let buffer = std::fs::File::create(path).expect("Could't create file.");
         html5ever::serialize::serialize(
@@ -328,7 +327,7 @@ mod test {
             let output_path = String::from(format!("./examples/10-Q/output/{}.html", i));
 
             // Act
-            processed_filing.write_file_contents(output_path);
+            processed_filing.write_file_contents(&output_path);
 
             // Assert
             let node = processed_filing.income_statement_header_node.unwrap();

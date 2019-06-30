@@ -8,6 +8,7 @@ extern crate lazy_static;
 extern crate mac;
 #[macro_use]
 extern crate failure;
+extern crate rand;
 
 pub mod helpers;
 pub mod regexes;

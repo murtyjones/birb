@@ -13,4 +13,5 @@ tendril = "*"
 regex = "*"
 lazy_static = "*"
 mac = "*"
+rand = "*"
 aws = { path = "../aws", version = "*" }

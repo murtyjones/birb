@@ -2,7 +2,7 @@ use futures::{Future, Stream};
 use rusoto_core::credential::{ChainProvider, InstanceMetadataProvider};
 use rusoto_core::request::HttpClient;
 use rusoto_core::Region;
-use rusoto_s3::{GetObjectRequest, PutObjectRequest, S3Client, S3};
+use rusoto_s3::{GetObjectRequest, ListObjectsRequest, Object, PutObjectRequest, S3Client, S3};
 
 pub fn get_s3_client() -> S3Client {
     let credentials = ChainProvider::new();
@@ -31,4 +31,23 @@ pub fn get_s3_object(client: &S3Client, bucket: &str, filename: &str) -> Vec<u8>
 
     assert!(body.len() > 0);
     body
+}
+
+pub fn list_s3_objects(client: &S3Client, bucket: &str) -> Vec<Object> {
+    let list_req = ListObjectsRequest {
+        bucket: bucket.to_owned(),
+        delimiter: None,
+        encoding_type: None,
+        marker: None,
+        max_keys: None,
+        prefix: None,
+        request_payer: None,
+    };
+
+    let result = client
+        .list_objects(list_req)
+        .sync()
+        .expect("Couldn't list S3 objects");
+
+    result.contents.expect("Bucket should not be empty!")
 }

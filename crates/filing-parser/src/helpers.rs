@@ -5,6 +5,8 @@ use html5ever::tendril::{SliceExt, StrTendril, TendrilSink};
 use html5ever::{LocalName, QualName};
 use markup5ever::Attribute;
 use std::cell::RefCell;
+use std::fs::File;
+use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
@@ -88,4 +90,16 @@ pub fn create_x_birb_attr(name: &'static str) -> Attribute {
         ),
         value: "".to_tendril(),
     }
+}
+
+pub fn write_to_file(file_path: &String, data: Vec<u8>) -> std::io::Result<()> {
+    let absolute_path = get_abs_path(file_path);
+    let mut pos = 0;
+    let mut buffer = File::create(absolute_path).expect("Couldn't make file");
+
+    while pos < data.len() {
+        let bytes_written = buffer.write(&data[pos..])?;
+        pos += bytes_written;
+    }
+    Ok(())
 }
