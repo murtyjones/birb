@@ -6,8 +6,10 @@ extern crate markup5ever;
 extern crate lazy_static;
 #[macro_use]
 extern crate mac;
+#[macro_use]
+extern crate failure;
 
 pub mod helpers;
-pub mod ten_q;
 pub mod regexes;
+pub mod ten_q;
 pub mod test_files;

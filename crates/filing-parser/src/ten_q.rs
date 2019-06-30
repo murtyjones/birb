@@ -1,5 +1,6 @@
 // standard library / core
 use core::borrow::{Borrow, BorrowMut};
+use failure::Error;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::rc::Weak;
@@ -33,9 +34,19 @@ pub struct ProcessedFiling {
     pub income_statement_header_node: Option<Handle>,
 }
 
+pub enum ProcessingStep {
+    IncomeStatement,
+}
+
+#[derive(Debug, Fail, PartialEq)]
+enum ProcessingError {
+    #[fail(display = "No income statement found for CIK: {}", cik)]
+    NoIncomeStatementFound { cik: String },
+}
+
 #[allow(dead_code)]
 impl ProcessedFiling {
-    fn new(filing_contents: String) -> ProcessedFiling {
+    fn new(filing_contents: String) -> Result<ProcessedFiling, ProcessingError> {
         let mut p_f = ProcessedFiling {
             dom: parse_document(RcDom::default(), Default::default()).one(filing_contents),
             income_statement_table_node: None,
@@ -43,10 +54,13 @@ impl ProcessedFiling {
         };
 
         // Process the filing
-        p_f.process();
+        let result = p_f.process();
+        if let Err(e) = p_f.process() {
+            return Err(e);
+        }
 
         // Return the processed document
-        p_f
+        Ok(p_f)
     }
 
     /// Gets the Node containing the entire parsed document
@@ -55,10 +69,26 @@ impl ProcessedFiling {
     }
 
     /// Does it all!
-    fn process(&mut self) {
+    fn process(&mut self) -> Result<(), ProcessingError> {
         let doc = self.get_doc();
-        self.maybe_find_income_statement_table(&doc);
+
+        // Find the income statement
+        self.process_step(&doc, &ProcessingStep::IncomeStatement);
+        if self.income_statement_header_node.is_none() {
+            return Err(ProcessingError::NoIncomeStatementFound {
+                cik: String::from("fake"),
+            });
+        }
         // TODO add other processing steps here
+        Ok(())
+    }
+
+    fn process_step(&mut self, handle: &Handle, s: &ProcessingStep) {
+        match s {
+            ProcessingStep::IncomeStatement => {
+                self.maybe_find_income_statement_table(handle);
+            }
+        }
     }
 
     fn maybe_find_income_statement_table(&mut self, handle: &Handle) {
@@ -73,10 +103,10 @@ impl ProcessedFiling {
         if self.income_statement_table_node.is_some() {
             return ();
         }
-        self.next_iteration(node);
+        self.next_iteration(node, &ProcessingStep::IncomeStatement);
     }
 
-    fn next_iteration(&mut self, handle: &Handle) {
+    fn next_iteration(&mut self, handle: &Handle, s: &ProcessingStep) {
         for (i, child) in handle
             .children
             .borrow()
@@ -87,7 +117,7 @@ impl ProcessedFiling {
                 _ => false,
             })
         {
-            &self.maybe_find_income_statement_table(child);
+            &self.process_step(child, &s);
         }
     }
 
@@ -266,7 +296,28 @@ mod test {
         // To parse a string into a tree of nodes, we need to invoke
         // `parse_document` and supply it with a TreeSink implementation (RcDom).
         let processed_filing = ProcessedFiling::new(filing_contents);
-        processed_filing
+        match processed_filing {
+            Ok(p_f) => p_f,
+            Err(e) => {
+                panic!("{}", e);
+            }
+        }
+    }
+
+    #[test]
+    fn test_should_err_when_no_income_statement_found() {
+        let fake_html = String::from("<html></html>");
+        // this will panic:
+        let processed_filing = ProcessedFiling::new(fake_html);
+        assert!(processed_filing.is_err());
+        if let Err(e) = processed_filing {
+            assert_eq!(
+                e,
+                ProcessingError::NoIncomeStatementFound {
+                    cik: String::from("fake")
+                }
+            );
+        }
     }
 
     #[test]
