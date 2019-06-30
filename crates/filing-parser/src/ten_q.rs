@@ -17,7 +17,7 @@ use crate::regexes::income_statement::INCOME_STATEMENT_HEADER_REGEX;
 use std::ascii::escape_default;
 
 // helpers
-use crate::helpers::{get_parents_and_indexes, tendril_to_string};
+use crate::helpers::{attach_style, get_parents_and_indexes, tendril_to_string};
 
 // test files
 use crate::test_files::FILES;
@@ -149,21 +149,15 @@ impl ProcessedFiling {
         if self.income_statement_table_node.is_some() {
             self.borrow_mut().income_statement_header_node = Some(handle.clone());
             // If table was found, attach TEMPORARY red background to immediate parent
+            // Add the custom style attribute (TODO make this add a custom ID instead):
+            let colorizer: Attribute = Attribute {
+                name: QualName::new(None, ns!(), local_name!("style")),
+                value: "background-color: red;".to_tendril(),
+            };
             let immediate_parent = &parents_and_indexes[0].0;
-            match immediate_parent.data {
-                NodeData::Element { ref attrs, .. } => {
-                    self.add_red_bg_style(attrs);
-                }
-                _ => panic!("Parent should be an element!"),
-            }
-            let table_node = &self.income_statement_table_node;
-
-            match table_node.as_ref().unwrap().data {
-                NodeData::Element { ref attrs, .. } => {
-                    self.add_red_bg_style(attrs);
-                }
-                _ => panic!("Parent should be an element!"),
-            }
+            let table_node = &self.income_statement_table_node.as_ref().unwrap();
+            attach_style(immediate_parent, colorizer.clone());
+            attach_style(table_node, colorizer.clone());
         }
     }
 
@@ -234,25 +228,6 @@ impl ProcessedFiling {
         {
             self.recursive_node_is_table_element(child);
         }
-    }
-
-    /// Temporary method that attaches styling for visual confrimation.
-    /// eventually this should attach a custom data ID.
-    /// Something like: x-birb-income-statement-header
-    fn add_red_bg_style(&self, attrs: &RefCell<Vec<Attribute>>) {
-        // Remove the style attribute if it exists (TODO remove this):
-        attrs
-            .borrow_mut()
-            .retain(|attr| &attr.name.local != "style");
-
-        // Add the custom style attribute (TODO make this add a custom ID instead):
-        let colorizer: Attribute = Attribute {
-            name: QualName::new(None, ns!(), local_name!("style")),
-            value: "background-color: red;".to_tendril(),
-        };
-
-        // Add the new attributes to the element:
-        attrs.borrow_mut().push(colorizer);
     }
 }
 

@@ -1,7 +1,8 @@
 use crate::ten_q::MAX_LEVELS_UP;
 use core::borrow::{Borrow, BorrowMut};
-use html5ever::rcdom::{Handle, Node, RcDom};
+use html5ever::rcdom::{Handle, Node, NodeData, RcDom};
 use html5ever::tendril::{SliceExt, StrTendril, TendrilSink};
+use markup5ever::Attribute;
 use std::cell::RefCell;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
@@ -63,4 +64,16 @@ pub fn tendril_to_string(text: &RefCell<StrTendril>) -> String {
     let mut converted = String::new();
     converted.push_str(&text.borrow());
     converted
+}
+
+pub fn attach_style(handle: &Handle, new_style: Attribute) {
+    match handle.data {
+        NodeData::Element { ref attrs, .. } => {
+            attrs
+                .borrow_mut()
+                .retain(|attr| &attr.name.local != "style");
+            attrs.borrow_mut().push(new_style);
+        }
+        _ => panic!("Node should be an element!"),
+    }
 }
