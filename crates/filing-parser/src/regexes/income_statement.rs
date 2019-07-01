@@ -9,6 +9,7 @@ lazy_static! {
     static ref INCOME_STATEMENT_HEADER_PATTERN: &'static str = r"
         ^
         (<b>)*                          # Optional closing tag
+        (unaudited)*\s*                 # 'unaudited ' (optional)
         (condensed)*\s*                 # 'condensed ' (optional)
         (consolidated)*\s*              # 'consolidated ' (optional)
         (condensed)*\s*                 # 'condensed ' (optional after consolidated)

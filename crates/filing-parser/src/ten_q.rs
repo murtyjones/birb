@@ -173,7 +173,6 @@ impl ProcessedFiling {
                     let value = &RefCell::new(attr.value.clone());
                     let matching_attr = &MATCHING_ATTRIBUTES[j];
                     let name_matches = &attr.name.local == matching_attr.name;
-                    print!("{}=\"{}\"\n", &attr.name.local, tendril_to_string(value));
                     let value_matches = tendril_to_string(value) == matching_attr.value;
                     if name_matches && value_matches {
                         return true;

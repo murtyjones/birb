@@ -13,7 +13,12 @@ fn main() {
     let random_object_key = data[i].key.as_ref().expect("Object should have a key!");
     println!("Random object to process: {:?}", &random_object_key);
     let object = s3::get_s3_object(&client, BUCKET, random_object_key);
-    let mut processed = ProcessedFiling::new(String::from_utf8(object).unwrap()).unwrap();
+    let contents = String::from_utf8(object).unwrap();
+    if contents.contains("    10-K") {
+        println!("10-K, skipping");
+        return ();
+    }
+    let mut processed = ProcessedFiling::new(contents).unwrap();
     let path = String::from("examples/10-Q/input/wow.html");
     processed.write_file_contents(&path);
     println!("Done");
