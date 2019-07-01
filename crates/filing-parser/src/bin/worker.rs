@@ -19,7 +19,7 @@ fn main() {
         return ();
     }
     let mut processed = ProcessedFiling::new(contents).unwrap();
-    let path = String::from("examples/10-Q/input/wow.html");
+    let path = String::from("examples/10-Q/output/wow.html");
     processed.write_file_contents(&path);
     println!("Done");
 }
