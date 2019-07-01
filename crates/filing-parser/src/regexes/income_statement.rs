@@ -34,12 +34,15 @@ lazy_static! {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::test_files::MatchType;
 
     #[test]
     fn test_income_statement_known_header_regex_examples() {
         for i in 0..FILES.len() {
             let file = &FILES[i];
-            assert!(INCOME_STATEMENT_HEADER_REGEX.is_match(&file.header_inner_html));
+            if file.match_type == MatchType::Regex {
+                assert!(INCOME_STATEMENT_HEADER_REGEX.is_match(&file.header_inner_html));
+            }
         }
     }
 }

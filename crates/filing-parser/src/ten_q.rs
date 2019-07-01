@@ -12,7 +12,8 @@ use html5ever::tendril::{SliceExt, StrTendril, TendrilSink};
 use html5ever::tree_builder::Attribute;
 use html5ever::{LocalName, Namespace, Prefix, QualName};
 
-// regex
+// regex / text matching
+use crate::matching_attributes::MATCHING_ATTRIBUTES;
 use crate::regexes::income_statement::INCOME_STATEMENT_HEADER_REGEX;
 use std::ascii::escape_default;
 
@@ -100,7 +101,7 @@ impl ProcessedFiling {
             return ();
         }
         // try to find the nearby income statement table
-        self.process_income_statement_if_text_node(handle);
+        self.process_income_statement_if_matching_node_type(handle);
         // If header + table was found, exit
         if self.income_statement_table_node.is_some() {
             return ();
@@ -123,14 +124,17 @@ impl ProcessedFiling {
         }
     }
 
-    fn process_income_statement_if_text_node(&mut self, handle: &Handle) {
-        if let NodeData::Text { ref contents } = handle.data {
-            self.analyze_node_as_possible_income_statement(handle);
+    fn process_income_statement_if_matching_node_type(&mut self, handle: &Handle) {
+        match handle.data {
+            NodeData::Text { .. } | NodeData::Element { .. } => {
+                self.analyze_node_as_possible_income_statement(handle);
+            }
+            _ => {}
         }
     }
 
     fn analyze_node_as_possible_income_statement(&mut self, handle: &Handle) {
-        if !self.has_income_statement_regex(handle) {
+        if !self.hueristical_income_statement_content_match(handle) {
             return ();
         };
 
@@ -151,20 +155,33 @@ impl ProcessedFiling {
         self.maybe_attach_income_statement_attributes(handle, parents_and_indexes);
     }
 
-    fn has_income_statement_regex(&self, handle: &Handle) -> bool {
-        match handle.data {
-            NodeData::Text { ref contents } => {
-                let contents = tendril_to_string(contents);
-                // If the node text doesn't match the income statement RegExp, exit
-                if !INCOME_STATEMENT_HEADER_REGEX.is_match(contents.as_str()) {
-                    return false;
-                }
-            }
-            _ => {
-                return false;
+    fn hueristical_income_statement_content_match(&self, handle: &Handle) -> bool {
+        // if a text node with matching regex, return true
+        if let NodeData::Text { ref contents } = handle.data {
+            let contents = tendril_to_string(contents);
+            if INCOME_STATEMENT_HEADER_REGEX.is_match(contents.as_str()) {
+                return true;
             }
         }
-        true
+
+        // if an element node with matching attributes, return true
+        if let NodeData::Element { ref attrs, .. } = handle.data {
+            let length = attrs.borrow().len();
+            for i in 0..length {
+                let attr: &Attribute = &attrs.borrow()[i];
+                for j in 0..MATCHING_ATTRIBUTES.len() {
+                    let value = &RefCell::new(attr.value.clone());
+                    let matching_attr = &MATCHING_ATTRIBUTES[j];
+                    let name_matches = &attr.name.local == matching_attr.name;
+                    print!("{}=\"{}\"\n", &attr.name.local, tendril_to_string(value));
+                    let value_matches = tendril_to_string(value) == matching_attr.value;
+                    if name_matches && value_matches {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     fn offset_node_is_a_table_element(
@@ -260,6 +277,7 @@ impl ProcessedFiling {
 mod test {
     use super::*;
     use crate::helpers::get_abs_path;
+    use crate::test_files::MatchType;
     use std::fs::File;
     use std::io::prelude::*;
     use std::path::Path;
@@ -289,7 +307,6 @@ mod test {
     #[test]
     fn test_should_err_when_no_income_statement_found() {
         let fake_html = String::from("<html></html>");
-        // this will panic:
         let processed_filing = ProcessedFiling::new(fake_html);
         assert!(processed_filing.is_err());
         if let Err(e) = processed_filing {
@@ -319,25 +336,27 @@ mod test {
     }
 
     #[test]
-    fn test_income_statement_header_location_is_correct() {
+    fn test_income_statement_header_regex_is_correct() {
         for i in 0..FILES.len() {
             // Arrange
             let file = &FILES[i];
-            let mut processed_filing = make_processed_filing(&file.path);
-            let output_path = String::from(format!("./examples/10-Q/output/{}.html", i));
+            if file.match_type == MatchType::Regex {
+                let mut processed_filing = make_processed_filing(&file.path);
+                let output_path = String::from(format!("./examples/10-Q/output/{}.html", i));
 
-            // Act
-            processed_filing.write_file_contents(&output_path);
+                // Act
+                processed_filing.write_file_contents(&output_path);
 
-            // Assert
-            let node = processed_filing.income_statement_header_node.unwrap();
-            match node.data {
-                NodeData::Text { ref contents } => {
-                    let mut stringified_contents = String::new();
-                    stringified_contents.push_str(&contents.borrow());
-                    assert_eq!(file.header_inner_html, stringified_contents);
+                // Assert
+                let node = processed_filing.income_statement_header_node.unwrap();
+                match node.data {
+                    NodeData::Text { ref contents } => {
+                        let mut stringified_contents = String::new();
+                        stringified_contents.push_str(&contents.borrow());
+                        assert_eq!(file.header_inner_html, stringified_contents);
+                    }
+                    _ => panic!("Wrong node!"),
                 }
-                _ => panic!("Wrong node!"),
             }
         }
     }

@@ -11,6 +11,7 @@ extern crate failure;
 extern crate rand;
 
 pub mod helpers;
+pub mod matching_attributes;
 pub mod regexes;
 pub mod ten_q;
 pub mod test_files;
