@@ -324,6 +324,8 @@ mod test {
         for i in 0..FILES.len() {
             let file = &FILES[i];
             let mut processed_filing = make_processed_filing(&file.path);
+            let output_path = String::from(format!("./examples/10-Q/output/{}.html", i));
+            processed_filing.write_file_contents(&output_path);
             assert!(
                 processed_filing.income_statement_table_node.is_some(),
                 "There should be a table for each income statement!"
@@ -343,11 +345,6 @@ mod test {
             if file.match_type == MatchType::Regex {
                 let mut processed_filing = make_processed_filing(&file.path);
                 let output_path = String::from(format!("./examples/10-Q/output/{}.html", i));
-
-                // Act
-                processed_filing.write_file_contents(&output_path);
-
-                // Assert
                 let node = processed_filing.income_statement_header_node.unwrap();
                 match node.data {
                     NodeData::Text { ref contents } => {

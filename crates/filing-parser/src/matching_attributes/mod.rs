@@ -6,6 +6,6 @@ pub struct MatchingAttribute {
 lazy_static! {
     pub static ref MATCHING_ATTRIBUTES: Vec<MatchingAttribute> = vec![MatchingAttribute {
         name: "name",
-        value: "CASH_FLOWS",
+        value: "STATEMENTS_OF_OPERATIONS",
     }];
 }
