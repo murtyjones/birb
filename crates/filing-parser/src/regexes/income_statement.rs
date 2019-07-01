@@ -15,6 +15,7 @@ lazy_static! {
         (condensed)*\s*                 # 'condensed ' (optional after consolidated)
         statement(s)*\s+                # 'statement' or 'statements' (with optional whitespace)
         of\s+                           # 'of '
+        (comprehensive)*\s*             # 'comprehensive ' (optional)
         (income|operations|earnings)\s* # 'income' or 'operations' or 'earnings', possibly with a space
         (\(loss\))*                     # The word '(loss)' may be at the end
         (and\s+comprehensive\s+loss)*   # The term 'and comprehensive loss' may be at the end
