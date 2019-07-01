@@ -6,12 +6,13 @@ pub enum MatchType {
 
 #[derive(Debug)]
 pub struct TestableFiling {
-    pub s3: String,
-    pub path: String,
-    pub header_inner_html: String,
+    pub s3: String, // TODO static string
+    pub path: String, // TODO static string
+    pub header_inner_html: String, // TODO static string
     pub match_type: MatchType,
 }
 
+// TODO convert to function
 lazy_static! {
     pub static ref FILES: Vec<TestableFiling> = vec![
         TestableFiling {
