@@ -8,20 +8,20 @@ use crate::test_files::FILES;
 lazy_static! {
     static ref INCOME_STATEMENT_HEADER_PATTERN: &'static str = r"
         ^
-        (<b>)*                          # Optional closing tag
-        (unaudited)*\s*                 # 'unaudited ' (optional)
-        (condensed)*\s*                 # 'condensed ' (optional)
-        (consolidated)*\s*              # 'consolidated ' (optional)
-        (condensed)*\s*                 # 'condensed ' (optional after consolidated)
-        statement(s)*\s+                # 'statement' or 'statements' (with optional whitespace)
-        of\s+                           # 'of '
-        (comprehensive)*\s*             # 'comprehensive ' (optional)
-        (income|operations|earnings)\s* # 'income' or 'operations' or 'earnings', possibly with a space
-        (\(loss\))*                     # The word '(loss)' may be at the end
-        (and\s+comprehensive\s+loss)*   # The term 'and comprehensive loss' may be at the end
-        (and\s+comprehensive\s+income)* # The term 'and comprehensive income' may be at the end
-        (</b>)*                         # Optional closing tag
-        \s*                             # Optional whitespace
+        (<b>)*                                # Optional closing tag
+        (unaudited)*\s*                       # 'unaudited ' (optional)
+        (condensed)*\s*                       # 'condensed ' (optional)
+        (consolidated)*\s*                    # 'consolidated ' (optional)
+        (condensed)*\s*                       # 'condensed ' (optional after consolidated)
+        statement(s)*\s+                      # 'statement' or 'statements' (with optional whitespace)
+        of\s+                                 # 'of '
+        (comprehensive)*\s*                   # 'comprehensive ' (optional)
+        (income|operations|earnings|loss)\s*  # 'income' or 'operations' or 'earnings' or 'loss', possibly with a space
+        (\(loss\))*                           # The word '(loss)' may be at the end
+        (and\s+comprehensive\s+loss)*         # The term 'and comprehensive loss' may be at the end
+        (and\s+comprehensive\s+income)*       # The term 'and comprehensive income' may be at the end
+        (</b>)*                               # Optional closing tag
+        \s*                                   # Optional whitespace
         $
     ";
     pub static ref INCOME_STATEMENT_HEADER_REGEX: Regex =
@@ -45,6 +45,18 @@ mod test {
             if file.match_type == MatchType::Regex {
                 assert!(INCOME_STATEMENT_HEADER_REGEX.is_match(&file.header_inner_html));
             }
+        }
+    }
+
+    /// test examples for which we dont want to process the full doc
+    #[test]
+    fn test_further_examples() {
+        let examples = vec![
+            "unaudited condensed statements of operations",
+            "CONSOLIDATED STATEMENTS OF COMPREHENSIVE LOSS",
+        ];
+        for each in examples {
+            assert!(INCOME_STATEMENT_HEADER_REGEX.is_match(each));
         }
     }
 }
