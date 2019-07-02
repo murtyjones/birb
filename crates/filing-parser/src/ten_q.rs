@@ -25,7 +25,7 @@ use crate::helpers::{
 // test files
 use crate::test_files::get_files;
 
-pub const MAX_LEVELS_UP: i32 = 5;
+pub const MAX_LEVELS_UP: i32 = 4;
 // TODO: In the actual rendering of a document, this looks like it should only be a few levels over.
 // However when html5ever parses it into a dom, 8 levels over is required. Could just be because of text nodes,
 // but it's worth ensuring that there isn't whitespace or something being converted to a node unneccesarily.
