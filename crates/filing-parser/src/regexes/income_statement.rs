@@ -3,7 +3,7 @@ use regex::{Regex, RegexBuilder};
 use std::ascii::escape_default;
 
 // test files
-use crate::test_files::FILES;
+use crate::test_files::get_files;
 
 lazy_static! {
     static ref INCOME_STATEMENT_HEADER_PATTERN: &'static str = r"
@@ -40,10 +40,10 @@ mod test {
 
     #[test]
     fn test_income_statement_known_header_regex_examples() {
-        for i in 0..FILES.len() {
-            let file = &FILES[i];
+        let files = get_files();
+        for file in files {
             if file.match_type == MatchType::Regex {
-                assert!(INCOME_STATEMENT_HEADER_REGEX.is_match(&file.header_inner_html));
+                assert!(INCOME_STATEMENT_HEADER_REGEX.is_match(&file.header_inner_html.unwrap()));
             }
         }
     }

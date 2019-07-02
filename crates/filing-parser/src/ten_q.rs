@@ -13,7 +13,7 @@ use html5ever::tree_builder::Attribute;
 use html5ever::{LocalName, Namespace, Prefix, QualName};
 
 // regex / text matching
-use crate::matching_attributes::MATCHING_ATTRIBUTES;
+use crate::matching_attributes::get_matching_attrs;
 use crate::regexes::income_statement::INCOME_STATEMENT_HEADER_REGEX;
 use std::ascii::escape_default;
 
@@ -23,9 +23,9 @@ use crate::helpers::{
 };
 
 // test files
-use crate::test_files::FILES;
+use crate::test_files::get_files;
 
-pub const MAX_LEVELS_UP: i32 = 4;
+pub const MAX_LEVELS_UP: i32 = 5;
 // TODO: In the actual rendering of a document, this looks like it should only be a few levels over.
 // However when html5ever parses it into a dom, 8 levels over is required. Could just be because of text nodes,
 // but it's worth ensuring that there isn't whitespace or something being converted to a node unneccesarily.
@@ -144,6 +144,7 @@ impl ProcessedFiling {
         // if any are, return true.
         for each in &parents_and_indexes {
             let parent = &Rc::clone(&each.0);
+            self.node_is_table_element(parent);
             let child_index = each.1.clone();
             for sibling_index in 1..=MAX_LEVELS_OVER {
                 if self.income_statement_table_node.is_none() {
@@ -169,9 +170,10 @@ impl ProcessedFiling {
             let length = attrs.borrow().len();
             for i in 0..length {
                 let attr: &Attribute = &attrs.borrow()[i];
-                for j in 0..MATCHING_ATTRIBUTES.len() {
+                let matching_attrs = get_matching_attrs();
+                for j in 0..matching_attrs.len() {
                     let value = &RefCell::new(attr.value.clone());
-                    let matching_attr = &MATCHING_ATTRIBUTES[j];
+                    let matching_attr = &matching_attrs[j];
                     let name_matches = &attr.name.local == matching_attr.name;
                     let value_matches = tendril_to_string(value) == matching_attr.value;
                     if name_matches && value_matches {
@@ -205,17 +207,7 @@ impl ProcessedFiling {
             return ();
         }
 
-        if let NodeData::Element {
-            ref name,
-            ref attrs,
-            ..
-        } = node.data
-        {
-            if &name.local == "table" {
-                self.borrow_mut().income_statement_table_node = Some(Rc::clone(node));
-                return ();
-            }
-        }
+        self.node_is_table_element(node);
 
         for (i, child) in
             node.children
@@ -228,6 +220,20 @@ impl ProcessedFiling {
                 })
         {
             self.recursive_node_is_table_element(child);
+        }
+    }
+
+    fn node_is_table_element(&mut self, handle: &Handle) {
+        if let NodeData::Element {
+            ref name,
+            ref attrs,
+            ..
+        } = handle.data
+        {
+            if &name.local == "table" {
+                self.borrow_mut().income_statement_table_node = Some(Rc::clone(handle));
+                return ();
+            }
         }
     }
 
@@ -281,8 +287,8 @@ mod test {
     use std::io::prelude::*;
     use std::path::Path;
 
-    fn get_file_contents(path: &String) -> String {
-        let path = get_abs_path(path);
+    fn get_file_contents(path: &'static str) -> String {
+        let path = get_abs_path(&String::from(path));
         let mut file = File::open(path).expect("Couldn't open file");
         let mut contents = String::new();
         file.read_to_string(&mut contents)
@@ -290,7 +296,7 @@ mod test {
         contents
     }
 
-    fn make_processed_filing(path: &String) -> ProcessedFiling {
+    fn make_processed_filing(path: &'static str) -> ProcessedFiling {
         let filing_contents = get_file_contents(path);
         // To parse a string into a tree of nodes, we need to invoke
         // `parse_document` and supply it with a TreeSink implementation (RcDom).
@@ -320,9 +326,9 @@ mod test {
 
     #[test]
     fn test_income_statement_header_and_table_location_found() {
-        for i in 0..FILES.len() {
-            let file = &FILES[i];
-            let mut processed_filing = make_processed_filing(&file.path);
+        let files = get_files();
+        for (i, file) in files.iter().enumerate() {
+            let mut processed_filing = make_processed_filing(file.path);
             let output_path = String::from(format!("./examples/10-Q/output/{}.html", i));
             processed_filing.write_file_contents(&output_path);
             assert!(
@@ -338,18 +344,18 @@ mod test {
 
     #[test]
     fn test_income_statement_header_regex_is_correct() {
-        for i in 0..FILES.len() {
+        let files = get_files();
+        for (i, file) in files.iter().enumerate() {
             // Arrange
-            let file = &FILES[i];
             if file.match_type == MatchType::Regex {
-                let mut processed_filing = make_processed_filing(&file.path);
+                let mut processed_filing = make_processed_filing(file.path);
                 let output_path = String::from(format!("./examples/10-Q/output/{}.html", i));
                 let node = processed_filing.income_statement_header_node.unwrap();
                 match node.data {
                     NodeData::Text { ref contents } => {
                         let mut stringified_contents = String::new();
                         stringified_contents.push_str(&contents.borrow());
-                        assert_eq!(file.header_inner_html, stringified_contents);
+                        assert_eq!(file.header_inner_html.unwrap(), stringified_contents);
                     }
                     _ => panic!("Wrong node!"),
                 }

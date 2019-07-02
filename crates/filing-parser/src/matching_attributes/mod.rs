@@ -3,9 +3,16 @@ pub struct MatchingAttribute {
     pub value: &'static str,
 }
 
-lazy_static! {
-    pub static ref MATCHING_ATTRIBUTES: Vec<MatchingAttribute> = vec![MatchingAttribute {
-        name: "name",
-        value: "STATEMENTS_OF_OPERATIONS",
-    }];
+pub fn get_matching_attrs() -> Vec<MatchingAttribute> {
+    vec![
+        MatchingAttribute {
+            name: "name",
+            value: "STATEMENTS_OF_OPERATIONS",
+        },
+        MatchingAttribute {
+            // pertains to 0001185185-16-005747.html
+            name: "name",
+            value: "Operations",
+        },
+    ]
 }
