@@ -14,7 +14,8 @@ use html5ever::{LocalName, Namespace, Prefix, QualName};
 
 // regex / text matching
 use crate::matching_attributes::get_matching_attrs;
-use crate::regexes::income_statement::INCOME_STATEMENT_HEADER_REGEX;
+use crate::regexes::income_statement_header::INCOME_STATEMENT_HEADER_REGEX;
+use crate::regexes::months_ended::MONTHS_ENDED_REGEX;
 use std::ascii::escape_default;
 
 // helpers
@@ -144,7 +145,7 @@ impl ProcessedFiling {
         // if any are, return true.
         for each in &parents_and_indexes {
             let parent = &Rc::clone(&each.0);
-            self.node_is_table_element(parent);
+            self.node_is_income_statement_table_element(parent);
             let child_index = each.1.clone();
             for sibling_index in 1..=MAX_LEVELS_OVER {
                 if self.income_statement_table_node.is_none() {
@@ -199,15 +200,15 @@ impl ProcessedFiling {
             return ();
         }
         let mut sibling = &children[sibling_index_from_parent as usize];
-        self.recursive_node_is_table_element(sibling);
+        self.recursive_node_is_income_statement_table_element(sibling);
     }
 
-    fn recursive_node_is_table_element(&mut self, node: &Handle) {
+    fn recursive_node_is_income_statement_table_element(&mut self, node: &Handle) {
         if self.income_statement_table_node.is_some() {
             return ();
         }
 
-        self.node_is_table_element(node);
+        self.node_is_income_statement_table_element(node);
 
         for (i, child) in
             node.children
@@ -219,21 +220,48 @@ impl ProcessedFiling {
                     _ => false,
                 })
         {
-            self.recursive_node_is_table_element(child);
+            self.recursive_node_is_income_statement_table_element(child);
         }
     }
 
-    fn node_is_table_element(&mut self, handle: &Handle) {
+    fn node_is_income_statement_table_element(&mut self, handle: &Handle) {
+        // the text content "months" ended somewhere in it.
+        //
         if let NodeData::Element {
             ref name,
             ref attrs,
             ..
         } = handle.data
         {
+            // Should be named <table ...>
             if &name.local == "table" {
+                self.has_months_ended(handle);
+                if self.borrow_mut().income_statement_table_node.is_some() {
+                    return ();
+                }
+            }
+        }
+    }
+
+    fn has_months_ended(&mut self, handle: &Handle) {
+        if let NodeData::Text { ref contents, .. } = handle.data {
+            let contents_str = tendril_to_string(contents);
+            if MONTHS_ENDED_REGEX.is_match(contents_str.as_ref()) {
                 self.borrow_mut().income_statement_table_node = Some(Rc::clone(handle));
                 return ();
             }
+        }
+        for (i, child) in handle
+            .children
+            .borrow()
+            .iter()
+            .enumerate()
+            .filter(|(_i, child)| match child.data {
+                NodeData::Element { .. } | NodeData::Text { .. } => true,
+                _ => false,
+            })
+        {
+            return self.has_months_ended(child);
         }
     }
 
