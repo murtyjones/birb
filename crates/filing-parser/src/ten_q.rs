@@ -20,7 +20,8 @@ use crate::helpers::{
     add_attribute, create_x_birb_attr, get_parents_and_indexes, tendril_to_string,
 };
 
-pub const MAX_LEVELS_UP: i32 = 4;
+// see: https://www.sec.gov/Archives/edgar/data/1016708/000147793217005546/0001477932-17-005546.txt
+pub const MAX_LEVELS_UP: i32 = 5;
 // TODO: In the actual rendering of a document, this looks like it should only be a few levels over.
 // However when html5ever parses it into a dom, 8 levels over is required. Could just be because of text nodes,
 // but it's worth ensuring that there isn't whitespace or something being converted to a node unneccesarily.

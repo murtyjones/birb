@@ -18,6 +18,7 @@ lazy_static! {
         (and\s+comprehensive\s+income)*       # The term 'and comprehensive income' may be at the end
         (</b>)*                               # Optional closing tag
         \s*                                   # Optional whitespace
+        (\(unaudited\)\s*)*                   # Optional '(unaudited)'
         $
     ";
     pub static ref INCOME_STATEMENT_HEADER_REGEX: Regex =
@@ -50,7 +51,8 @@ mod test {
     fn test_further_examples() {
         let examples = vec![
             "unaudited condensed statements of operations",
-            "CONSOLIDATED STATEMENTS OF COMPREHENSIVE LOSS",
+            "CONLIDATED STATEMENTS OF COMPREHENSIVE LOSS",
+            "CONSOLIDATED STATEMENTS OF OPERATIONS (UNAUDITED)",
         ];
         for each in examples {
             assert!(INCOME_STATEMENT_HEADER_REGEX.is_match(each));
