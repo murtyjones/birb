@@ -1,9 +1,5 @@
 // regex
 use regex::{Regex, RegexBuilder};
-use std::ascii::escape_default;
-
-// test files
-use crate::test_files::get_files;
 
 lazy_static! {
     static ref INCOME_STATEMENT_HEADER_PATTERN: &'static str = r"
@@ -36,6 +32,7 @@ lazy_static! {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::test_files::get_files;
     use crate::test_files::MatchType;
 
     #[test]
