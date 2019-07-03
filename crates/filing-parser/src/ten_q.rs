@@ -133,7 +133,6 @@ impl ProcessedFiling {
         if !self.hueristical_income_statement_content_match(handle) {
             return ();
         };
-        println!("{:?}", handle.data);
         let parents_and_indexes = get_parents_and_indexes(handle);
 
         // for each parent, check if a sibling near to the current child is a table element.
@@ -233,10 +232,8 @@ impl ProcessedFiling {
     }
 
     fn has_months_ended(&mut self, handle: &Handle) {
-        //        println!("{:?}", handle.children);
         if let NodeData::Text { ref contents, .. } = handle.data {
             let contents_str = tendril_to_string(contents);
-            println!("{:?}", contents_str);
             // if any of these are discovered, we can feel confident that
             // we have found a table that contains income statement
             // data, as opposed to some other table, and mark the
