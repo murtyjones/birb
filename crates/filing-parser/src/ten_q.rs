@@ -232,6 +232,15 @@ impl ProcessedFiling {
         }
     }
 
+    // instructions for turning this into a cleaner recursive function:
+    // add an argument: remaining_observables: Vec<&Handle>.
+    // then, for the current "handle" argument:
+    //     if the regex passes (whether there are remaining_observables or not), return true.
+    //     if the regex fails:
+    //          add any children of this handle to the remaining_observables, then:
+    //              if there are no remaining observables, return false.
+    //              if there remaining observables, pop the first one and make a recursive call with
+    //              it and with the remaining_observables vector
     fn has_income_statement_table_content(&mut self, handle: &Handle) {
         if let NodeData::Text { ref contents, .. } = handle.data {
             let contents_str = tendril_to_string(contents);
