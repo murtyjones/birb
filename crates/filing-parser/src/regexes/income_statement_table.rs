@@ -6,6 +6,7 @@ lazy_static! {
         Weighted\s+
         average\s+
         (number\s+of\s+)*
+        (common\s+)*
         shares\s+
         outstanding
         .*
@@ -40,6 +41,7 @@ mod test {
             "Weighted average number of shares outstanding",
             "Weighted average shares outstanding - basic",
             "Weighted average shares outstanding - diluted",
+            "Weighted average common shares outstanding:",
         ];
         for each in match_examples {
             assert!(SHARES_OUTSTANDING_REGEX.is_match(each));
