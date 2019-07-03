@@ -94,5 +94,11 @@ pub fn get_files() -> Vec<TestableFiling> {
             header_inner_html: None,
             match_type: MatchType::Attribute,
         },
+        TestableFiling {
+            s3: "edgar/data/1029581/0001213900-16-018375.txt",
+            path: "examples/10-Q/input/0001213900-16-018375.txt",
+            header_inner_html: Some("CONDENSED\nCONSOLIDATED STATEMENTS OF OPERATIONS"),
+            match_type: MatchType::Regex,
+        },
     ];
 }

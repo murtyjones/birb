@@ -1,30 +1,24 @@
 // standard library / core
-use core::borrow::{Borrow, BorrowMut};
-use failure::Error;
+use core::borrow::BorrowMut;
 use std::cell::RefCell;
 use std::rc::Rc;
-use std::rc::Weak;
 
 // html parsing
 use html5ever::driver::parse_document;
 use html5ever::rcdom::{Handle, Node, NodeData, RcDom};
-use html5ever::tendril::{SliceExt, StrTendril, TendrilSink};
+use html5ever::tendril::{SliceExt, TendrilSink};
 use html5ever::tree_builder::Attribute;
-use html5ever::{LocalName, Namespace, Prefix, QualName};
+use html5ever::QualName;
 
 // regex / text matching
 use crate::matching_attributes::get_matching_attrs;
 use crate::regexes::income_statement_header::INCOME_STATEMENT_HEADER_REGEX;
-use crate::regexes::months_ended::MONTHS_ENDED_REGEX;
-use std::ascii::escape_default;
+use crate::regexes::income_statement_table::{MONTHS_ENDED_REGEX, SHARES_OUTSTANDING_REGEX};
 
 // helpers
 use crate::helpers::{
     add_attribute, create_x_birb_attr, get_parents_and_indexes, tendril_to_string,
 };
-
-// test files
-use crate::test_files::get_files;
 
 pub const MAX_LEVELS_UP: i32 = 4;
 // TODO: In the actual rendering of a document, this looks like it should only be a few levels over.
@@ -36,6 +30,7 @@ pub struct ProcessedFiling {
     pub dom: RcDom,
     pub income_statement_table_node: Option<Handle>,
     pub income_statement_header_node: Option<Handle>,
+    pub income_statement_table_heuristic_found: bool,
 }
 
 pub enum ProcessingStep {
@@ -55,6 +50,7 @@ impl ProcessedFiling {
             dom: parse_document(RcDom::default(), Default::default()).one(filing_contents),
             income_statement_table_node: None,
             income_statement_header_node: None,
+            income_statement_table_heuristic_found: false,
         };
 
         // Process the filing
@@ -111,12 +107,11 @@ impl ProcessedFiling {
     }
 
     fn next_iteration(&mut self, handle: &Handle, s: &ProcessingStep) {
-        for (i, child) in handle
+        for child in handle
             .children
             .borrow()
             .iter()
-            .enumerate()
-            .filter(|(_i, child)| match child.data {
+            .filter(|child| match child.data {
                 NodeData::Text { .. } | NodeData::Element { .. } => true,
                 _ => false,
             })
@@ -138,7 +133,7 @@ impl ProcessedFiling {
         if !self.hueristical_income_statement_content_match(handle) {
             return ();
         };
-
+        println!("{:?}", handle.data);
         let parents_and_indexes = get_parents_and_indexes(handle);
 
         // for each parent, check if a sibling near to the current child is a table element.
@@ -199,7 +194,7 @@ impl ProcessedFiling {
         if (children.len() as i32 - 1) < sibling_index_from_parent as i32 {
             return ();
         }
-        let mut sibling = &children[sibling_index_from_parent as usize];
+        let sibling = &children[sibling_index_from_parent as usize];
         self.recursive_node_is_income_statement_table_element(sibling);
     }
 
@@ -210,33 +205,27 @@ impl ProcessedFiling {
 
         self.node_is_income_statement_table_element(node);
 
-        for (i, child) in
-            node.children
-                .borrow()
-                .iter()
-                .enumerate()
-                .filter(|(_i, child)| match child.data {
-                    NodeData::Element { .. } => true,
-                    _ => false,
-                })
+        for child in node
+            .children
+            .borrow()
+            .iter()
+            .filter(|child| match child.data {
+                NodeData::Element { .. } => true,
+                _ => false,
+            })
         {
             self.recursive_node_is_income_statement_table_element(child);
         }
     }
 
     fn node_is_income_statement_table_element(&mut self, handle: &Handle) {
-        // the text content "months" ended somewhere in it.
-        //
-        if let NodeData::Element {
-            ref name,
-            ref attrs,
-            ..
-        } = handle.data
-        {
+        if let NodeData::Element { ref name, .. } = handle.data {
             // Should be named <table ...>
             if &name.local == "table" {
+                // should have "months ended" somewhere in the table
                 self.has_months_ended(handle);
-                if self.borrow_mut().income_statement_table_node.is_some() {
+                if self.borrow_mut().income_statement_table_heuristic_found {
+                    self.borrow_mut().income_statement_table_node = Some(Rc::clone(handle));
                     return ();
                 }
             }
@@ -244,24 +233,29 @@ impl ProcessedFiling {
     }
 
     fn has_months_ended(&mut self, handle: &Handle) {
+        //        println!("{:?}", handle.children);
         if let NodeData::Text { ref contents, .. } = handle.data {
             let contents_str = tendril_to_string(contents);
-            if MONTHS_ENDED_REGEX.is_match(contents_str.as_ref()) {
-                self.borrow_mut().income_statement_table_node = Some(Rc::clone(handle));
+            println!("{:?}", contents_str);
+            // if any of these are discovered, we can feel confident that
+            // we have found a table that contains income statement
+            // data, as opposed to some other table, and mark the
+            if MONTHS_ENDED_REGEX.is_match(contents_str.as_ref())
+                || SHARES_OUTSTANDING_REGEX.is_match(contents_str.as_ref())
+            {
+                self.borrow_mut().income_statement_table_heuristic_found = true;
                 return ();
             }
         }
-        for (i, child) in handle
+        for child in handle
             .children
             .borrow()
             .iter()
-            .enumerate()
-            .filter(|(_i, child)| match child.data {
-                NodeData::Element { .. } | NodeData::Text { .. } => true,
-                _ => false,
+            .filter(|child| match child.data {
+                _ => true,
             })
         {
-            return self.has_months_ended(child);
+            self.has_months_ended(child);
         }
     }
 
@@ -313,7 +307,8 @@ mod test {
     use crate::test_files::MatchType;
     use std::fs::File;
     use std::io::prelude::*;
-    use std::path::Path;
+    // test files
+    use crate::test_files::get_files;
 
     fn get_file_contents(path: &'static str) -> String {
         let path = get_abs_path(&String::from(path));
@@ -376,8 +371,7 @@ mod test {
         for (i, file) in files.iter().enumerate() {
             // Arrange
             if file.match_type == MatchType::Regex {
-                let mut processed_filing = make_processed_filing(file.path);
-                let output_path = String::from(format!("./examples/10-Q/output/{}.html", i));
+                let processed_filing = make_processed_filing(file.path);
                 let node = processed_filing.income_statement_header_node.unwrap();
                 match node.data {
                     NodeData::Text { ref contents } => {

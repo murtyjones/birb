@@ -27,8 +27,9 @@ pub fn same_node(x: &Handle, y: &Handle) -> bool {
 }
 
 pub fn get_parent_and_index(target: &Handle) -> Option<(Handle, i32)> {
-    // TODO this will hopefully be fixed soon:
+    // TODO this will hopefully be fixed soon and .get() can be used instead:
     let parent = target.parent.take();
+    target.parent.set(parent.clone());
     match parent {
         Some(n) => {
             let parent = n.upgrade().expect("dangling weak pointer");

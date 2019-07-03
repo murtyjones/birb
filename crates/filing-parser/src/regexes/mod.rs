@@ -1,2 +1,2 @@
 pub mod income_statement_header;
-pub mod months_ended;
+pub mod income_statement_table;
