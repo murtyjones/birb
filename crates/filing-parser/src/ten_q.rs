@@ -13,9 +13,7 @@ use html5ever::QualName;
 // regex / text matching
 use crate::matching_attributes::get_matching_attrs;
 use crate::regexes::income_statement_header::INCOME_STATEMENT_HEADER_REGEX;
-use crate::regexes::income_statement_table::{
-    INTEREST_INCOME_REGEX, MONTHS_ENDED_REGEX, SHARES_OUTSTANDING_REGEX,
-};
+use crate::regexes::income_statement_table::{INTEREST_INCOME_REGEX, SHARES_OUTSTANDING_REGEX};
 
 // helpers
 use crate::helpers::{
@@ -239,8 +237,7 @@ impl ProcessedFiling {
             // if any of these are discovered, we can feel confident that
             // we have found a table that contains income statement
             // data, as opposed to some other table, and mark the
-            if MONTHS_ENDED_REGEX.is_match(contents_str.as_ref())
-                || SHARES_OUTSTANDING_REGEX.is_match(contents_str.as_ref())
+            if SHARES_OUTSTANDING_REGEX.is_match(contents_str.as_ref())
                 || INTEREST_INCOME_REGEX.is_match(contents_str.as_ref())
             {
                 self.borrow_mut().income_statement_table_heuristic_found = true;
