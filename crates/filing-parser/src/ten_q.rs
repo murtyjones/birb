@@ -31,7 +31,6 @@ pub struct ProcessedFiling {
     pub dom: RcDom,
     pub income_statement_table_node: Option<Handle>,
     pub income_statement_header_node: Option<Handle>,
-    pub income_statement_table_heuristic_found: bool,
 }
 
 pub enum ProcessingStep {
@@ -51,7 +50,6 @@ impl ProcessedFiling {
             dom: parse_document(RcDom::default(), Default::default()).one(filing_contents),
             income_statement_table_node: None,
             income_statement_header_node: None,
-            income_statement_table_heuristic_found: false,
         };
 
         // Process the filing
@@ -223,8 +221,7 @@ impl ProcessedFiling {
             // Should be named <table ...>
             if &name.local == "table" {
                 // should have "months ended" somewhere in the table
-                self.has_income_statement_table_content(handle);
-                if self.borrow_mut().income_statement_table_heuristic_found {
+                if self.has_income_statement_table_content(handle, vec![]) {
                     self.borrow_mut().income_statement_table_node = Some(Rc::clone(handle));
                     return ();
                 }
@@ -245,7 +242,7 @@ impl ProcessedFiling {
     // need a default return somewhere to satisfy the compiler so the
     // recursive call might need to live inside of a "while let Some(handle) = remaining_children.pop()..."
     // with the default return coming after
-    fn has_income_statement_table_content(&mut self, handle: &Handle) {
+    fn has_income_statement_table_content(&mut self, handle: &Handle, mut next_nodes: Vec<Handle>) -> bool {
         if let NodeData::Text { ref contents, .. } = handle.data {
             let contents_str = tendril_to_string(contents);
             // if any of these are discovered, we can feel confident that
@@ -256,20 +253,29 @@ impl ProcessedFiling {
                 || INTEREST_INCOME_REGEX.is_match(contents_str.as_ref())
                 || EARNINGS_PER_SHARE_REGEX.is_match(contents_str.as_ref())
             {
-                self.borrow_mut().income_statement_table_heuristic_found = true;
-                return ();
+                return true;
             }
         }
-        for child in handle
+
+        let children = handle
             .children
-            .borrow()
+            .borrow();
+        let children = children
             .iter()
             .filter(|child| match child.data {
                 _ => true,
             })
-        {
-            self.has_income_statement_table_content(child);
+            .map(|child| Rc::clone(child))
+            .collect::<Vec<Rc<Node>>>();
+
+        for each in children {
+            next_nodes.push(each);
         }
+
+        while let Some(n) = next_nodes.pop() {
+            return self.has_income_statement_table_content(&n, next_nodes);
+        }
+        false
     }
 
     fn maybe_attach_income_statement_attributes(

@@ -100,11 +100,11 @@ pub fn get_files() -> Vec<TestableFiling> {
             header_inner_html: Some("CONDENSED\nCONSOLIDATED STATEMENTS OF OPERATIONS"),
             match_type: MatchType::Regex,
         },
-        TestableFiling {
-            s3: "edgar/data/1004980/0001004980-16-000073.txt",
-            path: "examples/10-Q/input/0001004980-16-000073.txt",
-            header_inner_html: Some("CONSOLIDATED STATEMENTS OF INCOME"),
-            match_type: MatchType::Regex,
-        },
+//        TestableFiling {
+//            s3: "edgar/data/1004980/0001004980-16-000073.txt",
+//            path: "examples/10-Q/input/0001004980-16-000073.txt",
+//            header_inner_html: Some("CONSOLIDATED STATEMENTS OF INCOME"),
+//            match_type: MatchType::Regex,
+//        },
     ];
 }
