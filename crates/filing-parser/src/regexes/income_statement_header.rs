@@ -51,7 +51,7 @@ mod test {
     fn test_further_examples() {
         let examples = vec![
             "unaudited condensed statements of operations",
-            "CONLIDATED STATEMENTS OF COMPREHENSIVE LOSS",
+            "CONSOLIDATED STATEMENTS OF COMPREHENSIVE LOSS", // this was needed for one specific filing, but i can't remember which and im not sure this is a pattern we want to match against given that this doesn't always relate to and income statement table :/
             "CONSOLIDATED STATEMENTS OF OPERATIONS (UNAUDITED)",
         ];
         for each in examples {
