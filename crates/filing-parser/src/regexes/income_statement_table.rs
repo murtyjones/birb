@@ -20,6 +20,24 @@ lazy_static! {
 }
 
 lazy_static! {
+    static ref SHARES_USED_PATTERN: &'static str = r"
+        Shares\s+
+        used\s+
+        in\s+
+        per\s+
+        share\s+
+        calculation
+        (:)*
+    ";
+    pub static ref SHARES_USED_REGEX: Regex = RegexBuilder::new(&SHARES_USED_PATTERN)
+        .case_insensitive(true)
+        .multi_line(true)
+        .ignore_whitespace(true)
+        .build()
+        .expect("Couldn't build income statement regex!");
+}
+
+lazy_static! {
     static ref INTEREST_INCOME_PATTERN: &'static str = r"
         interest\s+income
     ";
@@ -49,6 +67,18 @@ mod test {
         let no_match_examples = vec!["average shares"];
         for each in no_match_examples {
             assert!(!SHARES_OUTSTANDING_REGEX.is_match(each));
+        }
+    }
+
+    #[test]
+    fn test_shares_used() {
+        let match_examples = vec!["Shares used in per share calculation:"];
+        for each in match_examples {
+            assert!(SHARES_USED_REGEX.is_match(each));
+        }
+        let no_match_examples = vec!["average shares"];
+        for each in no_match_examples {
+            assert!(!SHARES_USED_REGEX.is_match(each));
         }
     }
 

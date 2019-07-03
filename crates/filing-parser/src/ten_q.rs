@@ -13,7 +13,7 @@ use html5ever::QualName;
 // regex / text matching
 use crate::matching_attributes::get_matching_attrs;
 use crate::regexes::income_statement_header::INCOME_STATEMENT_HEADER_REGEX;
-use crate::regexes::income_statement_table::{INTEREST_INCOME_REGEX, SHARES_OUTSTANDING_REGEX};
+use crate::regexes::income_statement_table::*;
 
 // helpers
 use crate::helpers::{
@@ -222,7 +222,7 @@ impl ProcessedFiling {
             // Should be named <table ...>
             if &name.local == "table" {
                 // should have "months ended" somewhere in the table
-                self.has_months_ended(handle);
+                self.has_income_statement_table_content(handle);
                 if self.borrow_mut().income_statement_table_heuristic_found {
                     self.borrow_mut().income_statement_table_node = Some(Rc::clone(handle));
                     return ();
@@ -231,13 +231,15 @@ impl ProcessedFiling {
         }
     }
 
-    fn has_months_ended(&mut self, handle: &Handle) {
+    fn has_income_statement_table_content(&mut self, handle: &Handle) {
         if let NodeData::Text { ref contents, .. } = handle.data {
             let contents_str = tendril_to_string(contents);
             // if any of these are discovered, we can feel confident that
             // we have found a table that contains income statement
             // data, as opposed to some other table, and mark the
+            println!("{}", contents_str);
             if SHARES_OUTSTANDING_REGEX.is_match(contents_str.as_ref())
+                || SHARES_USED_REGEX.is_match(contents_str.as_ref())
                 || INTEREST_INCOME_REGEX.is_match(contents_str.as_ref())
             {
                 self.borrow_mut().income_statement_table_heuristic_found = true;
@@ -252,7 +254,7 @@ impl ProcessedFiling {
                 _ => true,
             })
         {
-            self.has_months_ended(child);
+            self.has_income_statement_table_content(child);
         }
     }
 
@@ -324,7 +326,7 @@ mod test {
         match processed_filing {
             Ok(p_f) => p_f,
             Err(e) => {
-                panic!("{}", e);
+                panic!("[{}] {}", path, e);
             }
         }
     }
