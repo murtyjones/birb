@@ -237,7 +237,6 @@ impl ProcessedFiling {
             // if any of these are discovered, we can feel confident that
             // we have found a table that contains income statement
             // data, as opposed to some other table, and mark the
-            println!("{}", contents_str);
             if SHARES_OUTSTANDING_REGEX.is_match(contents_str.as_ref())
                 || SHARES_USED_REGEX.is_match(contents_str.as_ref())
                 || INTEREST_INCOME_REGEX.is_match(contents_str.as_ref())
