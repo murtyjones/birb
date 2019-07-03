@@ -3,7 +3,7 @@ use regex::{Regex, RegexBuilder};
 
 lazy_static! {
     static ref SHARES_OUTSTANDING_PATTERN: &'static str = r"
-        Weighted\s+
+        (weighted\s+)*
         average\s+
         (number\s+of\s+)*
         (common\s+)*
@@ -49,6 +49,23 @@ lazy_static! {
         .expect("Couldn't build income statement regex!");
 }
 
+lazy_static! {
+    static ref EARNINGS_PER_SHARE_PATTERN: &'static str = r"
+        (basic and diluted\s+)*
+        (earnings|loss)\s+
+        (\(loss\)\s+)*
+        per\s+
+        share\s*
+        (:)*
+    ";
+    pub static ref EARNINGS_PER_SHARE_REGEX: Regex = RegexBuilder::new(&EARNINGS_PER_SHARE_PATTERN)
+        .case_insensitive(true)
+        .multi_line(true)
+        .ignore_whitespace(true)
+        .build()
+        .expect("Couldn't build income statement regex!");
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -60,6 +77,7 @@ mod test {
             "Weighted average shares outstanding - basic",
             "Weighted average shares outstanding - diluted",
             "Weighted average common shares outstanding:",
+            "Average shares outstanding (basic)",
         ];
         for each in match_examples {
             assert!(SHARES_OUTSTANDING_REGEX.is_match(each));
@@ -91,6 +109,22 @@ mod test {
         let no_match_examples = vec!["interest expense"];
         for each in no_match_examples {
             assert!(!INTEREST_INCOME_REGEX.is_match(each));
+        }
+    }
+
+    #[test]
+    fn test_earnings_per_share() {
+        let match_examples = vec![
+            "Earnings (loss) per share:",
+            "Earnings per share (basic)",
+            "Basic and diluted loss per share",
+        ];
+        for each in match_examples {
+            assert!(EARNINGS_PER_SHARE_REGEX.is_match(each));
+        }
+        let no_match_examples = vec!["net earnings"];
+        for each in no_match_examples {
+            assert!(!EARNINGS_PER_SHARE_REGEX.is_match(each));
         }
     }
 }

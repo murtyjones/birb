@@ -241,6 +241,7 @@ impl ProcessedFiling {
             if SHARES_OUTSTANDING_REGEX.is_match(contents_str.as_ref())
                 || SHARES_USED_REGEX.is_match(contents_str.as_ref())
                 || INTEREST_INCOME_REGEX.is_match(contents_str.as_ref())
+                || EARNINGS_PER_SHARE_REGEX.is_match(contents_str.as_ref())
             {
                 self.borrow_mut().income_statement_table_heuristic_found = true;
                 return ();
