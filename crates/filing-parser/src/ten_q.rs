@@ -119,18 +119,18 @@ impl ProcessedFiling {
         }
     }
 
-    fn process_income_statement_if_matching_node_type(&mut self, handle: &Handle) {
+    fn process_income_statement_if_matching_node_type(&mut self, handle: &Handle) -> bool {
         match handle.data {
             NodeData::Text { .. } | NodeData::Element { .. } => {
-                self.analyze_node_as_possible_income_statement(handle);
+                return self.analyze_node_as_possible_income_statement(handle);
             }
-            _ => {}
+            _ => false,
         }
     }
 
-    fn analyze_node_as_possible_income_statement(&mut self, handle: &Handle) {
+    fn analyze_node_as_possible_income_statement(&mut self, handle: &Handle) -> bool {
         if !self.hueristical_income_statement_content_match(handle) {
-            return ();
+            return false;
         };
         let parents_and_indexes = get_parents_and_indexes(handle);
 
@@ -138,16 +138,19 @@ impl ProcessedFiling {
         // if any are, return true.
         for each in &parents_and_indexes {
             let parent = &Rc::clone(&each.0);
-            self.node_is_income_statement_table_element(parent);
+            if self.node_is_income_statement_table_element(parent) {
+                self.maybe_attach_income_statement_attributes(handle, parents_and_indexes);
+                return true;
+            };
             let child_index = each.1.clone();
             for sibling_index in 1..=MAX_LEVELS_OVER {
-                if self.income_statement_table_node.is_none() {
-                    self.offset_node_is_a_table_element(parent, child_index, sibling_index);
+                if self.offset_node_is_a_table_element(parent, child_index, sibling_index) {
+                    self.maybe_attach_income_statement_attributes(handle, parents_and_indexes);
+                    return true;
                 }
             }
         }
-
-        self.maybe_attach_income_statement_attributes(handle, parents_and_indexes);
+        false
     }
 
     fn hueristical_income_statement_content_match(&self, handle: &Handle) -> bool {
@@ -184,49 +187,63 @@ impl ProcessedFiling {
         parent: &Handle,
         child_index: i32,
         sibling_offset: i32,
-    ) {
+    ) -> bool {
         let sibling_index_from_parent = child_index + sibling_offset;
         let children = &parent.children.borrow();
         // There may not be a sibling at the offset specified, in which case
         // we return "false"
         if (children.len() as i32 - 1) < sibling_index_from_parent as i32 {
-            return ();
+            return false;
         }
         let sibling = &children[sibling_index_from_parent as usize];
-        self.recursive_node_is_income_statement_table_element(sibling);
+        self.recursive_node_is_income_statement_table_element(sibling, vec![])
     }
 
-    fn recursive_node_is_income_statement_table_element(&mut self, node: &Handle) {
+    fn recursive_node_is_income_statement_table_element(
+        &mut self,
+        handle: &Handle,
+        mut next_nodes: Vec<Handle>,
+    ) -> bool {
         if self.income_statement_table_node.is_some() {
-            return ();
+            return true;
         }
 
-        self.node_is_income_statement_table_element(node);
+        if self.node_is_income_statement_table_element(handle) {
+            return true;
+        }
 
-        for child in node
-            .children
-            .borrow()
+        let children = handle.children.borrow();
+        let children = children
             .iter()
             .filter(|child| match child.data {
                 NodeData::Element { .. } => true,
                 _ => false,
             })
-        {
-            self.recursive_node_is_income_statement_table_element(child);
+            .map(|child| Rc::clone(child))
+            .collect::<Vec<Rc<Node>>>();
+
+        for each in children {
+            next_nodes.push(each);
         }
+
+        while let Some(n) = next_nodes.pop() {
+            return self.recursive_node_is_income_statement_table_element(&n, next_nodes);
+        }
+        false
     }
 
-    fn node_is_income_statement_table_element(&mut self, handle: &Handle) {
+    fn node_is_income_statement_table_element(&mut self, handle: &Handle) -> bool {
         if let NodeData::Element { ref name, .. } = handle.data {
             // Should be named <table ...>
             if &name.local == "table" {
                 // should have "months ended" somewhere in the table
                 if self.has_income_statement_table_content(handle, vec![]) {
                     self.borrow_mut().income_statement_table_node = Some(Rc::clone(handle));
-                    return ();
+                    return true;
                 }
             }
         }
+        false
     }
 
     // instructions for turning this into a cleaner recursive function:
@@ -242,7 +259,11 @@ impl ProcessedFiling {
     // need a default return somewhere to satisfy the compiler so the
     // recursive call might need to live inside of a "while let Some(handle) = remaining_children.pop()..."
     // with the default return coming after
-    fn has_income_statement_table_content(&mut self, handle: &Handle, mut next_nodes: Vec<Handle>) -> bool {
+    fn has_income_statement_table_content(
+        &mut self,
+        handle: &Handle,
+        mut next_nodes: Vec<Handle>,
+    ) -> bool {
         if let NodeData::Text { ref contents, .. } = handle.data {
             let contents_str = tendril_to_string(contents);
             // if any of these are discovered, we can feel confident that
@@ -257,9 +278,7 @@ impl ProcessedFiling {
             }
         }
 
-        let children = handle
-            .children
-            .borrow();
+        let children = handle.children.borrow();
         let children = children
             .iter()
             .filter(|child| match child.data {
