@@ -88,19 +88,7 @@ impl ProcessedFiling {
             if self.process_income_statement_if_matching_node_type(&node) {
                 return true;
             }
-            let children = node
-                .children
-                .borrow()
-                .iter()
-                .filter(|child| match child.data {
-                    NodeData::Text { .. } | NodeData::Element { .. } => true,
-                    _ => false,
-                })
-                .map(|child| Rc::clone(child))
-                .collect::<Vec<Rc<Node>>>();
-            for each in children {
-                q.push(each);
-            }
+            q.append(&mut self.get_children(&node));
         }
         false
     }
@@ -124,7 +112,7 @@ impl ProcessedFiling {
         // if any are, return true.
         for each in &parents_and_indexes {
             let parent = &Rc::clone(&each.0);
-            if self.node_is_income_statement_table_element(parent) {
+            if self._node_is_income_statement_table_element(parent) {
                 self.maybe_attach_income_statement_attributes(handle, parents_and_indexes);
                 return true;
             };
@@ -181,49 +169,31 @@ impl ProcessedFiling {
         if (children.len() as i32 - 1) < sibling_index_from_parent as i32 {
             return false;
         }
-        let sibling = &children[sibling_index_from_parent as usize];
-        self.recursive_node_is_income_statement_table_element(sibling, vec![])
+        let sibling = Rc::clone(&children[sibling_index_from_parent as usize]);
+        self.node_or_child_is_income_statement_table_element(sibling)
     }
 
-    fn recursive_node_is_income_statement_table_element(
-        &mut self,
-        handle: &Handle,
-        mut next_nodes: Vec<Handle>,
-    ) -> bool {
-        if self.income_statement_table_node.is_some() {
-            return true;
-        }
+    fn node_or_child_is_income_statement_table_element(&mut self, handle: Handle) -> bool {
+        let mut q = vec![handle];
+        while let Some(node) = q.pop() {
+            if self.income_statement_table_node.is_some() {
+                return true;
+            }
 
-        if self.node_is_income_statement_table_element(handle) {
-            return true;
-        }
-
-        let children = handle.children.borrow();
-        let children = children
-            .iter()
-            .filter(|child| match child.data {
-                NodeData::Element { .. } => true,
-                _ => false,
-            })
-            .map(|child| Rc::clone(child))
-            .collect::<Vec<Rc<Node>>>();
-
-        for each in children {
-            next_nodes.push(each);
-        }
-
-        while let Some(n) = next_nodes.pop() {
-            return self.recursive_node_is_income_statement_table_element(&n, next_nodes);
+            if self._node_is_income_statement_table_element(&node) {
+                return true;
+            }
+            q.append(&mut self.get_children(&node));
         }
         false
     }
 
-    fn node_is_income_statement_table_element(&mut self, handle: &Handle) -> bool {
+    fn _node_is_income_statement_table_element(&mut self, handle: &Handle) -> bool {
         if let NodeData::Element { ref name, .. } = handle.data {
             // Should be named <table ...>
             if &name.local == "table" {
                 // should have "months ended" somewhere in the table
-                if self.has_income_statement_table_content(handle, vec![]) {
+                if self.has_income_statement_table_content(Rc::clone(handle)) {
                     self.borrow_mut().income_statement_table_node = Some(Rc::clone(handle));
                     return true;
                 }
@@ -232,53 +202,24 @@ impl ProcessedFiling {
         false
     }
 
-    // instructions for turning this into a cleaner recursive function:
-    // make it return a bool.
-    // add an argument: remaining_children: Vec<&Handle>.
-    // then, for the current "handle" argument:
-    //     if the regex passes (whether there are remaining_children or not), return true.
-    //     if the regex fails:
-    //          add any children of this handle to the remaining_children, then:
-    //              if there are no remaining observables, return false.
-    //              if there remaining observables, pop the first one and make a recursive call with
-    //              it and with the remaining_children vector
-    // need a default return somewhere to satisfy the compiler so the
-    // recursive call might need to live inside of a "while let Some(handle) = remaining_children.pop()..."
-    // with the default return coming after
-    fn has_income_statement_table_content(
-        &mut self,
-        handle: &Handle,
-        mut next_nodes: Vec<Handle>,
-    ) -> bool {
-        if let NodeData::Text { ref contents, .. } = handle.data {
-            let contents_str = tendril_to_string(contents);
-            // if any of these are discovered, we can feel confident that
-            // we have found a table that contains income statement
-            // data, as opposed to some other table, and mark the
-            if SHARES_OUTSTANDING_REGEX.is_match(contents_str.as_ref())
-                || SHARES_USED_REGEX.is_match(contents_str.as_ref())
-                || INTEREST_INCOME_REGEX.is_match(contents_str.as_ref())
-                || EARNINGS_PER_SHARE_REGEX.is_match(contents_str.as_ref())
-            {
-                return true;
+    fn has_income_statement_table_content(&mut self, handle: Handle) -> bool {
+        let mut q = vec![handle];
+
+        while let Some(node) = q.pop() {
+            if let NodeData::Text { ref contents, .. } = node.data {
+                let contents_str = tendril_to_string(contents);
+                // if any of these are discovered, we can feel confident that
+                // we have found a table that contains income statement
+                // data, as opposed to some other table, and mark the
+                if SHARES_OUTSTANDING_REGEX.is_match(contents_str.as_ref())
+                    || SHARES_USED_REGEX.is_match(contents_str.as_ref())
+                    || INTEREST_INCOME_REGEX.is_match(contents_str.as_ref())
+                    || EARNINGS_PER_SHARE_REGEX.is_match(contents_str.as_ref())
+                {
+                    return true;
+                }
             }
-        }
-
-        let children = handle.children.borrow();
-        let children = children
-            .iter()
-            .filter(|child| match child.data {
-                _ => true,
-            })
-            .map(|child| Rc::clone(child))
-            .collect::<Vec<Rc<Node>>>();
-
-        for each in children {
-            next_nodes.push(each);
-        }
-
-        while let Some(n) = next_nodes.pop() {
-            return self.has_income_statement_table_content(&n, next_nodes);
+            q.append(&mut self.get_children(&node));
         }
         false
     }
@@ -308,6 +249,19 @@ impl ProcessedFiling {
                 None,
             );
         }
+    }
+
+    fn get_children(&self, handle: &Handle) -> Vec<Handle> {
+        handle
+            .children
+            .borrow()
+            .iter()
+            .filter(|child| match child.data {
+                NodeData::Element { .. } | NodeData::Text { .. } => true,
+                _ => false,
+            })
+            .map(|child| Rc::clone(child))
+            .collect::<Vec<Rc<Node>>>()
     }
 }
 
