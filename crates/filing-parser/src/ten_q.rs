@@ -72,7 +72,7 @@ impl ProcessedFiling {
         let doc = self.get_doc();
 
         // Find the income statement
-        self.process_step(&doc, &ProcessingStep::IncomeStatement);
+        self.maybe_find_income_statement_table(&doc);
         if self.income_statement_header_node.is_none() {
             return Err(ProcessingError::NoIncomeStatementFound {
                 cik: String::from("fake"),
@@ -80,14 +80,6 @@ impl ProcessedFiling {
         }
         // TODO add other processing steps here
         Ok(())
-    }
-
-    fn process_step(&mut self, handle: &Handle, s: &ProcessingStep) {
-        match s {
-            ProcessingStep::IncomeStatement => {
-                self.maybe_find_income_statement_table(handle);
-            }
-        }
     }
 
     fn maybe_find_income_statement_table(&mut self, handle: &Handle) {
@@ -102,10 +94,6 @@ impl ProcessedFiling {
         if self.income_statement_table_node.is_some() {
             return ();
         }
-        self.next_iteration(node, &ProcessingStep::IncomeStatement);
-    }
-
-    fn next_iteration(&mut self, handle: &Handle, s: &ProcessingStep) {
         for child in handle
             .children
             .borrow()
@@ -115,7 +103,7 @@ impl ProcessedFiling {
                 _ => false,
             })
         {
-            &self.process_step(child, &s);
+            &self.maybe_find_income_statement_table(child);
         }
     }
 
