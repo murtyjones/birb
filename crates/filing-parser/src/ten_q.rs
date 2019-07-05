@@ -17,7 +17,7 @@ use crate::regexes::income_statement_table::*;
 
 // helpers
 use crate::helpers::{
-    add_attribute, create_x_birb_attr, get_parents_and_indexes, tendril_to_string,
+    add_attribute, create_x_birb_attr, dfs, get_parents_and_indexes, tendril_to_string,
 };
 
 // see: https://www.sec.gov/Archives/edgar/data/1016708/000147793217005546/0001477932-17-005546.txt
@@ -68,7 +68,7 @@ impl ProcessedFiling {
         let doc = self.get_doc();
 
         // Find the income statement
-        if self.find_income_statement(doc) {
+        if dfs(doc, |n| self.analyze_node_as_possible_income_statement(&n)) {
             assert!(
                 self.income_statement_header_node.is_some(),
                 "Income statement supposedly found but header node not set!"
@@ -84,18 +84,6 @@ impl ProcessedFiling {
         }
         // TODO add other processing steps here
         Ok(())
-    }
-
-    fn find_income_statement(&mut self, handle: Handle) -> bool {
-        let mut q = vec![handle];
-        while q.len() > 0 {
-            let node = q.remove(0);
-            if self.analyze_node_as_possible_income_statement(&node) {
-                return true;
-            }
-            q.append(&mut self.get_children(&node));
-        }
-        false
     }
 
     fn analyze_node_as_possible_income_statement(&mut self, handle: &Handle) -> bool {
@@ -175,19 +163,9 @@ impl ProcessedFiling {
             return false;
         }
         let sibling = Rc::clone(&children[sibling_index_from_parent as usize]);
-        self.node_or_child_is_income_statement_table_element(sibling)
-    }
-
-    fn node_or_child_is_income_statement_table_element(&mut self, handle: Handle) -> bool {
-        let mut q = vec![handle];
-        while q.len() > 0 {
-            let node = q.remove(0);
-            if self._node_is_income_statement_table_element(&node) {
-                return true;
-            }
-            q.append(&mut self.get_children(&node));
-        }
-        false
+        dfs(sibling, |n| {
+            self._node_is_income_statement_table_element(&n)
+        })
     }
 
     fn _node_is_income_statement_table_element(&mut self, handle: &Handle) -> bool {
@@ -195,23 +173,11 @@ impl ProcessedFiling {
             // Should be named <table ...>
             if &name.local == "table" {
                 // should have "months ended" somewhere in the table
-                if self.has_income_statement_table_content(Rc::clone(handle)) {
+                if dfs(Rc::clone(handle), |n| self.table_regex_match(&n)) {
                     self.borrow_mut().income_statement_table_node = Some(Rc::clone(handle));
                     return true;
                 }
             }
-        }
-        false
-    }
-
-    fn has_income_statement_table_content(&mut self, handle: Handle) -> bool {
-        let mut q = vec![handle];
-        while q.len() > 0 {
-            let node = q.remove(0);
-            if self.table_regex_match(&node) {
-                return true;
-            }
-            q.append(&mut self.get_children(&node));
         }
         false
     }
@@ -258,19 +224,6 @@ impl ProcessedFiling {
                 None,
             );
         }
-    }
-
-    fn get_children(&self, handle: &Handle) -> Vec<Handle> {
-        handle
-            .children
-            .borrow()
-            .iter()
-            .filter(|child| match child.data {
-                NodeData::Element { .. } | NodeData::Text { .. } => true,
-                _ => false,
-            })
-            .map(|child| Rc::clone(child))
-            .collect::<Vec<Rc<Node>>>()
     }
 }
 

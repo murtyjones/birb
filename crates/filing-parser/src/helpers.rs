@@ -100,3 +100,31 @@ pub fn write_to_file(file_path: &String, data: Vec<u8>) -> std::io::Result<()> {
     }
     Ok(())
 }
+
+pub fn get_children(handle: &Handle) -> Vec<Handle> {
+    handle
+        .children
+        .borrow()
+        .iter()
+        .filter(|child| match child.data {
+            NodeData::Element { .. } | NodeData::Text { .. } => true,
+            _ => false,
+        })
+        .map(|child| Rc::clone(child))
+        .collect::<Vec<Rc<Node>>>()
+}
+
+pub fn dfs<CB>(handle: Handle, mut cb: CB) -> bool
+where
+    CB: (FnMut(Handle) -> bool),
+{
+    let mut q = vec![handle];
+    while q.len() > 0 {
+        let node = q.remove(0);
+        if cb(Rc::clone(&node)) {
+            return true;
+        }
+        q.append(&mut get_children(&node));
+    }
+    false
+}
