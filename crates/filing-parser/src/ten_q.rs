@@ -33,10 +33,6 @@ pub struct ProcessedFiling {
     pub income_statement_header_node: Option<Handle>,
 }
 
-pub enum ProcessingStep {
-    IncomeStatement,
-}
-
 #[derive(Debug, Fail, PartialEq)]
 pub enum ProcessingError {
     #[fail(display = "No income statement found for CIK: {}", cik)]
@@ -72,8 +68,16 @@ impl ProcessedFiling {
         let doc = self.get_doc();
 
         // Find the income statement
-        self.maybe_find_income_statement_table(doc);
-        if self.income_statement_header_node.is_none() {
+        if self.find_income_statement(doc) {
+            assert!(
+                self.income_statement_header_node.is_some(),
+                "Income statement supposedly found but header node not set!"
+            );
+            assert!(
+                self.income_statement_table_node.is_some(),
+                "Income statement supposedly found but table node not set!"
+            );
+        } else {
             return Err(ProcessingError::NoIncomeStatementFound {
                 cik: String::from("fake"),
             });
@@ -82,25 +86,16 @@ impl ProcessedFiling {
         Ok(())
     }
 
-    fn maybe_find_income_statement_table(&mut self, handle: Handle) -> bool {
+    fn find_income_statement(&mut self, handle: Handle) -> bool {
         let mut q = vec![handle];
         while q.len() > 0 {
             let node = q.remove(0);
-            if self.process_income_statement_if_matching_node_type(&node) {
+            if self.analyze_node_as_possible_income_statement(&node) {
                 return true;
             }
             q.append(&mut self.get_children(&node));
         }
         false
-    }
-
-    fn process_income_statement_if_matching_node_type(&mut self, handle: &Handle) -> bool {
-        match handle.data {
-            NodeData::Text { .. } | NodeData::Element { .. } => {
-                return self.analyze_node_as_possible_income_statement(handle);
-            }
-            _ => false,
-        }
     }
 
     fn analyze_node_as_possible_income_statement(&mut self, handle: &Handle) -> bool {
@@ -128,7 +123,16 @@ impl ProcessedFiling {
         false
     }
 
-    fn hueristical_income_statement_content_match(&self, handle: &Handle) -> bool {
+    fn hueristical_income_statement_content_match(&mut self, handle: &Handle) -> bool {
+        if self.regex_match(handle) {
+            return true;
+        } else if self.attr_match(handle) {
+            return true;
+        }
+        false
+    }
+
+    fn regex_match(&mut self, handle: &Handle) -> bool {
         // if a text node with matching regex, return true
         if let NodeData::Text { ref contents } = handle.data {
             let contents = tendril_to_string(contents);
@@ -136,16 +140,16 @@ impl ProcessedFiling {
                 return true;
             }
         }
+        false
+    }
 
+    fn attr_match(&mut self, handle: &Handle) -> bool {
         // if an element node with matching attributes, return true
         if let NodeData::Element { ref attrs, .. } = handle.data {
-            let length = attrs.borrow().len();
-            for i in 0..length {
-                let attr: &Attribute = &attrs.borrow()[i];
+            for attr in attrs.borrow().iter() {
                 let matching_attrs = get_matching_attrs();
-                for j in 0..matching_attrs.len() {
+                for matching_attr in matching_attrs {
                     let value = &RefCell::new(attr.value.clone());
-                    let matching_attr = &matching_attrs[j];
                     let name_matches = &attr.name.local == matching_attr.name;
                     let value_matches = tendril_to_string(value) == matching_attr.value;
                     if name_matches && value_matches {
@@ -154,7 +158,7 @@ impl ProcessedFiling {
                 }
             }
         }
-        return false;
+        false
     }
 
     fn offset_node_is_a_table_element(
