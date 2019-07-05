@@ -354,15 +354,18 @@ mod test {
                 "There should be a header node for each income statement!"
             );
 
-            let result = processed_filing.get_doc_as_str();
-            assert!(result.contains(file.table_element))
+            let stringified_result = processed_filing.get_doc_as_str();
+            assert!(
+                stringified_result.contains(file.table_element),
+                "Table element expected content was not found!"
+            )
         }
     }
 
     #[test]
     fn test_income_statement_header_regex_is_correct() {
         let files = get_files();
-        for (i, file) in files.iter().enumerate() {
+        for file in files.iter() {
             // Arrange
             if file.match_type == MatchType::Regex {
                 let processed_filing = make_processed_filing(file.path);
