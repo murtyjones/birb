@@ -17,7 +17,7 @@ use crate::regexes::income_statement_table::*;
 
 // helpers
 use crate::helpers::{
-    add_attribute, create_x_birb_attr, dfs, get_parents_and_indexes, tendril_to_string,
+    add_attribute, bfs, create_x_birb_attr, get_parents_and_indexes, tendril_to_string,
 };
 
 // see: https://www.sec.gov/Archives/edgar/data/1016708/000147793217005546/0001477932-17-005546.txt
@@ -68,7 +68,7 @@ impl ProcessedFiling {
         let doc = self.get_doc();
 
         // Find the income statement
-        if dfs(doc, |n| self.analyze_node_as_possible_income_statement(&n)) {
+        if bfs(doc, |n| self.analyze_node_as_possible_income_statement(&n)) {
             assert!(
                 self.income_statement_header_node.is_some(),
                 "Income statement supposedly found but header node not set!"
@@ -163,7 +163,7 @@ impl ProcessedFiling {
             return false;
         }
         let sibling = Rc::clone(&children[sibling_index_from_parent as usize]);
-        dfs(sibling, |n| {
+        bfs(sibling, |n| {
             self._node_is_income_statement_table_element(&n)
         })
     }
@@ -173,7 +173,7 @@ impl ProcessedFiling {
             // Should be named <table ...>
             if &name.local == "table" {
                 // should have "months ended" somewhere in the table
-                if dfs(Rc::clone(handle), |n| self.table_regex_match(&n)) {
+                if bfs(Rc::clone(handle), |n| self.table_regex_match(&n)) {
                     self.borrow_mut().income_statement_table_node = Some(Rc::clone(handle));
                     return true;
                 }

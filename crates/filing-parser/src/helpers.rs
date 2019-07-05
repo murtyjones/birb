@@ -114,7 +114,7 @@ pub fn get_children(handle: &Handle) -> Vec<Handle> {
         .collect::<Vec<Rc<Node>>>()
 }
 
-pub fn dfs<CB>(handle: Handle, mut cb: CB) -> bool
+pub fn bfs<CB>(handle: Handle, mut cb: CB) -> bool
 where
     CB: (FnMut(Handle) -> bool),
 {
