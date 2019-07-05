@@ -182,10 +182,6 @@ impl ProcessedFiling {
         let mut q = vec![handle];
         while q.len() > 0 {
             let node = q.remove(0);
-            if self.income_statement_table_node.is_some() {
-                return true;
-            }
-
             if self._node_is_income_statement_table_element(&node) {
                 return true;
             }
@@ -354,7 +350,7 @@ mod test {
     #[test]
     fn test_income_statement_header_and_table_location_found() {
         let files = get_files();
-        for file in files.iter() {
+        for (i, file) in files.iter().enumerate() {
             let mut processed_filing = make_processed_filing(file.path);
             assert!(
                 processed_filing.income_statement_table_node.is_some(),
@@ -369,7 +365,9 @@ mod test {
             assert!(
                 stringified_result.contains(file.table_element),
                 "Table element expected content was not found!"
-            )
+            );
+            let output_path = String::from(format!("./examples/10-Q/output/{}.html", i));
+            std::fs::write(output_path, stringified_result).expect("Unable to write file");
         }
     }
 
