@@ -99,7 +99,7 @@ impl ProcessedFiling {
     }
 
     fn analyze_node_as_possible_income_statement(&mut self, handle: &Handle) -> bool {
-        if !self.hueristical_income_statement_content_match(handle) {
+        if !self.header_match(handle) {
             return false;
         };
         let parents_and_indexes = get_parents_and_indexes(handle);
@@ -123,16 +123,16 @@ impl ProcessedFiling {
         false
     }
 
-    fn hueristical_income_statement_content_match(&mut self, handle: &Handle) -> bool {
-        if self.regex_match(handle) {
+    fn header_match(&mut self, handle: &Handle) -> bool {
+        if self.header_regex_match(handle) {
             return true;
-        } else if self.attr_match(handle) {
+        } else if self.header_attr_match(handle) {
             return true;
         }
         false
     }
 
-    fn regex_match(&mut self, handle: &Handle) -> bool {
+    fn header_regex_match(&mut self, handle: &Handle) -> bool {
         // if a text node with matching regex, return true
         if let NodeData::Text { ref contents } = handle.data {
             let contents = tendril_to_string(contents);
@@ -143,7 +143,7 @@ impl ProcessedFiling {
         false
     }
 
-    fn attr_match(&mut self, handle: &Handle) -> bool {
+    fn header_attr_match(&mut self, handle: &Handle) -> bool {
         // if an element node with matching attributes, return true
         if let NodeData::Element { ref attrs, .. } = handle.data {
             for attr in attrs.borrow().iter() {
@@ -213,20 +213,27 @@ impl ProcessedFiling {
 
         while q.len() > 0 {
             let node = q.remove(0);
-            if let NodeData::Text { ref contents, .. } = node.data {
-                let contents_str = tendril_to_string(contents);
-                // if any of these are discovered, we can feel confident that
-                // we have found a table that contains income statement
-                // data, as opposed to some other table, and mark the
-                if SHARES_OUTSTANDING_REGEX.is_match(contents_str.as_ref())
-                    || SHARES_USED_REGEX.is_match(contents_str.as_ref())
-                    || INTEREST_INCOME_REGEX.is_match(contents_str.as_ref())
-                    || EARNINGS_PER_SHARE_REGEX.is_match(contents_str.as_ref())
-                {
-                    return true;
-                }
+            if self.table_regex_match(&node) {
+                return true;
             }
             q.append(&mut self.get_children(&node));
+        }
+        false
+    }
+
+    /// if any of these patterns are discovered, we can feel confident
+    /// that we have found a table that contains income statement data,
+    /// as opposed to some other table, and mark the
+    fn table_regex_match(&mut self, handle: &Handle) -> bool {
+        if let NodeData::Text { ref contents, .. } = handle.data {
+            let contents_str = tendril_to_string(contents);
+            if SHARES_OUTSTANDING_REGEX.is_match(contents_str.as_ref())
+                || SHARES_USED_REGEX.is_match(contents_str.as_ref())
+                || INTEREST_INCOME_REGEX.is_match(contents_str.as_ref())
+                || EARNINGS_PER_SHARE_REGEX.is_match(contents_str.as_ref())
+            {
+                return true;
+            }
         }
         false
     }
