@@ -206,7 +206,6 @@ impl ProcessedFiling {
 
     fn has_income_statement_table_content(&mut self, handle: Handle) -> bool {
         let mut q = vec![handle];
-
         while q.len() > 0 {
             let node = q.remove(0);
             if self.table_regex_match(&node) {
