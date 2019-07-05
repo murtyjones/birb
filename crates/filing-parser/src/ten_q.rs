@@ -84,7 +84,8 @@ impl ProcessedFiling {
 
     fn maybe_find_income_statement_table(&mut self, handle: Handle) -> bool {
         let mut q = vec![handle];
-        while let Some(node) = q.pop() {
+        while q.len() > 0 {
+            let node = q.remove(0);
             if self.process_income_statement_if_matching_node_type(&node) {
                 return true;
             }
@@ -175,7 +176,8 @@ impl ProcessedFiling {
 
     fn node_or_child_is_income_statement_table_element(&mut self, handle: Handle) -> bool {
         let mut q = vec![handle];
-        while let Some(node) = q.pop() {
+        while q.len() > 0 {
+            let node = q.remove(0);
             if self.income_statement_table_node.is_some() {
                 return true;
             }
@@ -205,7 +207,8 @@ impl ProcessedFiling {
     fn has_income_statement_table_content(&mut self, handle: Handle) -> bool {
         let mut q = vec![handle];
 
-        while let Some(node) = q.pop() {
+        while q.len() > 0 {
+            let node = q.remove(0);
             if let NodeData::Text { ref contents, .. } = node.data {
                 let contents_str = tendril_to_string(contents);
                 // if any of these are discovered, we can feel confident that
@@ -266,6 +269,18 @@ impl ProcessedFiling {
 }
 
 impl ProcessedFiling {
+    pub fn get_doc_as_str(&mut self) -> String {
+        let doc: &Rc<Node> = &self.get_doc();
+        let mut bytes = vec![];
+        html5ever::serialize::serialize(
+            &mut bytes,
+            doc,
+            html5ever::serialize::SerializeOpts::default(),
+        )
+        .expect("Couldn't write to file.");
+        String::from_utf8(bytes).unwrap()
+    }
+
     pub fn write_file_contents(&mut self, path: &String) {
         let doc: &Rc<Node> = &self.get_doc();
         let buffer = std::fs::File::create(path).expect("Could't create file.");
@@ -328,10 +343,8 @@ mod test {
     #[test]
     fn test_income_statement_header_and_table_location_found() {
         let files = get_files();
-        for (i, file) in files.iter().enumerate() {
+        for file in files.iter() {
             let mut processed_filing = make_processed_filing(file.path);
-            let output_path = String::from(format!("./examples/10-Q/output/{}.html", i));
-            processed_filing.write_file_contents(&output_path);
             assert!(
                 processed_filing.income_statement_table_node.is_some(),
                 "There should be a table for each income statement!"
@@ -340,6 +353,9 @@ mod test {
                 processed_filing.income_statement_header_node.is_some(),
                 "There should be a header node for each income statement!"
             );
+
+            let result = processed_filing.get_doc_as_str();
+            assert!(result.contains(file.table_element))
         }
     }
 
