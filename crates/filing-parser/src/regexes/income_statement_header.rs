@@ -19,6 +19,16 @@ lazy_static! {
         (</b>)*                               # Optional closing tag
         \s*                                   # Optional whitespace
         (\(unaudited\)\s*)*                   # Optional '(unaudited)'
+        (
+            \s+for\s+the\s+
+            (three|six|nine)
+            \s+
+            months\s+ended\s+
+            (March|June|September|December)+
+            \s+
+            (31|30)
+            ,*
+        )*
         $
     ";
     pub static ref INCOME_STATEMENT_HEADER_REGEX: Regex =
@@ -53,6 +63,7 @@ mod test {
             "unaudited condensed statements of operations",
             "CONSOLIDATED STATEMENTS OF COMPREHENSIVE LOSS", // this was needed for one specific filing, but i can't remember which and im not sure this is a pattern we want to match against given that this doesn't always relate to and income statement table :/
             "CONSOLIDATED STATEMENTS OF OPERATIONS (UNAUDITED)",
+            "Condensed Consolidated Statements of\nOperations for the Three Months Ended March 31,", // edgar/data/1009891/0001193805-17-000932.txt
         ];
         for each in examples {
             assert!(INCOME_STATEMENT_HEADER_REGEX.is_match(each));
