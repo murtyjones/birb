@@ -72,7 +72,7 @@ impl ProcessedFiling {
         let doc = self.get_doc();
 
         // Find the income statement
-        self.maybe_find_income_statement_table(&doc);
+        self.maybe_find_income_statement_table(doc);
         if self.income_statement_header_node.is_none() {
             return Err(ProcessingError::NoIncomeStatementFound {
                 cik: String::from("fake"),
@@ -82,29 +82,27 @@ impl ProcessedFiling {
         Ok(())
     }
 
-    fn maybe_find_income_statement_table(&mut self, handle: &Handle) {
-        let node = handle;
-        // If the income statement was already found, exit
-        if self.income_statement_table_node.is_some() {
-            return ();
+    fn maybe_find_income_statement_table(&mut self, handle: Handle) -> bool {
+        let mut q = vec![handle];
+        while let Some(node) = q.pop() {
+            if self.process_income_statement_if_matching_node_type(&node) {
+                return true;
+            }
+            let children = node
+                .children
+                .borrow()
+                .iter()
+                .filter(|child| match child.data {
+                    NodeData::Text { .. } | NodeData::Element { .. } => true,
+                    _ => false,
+                })
+                .map(|child| Rc::clone(child))
+                .collect::<Vec<Rc<Node>>>();
+            for each in children {
+                q.push(each);
+            }
         }
-        // try to find the nearby income statement table
-        self.process_income_statement_if_matching_node_type(handle);
-        // If header + table was found, exit
-        if self.income_statement_table_node.is_some() {
-            return ();
-        }
-        for child in handle
-            .children
-            .borrow()
-            .iter()
-            .filter(|child| match child.data {
-                NodeData::Text { .. } | NodeData::Element { .. } => true,
-                _ => false,
-            })
-        {
-            &self.maybe_find_income_statement_table(child);
-        }
+        false
     }
 
     fn process_income_statement_if_matching_node_type(&mut self, handle: &Handle) -> bool {
