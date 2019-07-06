@@ -60,6 +60,7 @@ mod test {
     #[test]
     fn test_further_examples() {
         let examples = vec![
+            "STATEMENTS\nOF INCOME", // edgar/data/101295/0001171843-17-002984.txt
             "unaudited condensed statements of operations",
             "CONSOLIDATED STATEMENTS OF COMPREHENSIVE LOSS", // this was needed for one specific filing, but i can't remember which and im not sure this is a pattern we want to match against given that this doesn't always relate to and income statement table :/
             "CONSOLIDATED STATEMENTS OF OPERATIONS (UNAUDITED)",
