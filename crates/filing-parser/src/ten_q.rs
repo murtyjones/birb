@@ -25,7 +25,8 @@ pub const MAX_LEVELS_UP: i32 = 5;
 // TODO: In the actual rendering of a document, this looks like it should only be a few levels over.
 // However when html5ever parses it into a dom, 8 levels over is required. Could just be because of text nodes,
 // but it's worth ensuring that there isn't whitespace or something being converted to a node unneccesarily.
-pub const MAX_LEVELS_OVER: i32 = 10;
+// current filing requiring at least 14 levels over: edgar/data/1023459/0001683168-18-000086.txt
+pub const MAX_LEVELS_OVER: i32 = 14;
 
 pub struct ProcessedFiling {
     pub dom: RcDom,

@@ -65,6 +65,7 @@ mod test {
             "CONSOLIDATED STATEMENTS OF COMPREHENSIVE LOSS", // this was needed for one specific filing, but i can't remember which and im not sure this is a pattern we want to match against given that this doesn't always relate to and income statement table :/
             "CONSOLIDATED STATEMENTS OF OPERATIONS (UNAUDITED)",
             "Condensed Consolidated Statements of\nOperations for the Three Months Ended March 31,", // edgar/data/1009891/0001193805-17-000932.txt
+            "CONDENSED CONSOLIDATED STATEMENTS OF OPERATIONS",
         ];
         for each in examples {
             assert!(INCOME_STATEMENT_HEADER_REGEX.is_match(each));
