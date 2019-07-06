@@ -84,7 +84,12 @@ mod test {
         for each in match_examples {
             assert!(SHARES_OUTSTANDING_REGEX.is_match(each));
         }
-        let no_match_examples = vec!["average shares", "earnings per share", "shares held"];
+        let no_match_examples = vec![
+            "average shares",
+            "earnings per share",
+            "shares held",
+            "shares",
+        ];
         for each in no_match_examples {
             assert!(!SHARES_OUTSTANDING_REGEX.is_match(each));
         }

@@ -14,5 +14,10 @@ pub fn get_matching_attrs() -> Vec<MatchingAttribute> {
             name: "name",
             value: "Operations",
         },
+        MatchingAttribute {
+            // pertains to 0001558370-17-003543.html
+            name: "name",
+            value: "STATEMENTSOFINCOME_792502",
+        },
     ]
 }

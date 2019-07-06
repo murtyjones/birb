@@ -1,8 +1,20 @@
+#[macro_use]
+extern crate lazy_static;
+extern crate regex;
 use aws::s3;
 use filing_parser::ten_q::ProcessedFiling;
 use rand::Rng;
+use regex::{Regex, RegexBuilder};
 
 const BUCKET: &'static str = "birb-edgar-filings";
+
+lazy_static! {
+    static ref TEN_K_PATTERN: &'static str = r"CONFORMED SUBMISSION TYPE:\s+10-K";
+    pub static ref TEN_K_REGEX: Regex = RegexBuilder::new(&TEN_K_PATTERN)
+        .case_insensitive(true)
+        .build()
+        .expect("Couldn't build income statement regex!");
+}
 
 /// Intended to randomly process files from S3
 fn main() {
@@ -10,7 +22,7 @@ fn main() {
     let data = s3::list_s3_objects(&client, BUCKET);
     let i = rand::thread_rng().gen_range(0, data.len() - 1);
     let random_object_key = data[i].key.as_ref().expect("Object should have a key!");
-    //    let random_object_key = &String::from("edgar/data/101295/0001171843-17-002984.txt");
+    //    let random_object_key = &String::from("edgar/data/1013934/0001558370-17-003543.txt");
 
     println!("Random object to process: {:?}", &random_object_key);
 
@@ -19,7 +31,7 @@ fn main() {
     println!("Object retrieved...");
 
     let contents = String::from_utf8(object).unwrap();
-    if contents.contains("    10-K") {
+    if TEN_K_REGEX.is_match(&*contents) {
         println!("10-K, skipping");
         return ();
     }
