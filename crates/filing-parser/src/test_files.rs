@@ -121,5 +121,11 @@ pub fn get_files() -> Vec<TestableFiling> {
         //            header_inner_html: Some("CONSOLIDATED STATEMENTS OF INCOME"),
         //            match_type: MatchType::Regex,
         //        },
+        //        TestableFiling {
+        //            s3: "edgar/data/1015780/0001015780-17-000075.txt",
+        //            path: "examples/10-Q/input/0001015780-17-000075.txt",
+        //            header_inner_html: Some("didnt look for this"),
+        //            match_type: MatchType::Regex,
+        //        },
     ];
 }
