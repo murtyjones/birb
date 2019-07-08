@@ -5,10 +5,13 @@ lazy_static! {
     static ref PATTERN: &'static str = r"
        ^
         (basic\s+and\s+diluted\s+)*
+        (net\s+)*
         (
-            net\s+income
+            income
             |
             earnings(\s+\(loss\))*
+            |
+            \(loss\)\s+earnings
             |
             loss
         )
@@ -49,6 +52,7 @@ mod test {
             "Net income per share - basic:",
             "Earnings per common share:",
             "Loss per share basic and diluted: ",
+            "Net (loss) earnings per share:",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));
