@@ -17,7 +17,7 @@ lazy_static! {
             |
             \s+\((basic|diluted)\)
         )*
-        (:)*
+        (:\s*)*
         $
     ";
     pub static ref REGEX: Regex = RegexBuilder::new(&PATTERN)
@@ -46,6 +46,7 @@ mod test {
             "Weighted average shares outstanding:",
             "Weighted-average number of basic common shares",
             "average shares",
+            "Weighted average shares outstanding: ",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));
