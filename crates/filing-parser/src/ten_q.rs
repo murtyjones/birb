@@ -1,5 +1,6 @@
 // standard library / core
 use core::borrow::BorrowMut;
+use regex::Regex;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -11,13 +12,12 @@ use html5ever::tree_builder::Attribute;
 use html5ever::QualName;
 
 // regex / text matching
-use crate::matching_attributes::get_matching_attrs;
-use crate::regexes::income_statement_header::INCOME_STATEMENT_HEADER_REGEX;
-use crate::regexes::income_statement_table::*;
+use crate::regexes::INCOME_STATEMENT_REGEXES;
 
 // helpers
 use crate::helpers::{
-    add_attribute, bfs, create_x_birb_attr, get_parents_and_indexes, tendril_to_string,
+    add_attribute, bfs, bfs_with_count, create_x_birb_attr, get_parents_and_indexes,
+    tendril_to_string,
 };
 
 // see: https://www.sec.gov/Archives/edgar/data/1016708/000147793217005546/0001477932-17-005546.txt
@@ -31,7 +31,6 @@ pub const MAX_LEVELS_OVER: i32 = 14;
 pub struct ProcessedFiling {
     pub dom: RcDom,
     pub income_statement_table_node: Option<Handle>,
-    pub income_statement_header_node: Option<Handle>,
 }
 
 #[derive(Debug, Fail, PartialEq)]
@@ -46,7 +45,6 @@ impl ProcessedFiling {
         let mut p_f = ProcessedFiling {
             dom: parse_document(RcDom::default(), Default::default()).one(filing_contents),
             income_statement_table_node: None,
-            income_statement_header_node: None,
         };
 
         // Process the filing
@@ -71,10 +69,6 @@ impl ProcessedFiling {
         // Find the income statement
         if bfs(doc, |n| self.analyze_node_as_possible_income_statement(&n)) {
             assert!(
-                self.income_statement_header_node.is_some(),
-                "Income statement supposedly found but header node not set!"
-            );
-            assert!(
                 self.income_statement_table_node.is_some(),
                 "Income statement supposedly found but table node not set!"
             );
@@ -88,93 +82,30 @@ impl ProcessedFiling {
     }
 
     fn analyze_node_as_possible_income_statement(&mut self, handle: &Handle) -> bool {
-        if !self.header_match(handle) {
-            return false;
+        if self._node_is_income_statement_table_element(handle) {
+            self.attach_income_statement_attributes();
+            return true;
         };
-        let parents_and_indexes = get_parents_and_indexes(handle);
-
-        // for each parent, check if a sibling near to the current child is a table element.
-        // if any are, return true.
-        for each in &parents_and_indexes {
-            let parent = &Rc::clone(&each.0);
-            if self._node_is_income_statement_table_element(parent) {
-                self.maybe_attach_income_statement_attributes(handle, parents_and_indexes);
-                return true;
-            };
-            let child_index = each.1.clone();
-            for sibling_index in 1..=MAX_LEVELS_OVER {
-                if self.offset_node_is_a_table_element(parent, child_index, sibling_index) {
-                    self.maybe_attach_income_statement_attributes(handle, parents_and_indexes);
-                    return true;
-                }
-            }
-        }
         false
-    }
-
-    fn header_match(&mut self, handle: &Handle) -> bool {
-        if self.header_regex_match(handle) {
-            return true;
-        } else if self.header_attr_match(handle) {
-            return true;
-        }
-        false
-    }
-
-    fn header_regex_match(&mut self, handle: &Handle) -> bool {
-        // if a text node with matching regex, return true
-        if let NodeData::Text { ref contents } = handle.data {
-            let contents = tendril_to_string(contents);
-            if INCOME_STATEMENT_HEADER_REGEX.is_match(contents.as_str()) {
-                return true;
-            }
-        }
-        false
-    }
-
-    fn header_attr_match(&mut self, handle: &Handle) -> bool {
-        // if an element node with matching attributes, return true
-        if let NodeData::Element { ref attrs, .. } = handle.data {
-            for attr in attrs.borrow().iter() {
-                let matching_attrs = get_matching_attrs();
-                for matching_attr in matching_attrs {
-                    let value = &RefCell::new(attr.value.clone());
-                    let name_matches = &attr.name.local == matching_attr.name;
-                    let value_matches = tendril_to_string(value) == matching_attr.value;
-                    if name_matches && value_matches {
-                        return true;
-                    }
-                }
-            }
-        }
-        false
-    }
-
-    fn offset_node_is_a_table_element(
-        &mut self,
-        parent: &Handle,
-        child_index: i32,
-        sibling_offset: i32,
-    ) -> bool {
-        let sibling_index_from_parent = child_index + sibling_offset;
-        let children = &parent.children.borrow();
-        // There may not be a sibling at the offset specified, in which case
-        // we return "false"
-        if (children.len() as i32 - 1) < sibling_index_from_parent as i32 {
-            return false;
-        }
-        let sibling = Rc::clone(&children[sibling_index_from_parent as usize]);
-        bfs(sibling, |n| {
-            self._node_is_income_statement_table_element(&n)
-        })
     }
 
     fn _node_is_income_statement_table_element(&mut self, handle: &Handle) -> bool {
         if let NodeData::Element { ref name, .. } = handle.data {
             // Should be named <table ...>
             if &name.local == "table" {
-                // should have "months ended" somewhere in the table
-                if bfs(Rc::clone(handle), |n| self.table_regex_match(&n)) {
+                let cb = |n| self.table_regex_match(&n);
+                let count = bfs_with_count(0, Rc::clone(handle), cb);
+
+                /*
+                 * There should be at least 2 regex matches that indicate
+                 * that this is an income statement. If less, return false.
+                 * This number should get larger over time as the regex patterns
+                 * become more accurate. If you find yourself lowering it...
+                 * Think about whether that is the right thing to do.
+                 */
+                const MIN_REQUIRED_MATCHES: i32 = 2;
+
+                if count >= MIN_REQUIRED_MATCHES {
                     self.borrow_mut().income_statement_table_node = Some(Rc::clone(handle));
                     return true;
                 }
@@ -189,33 +120,27 @@ impl ProcessedFiling {
     fn table_regex_match(&mut self, handle: &Handle) -> bool {
         if let NodeData::Text { ref contents, .. } = handle.data {
             let contents_str = tendril_to_string(contents);
-            if SHARES_OUTSTANDING_REGEX.is_match(contents_str.as_ref())
-                || SHARES_USED_REGEX.is_match(contents_str.as_ref())
-                || INTEREST_INCOME_REGEX.is_match(contents_str.as_ref())
-                || EARNINGS_PER_SHARE_REGEX.is_match(contents_str.as_ref())
-            {
-                return true;
+
+            for regex in INCOME_STATEMENT_REGEXES.iter() {
+                if regex.is_match(contents_str.as_ref()) {
+                    return true;
+                }
             }
+
+            return false;
         }
         false
     }
 
-    fn maybe_attach_income_statement_attributes(
-        &mut self,
-        handle: &Handle,
-        parents_and_indexes: Vec<(Rc<Node>, i32)>,
-    ) {
+    fn attach_income_statement_attributes(&mut self) {
         if self.income_statement_table_node.is_some() {
-            self.borrow_mut().income_statement_header_node = Some(handle.clone());
             // If table was found, attach TEMPORARY red background to immediate parent
             // Add the custom style attribute (TODO remove this eventually):
             let colorizer: Attribute = Attribute {
                 name: QualName::new(None, ns!(), local_name!("style")),
                 value: "background-color: red;".to_tendril(),
             };
-            let immediate_parent = &parents_and_indexes[0].0;
             let table_node = &self.income_statement_table_node.as_ref().unwrap();
-            add_attribute(immediate_parent, colorizer.clone(), Some("style"));
             add_attribute(table_node, colorizer.clone(), Some("style"));
 
             // add custom birb income statement identifier
@@ -257,7 +182,6 @@ impl ProcessedFiling {
 mod test {
     use super::*;
     use crate::helpers::get_abs_path;
-    use crate::test_files::MatchType;
     use std::fs::File;
     use std::io::prelude::*;
     // test files
@@ -309,10 +233,6 @@ mod test {
                 processed_filing.income_statement_table_node.is_some(),
                 "There should be a table for each income statement!"
             );
-            assert!(
-                processed_filing.income_statement_header_node.is_some(),
-                "There should be a header node for each income statement!"
-            );
 
             let stringified_result = processed_filing.get_doc_as_str();
             assert!(
@@ -321,26 +241,6 @@ mod test {
             );
             let output_path = String::from(format!("./examples/10-Q/output/{}.html", i));
             std::fs::write(output_path, stringified_result).expect("Unable to write file");
-        }
-    }
-
-    #[test]
-    fn test_income_statement_header_regex_is_correct() {
-        let files = get_files();
-        for file in files.iter() {
-            // Arrange
-            if file.match_type == MatchType::Regex {
-                let processed_filing = make_processed_filing(file.path);
-                let node = processed_filing.income_statement_header_node.unwrap();
-                match node.data {
-                    NodeData::Text { ref contents } => {
-                        let mut stringified_contents = String::new();
-                        stringified_contents.push_str(&contents.borrow());
-                        assert_eq!(file.header_inner_html.unwrap(), stringified_contents);
-                    }
-                    _ => panic!("Wrong node!"),
-                }
-            }
         }
     }
 }

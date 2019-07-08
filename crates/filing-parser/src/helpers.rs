@@ -52,7 +52,6 @@ pub fn get_parents_and_indexes(handle: &Handle) -> Vec<(Rc<Node>, i32)> {
         get_parent_and_index(handle).expect("Should have an immediate parent!");
     // Seed the vector with the immediate parent to make the loop logic below work well.
     let mut parents_and_indexes: Vec<(Rc<Node>, i32)> = vec![immediate_parent_and_index];
-
     // get parents several levels up:
     for i in 1..=MAX_LEVELS_UP {
         let prev_node_index = (i as usize) - 1;
@@ -114,6 +113,25 @@ pub fn get_children(handle: &Handle) -> Vec<Handle> {
         .collect::<Vec<Rc<Node>>>()
 }
 
+pub fn bfs_with_count<CB>(mut count: i32, handle: Handle, mut cb: CB) -> i32
+where
+    CB: (FnMut(Handle) -> bool),
+{
+    let mut q = vec![handle];
+    while q.len() > 0 {
+        let node = q.remove(0);
+        if cb(Rc::clone(&node)) {
+            count += 1;
+        }
+        // Prepend the child's elements to the queue. This is less
+        // ideal than appending them because it requires more memory,
+        // but we need to parse the document in order (IE from top to
+        // bottom), so this approach is needed for now.
+        q = prepend(q, &mut get_children(&node));
+    }
+    count
+}
+
 pub fn bfs<CB>(handle: Handle, mut cb: CB) -> bool
 where
     CB: (FnMut(Handle) -> bool),
@@ -124,7 +142,20 @@ where
         if cb(Rc::clone(&node)) {
             return true;
         }
-        q.append(&mut get_children(&node));
+        // Prepend the child's elements to the queue. This is less
+        // ideal than appending them because it requires more memory,
+        // but we need to parse the document in order (IE from top to
+        // bottom), so this approach is needed for now.
+        q = prepend(q, &mut get_children(&node));
     }
     false
+}
+
+fn prepend<T>(v: Vec<T>, s: &[T]) -> Vec<T>
+where
+    T: Clone,
+{
+    let mut tmp: Vec<_> = s.to_owned();
+    tmp.extend(v);
+    tmp
 }
