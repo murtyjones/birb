@@ -77,7 +77,7 @@ pub fn get_files() -> Vec<TestableFiling> {
             path: "examples/10-Q/input/0001213900-16-018375.txt",
             table_element: "<table cellpadding=\"0\" cellspacing=\"0\" style=\"background-color: red;\" x-birb-income-statement-table=\"\">"
         },
-        TestableFiling {
+        TestableFiling { // this one is messy... two companies
             s3: "edgar/data/1004980/0001004980-16-000073.txt",
             path: "examples/10-Q/input/0001004980-16-000073.txt",
             table_element: "<table id=\"6d37b329224548c18649e727b91c963c\" cellspacing=\"0\" cellpadding=\"0\" style=\"background-color: red;\" x-birb-income-statement-table=\"\">"
