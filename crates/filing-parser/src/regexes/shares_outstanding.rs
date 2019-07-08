@@ -2,16 +2,25 @@
 use regex::{Regex, RegexBuilder};
 
 lazy_static! {
-    static ref SHARES_OUTSTANDING_PATTERN: &'static str = r"
-        (weighted\s+)*
-        average\s+
-        (number\s+of\s+)*
-        (common\s+)*
-        shares\s+
-        (outstanding\s*)*
-        .*
+    static ref PATTERN: &'static str = r"
+        ^
+        (weighted[\s+|-])*
+        average
+        (\s+number\s+of)*
+        \s+
+        ((basic\s+)*common\s+)*shares
+        (\s+outstanding)*
+        (
+            \s+[-–]\s+basic\s+and\s+diluted
+            |
+            \s+[-–]\s+(diluted|basic)
+            |
+            \s+\((basic|diluted)\)
+        )*
+        (:)*
+        $
     ";
-    pub static ref SHARES_OUTSTANDING_REGEX: Regex = RegexBuilder::new(&SHARES_OUTSTANDING_PATTERN)
+    pub static ref REGEX: Regex = RegexBuilder::new(&PATTERN)
         .case_insensitive(true)
         .multi_line(true)
         .ignore_whitespace(true)
@@ -24,7 +33,7 @@ mod test {
     use super::*;
 
     #[test]
-    fn test_shares_outstanding() {
+    fn test() {
         let match_examples = vec![
             "Weighted average number of shares outstanding",
             "Weighted average shares outstanding - basic",
@@ -35,18 +44,15 @@ mod test {
             "Weighted average number of common shares outstanding - basic and diluted",
             "Weighted-average common shares outstanding",
             "Weighted average shares outstanding:",
+            "Weighted-average number of basic common shares",
+            "average shares",
         ];
         for each in match_examples {
-            assert!(SHARES_OUTSTANDING_REGEX.is_match(each));
+            assert!(REGEX.is_match(each));
         }
-        let no_match_examples = vec![
-            "average shares",
-            "earnings per share",
-            "shares held",
-            "shares",
-        ];
+        let no_match_examples = vec!["earnings per share", "shares held", "shares"];
         for each in no_match_examples {
-            assert!(!SHARES_OUTSTANDING_REGEX.is_match(each));
+            assert!(!REGEX.is_match(each));
         }
     }
 }

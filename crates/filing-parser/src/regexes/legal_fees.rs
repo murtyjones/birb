@@ -4,20 +4,13 @@ use regex::{Regex, RegexBuilder};
 lazy_static! {
     static ref PATTERN: &'static str = r"
         ^
-        (operating\s+)*
-        (
-            income(\s+\(loss\))*
-            |
-            \(loss\)\s+earnings
-        )
+        legal
         \s+
-        before
+        and
         \s+
-        (
-            income\s+taxes
-            |
-            income\s+tax\s+expense
-        )
+        administrative
+        \s+
+        fees
         $
     ";
     pub static ref REGEX: Regex = RegexBuilder::new(&PATTERN)
@@ -34,20 +27,11 @@ mod test {
 
     #[test]
     fn test() {
-        let match_examples = vec![
-            "Operating income before income taxes",
-            "Income before income tax expense",
-            "Income (loss) before income taxes",
-            "(Loss) earnings before income taxes",
-        ];
+        let match_examples = vec!["Legal and administrative fees"];
         for each in match_examples {
             assert!(REGEX.is_match(each));
         }
-        let no_match_examples = vec![
-            "Net Income",
-            "income",
-            "Income before income tax expense / operating margin",
-        ];
+        let no_match_examples = vec!["non-legal fees"];
         for each in no_match_examples {
             assert!(!REGEX.is_match(each));
         }

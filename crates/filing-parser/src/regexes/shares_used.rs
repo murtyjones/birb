@@ -29,7 +29,7 @@ mod test {
     use super::*;
 
     #[test]
-    fn test_shares_used() {
+    fn test() {
         let match_examples = vec![
             "Shares used in per share calculation:",
             "Shares used in computation of per common share data:",

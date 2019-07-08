@@ -22,7 +22,7 @@ fn main() {
     let data = s3::list_s3_objects(&client, BUCKET);
     let i = rand::thread_rng().gen_range(0, data.len() - 1);
     let random_object_key = data[i].key.as_ref().expect("Object should have a key!");
-    let random_object_key = &String::from("edgar/data/1000623/0001000623-17-000125.txt");
+    let random_object_key = &String::from("edgar/data/1027099/0001185185-16-005747.txt");
 
     println!("Random object to process: {:?}", &random_object_key);
 

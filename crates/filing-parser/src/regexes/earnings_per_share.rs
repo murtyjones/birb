@@ -2,7 +2,7 @@
 use regex::{Regex, RegexBuilder};
 
 lazy_static! {
-    static ref EARNINGS_PER_SHARE_PATTERN: &'static str = r"
+    static ref PATTERN: &'static str = r"
        ^
         (basic\s+and\s+diluted\s+)*
         (
@@ -15,7 +15,7 @@ lazy_static! {
         \s+
         per
         \s+
-        share
+        (common\s+)*share
         (
              (\s+\(basic\))
              |
@@ -24,7 +24,7 @@ lazy_static! {
         (:)*
         $
     ";
-    pub static ref EARNINGS_PER_SHARE_REGEX: Regex = RegexBuilder::new(&EARNINGS_PER_SHARE_PATTERN)
+    pub static ref REGEX: Regex = RegexBuilder::new(&PATTERN)
         .case_insensitive(true)
         .multi_line(true)
         .ignore_whitespace(true)
@@ -44,13 +44,14 @@ mod test {
             "Basic and diluted loss per share",
             "Net income per share – diluted",
             "Net income per share - basic",
+            "Earnings per common share:",
         ];
         for each in match_examples {
-            assert!(EARNINGS_PER_SHARE_REGEX.is_match(each));
+            assert!(REGEX.is_match(each));
         }
         let no_match_examples = vec!["net earnings", "Note 12—Earnings Per Share"];
         for each in no_match_examples {
-            assert!(!EARNINGS_PER_SHARE_REGEX.is_match(each));
+            assert!(!REGEX.is_match(each));
         }
     }
 }
