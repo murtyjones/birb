@@ -1,5 +1,6 @@
 use regex::Regex;
 
+pub mod depreciation_amortization;
 pub mod earnings_per_share;
 pub mod income_before_taxes;
 pub mod interest_income;
@@ -14,5 +15,6 @@ lazy_static! {
         &income_before_taxes::REGEX,
         &shares_outstanding::REGEX,
         &legal_fees::REGEX,
+//        &depreciation_amortization::REGEX,
     ];
 }

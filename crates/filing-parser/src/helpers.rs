@@ -1,4 +1,3 @@
-use crate::ten_q::MAX_LEVELS_UP;
 use core::borrow::Borrow;
 use html5ever::rcdom::{Handle, Node, NodeData};
 use html5ever::tendril::{SliceExt, StrTendril};
@@ -53,7 +52,7 @@ pub fn get_parents_and_indexes(handle: &Handle) -> Vec<(Rc<Node>, i32)> {
     // Seed the vector with the immediate parent to make the loop logic below work well.
     let mut parents_and_indexes: Vec<(Rc<Node>, i32)> = vec![immediate_parent_and_index];
     // get parents several levels up:
-    for i in 1..=MAX_LEVELS_UP {
+    for i in 1..=5 {
         let prev_node_index = (i as usize) - 1;
         let prev_node = &parents_and_indexes[prev_node_index].0;
         parents_and_indexes
@@ -81,10 +80,10 @@ pub fn add_attribute(handle: &Handle, new_attr: Attribute, strip_attr: Option<&'
     }
 }
 
-pub fn create_x_birb_attr(attr_name: &'static str) -> Attribute {
+pub fn create_x_birb_attr(attr_name: &'static str, value: i32) -> Attribute {
     Attribute {
         name: QualName::new(None, ns!(), LocalName::from(attr_name)),
-        value: "".to_tendril(),
+        value: format!("{}", value).to_tendril(),
     }
 }
 
@@ -149,6 +148,22 @@ where
         q = prepend(q, &mut get_children(&node));
     }
     false
+}
+
+pub fn bfs_no_return<CB>(handle: Handle, mut cb: CB) -> ()
+where
+    CB: (FnMut(Handle) -> bool),
+{
+    let mut q = vec![handle];
+    while q.len() > 0 {
+        let node = q.remove(0);
+        let _found = cb(Rc::clone(&node));
+        // Prepend the child's elements to the queue. This is less
+        // ideal than appending them because it requires more memory,
+        // but we need to parse the document in order (IE from top to
+        // bottom), so this approach is needed for now.
+        q = prepend(q, &mut get_children(&node));
+    }
 }
 
 fn prepend<T>(v: Vec<T>, s: &[T]) -> Vec<T>
