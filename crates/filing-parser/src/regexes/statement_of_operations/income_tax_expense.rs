@@ -4,7 +4,11 @@ use regex::{Regex, RegexBuilder};
 lazy_static! {
     static ref PATTERN: &'static str = r"
         ^
-        income\s+tax\s+expense
+        (
+            provision\s+for\s+income\s+taxes
+            |
+            income\s+tax\s+expense
+        )
         $
     ";
     pub static ref REGEX: Regex = RegexBuilder::new(&PATTERN)
@@ -21,7 +25,7 @@ mod test {
 
     #[test]
     fn test_earnings_per_share() {
-        let match_examples = vec!["Income tax expense"];
+        let match_examples = vec!["Provision for income taxes", "Income tax expense"];
         for each in match_examples {
             assert!(REGEX.is_match(each));
         }

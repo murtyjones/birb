@@ -7,8 +7,7 @@ lazy_static! {
         net
         \s+
         income
-        \s+
-        \(loss\)
+        (\s+\(loss\))*
         $
     ";
     pub static ref REGEX: Regex = RegexBuilder::new(&PATTERN)
@@ -25,7 +24,7 @@ mod test {
 
     #[test]
     fn test_earnings_per_share() {
-        let match_examples = vec!["Net income (loss)"];
+        let match_examples = vec!["Net income", "Net income (loss)"];
         for each in match_examples {
             assert!(REGEX.is_match(each));
         }

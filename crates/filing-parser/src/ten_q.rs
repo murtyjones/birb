@@ -95,7 +95,7 @@ impl ProcessedFiling {
                  * become more accurate. If you find yourself lowering it...
                  * Think about whether that is the right thing to do.
                  */
-                const MIN_REQUIRED_MATCHES: i32 = 2;
+                const MIN_REQUIRED_MATCHES: i32 = 4;
 
                 if count >= MIN_REQUIRED_MATCHES {
                     return true;
