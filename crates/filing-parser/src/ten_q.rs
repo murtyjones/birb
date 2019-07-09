@@ -16,7 +16,7 @@ use crate::regexes::statement_of_operations::INCOME_STATEMENT_REGEXES;
 
 // helpers
 use crate::helpers::{
-    add_attribute, bfs, bfs_no_return, bfs_with_count, create_x_birb_attr, tendril_to_string,
+    add_attribute, bfs, bfs_no_return, bfs_with_matches, create_x_birb_attr, tendril_to_string,
 };
 
 pub struct ProcessedFiling {
@@ -86,7 +86,7 @@ impl ProcessedFiling {
             // Should be named <table ...>
             if &name.local == "table" {
                 let cb = |n| self.table_regex_match(&n);
-                let count = bfs_with_count(0, Rc::clone(handle), cb);
+                let count = bfs_with_matches(Rc::clone(handle), cb);
 
                 /*
                  * There should be at least 2 regex matches that indicate
@@ -95,7 +95,7 @@ impl ProcessedFiling {
                  * become more accurate. If you find yourself lowering it...
                  * Think about whether that is the right thing to do.
                  */
-                const MIN_REQUIRED_MATCHES: i32 = 4;
+                const MIN_REQUIRED_MATCHES: i32 = 2;
 
                 if count >= MIN_REQUIRED_MATCHES {
                     return true;
@@ -108,20 +108,19 @@ impl ProcessedFiling {
     /// if any of these patterns are discovered, we can feel confident
     /// that we have found a table that contains income statement data,
     /// as opposed to some other table, and mark the
-    fn table_regex_match(&mut self, handle: &Handle) -> bool {
+    fn table_regex_match(&mut self, handle: &Handle) -> Option<&'static Regex> {
         if let NodeData::Text { ref contents, .. } = handle.data {
             let contents_str = tendril_to_string(contents);
 
             for regex in INCOME_STATEMENT_REGEXES.iter() {
                 if regex.is_match(contents_str.as_ref()) {
-                    //                    println!("{}", regex);
-                    return true;
+                    return Some(regex);
                 }
             }
 
-            return false;
+            return None;
         }
-        false
+        None
     }
 
     fn attach_income_statement_attributes(&mut self) {

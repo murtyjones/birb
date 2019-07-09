@@ -3,6 +3,7 @@ use html5ever::rcdom::{Handle, Node, NodeData};
 use html5ever::tendril::{SliceExt, StrTendril};
 use html5ever::{LocalName, QualName};
 use markup5ever::Attribute;
+use regex::Regex;
 use std::cell::RefCell;
 use std::fs::File;
 use std::io::Write;
@@ -112,15 +113,24 @@ pub fn get_children(handle: &Handle) -> Vec<Handle> {
         .collect::<Vec<Rc<Node>>>()
 }
 
-pub fn bfs_with_count<CB>(mut count: i32, handle: Handle, mut cb: CB) -> i32
+pub fn bfs_with_matches<CB>(handle: Handle, mut cb: CB) -> i32
 where
-    CB: (FnMut(Handle) -> bool),
+    CB: (FnMut(Handle) -> Option<&'static Regex>),
 {
+    let mut matches: Vec<&'static Regex> = vec![];
     let mut q = vec![handle];
     while q.len() > 0 {
         let node = q.remove(0);
-        if cb(Rc::clone(&node)) {
-            count += 1;
+        if let Some(r) = cb(Rc::clone(&node)) {
+            let is_already_found = matches.iter().fold(false, |acc, each| {
+                if each.as_str() == r.as_str() {
+                    return true;
+                }
+                return acc;
+            });
+            if !is_already_found {
+                matches.push(r);
+            }
         }
         // Prepend the child's elements to the queue. This is less
         // ideal than appending them because it requires more memory,
@@ -128,7 +138,7 @@ where
         // bottom), so this approach is needed for now.
         q = prepend(q, &mut get_children(&node));
     }
-    count
+    matches.len() as i32
 }
 
 pub fn bfs<CB>(handle: Handle, mut cb: CB) -> bool
