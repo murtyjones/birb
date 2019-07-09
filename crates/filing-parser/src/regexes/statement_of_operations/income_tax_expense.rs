@@ -9,6 +9,7 @@ lazy_static! {
             |
             income\s+tax\s+expense
         )
+        \s*                                    # Sometimes there's whitespace after
         $
     ";
     pub static ref REGEX: Regex = RegexBuilder::new(&PATTERN)
@@ -25,7 +26,11 @@ mod test {
 
     #[test]
     fn test_earnings_per_share() {
-        let match_examples = vec!["Provision for income taxes", "Income tax expense"];
+        let match_examples = vec![
+            "Provision for income taxes",
+            "Provision for income taxes ",
+            "Income tax expense",
+        ];
         for each in match_examples {
             assert!(REGEX.is_match(each));
         }
