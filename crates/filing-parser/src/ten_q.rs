@@ -12,7 +12,7 @@ use html5ever::tree_builder::Attribute;
 use html5ever::QualName;
 
 // regex / text matching
-use crate::regexes::INCOME_STATEMENT_REGEXES;
+use crate::regexes::statement_of_operations::INCOME_STATEMENT_REGEXES;
 
 // helpers
 use crate::helpers::{
@@ -95,7 +95,7 @@ impl ProcessedFiling {
                  * become more accurate. If you find yourself lowering it...
                  * Think about whether that is the right thing to do.
                  */
-                const MIN_REQUIRED_MATCHES: i32 = 2;
+                const MIN_REQUIRED_MATCHES: i32 = 4;
 
                 if count >= MIN_REQUIRED_MATCHES {
                     return true;
@@ -114,6 +114,7 @@ impl ProcessedFiling {
 
             for regex in INCOME_STATEMENT_REGEXES.iter() {
                 if regex.is_match(contents_str.as_ref()) {
+                    //                    println!("{}", regex);
                     return true;
                 }
             }
