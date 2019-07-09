@@ -16,6 +16,8 @@ lazy_static! {
             \s+[-–]\s+(diluted|basic)
             |
             \s+\((basic|diluted)\)
+            |
+            ,\s+(basic|diluted)
         )*
         (:\s*)*
         $
@@ -47,6 +49,8 @@ mod test {
             "Weighted-average number of basic common shares",
             "average shares",
             "Weighted average shares outstanding: ",
+            "Weighted Average Common Shares Outstanding, Basic",
+            "Weighted Average Common Shares Outstanding, Diluted",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

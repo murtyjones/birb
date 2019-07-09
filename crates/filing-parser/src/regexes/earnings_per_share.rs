@@ -25,6 +25,8 @@ lazy_static! {
              (\s+[-–—]\s+(diluted|basic))
              |
              (\s+basic\s+and\s+diluted)*
+             |
+             ,\s+(basic|diluted)
         )*
         (:\s*)*
         $
@@ -53,6 +55,8 @@ mod test {
             "Earnings per common share:",
             "Loss per share basic and diluted: ",
             "Net (loss) earnings per share:",
+            "Net Earnings Per Common Share, Basic",
+            "Net Earnings Per Common Share, Diluted",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));
