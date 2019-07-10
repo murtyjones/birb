@@ -226,15 +226,14 @@ mod test {
             std::fs::write(output_path, stringified_result.clone()).expect("Unable to write file");
             assert!(
                 stringified_result.contains(file.table_element),
-                format!(
-                    "[file: {}] Table element expected content was not found!",
-                    i
-                )
+                "[file: {}] Table element expected content was not found!",
+                i
             );
             assert_eq!(
                 processed_filing.income_statement_table_nodes.len() as i32,
                 file.income_statement_table_count,
-                format!("[file: {}] Should have expected number of tables!", i)
+                "[file: {}] Should have expected number of tables!",
+                i
             );
         }
     }
