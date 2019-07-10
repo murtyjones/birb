@@ -7,7 +7,7 @@ lazy_static! {
         interest
         \s+
         (
-            income
+            (income|expense)
             |
             expense\s\(income\)
         )
@@ -35,14 +35,12 @@ mod test {
             "Interest income, net ",
             "Interest income, net",
             "Interest expense (income), net",
+            "Interest expense",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));
         }
-        let no_match_examples = vec![
-            "interest expense",
-            "Note 2—Interest Income and Interest Expense",
-        ];
+        let no_match_examples = vec!["Note 2—Interest Income and Interest Expense"];
         for each in no_match_examples {
             assert!(!REGEX.is_match(each));
         }

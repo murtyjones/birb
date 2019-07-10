@@ -9,8 +9,12 @@ lazy_static! {
         (\s+number\s+of)*
         \s+
         ((basic\s+)*common\s+)*
-        shares
-        (\s+outstanding)*
+        (
+            shares(\s+outstanding)*
+        |
+            outstanding\s+shares
+        )
+
         (
             \s*[-–—]\s*basic\s+and\s+diluted
             |
@@ -55,6 +59,7 @@ mod test {
             "Weighted Average Common Shares Outstanding, Diluted",
             "Weighted average shares - basic (in shares)",
             "Average shares outstanding—basic (in shares)",
+            "Weighted average outstanding shares:",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));
