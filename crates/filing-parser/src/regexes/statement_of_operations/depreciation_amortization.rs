@@ -9,8 +9,9 @@ lazy_static! {
         (
             ,\s+amortization,\s+and\s+decommissioning
             |
-            \s+and\s+amortization\s+expense
+            \s+and\s+amortization
         )*
+        (\s+expense)*
         $
     ";
     pub static ref REGEX: Regex = RegexBuilder::new(&PATTERN)
@@ -32,6 +33,7 @@ mod test {
             "depreciation",
             "  depreciation",
             "Depreciation and amortization expense",
+            "Depreciation expense",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

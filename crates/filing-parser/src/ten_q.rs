@@ -1,7 +1,6 @@
 // standard library / core
 use core::borrow::BorrowMut;
 use regex::Regex;
-use std::cell::RefCell;
 use std::rc::Rc;
 
 // html parsing
@@ -16,7 +15,7 @@ use crate::regexes::statement_of_operations::INCOME_STATEMENT_REGEXES;
 
 // helpers
 use crate::helpers::{
-    add_attribute, bfs, bfs_no_return, bfs_with_matches, create_x_birb_attr, tendril_to_string,
+    add_attribute, bfs_no_return, bfs_with_matches, create_x_birb_attr, tendril_to_string,
 };
 
 pub struct ProcessedFiling {
@@ -224,13 +223,14 @@ mod test {
             );
 
             let stringified_result = processed_filing.get_doc_as_str();
-            //            assert!(
-            //                stringified_result.contains(file.table_element),
-            //                "Table element expected content was not found!"
-            //            );
-            println!(
-                "Table count: {}",
-                processed_filing.income_statement_table_nodes.len()
+            assert!(
+                stringified_result.contains(file.table_element),
+                "Table element expected content was not found!"
+            );
+            assert_eq!(
+                processed_filing.income_statement_table_nodes.len() as i32,
+                file.income_statement_table_count,
+                "Should have expected number of tables!"
             );
             let output_path = String::from(format!("./examples/10-Q/output/{}.html", i));
             std::fs::write(output_path, stringified_result).expect("Unable to write file");
