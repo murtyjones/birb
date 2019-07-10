@@ -7,11 +7,11 @@ lazy_static! {
         net
         \s+
         (
-            (income|profit)(\s+\(loss\))*
+            (earnings|income|profit)(\s+\(loss\))*
             |
             loss
             |
-            \(loss\)\s+earnings
+            \(loss\)[\s/]+(earnings|income|profit)
         )
         $
     ";
@@ -35,6 +35,7 @@ mod test {
             "Net loss",
             "Net (loss) earnings",
             "Net Profit (Loss)",
+            "Net (loss)/income",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

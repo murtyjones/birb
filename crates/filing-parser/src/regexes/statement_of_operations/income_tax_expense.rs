@@ -4,6 +4,7 @@ use regex::{Regex, RegexBuilder};
 lazy_static! {
     static ref PATTERN: &'static str = r"
         ^
+        (\(benefit\)[\s/]+)*
         (
             provision\s+for\s+income\s+taxes
             |
@@ -27,6 +28,7 @@ mod test {
     #[test]
     fn test_earnings_per_share() {
         let match_examples = vec![
+            "(Benefit)/provision for income taxes",
             "Provision for income taxes",
             "Provision for income taxes ",
             "Income tax expense",
