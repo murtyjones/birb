@@ -12,7 +12,7 @@ lazy_static! {
             |
             earnings(\s+\(loss\))*
             |
-            \(loss\)\s+(earnings|income)
+            \(loss\)[\s/]+(earnings|income)          # eg. `(loss) earnings` or `(loss)/earnings`
             |
             loss
         )
@@ -61,6 +61,7 @@ mod test {
             "(Loss) income per common share - basic and diluted:",
             "   Income (loss) per share",
             "Earnings per share:",
+            "(Loss)/earnings per share:",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));
