@@ -74,7 +74,8 @@ impl ProcessedFiling {
             self.borrow_mut()
                 .income_statement_table_nodes
                 .push(Rc::clone(handle));
-            self.attach_income_statement_attributes();
+            let index = self.borrow_mut().income_statement_table_nodes.len() as i32 - 1;
+            self.attach_income_statement_attributes(&Rc::clone(handle), index);
             return true;
         };
         false
@@ -122,22 +123,20 @@ impl ProcessedFiling {
         None
     }
 
-    fn attach_income_statement_attributes(&mut self) {
+    fn attach_income_statement_attributes(&mut self, handle: &Handle, index: i32) {
         // If table was found, attach TEMPORARY red background to immediate parent
         // Add the custom style attribute (TODO remove this eventually):
         let colorizer: Attribute = Attribute {
             name: QualName::new(None, ns!(), local_name!("style")),
             value: "background-color: red;".to_tendril(),
         };
-        for (i, each) in self.income_statement_table_nodes.iter().enumerate() {
-            add_attribute(each, colorizer.clone(), Some("style"));
-            // add custom birb income statement identifier
-            add_attribute(
-                each,
-                create_x_birb_attr("x-birb-income-statement-table", i as i32),
-                None,
-            );
-        }
+        add_attribute(handle, colorizer.clone(), Some("style"));
+        // add custom birb income statement identifier
+        add_attribute(
+            handle,
+            create_x_birb_attr("x-birb-income-statement-table", index),
+            None,
+        );
     }
 }
 
@@ -223,6 +222,8 @@ mod test {
             );
 
             let stringified_result = processed_filing.get_doc_as_str();
+            let output_path = String::from(format!("./examples/10-Q/output/{}.html", i));
+            std::fs::write(output_path, stringified_result.clone()).expect("Unable to write file");
             assert!(
                 stringified_result.contains(file.table_element),
                 "Table element expected content was not found!"
@@ -232,8 +233,6 @@ mod test {
                 file.income_statement_table_count,
                 "Should have expected number of tables!"
             );
-            let output_path = String::from(format!("./examples/10-Q/output/{}.html", i));
-            std::fs::write(output_path, stringified_result).expect("Unable to write file");
         }
     }
 }
