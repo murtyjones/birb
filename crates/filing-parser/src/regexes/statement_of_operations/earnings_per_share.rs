@@ -62,6 +62,7 @@ mod test {
             "   Income (loss) per share",
             "Earnings per share:",
             "(Loss)/earnings per share:",
+            "Loss per share:",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

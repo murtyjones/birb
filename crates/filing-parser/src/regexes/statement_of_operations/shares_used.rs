@@ -12,6 +12,8 @@ lazy_static! {
         in
         \s+
         (
+            computing\s+net\s+(earnings|income|loss)\s+per\s+share
+            |
             per\s+share\s+(calculation|computations)
             |
             computation\s+of\s+per\s+common\s+share\s+data
@@ -37,6 +39,7 @@ mod test {
             "Shares used in per share calculation:",
             "Shares used in computation of per common share data:",
             "Weighted average number of common shares used in per share computations",
+            "Shares used in computing net loss per share:",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

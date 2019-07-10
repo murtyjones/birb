@@ -33,6 +33,7 @@ mod test {
             "Net income",
             "Net income (loss)",
             "Net loss",
+            "NET LOSS",
             "Net (loss) earnings",
             "Net Profit (Loss)",
             "Net (loss)/income",
