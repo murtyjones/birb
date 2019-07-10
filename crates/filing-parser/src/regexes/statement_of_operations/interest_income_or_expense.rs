@@ -4,7 +4,14 @@ use regex::{Regex, RegexBuilder};
 lazy_static! {
     static ref PATTERN: &'static str = r"
         ^
-        interest\s+income(,\s+net)*
+        interest
+        \s+
+        (
+            income
+            |
+            expense\s\(income\)
+        )
+        (,\s+net)*
         \s*
         $
     ";
@@ -27,6 +34,7 @@ mod test {
             "interest income",
             "Interest income, net ",
             "Interest income, net",
+            "Interest expense (income), net",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

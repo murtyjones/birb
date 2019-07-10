@@ -60,6 +60,7 @@ pub fn get_files() -> Vec<TestableFiling> {
                             s3: "edgar/data/1001288/0001001288-16-000069.txt",
                             path: "examples/10-Q/input/0001001288-16-000069.txt",
                             table_element: "<table cellspacing=\"0\" cellpadding=\"0\" style=\"background-color: red;\" x-birb-income-statement-table=\"0\">"
+                            // count: 2
                         },
 //                        TestableFiling {
 //                            s3: "edgar/data/100625/0001493152-17-009297.txt",

@@ -4,10 +4,14 @@ use regex::{Regex, RegexBuilder};
 lazy_static! {
     static ref PATTERN: &'static str = r"
         ^
+        net
+        \s+
         (
-            net\s+income(\s+\(loss\))*
+            income(\s+\(loss\))*
             |
-            net\s+loss
+            loss
+            |
+            \(loss\)\s+earnings
         )
         $
     ";
@@ -25,7 +29,12 @@ mod test {
 
     #[test]
     fn test_earnings_per_share() {
-        let match_examples = vec!["Net income", "Net income (loss)", "Net loss"];
+        let match_examples = vec![
+            "Net income",
+            "Net income (loss)",
+            "Net loss",
+            "Net (loss) earnings",
+        ];
         for each in match_examples {
             assert!(REGEX.is_match(each));
         }
