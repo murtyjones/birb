@@ -5,7 +5,11 @@ lazy_static! {
     static ref PATTERN: &'static str = r"
         ^
         \s*                                           # sometimes there's whitespace before
-        (basic\s+and\s+diluted\s+)*
+        (
+            basic\s+and\s+diluted\s+
+            |
+            (basic|diluted)\s+
+        )*
         (net\s+)*
         (
             income(\s+\(loss\))*
@@ -63,6 +67,7 @@ mod test {
             "Earnings per share:",
             "(Loss)/earnings per share:",
             "Loss per share:",
+            "Basic earnings per common share",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));
