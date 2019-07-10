@@ -3,11 +3,12 @@ use regex::{Regex, RegexBuilder};
 
 lazy_static! {
     static ref PATTERN: &'static str = r"
-       ^
+        ^
+        \s*                                           # sometimes there's whitespace before
         (basic\s+and\s+diluted\s+)*
         (net\s+)*
         (
-            income
+            income(\s+\(loss\))*
             |
             earnings(\s+\(loss\))*
             |
@@ -58,6 +59,7 @@ mod test {
             "Net Earnings Per Common Share, Basic",
             "Net Earnings Per Common Share, Diluted",
             "(Loss) income per common share - basic and diluted:",
+            "   Income (loss) per share",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));
