@@ -42,7 +42,7 @@ pub fn get_files() -> Vec<TestableFiling> {
             s3: "edgar/data/1012019/0001437749-16-036870.txt",
             path: "examples/10-Q/input/0001437749-16-036870.txt",
             table_element: r#"<table id="TBL2422" cellspacing="0" cellpadding="0" border="0" style="background-color: red;" x-birb-income-statement-table="0">"#,
-            income_statement_table_count: 2
+            income_statement_table_count: 3
         },
         TestableFiling {
             s3: "edgar/data/1000045/0001193125-16-454777.txt",
