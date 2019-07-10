@@ -8,6 +8,8 @@ lazy_static! {
         depreciation
         (
             ,\s+amortization,\s+and\s+decommissioning
+            |
+            \s+and\s+amortization\s+expense
         )*
         $
     ";
@@ -29,6 +31,7 @@ mod test {
             "Depreciation, amortization, and decommissioning",
             "depreciation",
             "  depreciation",
+            "Depreciation and amortization expense",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));
