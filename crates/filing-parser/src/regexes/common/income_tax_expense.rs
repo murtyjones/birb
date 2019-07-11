@@ -9,6 +9,8 @@ lazy_static! {
             provision\s+for\s+income\s+taxes
             |
             income\s+tax\s+expense
+            |
+            income\s+tax\s+\(expense\)\s+benefit
         )
         \s*                                    # Sometimes there's whitespace after
         $
@@ -26,12 +28,13 @@ mod test {
     use super::*;
 
     #[test]
-    fn test_earnings_per_share() {
+    fn test() {
         let match_examples = vec![
             "(Benefit)/provision for income taxes",
             "Provision for income taxes",
             "Provision for income taxes ",
             "Income tax expense",
+            "Income tax (expense) benefit",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

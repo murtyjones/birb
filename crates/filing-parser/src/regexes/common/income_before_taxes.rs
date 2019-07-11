@@ -21,6 +21,8 @@ lazy_static! {
             income\s+tax\s+expense
             |
             taxes\s+on\s+income
+            |
+            income\s+tax\s+\(expense\)\s+benefit
         )
         $
     ";
@@ -47,6 +49,7 @@ mod test {
             "Profit (Loss) before Income Taxes",
             "Income (loss) before taxes on income",
             "(Loss)/income before (benefit)/provision for income taxes",
+            "Income (loss) before income tax (expense) benefit",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

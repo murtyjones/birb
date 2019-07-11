@@ -28,7 +28,7 @@ mod test {
     use super::*;
 
     #[test]
-    fn test_earnings_per_share() {
+    fn test() {
         let match_examples = vec![
             "Net income",
             "Net income (loss)",
