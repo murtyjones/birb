@@ -32,7 +32,7 @@ mod test {
         let match_examples = vec![
             "(Benefit)/provision for income taxes",
             "Provision for income taxes",
-            "Provision for income taxes ",
+            "Provision for income taxes  ",
             "Income tax expense",
             "Income tax (expense) benefit",
             "Income tax benefit",

@@ -31,6 +31,7 @@ mod test {
         let match_examples = vec![
             "  Selling, general and administrative",
             "General and administrative expenses",
+            "Selling, general and administrative expenses",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));
