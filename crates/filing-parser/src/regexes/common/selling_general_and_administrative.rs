@@ -6,7 +6,7 @@ lazy_static! {
         ^
         \s*               # sometimes there's whitespace before
         (Selling,\s+)*
-        general
+        general(,)*
         \s+
         and
         \s+

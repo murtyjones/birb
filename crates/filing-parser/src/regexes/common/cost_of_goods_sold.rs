@@ -4,7 +4,16 @@ use regex::{Regex, RegexBuilder};
 lazy_static! {
     static ref PATTERN: &'static str = r"
         ^
-        cost\s+of\s+goods\s+sold
+        cost
+        \s+
+        of
+        \s+
+        (
+            goods\s+sold
+            |
+            sales
+        )
+        (:)*
         $
     ";
     pub static ref REGEX: Regex = RegexBuilder::new(&PATTERN)
@@ -21,7 +30,7 @@ mod test {
 
     #[test]
     fn test() {
-        let match_examples = vec!["Cost of goods sold"];
+        let match_examples = vec!["Cost of goods sold", "Cost of sales:"];
         for each in match_examples {
             assert!(REGEX.is_match(each));
         }
