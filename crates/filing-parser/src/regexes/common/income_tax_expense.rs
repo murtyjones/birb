@@ -10,9 +10,9 @@ lazy_static! {
             |
             income\s+tax\s+expense
             |
-            income\s+tax\s+\(expense\)\s+benefit
+            income\s+tax\s+(\(expense\)\s+)*benefit
         )
-        \s*                                    # Sometimes there's whitespace after
+        \s*                                            # Sometimes there's whitespace after
         $
     ";
     pub static ref REGEX: Regex = RegexBuilder::new(&PATTERN)
@@ -35,11 +35,12 @@ mod test {
             "Provision for income taxes ",
             "Income tax expense",
             "Income tax (expense) benefit",
+            "Income tax benefit",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));
         }
-        let no_match_examples = vec!["earnings per share", "income", "net income"];
+        let no_match_examples = vec!["earnings per share", "income", "net income", "tax"];
         for each in no_match_examples {
             assert!(!REGEX.is_match(each));
         }
