@@ -38,6 +38,7 @@ mod test {
             "Interest income, net",
             "Interest expense (income), net",
             "Interest expense",
+            "Interest expense, net",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));
