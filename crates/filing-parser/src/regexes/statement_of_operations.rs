@@ -17,5 +17,6 @@ lazy_static! {
         &selling_general_and_administrative::REGEX,
         &non_interest_income::REGEX,
         &dividends_per_share::REGEX,
+        &provision_for_bad_debts::REGEX,
     ];
 }
