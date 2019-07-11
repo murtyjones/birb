@@ -8,7 +8,7 @@ lazy_static! {
         \s+
         and
         \s+
-        administrative
+        (administrative|professional)
         \s+
         fees
         $
@@ -27,7 +27,10 @@ mod test {
 
     #[test]
     fn test() {
-        let match_examples = vec!["Legal and administrative fees"];
+        let match_examples = vec![
+            "Legal and administrative fees",
+            "Legal and professional fees",
+        ];
         for each in match_examples {
             assert!(REGEX.is_match(each));
         }

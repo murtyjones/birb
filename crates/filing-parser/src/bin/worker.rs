@@ -33,7 +33,7 @@ fn main() {
     let contents = String::from_utf8(object).unwrap();
     if TEN_K_REGEX.is_match(&*contents) {
         println!("10-K, skipping");
-        return ();
+        return main();
     }
 
     println!("Processing...");
