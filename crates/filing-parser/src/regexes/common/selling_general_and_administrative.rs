@@ -32,6 +32,7 @@ mod test {
             "  Selling, general and administrative",
             "General and administrative expenses",
             "Selling, general and administrative expenses",
+            "General and administrative",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));
