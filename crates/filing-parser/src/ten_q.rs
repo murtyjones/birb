@@ -134,7 +134,7 @@ impl ProcessedFiling {
         // add custom birb income statement identifier
         add_attribute(
             handle,
-            create_x_birb_attr("x-birb-income-statement-table", index),
+            create_x_birb_attr("x-birb-earnings-table", index),
             None,
         );
     }
