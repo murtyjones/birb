@@ -15,7 +15,7 @@ lazy_static! {
         &cost_of_goods_sold::REGEX,
         &operating_expenses::REGEX,
         &selling_general_and_administrative::REGEX,
-        &non_interest_income::REGEX,
+        &non_interest_income_expense::REGEX,
         &dividends_per_share::REGEX,
         &provision_for_bad_debts::REGEX,
     ];

@@ -7,7 +7,7 @@ pub mod income_tax_expense;
 pub mod interest_income_or_expense;
 pub mod legal_and_admin_fees;
 pub mod net_income;
-pub mod non_interest_income;
+pub mod non_interest_income_expense;
 pub mod operating_expenses;
 pub mod provision_for_bad_debts;
 pub mod selling_general_and_administrative;

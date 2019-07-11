@@ -6,9 +6,11 @@ lazy_static! {
         ^
         Non-interest
         \s+
-        income
-        \s+
-        \(loss\)
+        (
+            income\s+\(loss\)
+            |
+            expense
+        )
         (:)*
         $
     ";
@@ -26,7 +28,7 @@ mod test {
 
     #[test]
     fn test() {
-        let match_examples = vec!["Non-interest income (loss):"];
+        let match_examples = vec!["Non-interest income (loss):", "Non-interest expense:"];
         for each in match_examples {
             assert!(REGEX.is_match(each));
         }
