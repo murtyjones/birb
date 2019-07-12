@@ -4,6 +4,7 @@ use regex::{Regex, RegexBuilder};
 lazy_static! {
     static ref PATTERN: &'static str = r"
         ^
+        \s*                          # sometimes there's whitespace before
         (net\s+)*
         interest
         \s+
@@ -13,7 +14,7 @@ lazy_static! {
             expense\s\(income\)
         )
         (,\s+net)*
-        \s*
+        \s*                          # sometimes there's whitespace after
         $
     ";
     pub static ref REGEX: Regex = RegexBuilder::new(&PATTERN)
@@ -39,6 +40,7 @@ mod test {
             "Interest expense (income), net",
             "Interest expense",
             "Interest expense, net",
+            "  Interest expense",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

@@ -6,7 +6,7 @@ lazy_static! {
         ^
         \s*                                           # sometimes there's whitespace before
         (net\s+)*
-        income
+        income(\s+\(loss\))*
         \s+
         from
         \s+
@@ -32,6 +32,7 @@ mod test {
         let match_examples = vec![
             "Income From Continuing Operations",
             "Net income from continuing operations",
+            "Net income (loss) from continuing operations",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

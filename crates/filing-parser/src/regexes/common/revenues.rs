@@ -5,7 +5,11 @@ lazy_static! {
     static ref PATTERN: &'static str = r"
         ^
         \s*                                           # sometimes there's whitespace before
-        (total\s+)*
+        (
+            total\s+
+            |
+            income\s+and\s+
+        )*
         revenue(s)*
         (\s+and\s+other\s+income)*
         (:)*
@@ -32,6 +36,7 @@ mod test {
             "total revenue",
             "total revenues",
             "revenue:",
+            "Income and Revenues:",
             "Revenues and other income:",
         ];
         for each in match_examples {
