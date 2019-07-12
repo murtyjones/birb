@@ -5,6 +5,7 @@ lazy_static! {
     static ref PATTERN: &'static str = r"
         ^
         \s*                                           # sometimes there's whitespace before
+        (net\s+)*
         income
         \s+
         from
@@ -28,7 +29,10 @@ mod test {
 
     #[test]
     fn test() {
-        let match_examples = vec!["Income From Continuing Operations"];
+        let match_examples = vec![
+            "Income From Continuing Operations",
+            "Net income from continuing operations",
+        ];
         for each in match_examples {
             assert!(REGEX.is_match(each));
         }
