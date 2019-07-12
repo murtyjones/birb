@@ -4,6 +4,7 @@ use regex::{Regex, RegexBuilder};
 lazy_static! {
     static ref PATTERN: &'static str = r"
         ^
+        \s*                                        # Sometimes there's whitespace before
         net
         \s+
         (
@@ -37,6 +38,7 @@ mod test {
             "Net (loss) earnings",
             "Net Profit (Loss)",
             "Net (loss)/income",
+            "  Net income",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

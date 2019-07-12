@@ -4,26 +4,34 @@ use regex::{Regex, RegexBuilder};
 lazy_static! {
     static ref PATTERN: &'static str = r"
         ^
-        (operating\s+)*
+        \s*                                                       # Sometimes there's whitespace before
         (
-            (income|profit)(\s+\(loss\))*
+            pre[-–—]tax\s+income
             |
-            \(loss\)[\s/]+(earnings|income)    # eg. `(loss) earnings` or `(loss)/earnings`
-            |
-            loss
+            (
+                (operating\s+)*
+                (
+                    (income|profit)(\s+\(loss\))*
+                    |
+                    \(loss\)[\s/]+(earnings|income)               # eg. `(loss) earnings` or `(loss)/earnings`
+                    |
+                    loss
+                )
+                \s+
+                before\s+
+                ((\(benefit\)/)*provision\s+for\s+)*
+                (
+                    income\s+taxes
+                    |
+                    income\s+tax\s+(expense|provision|benefit)
+                    |
+                    taxes\s+on\s+income
+                    |
+                    income\s+tax\s+\(expense\)\s+benefit
+                )
+            )
         )
-        \s+
-        before\s+
-        ((\(benefit\)/)*provision\s+for\s+)*
-        (
-            income\s+taxes
-            |
-            income\s+tax\s+(expense|provision|benefit)
-            |
-            taxes\s+on\s+income
-            |
-            income\s+tax\s+\(expense\)\s+benefit
-        )
+        \s*                                                      # Sometimes there's whitespace after
         $
     ";
     pub static ref REGEX: Regex = RegexBuilder::new(&PATTERN)
@@ -53,6 +61,7 @@ mod test {
             "Income before income tax provision",
             "Income before provision for income taxes",
             "Loss before income tax benefit",
+            "  Pre-tax income",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

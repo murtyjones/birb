@@ -6,12 +6,11 @@ lazy_static! {
         ^
         \s*               # sometimes there's whitespace before
         (Selling,\s+)*
-        general(,)*
-        \s+
-        and
-        \s+
-        administrative
-        (\s+expenses)*
+        (
+            general(,)*\s+and\s+administrative(\s+expenses)*
+            |
+            G\s+&\s+A
+        )
         $
     ";
     pub static ref REGEX: Regex = RegexBuilder::new(&PATTERN)
@@ -33,6 +32,7 @@ mod test {
             "General and administrative expenses",
             "Selling, general and administrative expenses",
             "General and administrative",
+            "Selling, G & A",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

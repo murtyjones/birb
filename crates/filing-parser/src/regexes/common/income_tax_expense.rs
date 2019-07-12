@@ -4,11 +4,12 @@ use regex::{Regex, RegexBuilder};
 lazy_static! {
     static ref PATTERN: &'static str = r"
         ^
+        \s*                                            # Sometimes there's whitespace before
         (\(benefit\)[\s/]+)*
         (
             provision\s+for\s+income\s+taxes
             |
-            income\s+tax\s+expense
+            income\s+tax(\s+expense)*
             |
             income\s+tax\s+(\(expense\)\s+)*benefit
             |
@@ -39,6 +40,7 @@ mod test {
             "Income tax (expense) benefit",
             "Income tax expense (benefit)",
             "Income tax benefit",
+            "  Income tax",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));
