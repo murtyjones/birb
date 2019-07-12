@@ -692,6 +692,7 @@ dependencies = [
 name = "filing-metadata"
 version = "0.1.0"
 dependencies = [
+ "aws 0.1.0",
  "csv 1.0.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "env_logger 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",

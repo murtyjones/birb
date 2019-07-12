@@ -5,6 +5,7 @@ use rusoto_core::Region;
 use rusoto_s3::{GetObjectRequest, PutObjectRequest, S3Client, S3};
 use std::time::{Duration, Instant};
 
+use crate::aws::s3::get_s3_client;
 use crate::time_periods::Quarter;
 use crate::time_periods::Year;
 
@@ -14,18 +15,6 @@ pub fn main(q: Quarter, y: Year) -> Vec<u8> {
     let filename = format!("{}/QTR{}/master.idx", y, q);
     let client = get_s3_client();
     get_s3_object(&client, &bucket, &filename)
-}
-
-pub fn get_s3_client() -> S3Client {
-    #[cfg(debug_assertions)]
-    let mut credentials = ChainProvider::new();
-    #[cfg(not(debug_assertions))]
-    let mut credentials = InstanceMetadataProvider::new();
-    S3Client::new_with(
-        HttpClient::new().expect("failed to create request dispatcher"),
-        credentials,
-        Region::UsEast1,
-    )
 }
 
 #[cfg(not(test))]

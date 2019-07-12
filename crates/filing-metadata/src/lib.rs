@@ -4,6 +4,7 @@ extern crate postgres;
 extern crate postgres_derive;
 #[macro_use]
 extern crate log;
+extern crate aws;
 extern crate env_logger;
 
 extern crate futures;

@@ -1,11 +1,20 @@
 use futures::{Future, Stream};
-use rusoto_core::credential::{ChainProvider, InstanceMetadataProvider};
+use rusoto_core::credential::{ChainProvider, InstanceMetadataProvider, ProfileProvider};
 use rusoto_core::request::HttpClient;
 use rusoto_core::Region;
 use rusoto_s3::{GetObjectRequest, ListObjectsRequest, Object, PutObjectRequest, S3Client, S3};
 
 pub fn get_s3_client() -> S3Client {
-    let credentials = ChainProvider::new();
+    let mut p = ProfileProvider::new()
+        .ok()
+        .expect("Couldn't make ProfilePrivder");
+    p.set_profile("birb");
+
+    #[cfg(debug_assertions)]
+    let mut credentials = ChainProvider::with_profile_provider(p);
+    #[cfg(not(debug_assertions))]
+    let mut credentials = InstanceMetadataProvider::new();
+
     S3Client::new_with(
         HttpClient::new().expect("failed to create request dispatcher"),
         credentials,
