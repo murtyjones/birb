@@ -6,8 +6,7 @@ lazy_static! {
         ^
         \s*                          # sometimes there's whitespace before
         (dividends|distributions)
-        \s+
-        declared
+        (\s+declared)*
         \s+
         per
         (\s+common)*
@@ -32,6 +31,7 @@ mod test {
         let match_examples = vec![
             "Dividends declared per common share",
             "Distributions declared per share",
+            "Dividends per share",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

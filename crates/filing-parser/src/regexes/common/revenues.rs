@@ -7,6 +7,7 @@ lazy_static! {
         \s*                                           # sometimes there's whitespace before
         (total\s+)*
         revenue(s)*
+        (\s+and\s+other\s+income)*
         (:)*
         \s*                                           # sometimes there's whitespace af
         $
@@ -31,6 +32,7 @@ mod test {
             "total revenue",
             "total revenues",
             "revenue:",
+            "Revenues and other income:",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

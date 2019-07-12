@@ -11,6 +11,7 @@ lazy_static! {
             |
             G\s+&\s+A
         )
+        \s*               # sometimes there's whitespace after
         $
     ";
     pub static ref REGEX: Regex = RegexBuilder::new(&PATTERN)
@@ -30,6 +31,7 @@ mod test {
         let match_examples = vec![
             "  Selling, general and administrative",
             "General and administrative expenses",
+            "General and administrative ",
             "Selling, general and administrative expenses",
             "General and administrative",
             "Selling, G & A",
