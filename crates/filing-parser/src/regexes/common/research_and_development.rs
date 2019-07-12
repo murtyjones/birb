@@ -10,6 +10,8 @@ lazy_static! {
         and
         \s+
         development
+        (\s+expenses)*
+        (,\s+net)*
         \s*                                            # Sometimes there's whitespace after
         $
     ";
@@ -27,7 +29,10 @@ mod test {
 
     #[test]
     fn test() {
-        let match_examples = vec!["Research and development"];
+        let match_examples = vec![
+            "Research and development",
+            "RESEARCH AND DEVELOPMENT EXPENSES, NET",
+        ];
         for each in match_examples {
             assert!(REGEX.is_match(each));
         }
