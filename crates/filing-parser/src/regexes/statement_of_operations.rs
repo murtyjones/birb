@@ -19,5 +19,7 @@ lazy_static! {
         &dividends_per_share::REGEX,
         &provision_for_bad_debts::REGEX,
         &income_from_continuing_operations::REGEX,
+        &real_estate_taxes::REGEX,
+        &revenues::REGEX,
     ];
 }
