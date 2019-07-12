@@ -14,6 +14,8 @@ lazy_static! {
             income\s+tax\s+(\(expense\)\s+)*benefit
             |
             income\s+tax\s+expense\s+\(benefit\)
+            |
+            income\s+tax\s+\(provision\)\s+benefit
         )
         \s*                                            # Sometimes there's whitespace after
         $
@@ -41,6 +43,7 @@ mod test {
             "Income tax expense (benefit)",
             "Income tax benefit",
             "  Income tax",
+            "Income tax (provision) benefit",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

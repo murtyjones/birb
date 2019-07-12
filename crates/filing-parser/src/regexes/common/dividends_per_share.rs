@@ -4,14 +4,13 @@ use regex::{Regex, RegexBuilder};
 lazy_static! {
     static ref PATTERN: &'static str = r"
         ^
-        \s*            # sometimes there's whitespace before
-        dividends
+        \s*                          # sometimes there's whitespace before
+        (dividends|distributions)
         \s+
         declared
         \s+
         per
-        \s+
-        common
+        (\s+common)*
         \s+
         share
         $
@@ -30,7 +29,10 @@ mod test {
 
     #[test]
     fn test() {
-        let match_examples = vec!["Dividends declared per common share"];
+        let match_examples = vec![
+            "Dividends declared per common share",
+            "Distributions declared per share",
+        ];
         for each in match_examples {
             assert!(REGEX.is_match(each));
         }
