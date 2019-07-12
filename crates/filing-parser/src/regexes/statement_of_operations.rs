@@ -31,5 +31,6 @@ lazy_static! {
         &real_estate_taxes::REGEX,
         &revenues::REGEX,
         &research_and_development::REGEX,
+        &management_fees::REGEX,
     ];
 }

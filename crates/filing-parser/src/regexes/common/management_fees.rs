@@ -5,16 +5,10 @@ lazy_static! {
     static ref PATTERN: &'static str = r"
         ^
         \s*                                        # Sometimes there's whitespace before
-        net
+        management
         \s+
-        (
-            (earnings|income|profit)(\s+\(loss\))*
-            |
-            loss
-            |
-            \(loss\)[\s/]+(earnings|income|profit)
-        )
-        (\s+attributable\s+to\s+(shareholders|unitholders))*
+        fees
+        \s*                                        # Sometimes there's whitespace after
         $
     ";
     pub static ref REGEX: Regex = RegexBuilder::new(&PATTERN)
@@ -31,21 +25,11 @@ mod test {
 
     #[test]
     fn test() {
-        let match_examples = vec![
-            "Net income",
-            "Net income (loss)",
-            "Net loss",
-            "NET LOSS",
-            "Net (loss) earnings",
-            "Net Profit (Loss)",
-            "Net (loss)/income",
-            "  Net income",
-            "Net income (loss) attributable to unitholders",
-        ];
+        let match_examples = vec!["management fees"];
         for each in match_examples {
             assert!(REGEX.is_match(each));
         }
-        let no_match_examples = vec!["earnings per share", "income"];
+        let no_match_examples = vec!["management", "fees"];
         for each in no_match_examples {
             assert!(!REGEX.is_match(each));
         }
