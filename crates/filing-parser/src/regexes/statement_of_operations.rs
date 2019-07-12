@@ -21,5 +21,6 @@ lazy_static! {
         &income_from_continuing_operations::REGEX,
         &real_estate_taxes::REGEX,
         &revenues::REGEX,
+        &research_and_development::REGEX,
     ];
 }

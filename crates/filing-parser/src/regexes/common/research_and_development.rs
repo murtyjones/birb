@@ -4,19 +4,13 @@ use regex::{Regex, RegexBuilder};
 lazy_static! {
     static ref PATTERN: &'static str = r"
         ^
-        \s*                                           # sometimes there's whitespace before
-        (net\s+)*
-        (
-            income(\s+\(loss\))*
-            |
-            loss
-        )
+        \s*                                            # Sometimes there's whitespace before
+        research
         \s+
-        from
+        and
         \s+
-        continuing
-        \s+
-        operations
+        development
+        \s*                                            # Sometimes there's whitespace after
         $
     ";
     pub static ref REGEX: Regex = RegexBuilder::new(&PATTERN)
@@ -33,16 +27,11 @@ mod test {
 
     #[test]
     fn test() {
-        let match_examples = vec![
-            "Income From Continuing Operations",
-            "Net income from continuing operations",
-            "Net income (loss) from continuing operations",
-            "Loss from continuing operations",
-        ];
+        let match_examples = vec!["Research and development"];
         for each in match_examples {
             assert!(REGEX.is_match(each));
         }
-        let no_match_examples = vec!["net income"];
+        let no_match_examples = vec!["research", "development"];
         for each in no_match_examples {
             assert!(!REGEX.is_match(each));
         }

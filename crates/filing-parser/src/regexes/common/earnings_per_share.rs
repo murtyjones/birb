@@ -70,6 +70,7 @@ mod test {
             "Basic earnings per common share",
             "Basic and diluted net loss per share:",
             "Earnings per common share-basic",
+            "Basic and diluted earnings (loss) per share",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));
