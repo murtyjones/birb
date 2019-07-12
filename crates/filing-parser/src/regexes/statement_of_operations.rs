@@ -2,6 +2,15 @@ use regex::Regex;
 
 use crate::regexes::common::*;
 
+/*
+ * There should be at least this many regex matches that indicate
+ * that a given table is an income statement. If less, return false.
+ * This number should get larger over time as the regex patterns
+ * become more accurate. If you find yourself lowering it...
+ * Think about whether that is the right thing to do.
+ */
+pub static INCOME_STATEMENT_MIN_REQUIRED_REGEXES: i32 = 4;
+
 lazy_static! {
     pub static ref INCOME_STATEMENT_REGEXES: Vec<&'static Regex> = vec![
         &earnings_per_share::REGEX,

@@ -11,6 +11,7 @@ use html5ever::tree_builder::Attribute;
 use html5ever::QualName;
 
 // regex / text matching
+use crate::regexes::statement_of_operations::INCOME_STATEMENT_MIN_REQUIRED_REGEXES;
 use crate::regexes::statement_of_operations::INCOME_STATEMENT_REGEXES;
 
 // helpers
@@ -113,16 +114,7 @@ impl ProcessedFiling {
                 let cb = |n| self.table_regex_match(&n);
                 let count = bfs_with_matches(Rc::clone(handle), cb);
 
-                /*
-                 * There should be at least 2 regex matches that indicate
-                 * that this is an income statement. If less, return false.
-                 * This number should get larger over time as the regex patterns
-                 * become more accurate. If you find yourself lowering it...
-                 * Think about whether that is the right thing to do.
-                 */
-                const MIN_REQUIRED_MATCHES: i32 = 4;
-
-                if count >= MIN_REQUIRED_MATCHES {
+                if count >= INCOME_STATEMENT_MIN_REQUIRED_REGEXES {
                     return true;
                 }
             }
