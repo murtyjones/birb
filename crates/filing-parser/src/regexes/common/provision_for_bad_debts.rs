@@ -8,10 +8,11 @@ lazy_static! {
         Provision
         \s+
         for
-        \s+
-        bad
-        \s+
-        debts
+        (
+            \s+bad\s+debts
+            |
+            \s+credit\s+losses
+        )
         $
     ";
     pub static ref REGEX: Regex = RegexBuilder::new(&PATTERN)
@@ -28,7 +29,7 @@ mod test {
 
     #[test]
     fn test() {
-        let match_examples = vec!["provision for bad debts"];
+        let match_examples = vec!["provision for bad debts", "Provision for credit losses"];
         for each in match_examples {
             assert!(REGEX.is_match(each));
         }

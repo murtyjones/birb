@@ -4,10 +4,10 @@ use regex::{Regex, RegexBuilder};
 lazy_static! {
     static ref PATTERN: &'static str = r"
         ^
-        Non-interest
+        (non-interest|noninterest)
         \s+
         (
-            income\s+\(loss\)
+            income(\s+\(loss\))*
             |
             expense
         )
@@ -28,7 +28,11 @@ mod test {
 
     #[test]
     fn test() {
-        let match_examples = vec!["Non-interest income (loss):", "Non-interest expense:"];
+        let match_examples = vec![
+            "Non-interest income (loss):",
+            "Non-interest expense:",
+            "Noninterest Income",
+        ];
         for each in match_examples {
             assert!(REGEX.is_match(each));
         }
