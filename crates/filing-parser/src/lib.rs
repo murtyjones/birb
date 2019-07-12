@@ -9,6 +9,7 @@ extern crate mac;
 extern crate failure;
 extern crate rand;
 
+pub mod excluded_companies;
 pub mod helpers;
 pub mod regexes;
 pub mod ten_q;

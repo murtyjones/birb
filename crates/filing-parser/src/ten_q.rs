@@ -18,6 +18,9 @@ use crate::helpers::{
     add_attribute, bfs_no_return, bfs_with_matches, create_x_birb_attr, tendril_to_string,
 };
 
+// excluded companies
+use crate::excluded_companies::{ExcludedCompany, EXCLUDED_COMPANIES};
+
 pub struct ProcessedFiling {
     pub dom: RcDom,
     pub income_statement_table_nodes: Vec<Handle>,
@@ -31,16 +34,38 @@ pub enum ProcessingError {
 
 #[allow(dead_code)]
 impl ProcessedFiling {
-    pub fn new(filing_contents: String) -> Result<ProcessedFiling, ProcessingError> {
+    pub fn new(filing_contents: String) -> Result<ProcessedFiling, Vec<ProcessingError>> {
         let mut p_f = ProcessedFiling {
-            dom: parse_document(RcDom::default(), Default::default()).one(filing_contents),
+            dom: parse_document(RcDom::default(), Default::default()).one(&*filing_contents),
             income_statement_table_nodes: vec![],
         };
+
+        let mut errors = vec![];
 
         // Process the filing
         let result = p_f.process();
         if let Err(e) = result {
-            return Err(e);
+            errors.push(e);
+        }
+
+        /*
+         * if there are errors in finding expected tables, check
+         * whether or not the filing contains the CIK of a company
+         * that is known to not contain those tables. Some companies
+         * don't include an income statement, for example. If the
+         * filer isn't in this whitelist, return the errors.
+         *
+         * See: https://www.sec.gov/Archives/edgar/data/1003815/000100381516000011/b4assignorcorp121510k.htm
+         */
+        if errors.len() > 0 {
+            if let Some(_) = EXCLUDED_COMPANIES
+                .iter()
+                .find(|&ex_company| filing_contents.contains(ex_company.cik))
+            {
+                return Ok(p_f);
+            } else {
+                return Err(errors);
+            }
         }
 
         // Return the processed document
