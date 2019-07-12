@@ -215,8 +215,11 @@ mod test {
         let processed_filing = ProcessedFiling::new(filing_contents);
         match processed_filing {
             Ok(p_f) => p_f,
-            Err(e) => {
-                panic!("[{}] {}", path, e);
+            Err(errors) => {
+                errors.iter().for_each(|error| {
+                    println!("[{}] {}", path, error);
+                });
+                panic!("Failed to process!");
             }
         }
     }
@@ -226,9 +229,9 @@ mod test {
         let fake_html = String::from("<html></html>");
         let processed_filing = ProcessedFiling::new(fake_html);
         assert!(processed_filing.is_err());
-        if let Err(e) = processed_filing {
+        if let Err(errors) = processed_filing {
             assert_eq!(
-                e,
+                errors[0],
                 ProcessingError::NoIncomeStatementFound {
                     cik: String::from("fake")
                 }

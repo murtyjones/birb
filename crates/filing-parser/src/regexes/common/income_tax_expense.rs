@@ -11,6 +11,8 @@ lazy_static! {
             income\s+tax\s+expense
             |
             income\s+tax\s+(\(expense\)\s+)*benefit
+            |
+            income\s+tax\s+expense\s+\(benefit\)
         )
         \s*                                            # Sometimes there's whitespace after
         $
@@ -35,6 +37,7 @@ mod test {
             "Provision for income taxes  ",
             "Income tax expense",
             "Income tax (expense) benefit",
+            "Income tax expense (benefit)",
             "Income tax benefit",
         ];
         for each in match_examples {
