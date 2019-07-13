@@ -14,4 +14,5 @@ regex = "*"
 lazy_static = "*"
 mac = "*"
 rand = "*"
+rusoto_s3 = "*"
 aws = { path = "../aws", version = "*" }

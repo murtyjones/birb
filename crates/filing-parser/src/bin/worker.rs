@@ -5,6 +5,7 @@ use aws::s3;
 use filing_parser::master_processor::ParsedFiling;
 use rand::Rng;
 use regex::{Regex, RegexBuilder};
+use rusoto_s3::{Object, S3Client};
 
 const BUCKET: &'static str = "birb-edgar-filings";
 
@@ -18,29 +19,32 @@ lazy_static! {
 
 /// Intended to randomly process files from S3
 fn main() {
-    loop {
-        process_randomly();
+    let client = s3::get_s3_client();
+    let data = s3::list_s3_objects(&client, BUCKET);
+
+    let starting = 0;
+    let last_index = data.len() - 1;
+
+    for i in starting..=last_index {
+        process(&client, &data[i]);
     }
 }
 
-fn process_randomly() {
-    let client = s3::get_s3_client();
-    let data = s3::list_s3_objects(&client, BUCKET);
-    let i = rand::thread_rng().gen_range(0, data.len() - 1);
-    let random_object_key = data[i].key.as_ref().expect("Object should have a key!");
-    //    let random_object_key = &String::from("edgar/data/1010566/0001062993-16-008979.txt");
+fn process(client: &S3Client, data: &Object) {
+    let random_object_key = data.key.as_ref().expect("Object should have a key!");
+    //    let random_object_key = &String::from("edgar/data/1011509/0001104659-16-100057.txt");
 
     println!("Random object to process: {:?}", &random_object_key);
 
-    let object = s3::get_s3_object(&client, BUCKET, random_object_key);
+    let object = s3::get_s3_object(client, BUCKET, random_object_key);
 
     println!("Object retrieved...");
 
     let contents = String::from_utf8(object).unwrap();
-    if TEN_K_REGEX.is_match(&*contents) {
-        println!("10-K, skipping");
-        return main();
-    }
+    //    if TEN_K_REGEX.is_match(&*contents) {
+    //        println!("10-K, skipping");
+    //        return ();
+    //    }
 
     println!("Processing...");
 

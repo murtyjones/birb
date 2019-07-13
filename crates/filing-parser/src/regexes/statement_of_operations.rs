@@ -32,5 +32,6 @@ lazy_static! {
         &revenues::REGEX,
         &research_and_development::REGEX,
         &management_fees::REGEX,
+        &stock_based_compensation::REGEX,
     ];
 }

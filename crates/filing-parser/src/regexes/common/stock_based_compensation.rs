@@ -5,15 +5,8 @@ lazy_static! {
     static ref PATTERN: &'static str = r"
         ^
         \s*                                           # sometimes there's whitespace before
-        depreciation
-        (
-            ,\s+depletion\s+and\s+amortization
-            |
-            ,\s+amortization,\s+and\s+decommissioning
-            |
-            \s+and\s+amortization
-        )*
-        (\s+expense(s)*)*
+        stock\s+based\s+compensation
+        \s*                                           # sometimes there's whitespace after
         $
     ";
     pub static ref REGEX: Regex = RegexBuilder::new(&PATTERN)
@@ -30,20 +23,11 @@ mod test {
 
     #[test]
     fn test() {
-        let match_examples = vec![
-            "Depreciation, amortization, and decommissioning",
-            "depreciation",
-            "  depreciation",
-            "Depreciation and amortization expense",
-            "Depreciation expense",
-            "Depreciation and amortization",
-            "Depreciation and amortization expenses",
-            "Depreciation,   depletion and amortization",
-        ];
+        let match_examples = vec!["Stock based   compensation"];
         for each in match_examples {
             assert!(REGEX.is_match(each));
         }
-        let no_match_examples = vec!["blah depreciation blah"];
+        let no_match_examples = vec!["stock", "compensation"];
         for each in no_match_examples {
             assert!(!REGEX.is_match(each));
         }

@@ -18,3 +18,4 @@ pub mod revenues;
 pub mod selling_general_and_administrative;
 pub mod shares_outstanding;
 pub mod shares_used;
+pub mod stock_based_compensation;

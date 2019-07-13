@@ -717,6 +717,7 @@ dependencies = [
  "markup5ever 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.3.23 (registry+https://github.com/rust-lang/crates.io-index)",
  "regex 1.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rusoto_s3 0.38.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "tendril 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "xml5ever 0.14.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
