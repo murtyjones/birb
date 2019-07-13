@@ -16,6 +16,7 @@ lazy_static! {
             income\s\(expense\)
         )
         (,\s+net)*
+        (:)*
         \s*                          # sometimes there's whitespace after
         $
     ";
@@ -46,6 +47,7 @@ mod test {
             "Interest income (expense), net",
             "Financial income",
             "Financial expenses",
+            "Interest Income:",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

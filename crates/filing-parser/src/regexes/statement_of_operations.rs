@@ -13,6 +13,7 @@ pub static INCOME_STATEMENT_MIN_REQUIRED_REGEXES: i32 = 4;
 
 lazy_static! {
     pub static ref INCOME_STATEMENT_REGEXES: Vec<&'static Regex> = vec![
+        &compensation_and_benefits::REGEX,
         &earnings_per_share::REGEX,
         &interest_income_or_expense::REGEX,
         &income_before_taxes::REGEX,
@@ -21,6 +22,7 @@ lazy_static! {
         &depreciation_amortization::REGEX,
         &net_income::REGEX,
         &income_tax_expense::REGEX,
+        &total_expenses::REGEX,
         &cost_of_goods_sold::REGEX,
         &operating_expenses::REGEX,
         &selling_general_and_administrative::REGEX,

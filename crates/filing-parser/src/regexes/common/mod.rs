@@ -1,3 +1,4 @@
+pub mod compensation_and_benefits;
 pub mod cost_of_goods_sold;
 pub mod depreciation_amortization;
 pub mod dividends_per_share;
@@ -19,3 +20,4 @@ pub mod selling_general_and_administrative;
 pub mod shares_outstanding;
 pub mod shares_used;
 pub mod stock_based_compensation;
+pub mod total_expenses;

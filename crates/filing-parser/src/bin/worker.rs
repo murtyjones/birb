@@ -21,17 +21,26 @@ lazy_static! {
 /// Intended to randomly process files from S3
 fn main() {
     let client = s3::get_s3_client();
+    let args: Vec<String> = std::env::args().collect();
+
+    if args.len() > 1 {
+        let object_key = &args[1];
+        let object = s3::get_s3_object(&client, BUCKET, object_key);
+        let contents = String::from_utf8(object).unwrap();
+        ParsedFiling::new(contents, object_key.to_string()).unwrap();
+        return ();
+    }
+
     let data = s3::list_s3_objects(&client, BUCKET);
     //    panic!("{}", data.keys);
-    let starting = 0; // <-- change this to whatever the last failing doc was.
 
-    data[starting..]
-        .par_iter()
-        .enumerate()
-        .for_each(|(i, object)| {
-            println!("Starting for index: {} / key: {:?}", i, object.key);
-            process(&client, object);
-        });
+    // item 999:
+    let starting_key = "edgar/data/1029800/0001029800-16-000063.txt";
+
+    data.par_iter().enumerate().for_each(|(i, object)| {
+        println!("Starting for index: {} / key: {:?}", i, object.key);
+        process(&client, object);
+    });
 }
 
 fn process(client: &S3Client, data: &Object) {
