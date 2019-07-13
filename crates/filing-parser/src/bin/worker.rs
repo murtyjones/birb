@@ -4,6 +4,7 @@ extern crate regex;
 use aws::s3;
 use filing_parser::master_processor::ParsedFiling;
 use rand::Rng;
+use rayon::prelude::*;
 use regex::{Regex, RegexBuilder};
 use rusoto_s3::{Object, S3Client};
 
@@ -22,12 +23,14 @@ fn main() {
     let client = s3::get_s3_client();
     let data = s3::list_s3_objects(&client, BUCKET);
 
-    let starting = 0;
-    let last_index = data.len() - 1;
+    //    let starting = 0;
+    //    let last_index = data.len() - 1;
 
-    for i in starting..=last_index {
-        process(&client, &data[i]);
-    }
+    let starting = 0; // <-- change this to whatever the last failing doc was.
+
+    data[starting..].par_iter().for_each(|object| {
+        process(&client, object);
+    });
 }
 
 fn process(client: &S3Client, data: &Object) {
