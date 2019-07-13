@@ -38,9 +38,12 @@ pub trait TableTypeIdentifier {
     fn dom(&self) -> &RcDom;
 
     fn income_statement_table_nodes(&self) -> &Vec<Handle>;
+
     fn push_to_income_statement_table_nodes(&mut self, handle: Handle);
 
     fn filing_contents(&self) -> &String;
+
+    fn filing_key(&self) -> &String;
 
     /// Gets the Node containing the entire parsed document
     fn get_doc(&self) -> Rc<Node> {
@@ -87,7 +90,7 @@ pub trait TableTypeIdentifier {
 
         if self.income_statement_table_nodes().len() == 0 {
             return Err(ProcessingError::NoIncomeStatementFound {
-                cik: String::from("fake"),
+                cik: self.filing_key().clone(),
             });
         }
 

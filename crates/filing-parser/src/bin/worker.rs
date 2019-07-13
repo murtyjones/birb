@@ -22,24 +22,23 @@ lazy_static! {
 fn main() {
     let client = s3::get_s3_client();
     let data = s3::list_s3_objects(&client, BUCKET);
-
-    //    let starting = 0;
-    //    let last_index = data.len() - 1;
-
+    //    panic!("{}", data.keys);
     let starting = 0; // <-- change this to whatever the last failing doc was.
 
-    data[starting..].par_iter().for_each(|object| {
-        process(&client, object);
-    });
+    data[starting..]
+        .par_iter()
+        .enumerate()
+        .for_each(|(i, object)| {
+            println!("Starting for index: {} / key: {:?}", i, object.key);
+            process(&client, object);
+        });
 }
 
 fn process(client: &S3Client, data: &Object) {
-    let random_object_key = data.key.as_ref().expect("Object should have a key!");
+    let object_key = data.key.as_ref().expect("Object should have a key!");
     //    let random_object_key = &String::from("edgar/data/1011509/0001104659-16-100057.txt");
 
-    println!("Random object to process: {:?}", &random_object_key);
-
-    let object = s3::get_s3_object(client, BUCKET, random_object_key);
+    let object = s3::get_s3_object(client, BUCKET, object_key);
 
     println!("Object retrieved...");
 
@@ -51,7 +50,7 @@ fn process(client: &S3Client, data: &Object) {
 
     println!("Processing...");
 
-    let processed = ParsedFiling::new(contents).unwrap();
+    let processed = ParsedFiling::new(contents, object_key.to_string()).unwrap();
 
     // TODO: This part is crazy slow! How can it be sped up when it comes time to write processed files to S3?
     //    return write_to_file(processed);

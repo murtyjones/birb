@@ -9,6 +9,7 @@ use core::borrow::BorrowMut;
 
 pub struct ParsedFiling {
     pub filing_contents: String,
+    pub filing_key: String,
     pub dom: RcDom,
     pub income_statement_table_nodes: Vec<Handle>,
 }
@@ -16,6 +17,10 @@ pub struct ParsedFiling {
 impl TableTypeIdentifier for ParsedFiling {
     fn dom(&self) -> &RcDom {
         &self.dom
+    }
+
+    fn filing_key(&self) -> &String {
+        &self.filing_key
     }
 
     fn income_statement_table_nodes(&self) -> &Vec<Handle> {
@@ -33,16 +38,20 @@ impl TableTypeIdentifier for ParsedFiling {
 
 #[derive(Debug, Fail, PartialEq)]
 pub enum ParsingError {
-    #[fail(display = "Failed to parse document for CIK: {}", cik)]
-    FailedToParse { cik: String },
-    #[fail(display = "No income statement found for CIK: {}", cik)]
-    NoIncomeStatementFound { cik: String },
+    #[fail(display = "Failed to parse document for filing_key: {}", filing_key)]
+    FailedToParse { filing_key: String },
+    #[fail(display = "No income statement found for filing_key: {}", filing_key)]
+    NoIncomeStatementFound { filing_key: String },
 }
 
 impl ParsedFiling {
-    pub fn new(filing_contents: String) -> Result<ParsedFiling, Vec<ParsingError>> {
+    pub fn new(
+        filing_contents: String,
+        object_key: String,
+    ) -> Result<ParsedFiling, Vec<ParsingError>> {
         let mut p_f = ParsedFiling {
             filing_contents: filing_contents.clone(),
+            filing_key: object_key.clone(),
             dom: parse_document(RcDom::default(), Default::default()).one(&*filing_contents),
             income_statement_table_nodes: vec![],
         };
