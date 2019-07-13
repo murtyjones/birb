@@ -2,7 +2,7 @@
 extern crate lazy_static;
 extern crate regex;
 use aws::s3;
-use filing_parser::ten_q::ProcessedFiling;
+use filing_parser::master_processor::ParsedFiling;
 use rand::Rng;
 use regex::{Regex, RegexBuilder};
 
