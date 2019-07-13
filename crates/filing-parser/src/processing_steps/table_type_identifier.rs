@@ -34,17 +34,24 @@ pub enum ProcessingError {
 }
 
 #[allow(dead_code)]
-impl ProcessedFiling {
-    pub fn new(filing_contents: String) -> Result<ProcessedFiling, Vec<ProcessingError>> {
-        let mut p_f = ProcessedFiling {
-            dom: parse_document(RcDom::default(), Default::default()).one(&*filing_contents),
-            income_statement_table_nodes: vec![],
-        };
+pub trait TableTypeIdentifier {
+    fn dom(&self) -> &RcDom;
 
+    fn income_statement_table_nodes(&self) -> &Vec<Handle>;
+    fn push_to_income_statement_table_nodes(&mut self, handle: Handle);
+
+    fn filing_contents(&self) -> &String;
+
+    /// Gets the Node containing the entire parsed document
+    fn get_doc(&self) -> Rc<Node> {
+        Rc::clone(&self.dom().document)
+    }
+
+    fn probably_find_income_statement(&mut self) -> Result<(), Vec<ProcessingError>> {
         let mut errors = vec![];
 
         // Process the filing
-        let result = p_f.process();
+        let result = self.process();
         if let Err(e) = result {
             errors.push(e);
         }
@@ -61,46 +68,37 @@ impl ProcessedFiling {
         if errors.len() > 0 {
             if let Some(_) = EXCLUDED_COMPANIES
                 .iter()
-                .find(|&ex_company| filing_contents.contains(ex_company.cik))
+                .find(|&ex_company| self.filing_contents().contains(ex_company.cik))
             {
-                return Ok(p_f);
+                return Ok(());
             } else {
                 return Err(errors);
             }
         }
 
-        // Return the processed document
-        Ok(p_f)
+        Ok(())
     }
 
-    /// Gets the Node containing the entire parsed document
-    fn get_doc(&self) -> Rc<Node> {
-        Rc::clone(&self.dom.document)
-    }
-
-    /// Does it all!
     fn process(&mut self) -> Result<(), ProcessingError> {
         let doc = self.get_doc();
 
         // Find the income statement
         bfs_no_return(doc, |n| self.find_income_statement_or_statements(&n));
 
-        if self.income_statement_table_nodes.len() == 0 {
+        if self.income_statement_table_nodes().len() == 0 {
             return Err(ProcessingError::NoIncomeStatementFound {
                 cik: String::from("fake"),
             });
         }
-        // TODO add other processing steps here (e.g. balance sheet)
+
         Ok(())
     }
 
     fn find_income_statement_or_statements(&mut self, handle: &Handle) -> bool {
         if self.node_is_income_statement_table(handle) {
             println!("Found!");
-            self.borrow_mut()
-                .income_statement_table_nodes
-                .push(Rc::clone(handle));
-            let index = self.borrow_mut().income_statement_table_nodes.len() as i32 - 1;
+            self.push_to_income_statement_table_nodes(Rc::clone(handle));
+            let index = self.borrow_mut().income_statement_table_nodes().len() as i32 - 1;
             self.attach_income_statement_attributes(&Rc::clone(handle), index);
             return true;
         };
@@ -154,31 +152,6 @@ impl ProcessedFiling {
             create_x_birb_attr("x-birb-earnings-table", index),
             None,
         );
-    }
-}
-
-impl ProcessedFiling {
-    pub fn get_doc_as_str(&mut self) -> String {
-        let doc: &Rc<Node> = &self.get_doc();
-        let mut bytes = vec![];
-        html5ever::serialize::serialize(
-            &mut bytes,
-            doc,
-            html5ever::serialize::SerializeOpts::default(),
-        )
-        .expect("Couldn't write to file.");
-        String::from_utf8(bytes).unwrap()
-    }
-
-    pub fn write_file_contents(&mut self, path: &String) {
-        let doc: &Rc<Node> = &self.get_doc();
-        let buffer = std::fs::File::create(path).expect("Could't create file.");
-        html5ever::serialize::serialize(
-            buffer,
-            doc,
-            html5ever::serialize::SerializeOpts::default(),
-        )
-        .expect("Couldn't write to file.");
     }
 }
 

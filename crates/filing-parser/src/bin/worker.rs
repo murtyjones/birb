@@ -38,18 +38,18 @@ fn main() {
 
     println!("Processing...");
 
-    let processed = ProcessedFiling::new(contents).unwrap();
+    let processed = ParsedFiling::new(contents).unwrap();
 
     // TODO: This part is crazy slow! How can it be sped up when it comes time to write processed files to S3?
-    //    return write_to_file(processed);
+    return write_to_file(processed);
 
     println!("Done");
 
     main()
 }
 
-fn write_to_file(mut processed: ProcessedFiling) {
+fn write_to_file(mut parsed: ParsedFiling) {
     let path = String::from("examples/10-Q/output/wow.html");
     println!("Processed! Writing to file...");
-    processed.write_file_contents(&path);
+    parsed.write_file_contents(&path);
 }
