@@ -18,11 +18,17 @@ lazy_static! {
 
 /// Intended to randomly process files from S3
 fn main() {
+    loop {
+        process_randomly();
+    }
+}
+
+fn process_randomly() {
     let client = s3::get_s3_client();
     let data = s3::list_s3_objects(&client, BUCKET);
     let i = rand::thread_rng().gen_range(0, data.len() - 1);
     let random_object_key = data[i].key.as_ref().expect("Object should have a key!");
-    let random_object_key = &String::from("edgar/data/1027099/0001185185-17-001711.txt");
+    //    let random_object_key = &String::from("edgar/data/1010566/0001062993-16-008979.txt");
 
     println!("Random object to process: {:?}", &random_object_key);
 
@@ -41,11 +47,9 @@ fn main() {
     let processed = ParsedFiling::new(contents).unwrap();
 
     // TODO: This part is crazy slow! How can it be sped up when it comes time to write processed files to S3?
-    return write_to_file(processed);
+    //    return write_to_file(processed);
 
     println!("Done");
-
-    main()
 }
 
 fn write_to_file(mut parsed: ParsedFiling) {
