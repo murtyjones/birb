@@ -20,7 +20,7 @@ use crate::helpers::{
 };
 
 // excluded companies
-use crate::excluded_companies::{ExcludedCompany, EXCLUDED_COMPANIES};
+use crate::excluded_companies::EXCLUDED_COMPANIES;
 
 pub struct ProcessedFiling {
     pub dom: RcDom,
@@ -69,10 +69,10 @@ pub trait TableTypeIdentifier {
          * See: https://www.sec.gov/Archives/edgar/data/1003815/000100381516000011/b4assignorcorp121510k.htm
          */
         if errors.len() > 0 {
-            if let Some(_) = EXCLUDED_COMPANIES
-                .iter()
-                .find(|&ex_company| self.filing_contents().contains(ex_company.cik))
-            {
+            if let Some(_) = EXCLUDED_COMPANIES.iter().find(|&ex_company| {
+                self.filing_contents().contains(ex_company.cik)
+                    || ex_company.excludable_name.is_match(self.filing_contents())
+            }) {
                 return Ok(());
             } else {
                 return Err(errors);
