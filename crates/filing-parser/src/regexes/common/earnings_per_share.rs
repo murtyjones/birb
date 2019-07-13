@@ -33,7 +33,8 @@ lazy_static! {
              |
              ,\s+(basic|diluted)
         )*
-        (:\s*)*
+        (\s+\(EPS\))*
+        (\s*[:-–—]\s*)*
         $
     ";
     pub static ref REGEX: Regex = RegexBuilder::new(&PATTERN)
@@ -71,6 +72,8 @@ mod test {
             "Basic and diluted net loss per share:",
             "Earnings per common share-basic",
             "Basic and diluted earnings (loss) per share",
+            "Earnings per share (EPS) —",
+            "Earnings per share (EPS):",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

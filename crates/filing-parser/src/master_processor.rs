@@ -83,3 +83,80 @@ impl ParsedFiling {
         .expect("Couldn't write to file.");
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::helpers::get_abs_path;
+    use std::fs::File;
+    use std::io::prelude::*;
+    // test files
+    use crate::test_files::get_files;
+
+    fn get_file_contents(path: &'static str) -> String {
+        let path = get_abs_path(&String::from(path));
+        let mut file = File::open(path).expect("Couldn't open file");
+        let mut contents = String::new();
+        file.read_to_string(&mut contents)
+            .expect("Couldn't get file contents");
+        contents
+    }
+
+    fn make_processed_filing(path: &'static str) -> ParsedFiling {
+        let filing_contents = get_file_contents(path);
+        // To parse a string into a tree of nodes, we need to invoke
+        // `parse_document` and supply it with a TreeSink implementation (RcDom).
+        let processed_filing = ParsedFiling::new(filing_contents);
+        match processed_filing {
+            Ok(p_f) => p_f,
+            Err(errors) => {
+                errors.iter().for_each(|error| {
+                    println!("[{}] {}", path, error);
+                });
+                panic!("Failed to process!");
+            }
+        }
+    }
+
+    #[test]
+    fn test_should_err_when_no_income_statement_found() {
+        let fake_html = String::from("<html></html>");
+        let processed_filing = ParsedFiling::new(fake_html);
+        assert!(processed_filing.is_err());
+        if let Err(errors) = processed_filing {
+            assert_eq!(
+                errors[0],
+                ParsingError::NoIncomeStatementFound {
+                    cik: String::from("fake")
+                }
+            );
+        }
+    }
+
+    #[test]
+    fn test_income_statement_header_and_table_location_found() {
+        let files = get_files();
+        for (i, file) in files.iter().enumerate() {
+            let mut processed_filing = make_processed_filing(file.path);
+            assert!(
+                processed_filing.income_statement_table_nodes.len() > 0,
+                "There should be at least one table for each income statement!"
+            );
+
+            let stringified_result = processed_filing.get_doc_as_str();
+            let output_path = String::from(format!("./examples/10-Q/output/{}.html", i));
+            std::fs::write(output_path, stringified_result.clone()).expect("Unable to write file");
+            assert!(
+                stringified_result.contains(file.table_element),
+                "[file: {}] Table element expected content was not found!",
+                i
+            );
+            assert_eq!(
+                processed_filing.income_statement_table_nodes.len() as i32,
+                file.income_statement_table_count,
+                "[file: {}] Should have expected number of tables!",
+                i
+            );
+        }
+    }
+}

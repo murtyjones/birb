@@ -5,6 +5,7 @@ lazy_static! {
     static ref PATTERN: &'static str = r"
         ^
         \s*                                        # Sometimes there's whitespace before
+        (consolidated\s+)*
         net
         \s+
         (
@@ -41,6 +42,7 @@ mod test {
             "Net (loss)/income",
             "  Net income",
             "Net income (loss) attributable to unitholders",
+            "Consolidated Net Income",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

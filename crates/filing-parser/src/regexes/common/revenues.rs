@@ -5,11 +5,13 @@ lazy_static! {
     static ref PATTERN: &'static str = r"
         ^
         \s*                                           # sometimes there's whitespace before
-        (
-            total\s+
+        ((
+            total
             |
-            income\s+and\s+
-        )*
+            income\s+and
+            |
+            operating
+        )\s+)*
         revenue(s)*
         (\s+and\s+other\s+income)*
         (:)*
@@ -38,6 +40,7 @@ mod test {
             "revenue:",
             "Income and Revenues:",
             "Revenues and other income:",
+            "Operating Revenues:",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

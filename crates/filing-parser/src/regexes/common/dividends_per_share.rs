@@ -5,13 +5,19 @@ lazy_static! {
     static ref PATTERN: &'static str = r"
         ^
         \s*                          # sometimes there's whitespace before
+        (cash\s+)*
         (dividends|distributions)
-        (\s+declared)*
+        (\s+(declared|paid))*
         \s+
         per
-        (\s+common)*
         \s+
-        share
+        (
+            share
+            |
+            common\s+share
+            |
+            share\s+of\s+common\s+stock
+        )
         $
     ";
     pub static ref REGEX: Regex = RegexBuilder::new(&PATTERN)
@@ -32,6 +38,7 @@ mod test {
             "Dividends declared per common share",
             "Distributions declared per share",
             "Dividends per share",
+            "Cash dividends paid per share of common stock",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));
