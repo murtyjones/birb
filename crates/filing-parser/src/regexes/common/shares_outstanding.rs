@@ -65,6 +65,7 @@ mod test {
             "Average shares outstanding—basic (in shares)",
             "Weighted average outstanding shares:",
             "Weighted average basic and diluted shares outstanding",
+            "Weighted average\nnumber of  common shares outstanding - diluted",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

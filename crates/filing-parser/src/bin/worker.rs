@@ -40,22 +40,16 @@ fn process(client: &S3Client, data: &Object) {
 
     let object = s3::get_s3_object(client, BUCKET, object_key);
 
-    println!("Object retrieved...");
-
     let contents = String::from_utf8(object).unwrap();
     //    if TEN_K_REGEX.is_match(&*contents) {
     //        println!("10-K, skipping");
     //        return ();
     //    }
 
-    println!("Processing...");
-
     let processed = ParsedFiling::new(contents, object_key.to_string()).unwrap();
 
     // TODO: This part is crazy slow! How can it be sped up when it comes time to write processed files to S3?
     //    return write_to_file(processed);
-
-    println!("Done");
 }
 
 fn write_to_file(mut parsed: ParsedFiling) {

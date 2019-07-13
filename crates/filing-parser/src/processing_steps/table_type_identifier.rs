@@ -99,7 +99,6 @@ pub trait TableTypeIdentifier {
 
     fn find_income_statement_or_statements(&mut self, handle: &Handle) -> bool {
         if self.node_is_income_statement_table(handle) {
-            println!("Found!");
             self.push_to_income_statement_table_nodes(Rc::clone(handle));
             let index = self.borrow_mut().income_statement_table_nodes().len() as i32 - 1;
             self.attach_income_statement_attributes(&Rc::clone(handle), index);

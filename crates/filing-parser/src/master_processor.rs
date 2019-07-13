@@ -113,9 +113,10 @@ mod test {
 
     fn make_processed_filing(path: &'static str) -> ParsedFiling {
         let filing_contents = get_file_contents(path);
+        let fake_key = String::from("000/000.txt");
         // To parse a string into a tree of nodes, we need to invoke
         // `parse_document` and supply it with a TreeSink implementation (RcDom).
-        let processed_filing = ParsedFiling::new(filing_contents);
+        let processed_filing = ParsedFiling::new(filing_contents, fake_key);
         match processed_filing {
             Ok(p_f) => p_f,
             Err(errors) => {
@@ -130,13 +131,14 @@ mod test {
     #[test]
     fn test_should_err_when_no_income_statement_found() {
         let fake_html = String::from("<html></html>");
-        let processed_filing = ParsedFiling::new(fake_html);
+        let fake_key = String::from("000/000.txt");
+        let processed_filing = ParsedFiling::new(fake_html, fake_key);
         assert!(processed_filing.is_err());
         if let Err(errors) = processed_filing {
             assert_eq!(
                 errors[0],
                 ParsingError::NoIncomeStatementFound {
-                    cik: String::from("fake")
+                    filing_key: String::from("fake")
                 }
             );
         }
