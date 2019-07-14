@@ -3,10 +3,9 @@ extern crate lazy_static;
 extern crate regex;
 use aws::s3;
 use filing_parser::master_processor::ParsedFiling;
-use rand::Rng;
 use rayon::prelude::*;
 use regex::{Regex, RegexBuilder};
-use rusoto_s3::{Object, S3Client};
+use rusoto_s3::{ListObjectsRequest, Object, S3Client, S3};
 
 const BUCKET: &'static str = "birb-edgar-filings";
 
@@ -31,11 +30,9 @@ fn main() {
         return ();
     }
 
-    let data = s3::list_s3_objects(&client, BUCKET);
-    //    panic!("{}", data.keys);
-
-    // item 999:
-    let starting_key = "edgar/data/1029800/0001029800-16-000063.txt";
+    let starting_key = "edgar/data/1029800/0001029800-16-000063.txt"; // <- item 999
+    let starting_key = "edgar/data/1060391/0001060391-18-000005.txt"; // <- item 1,998
+    let data = get_next_1000_filing_keys(&client, BUCKET, starting_key);
 
     data.par_iter().enumerate().for_each(|(i, object)| {
         println!("Starting for index: {} / key: {:?}", i, object.key);
@@ -66,3 +63,27 @@ fn write_to_file(mut parsed: ParsedFiling) {
     println!("Processed! Writing to file...");
     parsed.write_file_contents(&path);
 }
+
+fn get_next_1000_filing_keys(
+    client: &S3Client,
+    bucket: &'static str,
+    starting_key: &'static str,
+) -> Vec<Object> {
+    let list_req = ListObjectsRequest {
+        bucket: bucket.to_owned(),
+        delimiter: None,
+        encoding_type: None,
+        marker: Some(starting_key.to_owned()),
+        max_keys: None,
+        prefix: None,
+        request_payer: None,
+    };
+
+    let result = client
+        .list_objects(list_req)
+        .sync()
+        .expect("Couldn't list S3 objects");
+
+    result.contents.expect("Bucket should not be empty!")
+}
+

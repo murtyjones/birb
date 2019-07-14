@@ -6,17 +6,14 @@ lazy_static! {
         ^
         \s*                                           # sometimes there's whitespace before
         (net\s+)*
+        (operating\s+)*
         (
             income(\s+\(loss\))*
             |
             loss
         )
-        \s+
-        from
-        \s+
-        continuing
-        \s+
-        operations
+        \s+from\s+continuing\s+operations
+        \s*                                           # sometimes there's whitespace after
         $
     ";
     pub static ref REGEX: Regex = RegexBuilder::new(&PATTERN)
@@ -38,6 +35,7 @@ mod test {
             "Net income from continuing operations",
             "Net income (loss) from continuing operations",
             "Loss from continuing operations",
+            "Net operating income (loss) from continuing operations",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

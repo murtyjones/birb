@@ -29,7 +29,7 @@ lazy_static! {
         &non_interest_income_expense::REGEX,
         &dividends_per_share::REGEX,
         &provision_for_bad_debts::REGEX,
-        &income_from_continuing_operations::REGEX,
+        &operating_income::REGEX,
         &real_estate_taxes::REGEX,
         &revenues::REGEX,
         &research_and_development::REGEX,
