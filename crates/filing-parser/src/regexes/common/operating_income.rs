@@ -5,18 +5,18 @@ lazy_static! {
     static ref PATTERN: &'static str = r"
         ^
         \s*                                           # sometimes there's whitespace before
-        (net\s+)*
-        (operating\s+)*
         (
-            income(\s+\(loss\))*
+            (
+                (
+                    (net\s+)*(operating\s+)*income
+                    |
+                    loss
+                )\s+
+                (\(loss\)\s+)*from\s+(continuing\s+)*operations
+            )
             |
-            loss
+            operating\s+income
         )
-        \s+
-        from
-        (\s+continuing)*
-        \s+
-        operations
         \s*                                           # sometimes there's whitespace after
         $
     ";
@@ -41,6 +41,7 @@ mod test {
             "Loss from continuing operations",
             "Net operating income (loss) from continuing operations",
             "Loss from operations",
+            "  Operating income",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

@@ -49,6 +49,16 @@ lazy_static! {
             name: "CORPORATE BOND BACKED CERT TR SER 1998-NSC 1",
             excludable_name: build_excl_name(r"CORPORATE BOND BACKED CERT TR SER (19[5-9]\d|20[0-4]\d|2050)-NSC 1"),
         },
+        ExcludedCompany {
+            cik: "1092367",
+            name: "SYCAMORE NETWORKS, INC.",
+            excludable_name: build_excl_name(r"SYCAMORE NETWORKS, INC."),
+        },
+        ExcludedCompany {
+            cik: "1080448",
+            name: "PATRIOT GOLD CORP.",
+            excludable_name: build_excl_name(r"PATRIOT GOLD CORP."),
+        },
     ];
 }
 
