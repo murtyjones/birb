@@ -7,7 +7,7 @@ lazy_static! {
         \s*                                            # Sometimes there's whitespace before
         research
         \s+
-        and
+        (and|&)
         \s+
         development
         (\s+expenses)*
@@ -32,6 +32,7 @@ mod test {
         let match_examples = vec![
             "Research and development",
             "RESEARCH AND DEVELOPMENT EXPENSES, NET",
+            "   Research & development",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

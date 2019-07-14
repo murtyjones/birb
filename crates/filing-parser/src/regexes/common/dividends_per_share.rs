@@ -36,6 +36,7 @@ mod test {
     fn test() {
         let match_examples = vec![
             "Dividends declared per common share",
+            "Dividends declared per share",
             "Distributions declared per share",
             "Dividends per share",
             "Cash dividends paid per share of common stock",

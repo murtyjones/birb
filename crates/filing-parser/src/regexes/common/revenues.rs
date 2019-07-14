@@ -12,7 +12,11 @@ lazy_static! {
             |
             operating
         )\s+)*
-        revenue(s)*
+        (
+            net\s+sales
+            |
+            revenue(s)*
+        )
         (\s+and\s+other\s+income)*
         (:)*
         \s*                                           # sometimes there's whitespace af
@@ -41,6 +45,8 @@ mod test {
             "Income and Revenues:",
             "Revenues and other income:",
             "Operating Revenues:",
+            "Revenues:",
+            "Net sales",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

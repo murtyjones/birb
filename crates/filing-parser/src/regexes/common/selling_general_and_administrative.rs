@@ -7,7 +7,7 @@ lazy_static! {
         \s*               # sometimes there's whitespace before
         (Selling,\s+)*
         (
-            general(,)*\s+and\s+administrative(\s+expenses)*
+            general(,)*\s+(and|&)\s+administrative(\s+expenses)*
             |
             G\s+&\s+A
         )
@@ -35,6 +35,7 @@ mod test {
             "Selling, general and administrative expenses",
             "General and administrative",
             "Selling, G & A",
+            "   General & administrative",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

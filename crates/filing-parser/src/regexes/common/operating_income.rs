@@ -12,7 +12,11 @@ lazy_static! {
             |
             loss
         )
-        \s+from\s+continuing\s+operations
+        \s+
+        from
+        (\s+continuing)*
+        \s+
+        operations
         \s*                                           # sometimes there's whitespace after
         $
     ";
@@ -36,6 +40,7 @@ mod test {
             "Net income (loss) from continuing operations",
             "Loss from continuing operations",
             "Net operating income (loss) from continuing operations",
+            "Loss from operations",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

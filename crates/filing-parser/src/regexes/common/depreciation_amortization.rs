@@ -7,13 +7,13 @@ lazy_static! {
         \s*                                           # sometimes there's whitespace before
         depreciation
         (
-            \s+and\s+depletion
+            \s+(and|&)\s+depletion
             |
-            ,\s+depletion\s+and\s+amortization
+            ,\s+depletion\s+(and|&)\s+amortization
             |
-            ,\s+amortization,\s+and\s+decommissioning
+            ,\s+amortization,\s+(and|&)\s+decommissioning
             |
-            \s+and\s+amortization
+            \s+(and|&)\s+amortization
         )*
         (\s+expense(s)*)*
         $
@@ -42,6 +42,7 @@ mod test {
             "Depreciation and amortization expenses",
             "Depreciation,   depletion and amortization",
             "Depreciation and depletion",
+            "   Depreciation & amortization",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

@@ -34,5 +34,39 @@ lazy_static! {
             name: "GM FINANCIAL AUTOMOBILE LEASING TRUST 2015-2",
             excludable_name: build_excl_name("GM FINANCIAL AUTOMOBILE LEASING TRUST"),
         },
+        ExcludedCompany {
+            cik: "1059376",
+            name: "Corporate Bond-Backed Certificates, Series 1998-CAT-1 Trust",
+            excludable_name: build_excl_name(r"Corporate Bond-Backed Certificates, Series (19[5-9]\d|20[0-4]\d|2050)-CAT-1 Trust"),
+        },
+        ExcludedCompany {
+            cik: "1059377",
+            name: "CORPORATE BOND BACKED CERT TR SER 1998-ADM 1",
+            excludable_name: build_excl_name(r"CORPORATE BOND BACKED CERT TR SER (19[5-9]\d|20[0-4]\d|2050)-ADM 1"),
+        },
+        ExcludedCompany {
+            cik: "1059378",
+            name: "CORPORATE BOND BACKED CERT TR SER 1998-NSC 1",
+            excludable_name: build_excl_name(r"CORPORATE BOND BACKED CERT TR SER (19[5-9]\d|20[0-4]\d|2050)-NSC 1"),
+        },
     ];
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_cat1_trust_regex() {
+        let company = &EXCLUDED_COMPANIES[4]; // 1059376
+        let result = company.excludable_name.is_match(company.name);
+        assert!(result);
+    }
+
+    #[test]
+    fn test_adm1_trust_regex() {
+        let company = &EXCLUDED_COMPANIES[5]; // 1059377
+        let result = company.excludable_name.is_match(company.name);
+        assert!(result);
+    }
 }
