@@ -35,7 +35,7 @@ mod test {
     #[test]
     fn test() {
         let match_examples = vec![
-            "Net interest income",
+            "Net Interest Income",
             "Interest income",
             "interest income",
             "Interest income, net ",

@@ -11,7 +11,7 @@ lazy_static! {
         (
             \s+bad\s+debts
             |
-            \s+credit\s+losses
+            \s+(credit|loan)\s+losses
         )
         $
     ";
@@ -29,7 +29,11 @@ mod test {
 
     #[test]
     fn test() {
-        let match_examples = vec!["provision for bad debts", "Provision for credit losses"];
+        let match_examples = vec![
+            "provision for bad debts",
+            "Provision for credit losses",
+            "Provision for loan losses",
+        ];
         for each in match_examples {
             assert!(REGEX.is_match(each));
         }

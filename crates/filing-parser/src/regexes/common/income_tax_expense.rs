@@ -5,6 +5,7 @@ lazy_static! {
     static ref PATTERN: &'static str = r"
         ^
         \s*                                            # Sometimes there's whitespace before
+        (federal\s+)*
         (\(benefit\)[\s/]+)*
         (
             provision\s+for\s+income\s+taxes
@@ -54,6 +55,7 @@ mod test {
             "Income taxes",
             "Income tax provision (benefit)",
             "Income tax provision/(benefit)",
+            "Federal income tax expense (benefit)",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

@@ -32,6 +32,7 @@ fn main() {
 
     let starting_key = "edgar/data/1029800/0001029800-16-000063.txt"; // <- item 999
     let starting_key = "edgar/data/1060391/0001060391-18-000005.txt"; // <- item 1,998
+    let starting_key = "edgar/data/1094739/0001094739-16-000209.txt"; // <- item 2,997
     let data = get_next_1000_filing_keys(&client, BUCKET, starting_key);
 
     data.par_iter().enumerate().for_each(|(i, object)| {

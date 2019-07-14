@@ -4,11 +4,12 @@ use regex::{Regex, RegexBuilder};
 lazy_static! {
     static ref PATTERN: &'static str = r"
         ^
-        \s*               # sometimes there's whitespace before
-        professional
+        \s*                          # sometimes there's whitespace before
+        data
         \s+
-        (fees|services)
-        \s*               # sometimes there's whitespace after
+        processing
+        (:)*
+        \s*                          # sometimes there's whitespace after
         $
     ";
     pub static ref REGEX: Regex = RegexBuilder::new(&PATTERN)
@@ -25,11 +26,11 @@ mod test {
 
     #[test]
     fn test() {
-        let match_examples = vec!["professional fees", "Professional services"];
+        let match_examples = vec!["Data processing", "Data processing:"];
         for each in match_examples {
             assert!(REGEX.is_match(each));
         }
-        let no_match_examples = vec!["professional", "fees"];
+        let no_match_examples = vec!["data", "processing"];
         for each in no_match_examples {
             assert!(!REGEX.is_match(each));
         }

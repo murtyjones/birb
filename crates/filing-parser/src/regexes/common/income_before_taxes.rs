@@ -22,6 +22,7 @@ lazy_static! {
                 \s+
                 before\s+
                 ((\(benefit\)/)*provision\s+for\s+)*
+                (federal\s+)*
                 (
                     income\s+taxes
                     |
@@ -68,6 +69,7 @@ mod test {
             "Net operating income (loss) before income taxes",
             "INCOME (LOSS) FROM OPERATIONS BEFORE INCOME TAXES",
             "Loss from continuing operations, before income taxes",
+            "Income (Loss) Before Federal Income Taxes",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));
