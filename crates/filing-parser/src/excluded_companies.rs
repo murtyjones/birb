@@ -59,6 +59,16 @@ lazy_static! {
             name: "PATRIOT GOLD CORP.",
             excludable_name: build_excl_name(r"PATRIOT GOLD CORP."),
         },
+        ExcludedCompany {
+            cik: "1110795",
+            name: "METLIFE POLICYHOLDER TRUST",
+            excludable_name: build_excl_name(r"METLIFE POLICYHOLDER TRUST"),
+        },
+        ExcludedCompany {
+            cik: "921864",
+            name: "CITIBANK CREDIT CARD MASTER TRUST I",
+            excludable_name: build_excl_name(r"CITIBANK CREDIT CARD MASTER TRUST (I|II|III|IV|V|VI|VII|VIII|IX|X)"),
+        },
     ];
 }
 

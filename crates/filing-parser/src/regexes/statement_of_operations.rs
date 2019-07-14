@@ -39,5 +39,6 @@ lazy_static! {
         &shares_used::REGEX,
         &stock_based_compensation::REGEX,
         &total_expenses::REGEX,
+        &trading_profit::REGEX,
     ];
 }

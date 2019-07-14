@@ -4,6 +4,7 @@ use regex::{Regex, RegexBuilder};
 lazy_static! {
     static ref PATTERN: &'static str = r"
         ^
+        ((basic|diluted)\s+)*
         (weighted[\s+|-])*
         average
         (\s+number\s+of)*
@@ -69,6 +70,7 @@ mod test {
             "Weighted average\nnumber of  common shares outstanding - diluted",
             "Weighted average Redeemable Units\noutstanding",
             "Weighted average Redeemable Units outstanding",
+            "Basic weighted average shares outstanding",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

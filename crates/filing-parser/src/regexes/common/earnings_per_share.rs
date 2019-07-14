@@ -12,7 +12,7 @@ lazy_static! {
         )*
         (net\s+)*
         (
-            income(\s+\(loss\))*
+            (net\s+)*income((\s+|/)\(loss\))*
             |
             earnings((\s+|/)\(loss\))*
             |
@@ -69,6 +69,7 @@ mod test {
             "(Loss)/earnings per share:",
             "Loss per share:",
             "Basic earnings per common share",
+            "Basic net income/(loss) per common share",
             "Basic and diluted net loss per share:",
             "Earnings per common share-basic",
             "Basic and diluted earnings (loss) per share",

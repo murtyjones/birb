@@ -25,3 +25,4 @@ pub mod shares_outstanding;
 pub mod shares_used;
 pub mod stock_based_compensation;
 pub mod total_expenses;
+pub mod trading_profit;

@@ -11,6 +11,8 @@ lazy_static! {
                     (net\s+)*(operating\s+)*income
                     |
                     loss
+                    |
+                    income(\s+|/)\(loss\)
                 )\s+
                 (\(loss\)\s+)*from\s+(continuing\s+)*operations
             )
@@ -42,6 +44,7 @@ mod test {
             "Net operating income (loss) from continuing operations",
             "Loss from operations",
             "  Operating income",
+            "Income/(Loss) from operations",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));
