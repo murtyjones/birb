@@ -9,6 +9,7 @@ lazy_static! {
             pre[-–—]tax\s+income
             |
             (
+                (net\s+)*
                 (operating\s+)*
                 (
                     (income|profit|earnings)(\s+\(loss\))*
@@ -63,6 +64,7 @@ mod test {
             "Loss before income tax benefit",
             "  Pre-tax income",
             "Earnings Before Income Taxes",
+            "Net operating income (loss) before income taxes",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));
