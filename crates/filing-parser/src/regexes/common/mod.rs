@@ -11,6 +11,7 @@ pub mod interest_income_or_expense;
 pub mod legal_and_admin_fees;
 pub mod management_fees;
 pub mod net_income;
+pub mod net_income_controlling_interests;
 pub mod non_interest_income_expense;
 pub mod operating_expenses;
 pub mod operating_income;

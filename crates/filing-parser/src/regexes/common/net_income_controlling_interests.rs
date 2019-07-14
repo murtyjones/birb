@@ -5,12 +5,17 @@ lazy_static! {
     static ref PATTERN: &'static str = r"
         ^
         \s*               # sometimes there's whitespace before
-        (Selling,\s+)*
-        (
-            general(,)*\s+(and|&)\s+administrative(\s+expenses)*
-            |
-            G\s+&\s+A
-        )
+        net
+        \s+
+        income
+        \s+
+        attributable
+        \s+
+        to
+        \s+
+        (non[-–—\s]+)*controlling
+        \s+
+        interests
         \s*               # sometimes there's whitespace after
         $
     ";
@@ -29,15 +34,8 @@ mod test {
     #[test]
     fn test() {
         let match_examples = vec![
-            "  Selling, general and administrative",
-            "General and administrative expenses",
-            "General and administrative ",
-            "Selling, general and administrative expenses",
-            "General and administrative",
-            "General and   administrative",
-            "Selling, G & A",
-            "   General & administrative",
-            "  General and administrative expenses",
+            "Net income attributable to controlling interests",
+            "Net income attributable to non-controlling interests",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

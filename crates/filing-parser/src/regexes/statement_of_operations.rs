@@ -24,6 +24,7 @@ lazy_static! {
         &interest_income_or_expense::REGEX,
         &legal_and_admin_fees::REGEX,
         &management_fees::REGEX,
+        &net_income_controlling_interests::REGEX,
         &net_income::REGEX,
         &non_interest_income_expense::REGEX,
         &operating_expenses::REGEX,

@@ -5,12 +5,7 @@ lazy_static! {
     static ref PATTERN: &'static str = r"
         ^
         \s*               # sometimes there's whitespace before
-        (Selling,\s+)*
-        (
-            general(,)*\s+(and|&)\s+administrative(\s+expenses)*
-            |
-            G\s+&\s+A
-        )
+        Operation and maintenance expenses
         \s*               # sometimes there's whitespace after
         $
     ";
