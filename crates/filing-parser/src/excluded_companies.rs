@@ -69,6 +69,16 @@ lazy_static! {
             name: "CITIBANK CREDIT CARD MASTER TRUST I",
             excludable_name: build_excl_name(r"CITIBANK CREDIT CARD MASTER TRUST (I|II|III|IV|V|VI|VII|VIII|IX|X)"),
         },
+        ExcludedCompany {
+            cik: "1128250",
+            name: "BA CREDIT CARD TRUST",
+            excludable_name: build_excl_name(r"BA Credit Card Trust"),
+        },
+        ExcludedCompany {
+            cik: "1128383",
+            name: "NEVADA CLASSIC THOROUGHBREDS INC",
+            excludable_name: build_excl_name(r"NEVADA CLASSIC THOROUGHBREDS INC"),
+        },
     ];
 }
 

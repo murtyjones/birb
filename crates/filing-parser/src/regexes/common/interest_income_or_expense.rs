@@ -16,6 +16,8 @@ lazy_static! {
             income\s\((expense|loss)\)
             |
             \(expense\)
+            |
+            and\s+other\s+income
         )
         (,\s+net)*
         (:)*
@@ -54,6 +56,7 @@ mod test {
             "  Interest (expense)",
             "INVESTMENT INCOME (EXPENSE):",
             "INVESTMENT   INCOME (LOSS)",
+            "Interest and other income",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

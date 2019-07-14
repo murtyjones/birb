@@ -10,6 +10,8 @@ lazy_static! {
             general(,)*\s+(and|&)\s+administrative(\s+expenses)*
             |
             G\s+&\s+A
+            |
+            administrative\s+and\s+other(\s+fees)*
         )
         \s*               # sometimes there's whitespace after
         $
@@ -38,6 +40,7 @@ mod test {
             "Selling, G & A",
             "   General & administrative",
             "  General and administrative expenses",
+            "   Administrative and other fees",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

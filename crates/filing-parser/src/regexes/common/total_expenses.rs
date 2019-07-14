@@ -6,6 +6,7 @@ lazy_static! {
         ^
         \s*                                            # Sometimes there's whitespace before
         total
+        (\s+costs\s+and)*
         \s+
         expense(s)*
         (\s+after\s+reimbursement)*
@@ -30,6 +31,7 @@ mod test {
             "total expenses",
             "total expense",
             "Total expenses   after reimbursement",
+            "Total costs and expenses",
         ];
         for each in match_examples {
             assert!(REGEX.is_match(each));

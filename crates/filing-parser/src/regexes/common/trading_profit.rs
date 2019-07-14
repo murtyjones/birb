@@ -5,11 +5,12 @@ lazy_static! {
     static ref PATTERN: &'static str = r"
         ^
         \s*                          # sometimes there's whitespace before
+        (net\s+)*
         trading
         \s+
-        profit
+        (profit|gains)
         \s+
-        \(loss\)
+        \(loss(es)*\)
         (,*\s+net)*
         (:)*
         \s*                          # sometimes there's whitespace after
@@ -29,7 +30,11 @@ mod test {
 
     #[test]
     fn test() {
-        let match_examples = vec!["TRADING PROFIT (LOSS), NET:", "TRADING   PROFIT (LOSS):"];
+        let match_examples = vec![
+            "TRADING PROFIT (LOSS), NET:",
+            "TRADING   PROFIT (LOSS):",
+            "Net trading gains (losses):",
+        ];
         for each in match_examples {
             assert!(REGEX.is_match(each));
         }
