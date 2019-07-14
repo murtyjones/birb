@@ -4,16 +4,19 @@ extern crate postgres;
 extern crate postgres_derive;
 #[macro_use]
 extern crate log;
+extern crate aws;
 extern crate env_logger;
+extern crate filing_metadata;
 extern crate reqwest;
+
 use futures::{Future, Stream};
 use postgres::{Connection, TlsMode};
 use std::env;
-extern crate filing_metadata;
 
 mod filing;
+use aws::s3::get_s3_client;
 use filing::Filing;
-use filing_metadata::download_index::{get_s3_client, store_s3_document};
+use filing_metadata::download_index::store_s3_document;
 
 static BASE_EDGAR_URL: &'static str = "https://www.sec.gov/Archives/";
 

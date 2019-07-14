@@ -157,6 +157,7 @@ fn company_route(short_cik: String, store: Provided<Rc<RefCell<Store>>>) -> Virt
 
 fn on_company_visit_handler(short_cik: String, store: Provided<Rc<RefCell<Store>>>) {
     toggle_sidebar(true, store);
+    println!("hello");
 }
 
 fn hide_sidebar(store: Provided<Rc<RefCell<Store>>>) {

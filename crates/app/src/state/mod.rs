@@ -1,13 +1,17 @@
 mod side_nav;
+use side_nav::SideNav;
+
 mod top_nav;
+use top_nav::TopNav;
+use top_nav::TopNavSearchBar;
+
+mod company_page;
+use company_page::CompanyPage;
 
 use serde::{Deserialize, Serialize};
 use serde_json;
-use side_nav::SideNav;
 use std::cell::Cell;
 use std::rc::Rc;
-use top_nav::TopNav;
-use top_nav::TopNavSearchBar;
 
 mod msg;
 pub use self::msg::Msg;
@@ -17,6 +21,7 @@ use core::borrow::BorrowMut;
 pub struct State {
     path: String,
     pub top_nav: TopNav,
+    pub company_page: CompanyPage,
     pub side_nav: SideNav,
 }
 
@@ -25,6 +30,7 @@ impl State {
         State {
             path: "/".to_string(),
             top_nav: TopNav::new(),
+            company_page: CompanyPage::new(),
             side_nav: SideNav::new(),
         }
     }
@@ -46,6 +52,9 @@ impl State {
             Msg::SetPath(path) => self.set_path(path.to_string()),
             Msg::SetTypeaheadJson(json) => {
                 self.top_nav.search_bar.typeahead_results = Some(json.into_serde().unwrap());
+            }
+            Msg::SetCompanyPageFilings(json) => {
+                self.company_page.data = Some(json.into_serde().unwrap());
             }
             Msg::InitiatedTypeaheadRequest => {
                 self.top_nav.search_bar.has_initiated_auto_complete_download = true;

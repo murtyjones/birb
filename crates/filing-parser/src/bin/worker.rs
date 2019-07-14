@@ -26,7 +26,8 @@ fn main() {
         let object_key = &args[1];
         let object = s3::get_s3_object(&client, BUCKET, object_key);
         let contents = String::from_utf8(object).unwrap();
-        ParsedFiling::new(contents, object_key.to_string()).unwrap();
+        let processed = ParsedFiling::new(contents, object_key.to_string()).unwrap();
+        write_to_file(processed);
         return ();
     }
 
