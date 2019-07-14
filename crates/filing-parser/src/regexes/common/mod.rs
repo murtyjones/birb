@@ -12,6 +12,7 @@ pub mod net_income;
 pub mod non_interest_income_expense;
 pub mod operating_expenses;
 pub mod operating_income;
+pub mod professional_fees;
 pub mod provision_for_bad_debts;
 pub mod real_estate_taxes;
 pub mod research_and_development;

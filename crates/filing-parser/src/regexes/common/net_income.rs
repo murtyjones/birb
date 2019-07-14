@@ -9,7 +9,7 @@ lazy_static! {
         net
         \s+
         (
-            (earnings|income|profit)(\s+\(loss\))*
+            (earnings|income|profit)((\s+|/)\(loss\))*
             |
             loss
             |
@@ -35,6 +35,7 @@ mod test {
         let match_examples = vec![
             "Net income",
             "Net income (loss)",
+            "Net income/(loss)",
             "Net loss",
             "NET LOSS",
             "Net (loss) earnings",

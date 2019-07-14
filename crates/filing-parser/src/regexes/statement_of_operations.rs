@@ -18,6 +18,7 @@ lazy_static! {
         &interest_income_or_expense::REGEX,
         &income_before_taxes::REGEX,
         &shares_outstanding::REGEX,
+        &professional_fees::REGEX,
         &legal_and_admin_fees::REGEX,
         &depreciation_amortization::REGEX,
         &net_income::REGEX,
