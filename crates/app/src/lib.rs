@@ -152,18 +152,22 @@ fn home_route(store: Provided<Rc<RefCell<Store>>>) -> VirtualNode {
     on_visit = on_company_visit_handler
 )]
 fn company_route(short_cik: String, store: Provided<Rc<RefCell<Store>>>) -> VirtualNode {
-    CompanyView::new(Rc::clone(&store)).render()
+    CompanyView::new(short_cik, Rc::clone(&store)).render()
 }
 
 fn on_company_visit_handler(short_cik: String, store: Provided<Rc<RefCell<Store>>>) {
-    toggle_sidebar(true, store);
     println!("hello");
+    //    let store_1 = Rc::clone(&store);
+    //    toggle_sidebar(true, store_1);
+    //    let store_2 = Rc::clone(&store);
+    //    get_company_filings(&short_cik, store_2);
 }
 
 fn hide_sidebar(store: Provided<Rc<RefCell<Store>>>) {
-    toggle_sidebar(false, store);
+    println!("ww");
+    toggle_sidebar(false, Rc::clone(&store));
 }
-fn toggle_sidebar(is_visible: bool, store: Provided<Rc<RefCell<Store>>>) {
+fn toggle_sidebar(is_visible: bool, store: Rc<RefCell<Store>>) {
     // In order to check if the download has already been initiated, we must
     // wrap the possibility of a download attempt in a closure and pass it to
     // request_animation_frame. This is due to store already being mutably
@@ -193,6 +197,17 @@ pub fn download_typeahead_json(substr: String, store: Rc<RefCell<Store>>) {
     }) as Box<FnMut(JsValue)>);
     download_json(
         &*format!("http://localhost:8000/api/autocomplete/{}", substr),
+        callback.as_ref().unchecked_ref(),
+    );
+    callback.forget();
+}
+
+pub fn get_company_filings(short_cik: &String, store: Rc<RefCell<Store>>) {
+    let callback = Closure::wrap(Box::new(move |json: JsValue| {
+        store.borrow_mut().msg(&Msg::SetCompanyPageFilings(json));
+    }) as Box<FnMut(JsValue)>);
+    download_json(
+        &*format!("http://localhost:8000/api/companies/{}/filings", short_cik),
         callback.as_ref().unchecked_ref(),
     );
     callback.forget();
