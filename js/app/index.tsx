@@ -6,13 +6,13 @@ import { hot } from 'react-hot-loader';
 
 const ActiveRoute = () => (
     <Switch>
-        <Route path="/" component={Birb} />
+        <Route path='/' component={Birb} />
     </Switch>
 );
 
 export const App = hot(module)(() => (
     <>
-        <Header/>
+        <Route path='/' component={Header} />
         <ActiveRoute/>
     </>
 ));
