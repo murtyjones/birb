@@ -1,6 +1,7 @@
 # Editor and OS things
 .idea
 .DS_Store
+.vscode
 
 # Rust build stuff
 target/**/*
@@ -35,3 +36,7 @@ data/edgar-indexes
 # makefile is ignored so that local commands can be thrown in at will with secrets as needed
 Makefile
 makefile
+
+node_modules
+.module-cache
+*.log*
