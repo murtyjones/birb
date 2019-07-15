@@ -1,0 +1,41 @@
+header {
+    width: 100%;
+}
+
+.header-background {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    background-color: lightblue;
+}
+
+.header-contents {
+    display: grid;
+    position: relative;
+    grid-template: 100% / 70px 300px;
+    align-items: center;
+}
+
+.companySearch {
+
+}
+
+header, .header-background, .header-contents {
+    height: 60px;
+}
+
+.logo {
+    display: block;
+    font-size: 24pt;
+    font-weight: bold;
+}
+
+.logo > a {
+    color: whitesmoke;
+    text-decoration: none;
+}
+
+.logo > a:hover {
+    text-decoration: underline;
+}
