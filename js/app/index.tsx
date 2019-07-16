@@ -7,6 +7,7 @@ import { hot } from 'react-hot-loader';
 const ActiveRoute = () => (
     <Switch>
         <Route path='/' component={Birb} />
+        {/* TODO add 404 route */}
     </Switch>
 );
 

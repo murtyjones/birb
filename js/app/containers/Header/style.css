@@ -19,41 +19,86 @@ header {
 
 .companySearch {
     height: 35px;
-    padding: 0 20px;
     text-align: center;
-    grid-template-columns: 3fr 1fr;
-    display: grid;
 }
 
-.companySearch > input,
-.companySearch > input:focus {
+.companySearchInput {
+    overflow: hidden;
+    display: grid;
+    border-radius: 5px;
+    grid-template-columns: 3fr 1fr;
+    height: 100%;
+}
+
+.companySearchInput:focus-within {
+    box-shadow: 1px 1px 10px var(--grey-700);
+}
+
+.companySearchInput > input,
+.companySearchInput > input:focus {
     padding-left: 6px;
     box-sizing: border-box;
     outline: none;
     width: 100%;
-    border-radius: 5px 0 0 5px;
     border: 0;
 }
 
-.companySearch > input::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+.companySearchInput > input::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
     font-size: 120%;
     color: var(--grey-400);
     opacity: 1; /* Firefox */
 }
 
-.companySearch > input::-ms-input-placeholder { /* Microsoft Edge */
+.companySearchInput > input::-ms-input-placeholder { /* Microsoft Edge */
     font-size: 120%;
     color: var(--grey-400);
 }
 
-.companySearch > button {
+.companySearchInput > button {
     background-color: var(--grey-100);
     border-radius: 0 5px 5px 0;
 }
 
-.companySearch > button:hover, .companySearch > button:focus {
+.companySearchInput > button:hover,
+.companySearchInput > button:focus {
     cursor: pointer;
     background-color: var(--grey-200);
+}
+
+.companySearchResults {
+    background-color: white;
+    position: relative;
+    top: -3px;
+    border-radius: 0 0 5px 5px;
+}
+
+.companySearchResults:focus {
+    box-shadow: 5px 5px 3px black;
+}
+
+a.companySearchResult {
+    display: grid;
+    grid-template-rows: auto;
+    padding: 5px 10px;
+    box-sizing: border-box;
+    text-align: left;
+    text-decoration: none;
+}
+
+a.companySearchResult:hover,
+a.companySearchResult:focus {
+    cursor: pointer;
+    background-color: var(--grey-100);
+}
+
+a.companySearchResult > .companyName {
+    color: black;
+    font-weight: 500;
+}
+a.companySearchResult > .shortCik {
+    color: var(--grey-700);
+    font-size: 80%;
+    font-style: italic;
 }
 
 header, .header-background, .header-contents {
