@@ -38,7 +38,7 @@ interface Result {
 }
 
 const Result: React.FC<Result> = props => (
-    <Link to='/hi' className={style.companySearchResult}>
+    <Link to={`/companies/${props.result.short_cik}`} className={style.companySearchResult}>
         <span className={style.companyName}>
             {props.result.company_name}
         </span>
@@ -125,7 +125,6 @@ export class Header extends React.PureComponent<Header.Props> {
     };
 
     render() {
-        console.log(typeof this.setResults);
         return (
             <header>
                 <div className={style['header-background']}/>
