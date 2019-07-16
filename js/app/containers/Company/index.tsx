@@ -1,13 +1,8 @@
 import * as React from 'react';
-import * as style from './style.css';
+// import * as style from './style.css';
 import {RouteComponentProps} from 'react-router';
 
-interface GetCompanyResult {
-    company_name: string;
-    short_cik: string;
-}
-
-const http = async (request: RequestInfo): Promise<GetCompanyResult> => {
+const http = async (request: RequestInfo): Promise<CompanyFilingDataResponse> => {
     return new Promise(resolve => {
         fetch(request)
             .then(response => {
@@ -18,6 +13,16 @@ const http = async (request: RequestInfo): Promise<GetCompanyResult> => {
     });
 };
 
+interface CompanyFilingData {
+    company_name: string;
+    filings: Array<any>;
+    short_cik: string;
+}
+
+interface CompanyFilingDataResponse {
+    data: CompanyFilingData
+}
+
 interface MatchParams {
     short_cik: string;
 }
@@ -27,19 +32,36 @@ export namespace Company {
 }
 
 export class Company extends React.PureComponent<Company.Props> {
+    constructor(props: Company.Props, context?: any) {
+        super(props, context);
+        this.setFilingData = this.setFilingData.bind(this);
+    }
+    readonly state = { results: { company_name: '', filings: [], short_cik: '' } };
+
+    setFilingData(result: CompanyFilingDataResponse) {
+        this.setState({
+            results: result.data
+        })
+    }
+
     async componentDidMount() {
         const short_cik = this.props.match.params.short_cik;
-        const request = new Request(`http://localhost:8000/api/companies/${short_cik}`, {
+        const request = new Request(`http://localhost:8000/api/companies/${short_cik}/filings`, {
             method: 'GET'
         });
-        const r = await http(request);
-        console.log(r);
+        const result: CompanyFilingDataResponse = await http(request);
+        console.log(result);
+        this.setFilingData(result)
     }
 
     render() {
+        const results: Array<any> = this.state.results.filings || [];
         return (
             <div>
-                Hello!
+                { results.length > 0
+                    ? results.map(each => <div>{each.filing_name}</div>)
+                    : 'Hello!'
+                }
             </div>
         )
     }

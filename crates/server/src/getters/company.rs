@@ -34,7 +34,7 @@ pub fn get_filing_info(
             "
             SELECT * FROM company c
             JOIN filing f ON c.short_cik = f.company_short_cik
-            WHERE short_cik = '1491419';
+            WHERE short_cik = $1;
         ",
             &[&short_cik],
         )

@@ -30,5 +30,5 @@ pub struct Filing {
     pub filing_edgar_url: String,
     pub filing_quarter: i32,
     pub filing_year: i32,
-    pub collected: i32,
+    pub collected: bool,
 }
