@@ -3,14 +3,34 @@ import * as style from './style.css';
 import {RouteComponentProps} from 'react-router';
 import {Link} from 'react-router-dom';
 
+const http = async (request: RequestInfo): Promise<SearchResponseResults> => {
+    return new Promise(resolve => {
+        fetch(request)
+            .then(response => {
+                console.log(response);
+                return response.text()})
+            .then(text => {
+                resolve(text ? JSON.parse(text) : {});
+            })
+    });
+};
+
+
+
 interface SearchResponseResult {
-    companyName: string;
-    shortCik: string;
+    company_name: string;
+    short_cik: string;
+}
+
+
+interface SearchResponseResults {
+    data: Array<SearchResponseResult>;
+    has_more: boolean;
 }
 
 const fakeResults: Array<SearchResponseResult> = [
-    { companyName: 'wow', shortCik: '123456' },
-    { companyName: 'yes', shortCik: '567890' },
+    { company_name: 'wow', short_cik: '123456' },
+    { company_name: 'yes', short_cik: '567890' },
 ];
 
 interface Result {
@@ -20,17 +40,21 @@ interface Result {
 const Result: React.FC<Result> = props => (
     <Link to='/hi' className={style.companySearchResult}>
         <span className={style.companyName}>
-            {props.result.companyName}
+            {props.result.company_name}
         </span>
         <span className={style.shortCik}>
-            CIK: {props.result.shortCik}
+            CIK: {props.result.short_cik}
         </span>
     </Link>
 );
 
-const CompanySearchResults = () => (
+interface CompanySearchResults {
+    results: SearchResponseResults
+}
+
+const CompanySearchResults: React.FC<CompanySearchResults> = props => (
     <div className={style.companySearchResults}>
-        {fakeResults.map((each: SearchResponseResult, i) =>
+        {props.results.data.map((each: SearchResponseResult, i) =>
             <Result key={i} result={each} />
         )}
     </div>
@@ -42,24 +66,44 @@ const Logo = () => (
     </div>
 );
 
-const CompanySearch = () => (
-    <div className={style.companySearch}>
-        <CompanySearchInput/>
-        <CompanySearchResults/>
-    </div>
-)
+interface CompanySearch {
+    results: SearchResponseResults,
+    onRetrievedSearchResults: (results: SearchResponseResults) => void,
+}
 
-const CompanySearchInput = () => (
+interface CompanySearchInput {
+    onRetrievedSearchResults: (results: SearchResponseResults) => void,
+}
+
+const CompanySearchInput: React.FC<CompanySearchInput> = props => (
     <div className={style.companySearchInput}>
         <input
             autoFocus /* TODO only autofocus on the index/landing page */
             placeholder='Type a company name'
             type='text'
             onInput={async (event: React.ChangeEvent<HTMLInputElement>) => {
-                console.log(event.target.value);
+                const pat: string = event.target.value;
+                const request = new Request(
+                    `http://localhost:8000/api/autocomplete/${pat}`, {
+                        method: 'GET'
+                    });
+                const result: SearchResponseResults = await http(request);
+                props.onRetrievedSearchResults(result);
+
             }}
         />
         <button>Search</button>
+    </div>
+);
+
+const CompanySearch: React.FC<CompanySearch> = props => (
+    <div className={style.companySearch}>
+        <CompanySearchInput
+            onRetrievedSearchResults={props.onRetrievedSearchResults}
+        />
+        <CompanySearchResults
+            results={props.results}
+        />
     </div>
 );
 
@@ -68,15 +112,29 @@ export namespace Header {
 }
 
 export class Header extends React.PureComponent<Header.Props> {
+    constructor(props: Header.Props, context?: any) {
+        super(props, context);
+        this.setResults = this.setResults.bind(this);
+    }
+    readonly state = { results: { data: [], has_more: false } };
+
     static defaultProps: Partial<Header.Props> = {};
 
+    setResults(value: SearchResponseResults): void {
+        this.setState({ results: value });
+    };
+
     render() {
+        console.log(typeof this.setResults);
         return (
             <header>
                 <div className={style['header-background']}/>
                 <div className={style['header-contents']}>
                     <Logo />
-                    <CompanySearch />
+                    <CompanySearch
+                        results={this.state.results}
+                        onRetrievedSearchResults={this.setResults}
+                    />
                 </div>
             </header>
         )
