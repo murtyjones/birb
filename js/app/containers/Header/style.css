@@ -13,12 +13,47 @@ header {
 .header-contents {
     display: grid;
     position: relative;
-    grid-template: 100% / 70px 300px;
+    grid-template: 100% / 70px 320px;
     align-items: center;
 }
 
 .companySearch {
+    height: 35px;
+    padding: 0 20px;
+    text-align: center;
+    grid-template-columns: 3fr 1fr;
+    display: grid;
+}
 
+.companySearch > input,
+.companySearch > input:focus {
+    padding-left: 6px;
+    box-sizing: border-box;
+    outline: none;
+    width: 100%;
+    border-radius: 5px 0 0 5px;
+    border: 0;
+}
+
+.companySearch > input::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+    font-size: 120%;
+    color: var(--grey-400);
+    opacity: 1; /* Firefox */
+}
+
+.companySearch > input::-ms-input-placeholder { /* Microsoft Edge */
+    font-size: 120%;
+    color: var(--grey-400);
+}
+
+.companySearch > button {
+    background-color: var(--grey-100);
+    border-radius: 0 5px 5px 0;
+}
+
+.companySearch > button:hover, .companySearch > button:focus {
+    cursor: pointer;
+    background-color: var(--grey-200);
 }
 
 header, .header-background, .header-contents {

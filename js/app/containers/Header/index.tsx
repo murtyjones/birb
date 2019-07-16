@@ -11,7 +11,12 @@ const Logo = () => (
 
 const CompanySearch = () => (
     <div className={style.companySearch}>
-        <input type='text' />
+        <input
+            autoFocus
+            placeholder='Type a company name'
+            type='text'
+        />
+        <button>Search</button>
     </div>
 );
 

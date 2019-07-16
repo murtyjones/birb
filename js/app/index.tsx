@@ -12,7 +12,8 @@ const ActiveRoute = () => (
 
 export const App = hot(module)(() => (
     <>
+        {/* Show the header on all routes */}
         <Route path='/' component={Header} />
-        <ActiveRoute/>
+        <ActiveRoute />
     </>
 ));
