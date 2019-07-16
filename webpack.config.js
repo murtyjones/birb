@@ -29,7 +29,10 @@ module.exports = {
     // (jsnext:main directs not usually distributable es6 format, but es6 sources)
     mainFields: ['module', 'browser', 'main'],
     alias: {
-      app: path.resolve(__dirname, 'js/app/')
+      app: path.resolve(__dirname, sourcePath, 'app/'),
+      // needed to prevent react-router 5+ singleton import issues:
+      'react-router-dom': path.join(__dirname, 'node_modules/react-router-dom/'),
+      'react-router': path.join(__dirname, 'node_modules/react-router/'),
     }
   },
   module: {
