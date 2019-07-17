@@ -17,6 +17,10 @@ nav#nav {
 .navigation {
   display: grid;
   grid-template-columns: 100px 120px;
+  /*
+    This offset is needed so that the bottom border
+    for the active tab covers the default bottom border:
+  */
   position: relative;
   top: 1px;
 }
