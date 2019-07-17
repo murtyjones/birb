@@ -1,122 +1,17 @@
-header {
-    width: 100%;
-}
-
-.headerBackground {
-    position: fixed;
-    left: 0;
-    right: 0;
-    top: 0;
-    background-color: lightblue;
-}
-
-.headerContents {
-    display: grid;
-    position: relative;
-    grid-template: 100% / 70px 320px;
-    align-items: center;
-}
-
-.companySearch {
-    height: 35px;
-    text-align: center;
-}
-
-.companySearchInput {
-    overflow: hidden;
-    display: grid;
-    border-radius: 5px;
-    grid-template-columns: 3fr 1fr;
-    height: 100%;
-}
-
-.companySearchInput:focus-within {
-    box-shadow: 1px 1px 10px var(--grey-700);
-}
-
-.companySearchInput > input,
-.companySearchInput > input:focus {
-    padding-left: 6px;
+.mainCompanyContents {
     box-sizing: border-box;
-    outline: none;
+    padding-top: 20px;
+}
+
+.allFilingsTable {
     width: 100%;
-    border: 0;
+    border-collapse: collapse;
+    box-shadow: 3px 3px 10px var(--grey-100);
+    border: 1px solid var(--grey-100);
 }
 
-.companySearchInput > input::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
-    font-size: 120%;
-    color: var(--grey-400);
-    opacity: 1; /* Firefox */
-}
-
-.companySearchInput > input::-ms-input-placeholder { /* Microsoft Edge */
-    font-size: 120%;
-    color: var(--grey-400);
-}
-
-.companySearchInput > button {
-    background-color: var(--grey-100);
-    border-radius: 0 5px 5px 0;
-}
-
-.companySearchInput > button:hover,
-.companySearchInput > button:focus {
-    cursor: pointer;
-    background-color: var(--grey-200);
-}
-
-.companySearchResults {
-    background-color: white;
-    position: relative;
-    top: -3px;
-    border-radius: 0 0 5px 5px;
-}
-
-.companySearchResults:focus {
-    box-shadow: 5px 5px 3px black;
-}
-
-a.companySearchResult {
-    display: grid;
-    grid-template-rows: auto;
-    padding: 1px 10px;
+.allFilingsTable > tbody > tr {
+    border-bottom: 1px solid var(--grey-300);
     box-sizing: border-box;
-    text-align: left;
-    text-decoration: none;
 }
-
-a.companySearchResult:hover,
-a.companySearchResult:focus {
-    cursor: pointer;
-    background-color: var(--grey-100);
-}
-
-a.companySearchResult > .companyName {
-    color: black;
-    font-weight: 500;
-    font-size: 80%;
-}
-a.companySearchResult > .shortCik {
-    color: var(--grey-700);
-    font-size: 80%;
-    font-style: italic;
-}
-
-header, .headerBackground, .headerContents {
-    height: 60px;
-}
-
-.logo {
-    display: block;
-    font-size: 24pt;
-    font-weight: bold;
-}
-
-.logo > a {
-    color: whitesmoke;
-    text-decoration: none;
-}
-
-.logo > a:hover {
-    text-decoration: underline;
-}
+.allFilingsTable > tbody > tr:last-child { border: none; }

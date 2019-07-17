@@ -1,5 +1,5 @@
 import * as React from 'react';
-// import * as style from './style.css';
+import * as style from './style.css';
 import {RouteComponentProps} from 'react-router';
 
 const http = async (request: RequestInfo): Promise<CompanyFilingDataResponse> => {
@@ -36,11 +36,11 @@ export class Company extends React.PureComponent<Company.Props> {
         super(props, context);
         this.setFilingData = this.setFilingData.bind(this);
     }
-    readonly state = { results: { company_name: '', filings: [], short_cik: '' } };
+    readonly state = { allFilings: { company_name: '', filings: [], short_cik: '' } };
 
     setFilingData(result: CompanyFilingDataResponse) {
         this.setState({
-            results: result.data
+            allFilings: result.data
         })
     }
 
@@ -55,14 +55,29 @@ export class Company extends React.PureComponent<Company.Props> {
     }
 
     render() {
-        const results: Array<any> = this.state.results.filings || [];
         return (
-            <div>
-                { results.length > 0
-                    ? results.map(each => <div>{each.filing_name}</div>)
+            <div className={`${style.mainCompanyContents} container`}>
+                { this.state.allFilings.filings.length > 0
+                    ? AllFilingsTable(this.state.allFilings)
                     : 'Hello!'
                 }
             </div>
         )
     }
 }
+
+const AllFilingsTable = (allFilings: CompanyFilingData) => (
+    <table className={style.allFilingsTable}>
+        <tbody>
+            {
+                allFilings.filings.map(each =>
+                    <tr>
+                        <td>{each.filing_name}</td>
+                        <td>{each.filing_quarter}</td>
+                        <td>{each.filing_year}</td>
+                    </tr>
+                )
+            }
+        </tbody>
+    </table>
+);
