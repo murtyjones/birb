@@ -2,7 +2,7 @@ header {
     width: 100%;
 }
 
-.header-background {
+.headerBackground {
     position: fixed;
     left: 0;
     right: 0;
@@ -10,7 +10,7 @@ header {
     background-color: lightblue;
 }
 
-.header-contents {
+.headerContents {
     display: grid;
     position: relative;
     grid-template: 100% / 70px 320px;
@@ -102,7 +102,7 @@ a.companySearchResult > .shortCik {
     font-style: italic;
 }
 
-header, .header-background, .header-contents {
+header, .headerBackground, .headerContents {
     height: 60px;
 }
 

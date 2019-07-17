@@ -1,0 +1,46 @@
+:root {
+  --nav-border-color: var(--grey-500);
+}
+
+nav#nav {
+  height: 120px;
+  border-bottom: 1px solid var(--nav-border-color);
+  background-color: var(--grey-100);
+}
+
+.navContents {
+  display: grid;
+  grid-template-rows: auto 50px;
+  height: 100%;
+}
+
+.navigation {
+  display: grid;
+  grid-template-columns: 100px 120px;
+}
+
+.navigation > a {
+  height: 100%;
+  text-align: center;
+  display: table;
+  text-decoration: none;
+  color: black;
+}
+
+.navigation > a > span {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.navigation > a.active {
+  font-weight: 500;
+  text-align: center;
+  background-color: var(--main-bg-color);
+  border-left: 1px solid var(--nav-border-color);
+  border-right: 1px solid var(--nav-border-color);
+  border-bottom: 2px solid var(--main-bg-color);
+  border-top: 3px solid crimson;
+  box-sizing: border-box;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+}

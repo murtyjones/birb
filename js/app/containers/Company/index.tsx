@@ -24,7 +24,7 @@ interface CompanyFilingDataResponse {
 }
 
 interface MatchParams {
-    short_cik: string;
+    shortCik: string;
 }
 
 export namespace Company {
@@ -45,8 +45,8 @@ export class Company extends React.PureComponent<Company.Props> {
     }
 
     async componentDidMount() {
-        const short_cik = this.props.match.params.short_cik;
-        const request = new Request(`http://localhost:8000/api/companies/${short_cik}/filings`, {
+        const shortCik = this.props.match.params.shortCik;
+        const request = new Request(`http://localhost:8000/api/companies/${shortCik}/filings`, {
             method: 'GET'
         });
         const result: CompanyFilingDataResponse = await http(request);

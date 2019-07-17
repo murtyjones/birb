@@ -126,9 +126,8 @@ export class Header extends React.PureComponent<Header.Props> {
 
     render() {
         return (
-            <header>
-                <div className={style['header-background']}/>
-                <div className={style['header-contents']}>
+            <header className={style.headerBackground}>
+                <div className={`${style.headerContents} container`}>
                     <Logo />
                     <CompanySearch
                         results={this.state.results}

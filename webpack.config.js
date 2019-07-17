@@ -20,7 +20,8 @@ module.exports = {
   output: {
     path: outPath,
     filename: isProduction ? '[contenthash].js' : '[hash].js',
-    chunkFilename: isProduction ? '[name].[contenthash].js' : '[name].[hash].js'
+    chunkFilename: isProduction ? '[name].[contenthash].js' : '[name].[hash].js',
+    publicPath: '/' // see: https://github.com/jantimon/html-webpack-plugin/issues/635#issuecomment-291285897
   },
   target: 'web',
   resolve: {
