@@ -3,7 +3,7 @@ header {
 }
 
 .headerBackground {
-    background-color: lightblue;
+    background-color: Var(--Wetasphalt);
 }
 
 .headerContents {

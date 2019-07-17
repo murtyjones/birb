@@ -1,5 +1,5 @@
 :root {
-  --nav-border-color: var(--grey-500);
+  --nav-border-color: var(--grey-300);
 }
 
 nav#nav {
@@ -17,6 +17,8 @@ nav#nav {
 .navigation {
   display: grid;
   grid-template-columns: 100px 120px;
+  position: relative;
+  top: 1px;
 }
 
 .navigation > a {
@@ -39,7 +41,7 @@ nav#nav {
   border-left: 1px solid var(--nav-border-color);
   border-right: 1px solid var(--nav-border-color);
   border-bottom: 2px solid var(--main-bg-color);
-  border-top: 3px solid crimson;
+  border-top: 3px solid var(--Pumpkin);
   box-sizing: border-box;
   border-top-left-radius: 3px;
   border-top-right-radius: 3px;
