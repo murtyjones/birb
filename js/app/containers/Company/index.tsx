@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as style from './style.css';
 import {RouteComponentProps} from 'react-router';
+import {Link} from 'react-router-dom';
 
 const http = async (request: RequestInfo): Promise<CompanyFilingDataResponse> => {
     return new Promise(resolve => {
@@ -67,17 +68,16 @@ export class Company extends React.PureComponent<Company.Props> {
 }
 
 const AllFilingsTable = (allFilings: CompanyFilingData) => (
-    <table className={style.allFilingsTable}>
-        <tbody>
-            {
-                allFilings.filings.map(each =>
-                    <tr>
-                        <td>{each.filing_name}</td>
-                        <td>{each.filing_quarter}</td>
-                        <td>{each.filing_year}</td>
-                    </tr>
-                )
-            }
-        </tbody>
-    </table>
+    <div className={style.allFilingsTable}>
+
+        {
+            allFilings.filings.map(each =>
+                <Link to={`/filing?bucket=birb-edgar-filings&key=${each.filing_edgar_url}`}>
+                        <span>{each.filing_name}</span>
+                        <span>{each.filing_quarter}</span>
+                        <span>{each.filing_year}</span>
+                </Link>
+            )
+        }
+    </div>
 );

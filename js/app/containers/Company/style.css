@@ -4,14 +4,24 @@
 }
 
 .allFilingsTable {
+    display: table;
     width: 100%;
     border-collapse: collapse;
     box-shadow: 3px 3px 10px var(--grey-100);
     border: 1px solid var(--grey-100);
 }
 
-.allFilingsTable > tbody > tr {
+.allFilingsTable > a {
+    display: table-row;
     border-bottom: 1px solid var(--grey-300);
     box-sizing: border-box;
 }
-.allFilingsTable > tbody > tr:last-child { border: none; }
+.allFilingsTable > a:last-child { border: none; }
+.allFilingsTable > a:hover,
+.allFilingsTable > a:focus {
+    background-color: var(--grey-50);
+}
+
+.allFilingsTable > a > span {
+    display: table-cell;
+}
