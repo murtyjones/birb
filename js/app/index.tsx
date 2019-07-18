@@ -28,7 +28,7 @@ const MaybeRenderHeader = () => (
             ]}
             children={null}
         />
-        /* Routes that ought to show the header: */
+        /* All other routes ought to show the header: */
         <Route path='/' component={Header} />
     </Switch>
 );
