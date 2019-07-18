@@ -16,15 +16,29 @@ const ActiveRoute = () => (
     </Switch>
 );
 
+/*
+ * Show the header on all routes except those blacklisted below
+ */
+const MaybeRenderHeader = () => (
+    <Switch>
+        /* Routes that should not show the header: */
+        <Route
+            path={[
+                '/filings'
+            ]}
+            children={null}
+        />
+        /* Routes that ought to show the header: */
+        <Route path='/' component={Header} />
+    </Switch>
+);
+
 export const App = hot(module)(() => (
     <>
-        {/* Show the header on most routes routes */}
-        <Route path={[
-            '/',
-            '/companies/:shortCik/:activeTab?'
-        ]} exact component={Header} />
 
-        {/* Show the company nav on all company routes routes */}
+        <MaybeRenderHeader />
+
+        {/* Show the company nav on all company routes */}
         <Route path='/companies/:shortCik/:activeTab?' component={CompanyNav} />
 
         <ActiveRoute />
