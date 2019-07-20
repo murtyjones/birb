@@ -5,9 +5,9 @@ authors = ["Marty Jones <murtin.jones@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-html5ever = "*"
-xml5ever = "*"
-markup5ever = "*"
+html5ever = "^0.23.0"
+xml5ever = "^0.14.0"
+markup5ever = "^0.8.1"
 failure = "*"
 tendril = "*"
 regex = "*"

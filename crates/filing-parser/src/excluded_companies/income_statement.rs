@@ -1,16 +1,6 @@
 // regex
+use crate::excluded_companies::{build_excl_name, ExcludedCompany};
 use regex::Regex;
-
-pub struct ExcludedCompany {
-    pub cik: &'static str,
-    pub name: &'static str,
-    pub excludable_name: Regex,
-}
-
-fn build_excl_name(pat: &'static str) -> Regex {
-    let insensitive = format!("(?i){}", pat);
-    Regex::new(&insensitive).expect("Couldn't build income statement regex!")
-}
 
 lazy_static! {
     pub static ref EXCLUDED_COMPANIES: Vec<ExcludedCompany> = vec![

@@ -4,6 +4,8 @@ use html5ever::tendril::TendrilSink;
 //use std::borrow::BorrowMut;
 use std::rc::Rc;
 
+use crate::processing_steps::metadata_remover::{MetadataRemover, ProcessingError};
+use crate::processing_steps::table_accessor::TableAccessor;
 use crate::processing_steps::table_type_identifier::TableTypeIdentifier;
 use core::borrow::BorrowMut;
 
@@ -14,13 +16,9 @@ pub struct ParsedFiling {
     pub income_statement_table_nodes: Vec<Handle>,
 }
 
-impl TableTypeIdentifier for ParsedFiling {
+impl TableAccessor for ParsedFiling {
     fn dom(&self) -> &RcDom {
         &self.dom
-    }
-
-    fn filing_key(&self) -> &String {
-        &self.filing_key
     }
 
     fn income_statement_table_nodes(&self) -> &Vec<Handle> {
@@ -34,7 +32,15 @@ impl TableTypeIdentifier for ParsedFiling {
     fn filing_contents(&self) -> &String {
         &self.filing_contents
     }
+
+    fn filing_key(&self) -> &String {
+        &self.filing_key
+    }
 }
+
+impl TableTypeIdentifier for ParsedFiling {}
+
+impl MetadataRemover for ParsedFiling {}
 
 #[derive(Debug, Fail, PartialEq)]
 pub enum ParsingError {
@@ -56,7 +62,8 @@ impl ParsedFiling {
             income_statement_table_nodes: vec![],
         };
 
-        let income_statement_result = p_f.probably_find_income_statement().unwrap();
+        p_f.probably_find_income_statement();
+        p_f.probably_strip_metadata_nodes();
 
         // Return the processed document
         Ok(p_f)

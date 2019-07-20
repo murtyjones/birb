@@ -16,16 +16,14 @@ use crate::regexes::statement_of_operations::INCOME_STATEMENT_REGEXES;
 
 // helpers
 use crate::helpers::{
-    add_attribute, bfs_no_return, bfs_with_matches, create_x_birb_attr, tendril_to_string,
+    add_attribute, bfs_no_base_case, bfs_with_matches, create_x_birb_attr, tendril_to_string,
 };
 
-// excluded companies
-use crate::excluded_companies::EXCLUDED_COMPANIES;
+// traits needed
+use crate::processing_steps::table_accessor::TableAccessor;
 
-pub struct ProcessedFiling {
-    pub dom: RcDom,
-    pub income_statement_table_nodes: Vec<Handle>,
-}
+// comapnies that may not have an income statement:
+use crate::excluded_companies::income_statement::EXCLUDED_COMPANIES;
 
 #[derive(Debug, Fail, PartialEq)]
 pub enum ProcessingError {
@@ -34,22 +32,7 @@ pub enum ProcessingError {
 }
 
 #[allow(dead_code)]
-pub trait TableTypeIdentifier {
-    fn dom(&self) -> &RcDom;
-
-    fn income_statement_table_nodes(&self) -> &Vec<Handle>;
-
-    fn push_to_income_statement_table_nodes(&mut self, handle: Handle);
-
-    fn filing_contents(&self) -> &String;
-
-    fn filing_key(&self) -> &String;
-
-    /// Gets the Node containing the entire parsed document
-    fn get_doc(&self) -> Rc<Node> {
-        Rc::clone(&self.dom().document)
-    }
-
+pub trait TableTypeIdentifier: TableAccessor {
     fn probably_find_income_statement(&mut self) -> Result<(), Vec<ProcessingError>> {
         let mut errors = vec![];
 
@@ -86,7 +69,7 @@ pub trait TableTypeIdentifier {
         let doc = self.get_doc();
 
         // Find the income statement
-        bfs_no_return(doc, |n| self.find_income_statement_or_statements(&n));
+        bfs_no_base_case(doc, |n| self.find_income_statement_or_statements(&n));
 
         if self.income_statement_table_nodes().len() == 0 {
             return Err(ProcessingError::NoIncomeStatementFound {

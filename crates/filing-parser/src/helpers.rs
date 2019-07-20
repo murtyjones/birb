@@ -28,22 +28,24 @@ pub fn same_node(x: &Handle, y: &Handle) -> bool {
 
 pub fn get_parent_and_index(target: &Handle) -> Option<(Handle, i32)> {
     // TODO this will hopefully be fixed soon and .get() can be used instead:
-    let parent = target.parent.take();
-    target.parent.set(parent.clone());
-    match parent {
-        Some(n) => {
-            let parent = n.upgrade().expect("dangling weak pointer");
-            let children = &parent.children.borrow();
-            match children
-                .iter()
-                .enumerate()
-                .find(|&(_, n)| same_node(n, target))
-            {
-                Some((i, _)) => Some((Rc::clone(&parent), i as i32)),
-                None => panic!("Have parent but couldn't find in parent's children!"),
-            }
-        }
-        None => panic!("No parent!"),
+    let parent = target
+        .parent
+        .take()
+        .expect("No parent!")
+        .upgrade()
+        .expect("dangling weak pointer!");
+    let num2 = Rc::clone(&parent);
+    let weaknum2 = std::rc::Rc::downgrade(&num2);
+    target.parent.set(Some(weaknum2));
+    let children = parent.children.borrow();
+
+    match children
+        .iter()
+        .enumerate()
+        .find(|&(_, n)| same_node(n, target))
+    {
+        Some((i, _)) => Some((Rc::clone(&parent), i as i32)),
+        None => panic!("Have parent but couldn't find in parent's children!"),
     }
 }
 
@@ -160,7 +162,7 @@ where
     false
 }
 
-pub fn bfs_no_return<CB>(handle: Handle, mut cb: CB) -> ()
+pub fn bfs_no_base_case<CB>(handle: Handle, mut cb: CB) -> ()
 where
     CB: (FnMut(Handle) -> bool),
 {
