@@ -152,18 +152,15 @@ mod test {
     }
 
     #[test]
-    fn test_should_err_when_no_income_statement_found() {
+    fn test_should_provide_expeted_errors() {
         let fake_html = String::from("<html></html>");
         let fake_key = String::from("000/000.txt");
         let processed_filing = ParsedFiling::new(fake_html, fake_key);
-        assert!(processed_filing.is_err());
-        if let Err(errors) = processed_filing {
-            assert_eq!(
-                errors[0],
-                ParsingError::NoIncomeStatementFound {
-                    filing_key: String::from("fake")
-                }
-            );
+        match processed_filing {
+            Ok(_) => panic!("Not expecting okay!"),
+            Err(e) => {
+                assert_eq!(e.len(), 2);
+            }
         }
     }
 

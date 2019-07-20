@@ -77,7 +77,6 @@ pub trait MetadataRemover: TableAccessor {
     fn strip_any_xbrl_node(&mut self, handle: &Handle) -> bool {
         if let NodeData::Element { ref name, .. } = handle.data {
             // Should be named <xbrl>
-            println!("{}", name.local);
             if &name.local == "xbrl" || &name.local == "XBRL" {
                 self.delete_node(handle);
                 return true;
