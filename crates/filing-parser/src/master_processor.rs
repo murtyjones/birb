@@ -177,6 +177,8 @@ mod test {
             let stringified_result = processed_filing.get_doc_as_str();
             let output_path = String::from(format!("./examples/10-Q/output/{}.html", i));
             std::fs::write(output_path, stringified_result.clone()).expect("Unable to write file");
+
+            // earnings identifiers assertions:
             assert!(
                 stringified_result.contains(file.table_element),
                 "[file: {}] Table element expected content was not found!",
@@ -186,6 +188,18 @@ mod test {
                 processed_filing.income_statement_table_nodes.len() as i32,
                 file.income_statement_table_count,
                 "[file: {}] Should have expected number of tables!",
+                i
+            );
+
+            // metadata removal assertions:
+            assert!(
+                !stringified_result.contains("<sec-header"),
+                "[file: {}] Contains <sec-header> node(s)!",
+                i
+            );
+            assert!(
+                !stringified_result.contains("<xbrl"),
+                "[file: {}] Contains <xbrl> nodes!",
                 i
             );
         }
