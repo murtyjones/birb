@@ -4,9 +4,13 @@ use html5ever::tendril::TendrilSink;
 //use std::borrow::BorrowMut;
 use std::rc::Rc;
 
-use crate::processing_steps::metadata_remover::{MetadataRemover, ProcessingError};
+use crate::processing_steps::income_statement_identifier::{
+    IncomeStatementIdentifier, ProcessingError as IncomeStatementIdentifierProcessingError,
+};
+use crate::processing_steps::metadata_remover::{
+    MetadataRemover, ProcessingError as MetadataRemoverProcessingError,
+};
 use crate::processing_steps::table_accessor::TableAccessor;
-use crate::processing_steps::table_type_identifier::TableTypeIdentifier;
 use core::borrow::BorrowMut;
 
 pub struct ParsedFiling {
@@ -14,6 +18,14 @@ pub struct ParsedFiling {
     pub filing_key: String,
     pub dom: RcDom,
     pub income_statement_table_nodes: Vec<Handle>,
+}
+
+#[derive(Debug, Fail, PartialEq)]
+pub enum ParsingError {
+    #[fail(display = "Error when identifying table types")]
+    IncomeStatementIdentifierProcessingError(IncomeStatementIdentifierProcessingError),
+    #[fail(display = "Error when removing metadata")]
+    MetadataRemoverProcessingError(MetadataRemoverProcessingError),
 }
 
 impl TableAccessor for ParsedFiling {
@@ -38,17 +50,9 @@ impl TableAccessor for ParsedFiling {
     }
 }
 
-impl TableTypeIdentifier for ParsedFiling {}
+impl IncomeStatementIdentifier for ParsedFiling {}
 
 impl MetadataRemover for ParsedFiling {}
-
-#[derive(Debug, Fail, PartialEq)]
-pub enum ParsingError {
-    #[fail(display = "Failed to parse document for filing_key: {}", filing_key)]
-    FailedToParse { filing_key: String },
-    #[fail(display = "No income statement found for filing_key: {}", filing_key)]
-    NoIncomeStatementFound { filing_key: String },
-}
 
 impl ParsedFiling {
     pub fn new(
@@ -62,8 +66,20 @@ impl ParsedFiling {
             income_statement_table_nodes: vec![],
         };
 
-        p_f.probably_find_income_statement();
-        p_f.probably_strip_metadata_nodes();
+        let mut errors: Vec<ParsingError> = vec![];
+
+        let mut r = p_f.probably_find_income_statement();
+        if let Err(e) = r {
+            errors.push(ParsingError::IncomeStatementIdentifierProcessingError(e));
+        }
+        let mut r = p_f.probably_strip_metadata_nodes();
+        if let Err(e) = r {
+            errors.push(ParsingError::MetadataRemoverProcessingError(e));
+        }
+
+        if errors.len() > 0 {
+            return Err(errors);
+        }
 
         // Return the processed document
         Ok(p_f)

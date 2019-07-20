@@ -1,4 +1,5 @@
 use crate::excluded_companies::sec_header::EXCLUDED_COMPANIES;
+use crate::excluded_companies::ExcludedCompany;
 use crate::helpers::{bfs, bfs_no_base_case, bfs_skip_chillins};
 use crate::processing_steps::table_accessor::TableAccessor;
 use html5ever::rcdom::{Handle, Node, NodeData, RcDom};
@@ -10,15 +11,9 @@ pub enum ProcessingError {
 }
 
 pub trait MetadataRemover: TableAccessor {
-    fn probably_strip_metadata_nodes(&mut self) -> Result<(), Vec<ProcessingError>> {
-        let mut errors = vec![];
-
+    fn probably_strip_metadata_nodes(&mut self) -> Result<(), ProcessingError> {
         // Process the filing
         let result = self.process();
-        if let Err(e) = result {
-            errors.push(e);
-        }
-
         /*
          * if there are errors in finding expected tables, check
          * whether or not the filing contains the CIK of a company
@@ -26,16 +21,11 @@ pub trait MetadataRemover: TableAccessor {
          * don't include an income statement, for example. If the
          * filer isn't in this whitelist, return the errors.
          *
-         * See: https:// <-- TODO
+         * See: https://www.sec.gov/Archives/edgar/data/1003815/000100381516000011/b4assignorcorp121510k.htm
          */
-        if errors.len() > 0 {
-            if let Some(_) = EXCLUDED_COMPANIES.iter().find(|&ex_company| {
-                self.filing_contents().contains(ex_company.cik)
-                    || ex_company.excludable_name.is_match(self.filing_contents())
-            }) {
-                return Ok(());
-            } else {
-                return Err(errors);
+        if let Err(e) = result {
+            if self.excluable_filing().is_none() {
+                return Err(e);
             }
         }
 
@@ -43,6 +33,13 @@ pub trait MetadataRemover: TableAccessor {
         bfs_skip_chillins(doc, |n| self.strip_any_xbrl_node(&n));
 
         Ok(())
+    }
+
+    fn excluable_filing(&mut self) -> Option<&ExcludedCompany> {
+        EXCLUDED_COMPANIES.iter().find(|&ex_company| {
+            self.filing_contents().contains(ex_company.cik)
+                || ex_company.excludable_name.is_match(self.filing_contents())
+        })
     }
 
     fn process(&mut self) -> Result<(), ProcessingError> {
