@@ -1,6 +1,6 @@
 provider "aws" {
-  version                 = ">= 1.33.0"
+  version                 = ">=2.5.0"
   shared_credentials_file = "$HOME/.aws/credentials"
-  profile                 = "default"
+  profile                 = "birb"
   region                  = "${var.aws_region}"
 }

@@ -157,7 +157,7 @@ impl Subcommand for AwsAll {
             AwsAll::Down => {
                 let _result = run_str_in_bash(
                     "
-                    terraform destroy -var-file=terraform/production.secret.tfvars \
+                    AWS_PROFILE=birb terraform destroy -var-file=terraform/production.secret.tfvars \
                         -auto-approve \
                         terraform/
                 ",
@@ -172,7 +172,11 @@ impl Subcommand for TfPlan {
     fn run(&self) -> Result<(), failure::Error> {
         match self {
             TfPlan::Up => {
-                run_str_in_bash("terraform apply \"plan\" && rm -rf plan")?;
+                run_str_in_bash(
+                    "\
+                     AWS_PROFILE=birb terraform apply \"plan\" && rm -rf plan\
+                     ",
+                )?;
             }
         }
         Ok(())
@@ -186,7 +190,7 @@ impl Subcommand for AwsServer {
                 // Not currently worrying about whether or not the deploy was successful
                 let _plan = run_str_in_bash(
                     "
-                    terraform plan -var-file=terraform/production.secret.tfvars \
+                    AWS_PROFILE=birb terraform plan -var-file=terraform/production.secret.tfvars \
                        -out=plan \
                        -target=aws_alb.server_load_balancer \
                        -target=aws_alb_target_group.server_target_group \
@@ -226,7 +230,7 @@ impl Subcommand for AwsServer {
             AwsServer::Down => {
                 let _reuslt = run_str_in_bash(
                     "
-                    terraform destroy -var-file=terraform/production.secret.tfvars \
+                    AWS_PROFILE=birb terraform destroy -var-file=terraform/production.secret.tfvars \
                        -auto-approve \
                        -target=aws_alb.server_load_balancer \
                        -target=aws_alb_target_group.server_target_group \
@@ -283,7 +287,7 @@ impl Subcommand for AwsEdgar {
             AwsEdgar::Down => {
                 let _reuslt = run_str_in_bash(
                     "
-                    terraform destroy -var-file=terraform/production.secret.tfvars \
+                    AWS_PROFILE=birb terraform destroy -var-file=terraform/production.secret.tfvars \
                        -auto-approve \
                        -target=aws_launch_configuration.edgar_launch_configuration \
                        -target=aws_autoscaling_group.edgar_autoscaling \
@@ -329,7 +333,7 @@ impl Subcommand for AwsBastion {
             AwsBastion::Down => {
                 let _result = run_str_in_bash(
                     "
-                terraform destroy -var-file=terraform/production.secret.tfvars \
+                AWS_PROFILE=birb terraform destroy -var-file=terraform/production.secret.tfvars \
                            -auto-approve \
                            -target=aws_instance.bastion \
                            -target=aws_key_pair.bastion_key \
@@ -428,7 +432,7 @@ impl Subcommand for AwsStateless {
             AwsStateless::Down => {
                 let _result = run_str_in_bash(
                     "
-                       terraform destroy -var-file=terraform/production.secret.tfvars \
+                       AWS_PROFILE=birb terraform destroy -var-file=terraform/production.secret.tfvars \
                            -auto-approve \
                            -target=aws_alb.server_load_balancer \
                            -target=aws_alb_target_group.server_target_group \
