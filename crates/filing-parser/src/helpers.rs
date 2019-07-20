@@ -178,6 +178,24 @@ where
     }
 }
 
+pub fn bfs_skip_chillins<CB>(handle: Handle, mut cb: CB) -> ()
+where
+    CB: (FnMut(Handle) -> bool),
+{
+    let mut q = vec![handle];
+    while q.len() > 0 {
+        let node = q.remove(0);
+        let found = cb(Rc::clone(&node));
+        if !found {
+            // Prepend the child's elements to the queue. This is less
+            // ideal than appending them because it requires more memory,
+            // but we need to parse the document in order (IE from top to
+            // bottom), so this approach is needed for now.
+            q = prepend(q, &mut get_children(&node));
+        }
+    }
+}
+
 fn prepend<T>(v: Vec<T>, s: &[T]) -> Vec<T>
 where
     T: Clone,

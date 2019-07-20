@@ -1,5 +1,5 @@
 use crate::excluded_companies::sec_header::EXCLUDED_COMPANIES;
-use crate::helpers::{bfs, bfs_no_base_case};
+use crate::helpers::{bfs, bfs_no_base_case, bfs_skip_chillins};
 use crate::processing_steps::table_accessor::TableAccessor;
 use html5ever::rcdom::{Handle, Node, NodeData, RcDom};
 
@@ -40,7 +40,7 @@ pub trait MetadataRemover: TableAccessor {
         }
 
         let doc = self.get_doc();
-        bfs_no_base_case(doc, |n| self.strip_any_xbrl_node(&n));
+        bfs_skip_chillins(doc, |n| self.strip_any_xbrl_node(&n));
 
         Ok(())
     }
