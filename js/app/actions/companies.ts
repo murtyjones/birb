@@ -1,3 +1,4 @@
+import { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
 import { CompanyModel } from 'app/models';
 
@@ -24,17 +25,29 @@ const http = async (request: RequestInfo): Promise<CompanyFilingDataResponse> =>
 
 export namespace CompanyActions {
   export enum Type {
-    GET_COMPANY = 'GET_COMPANY',
+    GET_COMPANY_REQUEST = 'GET_COMPANY_REQUEST',
+    GET_COMPANY_SUCCESS = 'GET_COMPANY_SUCCESS',
+    GET_COMPANY_FAILURE = 'GET_COMPANY_FAILURE',
   }
 
-  export const getCompany = createAction (Type.GET_COMPANY, async (shortCik: string): Promise<CompanyModel> => {
-    const request = new Request(`http://localhost:8000/api/companies/${shortCik}/filings`, {
-      method: 'GET'
-    });
-    const result: CompanyFilingDataResponse = await http(request);
-    return { shortCik: result.data.short_cik, name: result.data.company_name };
-  });
+  const getCompanyRequest = createAction('GET_COMPANY_REQUEST');
+  const getCompanySuccess = createAction<CompanyModel>('GET_COMPANY_SUCCESS');
+  const getCompanyFailure = createAction('GET_COMPANY_FAILURE');
 
+  export const getCompany = (shortCik: string) => async (dispatch: Dispatch) => {
+    dispatch(getCompanyRequest());
+    try {
+      const request = new Request(`http://localhost:8000/api/companies/${shortCik}/filings`, {
+        method: 'GET'
+      });
+      const result: CompanyFilingDataResponse = await http(request);
+      dispatch(getCompanySuccess({
+        shortCik: result.data.short_cik, name: result.data.company_name
+      }));
+    } catch (e) {
+      dispatch(getCompanyFailure());
+    }
+  };
 }
 
 export type CompanyActions = Omit<typeof CompanyActions, 'Type'>;

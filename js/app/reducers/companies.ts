@@ -9,7 +9,7 @@ const initialState: RootState.CompanyState = {
 
 export const companyReducer = handleActions<RootState.CompanyState, CompanyModel>(
     {
-        [CompanyActions.Type.GET_COMPANY]: (state, action) => {
+        [CompanyActions.Type.GET_COMPANY_SUCCESS]: (state, action) => {
             const c = action.payload;
             return state;
         },

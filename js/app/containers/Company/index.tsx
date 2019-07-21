@@ -36,7 +36,7 @@ export class Company extends React.PureComponent<Company.Props> {
 
     async componentDidMount() {
         const shortCik = this.props.match.params.shortCik;
-        this.props.actions.getCompany(shortCik);
+        await this.props.actions.getCompany(shortCik);
     }
 
     render() {
@@ -53,17 +53,17 @@ export class Company extends React.PureComponent<Company.Props> {
     }
 }
 
-const AllFilingsTable = (allFilings: CompanyFilingData) => (
-    <div className={style.allFilingsTable}>
-
-        {
-            allFilings.filings.map(each =>
-                <Link to={`/filing?bucket=birb-edgar-filings&key=${each.filing_edgar_url}`}>
-                        <span>{each.filing_name}</span>
-                        <span>{each.filing_quarter}</span>
-                        <span>{each.filing_year}</span>
-                </Link>
-            )
-        }
-    </div>
-);
+// const AllFilingsTable = (allFilings: CompanyFilingData) => (
+//     <div className={style.allFilingsTable}>
+//
+//         {
+//             allFilings.filings.map(each =>
+//                 <Link to={`/filing?bucket=birb-edgar-filings&key=${each.filing_edgar_url}`}>
+//                         <span>{each.filing_name}</span>
+//                         <span>{each.filing_quarter}</span>
+//                         <span>{each.filing_year}</span>
+//                 </Link>
+//             )
+//         }
+//     </div>
+// );
