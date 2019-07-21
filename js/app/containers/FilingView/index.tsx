@@ -22,7 +22,7 @@ export class FilingView extends React.Component<FilingView.Props> {
         return (
             <div style={{
                 display: 'grid',
-                'grid-template-columns': '200px auto',
+                gridTemplateColumns: '200px auto',
                 height: '100vh'
             }}>
                 <div>sidebar</div>
