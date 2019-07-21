@@ -11,9 +11,10 @@ pub fn get_s3_client() -> S3Client {
     p.set_profile("birb");
 
     #[cfg(debug_assertions)]
-    let mut credentials = ChainProvider::with_profile_provider(p);
+    let credentials = ChainProvider::with_profile_provider(p);
     #[cfg(not(debug_assertions))]
-    let mut credentials = InstanceMetadataProvider::new();
+    let credentials = ChainProvider::new();
+    // if the above doesn't work, try: let mut credentials = InstanceMetadataProvider::new();
 
     S3Client::new_with(
         HttpClient::new().expect("failed to create request dispatcher"),
@@ -39,7 +40,7 @@ pub fn get_s3_object(client: &S3Client, bucket: &str, filename: &str) -> Vec<u8>
     let body = stream.concat2().wait().unwrap();
 
     assert!(body.len() > 0);
-    body
+    body.to_vec()
 }
 
 pub fn list_s3_objects(client: &S3Client, bucket: &str) -> Vec<Object> {
