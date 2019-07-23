@@ -14,7 +14,6 @@ export const companyReducer = createReducer(defaultTodosState, handleAction => [
                 [payload.shortCik]: payload
             }
         });
-        console.log(newState);
         return newState;
     }),
 ]);
