@@ -1,18 +1,20 @@
-import { handleActions } from 'redux-actions';
 import { RootState } from './state';
 import { CompanyActions } from 'app/actions/companies';
-import { CompanyModel } from 'app/models';
+import { createReducer } from 'deox'
 
-const initialState: RootState.CompanyState = {
+export const defaultTodosState: RootState.CompanyState = {
     byShortCik: {}
 };
 
-export const companyReducer = handleActions<RootState.CompanyState, CompanyModel>(
-    {
-        [CompanyActions.Type.GET_COMPANY_SUCCESS]: (state, action) => {
-            const c = action.payload;
-            return state;
-        },
-    },
-    initialState
-);
+export const companyReducer = createReducer(defaultTodosState, handleAction => [
+    handleAction(CompanyActions.getCompany.success, (state, { payload }) => {
+        const newState = Object.assign(state, {
+            byShortCik: {
+                ...state.byShortCik,
+                [payload.shortCik]: payload
+            }
+        });
+        console.log(newState);
+        return newState;
+    }),
+]);

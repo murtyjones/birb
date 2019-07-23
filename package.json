@@ -62,6 +62,7 @@
   },
   "dependencies": {
     "classnames": "^2.2.6",
+    "deox": "^2.1.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-redux": "^6.0.1",
