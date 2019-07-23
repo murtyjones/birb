@@ -7,7 +7,6 @@ const http = async (request: RequestInfo): Promise<SearchResponseResults> => {
     return new Promise(resolve => {
         fetch(request)
             .then(response => {
-                console.log(response);
                 return response.text()})
             .then(text => {
                 resolve(text ? JSON.parse(text) : {});

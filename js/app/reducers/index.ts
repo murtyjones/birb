@@ -2,6 +2,9 @@ import { combineReducers } from 'redux';
 import { RootState } from './state';
 import { todoReducer } from './todos';
 import { companyReducer } from './companies';
+import { loadingReducer } from './loading';
+
+export * from './selectors';
 
 export { RootState };
 
@@ -10,4 +13,5 @@ export { RootState };
 export const rootReducer = combineReducers<RootState>({
   todos: todoReducer as any,
   companies: companyReducer as any,
+  loading: loadingReducer as any,
 });

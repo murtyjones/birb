@@ -7,6 +7,7 @@ import {RootState} from 'app/reducers';
 import {CompanyActions} from 'app/actions/companies';
 import {bindActionCreators, Dispatch} from 'redux';
 import {omit} from 'app/utils';
+import {createLoadingSelector} from 'app/reducers/selectors/loading';
 
 interface MatchParams {
     shortCik: string;
@@ -16,12 +17,18 @@ export namespace Company {
     export interface Props extends RouteComponentProps<MatchParams> {
         companies: RootState.CompanyState;
         actions: CompanyActions;
+        isFetching: boolean;
     }
 }
 
+const loadingSelector = createLoadingSelector([CompanyActions.Type.GET_COMPANY]);
+
 @connect(
-    (state: RootState, ownProps): Pick<Company.Props, 'companies'> => {
-        return { companies: state.companies  };
+    (state: RootState, ownProps): Pick<Company.Props, 'companies' | 'isFetching'> => {
+        return {
+            companies: state.companies,
+            isFetching: loadingSelector(state)
+        };
     },
     (dispatch: Dispatch): Pick<Company.Props, 'actions'> => ({
         actions: bindActionCreators(omit(CompanyActions, 'Type'), dispatch)
@@ -40,7 +47,6 @@ export class Company extends React.PureComponent<Company.Props> {
     }
 
     render() {
-        console.log(this.props.companies.byShortCik);
         return (
             <div className={`${style.mainCompanyContents} container`}>
 

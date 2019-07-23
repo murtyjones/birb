@@ -25,6 +25,7 @@ const http = async (request: RequestInfo): Promise<CompanyFilingDataResponse> =>
 
 export namespace CompanyActions {
   export enum Type {
+    GET_COMPANY = 'GET_COMPANY',
     GET_COMPANY_REQUEST = 'GET_COMPANY_REQUEST',
     GET_COMPANY_SUCCESS = 'GET_COMPANY_SUCCESS',
     GET_COMPANY_FAILURE = 'GET_COMPANY_FAILURE',
