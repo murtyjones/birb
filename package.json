@@ -8,8 +8,7 @@
     "react",
     "redux",
     "typescript",
-    "boilerplate",
-    "todomvc"
+    "boilerplate"
   ],
   "main": "index.js",
   "scripts": {
