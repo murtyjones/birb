@@ -1,7 +1,5 @@
 import { RootState } from './state';
 import { Action } from 'redux';
-import { LoadingActions } from 'app/actions/loading';
-import { createReducer } from 'deox'
 
 export const defaultLoadingState: RootState.LoadingState = {
 
