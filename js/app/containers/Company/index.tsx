@@ -49,7 +49,6 @@ export class Company extends React.PureComponent<Company.Props> {
     render() {
         return (
             <div className={`${style.mainCompanyContents} container`}>
-
                 {/*{ this.state.allFilings.filings.length > 0*/}
                 {/*    ? AllFilingsTable(this.state.allFilings)*/}
                 {/*    : 'Hello!'*/}
