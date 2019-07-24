@@ -1,27 +1,7 @@
 import { Dispatch } from 'redux';
 import { createActionCreator } from 'deox'
 import { CompanyModel } from 'app/models';
-
-interface CompanyFilingData {
-  company_name: string;
-  filings: Array<any>;
-  short_cik: string;
-}
-
-interface CompanyFilingDataResponse {
-  data: CompanyFilingData
-}
-
-const http = async (request: RequestInfo): Promise<CompanyFilingDataResponse> => {
-  return new Promise(resolve => {
-    fetch(request)
-        .then(response => {
-          return response.text()})
-        .then(text => {
-          resolve(text ? JSON.parse(text) : {});
-        })
-  });
-};
+import { http } from 'app/utils/http';
 
 export namespace CompanyActions {
   export enum Type {
@@ -40,11 +20,11 @@ export namespace CompanyActions {
         const request = new Request(`http://localhost:8000/api/companies/${shortCik}/filings`, {
           method: 'GET'
         });
-        const result: CompanyFilingDataResponse = await http(request);
+        const response = await http(request);
 
         dispatch(getCompany.success({
-          shortCik: result.data.short_cik,
-          name: result.data.company_name,
+          shortCik: response.body.data.short_cik,
+          name: response.body.data.company_name,
         }));
       } catch (error) {
         dispatch(getCompany.failure(error));
