@@ -43,7 +43,7 @@ const Logo = () => (
 );
 
 interface CompanySearchInput {
-    search: (pat: string) => void,
+    handleInput: (pat: string) => void,
 }
 
 const CompanySearchInput: React.FC<CompanySearchInput> = props => (
@@ -54,7 +54,7 @@ const CompanySearchInput: React.FC<CompanySearchInput> = props => (
             type='text'
             onInput={async (event: React.ChangeEvent<HTMLInputElement>) => {
                 const pat: string = event.target.value;
-                props.search(pat);
+                props.handleInput(pat);
 
             }}
         />
@@ -65,14 +65,14 @@ const CompanySearchInput: React.FC<CompanySearchInput> = props => (
 
 
 interface CompanySearch {
-    search: (pat: string) => void,
+    handleInput: (pat: string) => void,
     results: RootState.SearchResultsState,
 }
 
 const CompanySearch: React.FC<CompanySearch> = props => (
     <div className={style.companySearch}>
         <CompanySearchInput
-            search={props.search}
+            handleInput={props.handleInput}
         />
         <CompanySearchResults
             results={props.results}
@@ -115,7 +115,7 @@ export class Header extends React.PureComponent<Header.Props> {
                 <div className={`${style.headerContents} container`}>
                     <Logo />
                     <CompanySearch
-                        search={this.props.actions.searchCompany}
+                        handleInput={this.props.actions.searchCompany}
                         results={this.props.searchResults}
                     />
                 </div>
