@@ -63,6 +63,7 @@ header {
 }
 
 .companySearchResults {
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.05);
     background-color: white;
     position: relative;
     top: -3px;
@@ -90,12 +91,12 @@ a.companySearchResult:focus {
 
 a.companySearchResult > .companyName {
     color: black;
-    font-weight: 500;
-    font-size: 80%;
+    font-weight: 400;
+    font-size: 95%;
 }
 a.companySearchResult > .shortCik {
     color: var(--grey-700);
-    font-size: 80%;
+    font-size: 90%;
     font-style: italic;
 }
 

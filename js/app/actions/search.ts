@@ -18,8 +18,11 @@ export namespace SearchActions {
 
     function fetchCompanySearchResults(pat: string) {
         return async (dispatch: Dispatch) => {
+            // If no query, no results to show:
+            if (pat === '') {
+                dispatch(searchCompany.success({ data: [], has_more: false }));
+            }
             dispatch(searchCompany.request());
-
             try {
                 const request = new Request(`http://localhost:8000/api/autocomplete/${pat}`, {
                     method: 'GET'
