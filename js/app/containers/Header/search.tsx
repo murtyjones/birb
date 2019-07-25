@@ -3,8 +3,10 @@ import * as style from 'app/containers/Header/style.css';
 import {RootState} from 'app/reducers';
 import {Result} from 'app/reducers/search';
 import cns from 'classnames';
+import { History } from 'history';
 import * as React from 'react';
 import {Link, RouteComponentProps} from 'react-router-dom';
+
 
 interface ICompanySearchResult {
     result: Result;
@@ -68,6 +70,7 @@ const CompanySearchInput: React.FC<ICompanySearchInput> = (props) => (
 
 export namespace CompanySearch {
     export interface IProps {
+        history: History;
         handleInput: (pat: string) => void;
         results: RootState.SearchResultsState;
     }
@@ -91,6 +94,7 @@ export class CompanySearch extends React.PureComponent<CompanySearch.IProps> {
         this.handleBlur = this.handleBlur.bind(this);
         this.forceBlur = this.forceBlur.bind(this);
         this.navigate = this.navigate.bind(this);
+        this.handleSelect = this.handleSelect.bind(this);
     }
 
     public handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
@@ -121,6 +125,7 @@ export class CompanySearch extends React.PureComponent<CompanySearch.IProps> {
             this.forceBlur();
         } else if ((selectKeys as any)[event.key]) {
             event.preventDefault();
+            this.handleSelect();
         }
     }
 
@@ -134,17 +139,17 @@ export class CompanySearch extends React.PureComponent<CompanySearch.IProps> {
     }
 
     public handleBlur() {
-        // this.setState({
-        //     activeIndex: -1,
-        //     isInputActive: false,
-        // });
+        this.setState({
+            activeIndex: -1,
+            isInputActive: false,
+        });
     }
 
     public forceBlur() {
-        // this.setState({
-        //     activeIndex: -1,
-        //     isInputActive: false,
-        // });
+        this.setState({
+            activeIndex: -1,
+            isInputActive: false,
+        });
     }
 
     public navigate(direction: -1|1) {
@@ -158,13 +163,18 @@ export class CompanySearch extends React.PureComponent<CompanySearch.IProps> {
             }
             this.setState({
                 activeIndex: newActiveItemIndex,
-
             });
         } else {
             this.setState({
                 activeIndex: -1,
             });
         }
+    }
+
+    public handleSelect() {
+        const shortCik = this.props.results.data[this.state.activeIndex].short_cik;
+        this.props.history.push(`/companies/${shortCik}`);
+        this.forceBlur();
     }
 
     public render() {
