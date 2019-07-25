@@ -41,6 +41,7 @@ const CompanySearchResults: React.FC<ICompanySearchResults> = (props) => (
 interface ICompanySearchInput {
     handleInput: (pat: string) => void;
     handleBlur: () => void;
+    handleClick: () => void;
     handleKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
     isInputActive: boolean;
 }
@@ -57,6 +58,7 @@ const CompanySearchInput: React.FC<ICompanySearchInput> = (props) => (
             }}
             onBlur={() => props.handleBlur()}
             onKeyDown={props.handleKeyDown}
+            onClick={props.handleClick}
         />
         <button>Search</button>
     </div>
@@ -107,13 +109,16 @@ export class CompanySearch extends React.PureComponent<CompanySearch.IProps> {
         };
 
         if ((navUpKeys as any)[event.key]) {
+            event.preventDefault();
             this.navigate(1);
         } else if ((navDownKeys as any)[event.key]) {
+            event.preventDefault();
             this.navigate(-1);
         } else if ((blurKeys as any)[event.key]) {
+            event.preventDefault();
             this.forceBlur();
         } else if ((selectKeys as any)[event.key]) {
-
+            event.preventDefault();
         }
     }
 
@@ -122,29 +127,32 @@ export class CompanySearch extends React.PureComponent<CompanySearch.IProps> {
         this.props.handleInput(pat);
     }
 
-    public handleClick(e) {
+    public handleClick() {
         this.setState({ isInputActive: true });
     }
 
     public handleBlur() {
-        this.setState({ isInputActive: false });
+        this.setState({
+            activeIndex: -1,
+            isInputActive: false,
+        });
     }
 
     public forceBlur() {
-        this.setState({ isInputActive: false });
+        this.setState({
+            activeIndex: -1,
+            isInputActive: false,
+        });
     }
 
     public navigate(direction: -1|1) {
         if (this.props.results.data.length > 0) {
-            const jumpToTopOfList = this.state.activeIndex === this.props.results.data.length - 1 && direction < 0;
-            const jumpToEndOfList = this.state.activeIndex === 0 && direction > 0;
+            const lastItem = this.props.results.data.length - 1;
+            let newDirection = this.state.activeIndex - direction;
+            newDirection = Math.max(newDirection, 0);
+            newDirection = Math.min(newDirection, lastItem);
             this.setState({
-                activeIndex:
-                    jumpToTopOfList
-                        ? 0
-                        : jumpToEndOfList
-                        ? this.props.results.data.length - 1
-                        : this.state.activeIndex - direction,
+                activeIndex: newDirection,
 
             });
         } else {
