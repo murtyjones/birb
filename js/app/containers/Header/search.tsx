@@ -2,6 +2,7 @@ import {SearchActions} from 'app/actions/search';
 import * as style from 'app/containers/Header/style.css';
 import {RootState} from 'app/reducers';
 import {Result} from 'app/reducers/search';
+import cns from 'classnames';
 import * as React from 'react';
 import {Link, RouteComponentProps} from 'react-router-dom';
 
@@ -13,8 +14,9 @@ interface ICompanySearchResult {
 const Result: React.FC<ICompanySearchResult> = (props) => (
     <Link
         to={`/companies/${props.result.short_cik}`}
-        className={style.companySearchResult}
-        style={props.isActive ? {background: 'red'} : {}}
+        className={cns(style.companySearchResult, {
+            [style.activeResult]: props.isActive,
+        })}
     >
         <span className={style.companyName}>
             {props.result.company_name}
@@ -132,17 +134,17 @@ export class CompanySearch extends React.PureComponent<CompanySearch.IProps> {
     }
 
     public handleBlur() {
-        this.setState({
-            activeIndex: -1,
-            isInputActive: false,
-        });
+        // this.setState({
+        //     activeIndex: -1,
+        //     isInputActive: false,
+        // });
     }
 
     public forceBlur() {
-        this.setState({
-            activeIndex: -1,
-            isInputActive: false,
-        });
+        // this.setState({
+        //     activeIndex: -1,
+        //     isInputActive: false,
+        // });
     }
 
     public navigate(direction: -1|1) {
@@ -166,7 +168,6 @@ export class CompanySearch extends React.PureComponent<CompanySearch.IProps> {
     }
 
     public render() {
-        console.log(this.state.activeIndex);
         return (
             <div className={style.companySearch}>
                 <CompanySearchInput

@@ -1,9 +1,9 @@
-import {http} from "app/utils/http";
-import {Dispatch} from "redux";
-import {createActionCreator} from "deox";
-import {Result} from "app/reducers/search";
+import {Result} from 'app/reducers/search';
+import {http} from 'app/utils/http';
+import {createActionCreator} from 'deox';
+import {Dispatch} from 'redux';
 
-export interface SearchResults {
+export interface ISearchResults {
     data: Result[];
     has_more: boolean;
 }
@@ -25,7 +25,7 @@ export namespace SearchActions {
             dispatch(searchCompany.request());
             try {
                 const request = new Request(`http://localhost:8000/api/autocomplete/${pat}`, {
-                    method: 'GET'
+                    method: 'GET',
                 });
                 const response = await http(request);
 
@@ -38,19 +38,19 @@ export namespace SearchActions {
             } catch (error) {
                 dispatch(searchCompany.failure(error));
             }
-        }
+        };
     }
 
     export const searchCompany = Object.assign(fetchCompanySearchResults, {
+        failure: createActionCreator(Type.SEARCH_COMPANY_FAILURE, (resolve) => (error) =>
+            resolve(error),
+        ),
         request: createActionCreator(Type.SEARCH_COMPANY_REQUEST),
         success: createActionCreator(
             Type.SEARCH_COMPANY_SUCCESS,
-            resolve => (results: SearchResults) => resolve(results)
+            (resolve) => (results: ISearchResults) => resolve(results),
         ),
-        failure: createActionCreator(Type.SEARCH_COMPANY_FAILURE, resolve => error =>
-            resolve(error)
-        ),
-    })
+    });
 }
 
 export type SearchActions = Omit<typeof SearchActions, 'Type'>;

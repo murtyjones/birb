@@ -84,8 +84,13 @@ a.companySearchResult {
 }
 
 a.companySearchResult:hover,
-a.companySearchResult:focus {
+a.companySearchResult:focus,
+a.companySearchResult:active {
     cursor: pointer;
+    background-color: var(--grey-100);
+}
+
+a.activeResult {
     background-color: var(--grey-100);
 }
 
