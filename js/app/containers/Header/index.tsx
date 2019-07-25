@@ -2,81 +2,16 @@ import * as React from 'react';
 import * as style from './style.css';
 import {RouteComponentProps} from 'react-router';
 import {Link} from 'react-router-dom';
-import {createLoadingSelector, RootState} from "app/reducers";
-import {Result} from "app/reducers/search";
-import {connect} from "react-redux";
-import {bindActionCreators, Dispatch} from "redux";
-import {omit} from "app/utils";
-import {SearchActions} from "app/actions/search";
-
-interface CompanySearchResult {
-    result: Result
-}
-
-const Result: React.FC<CompanySearchResult> = props => (
-    <Link to={`/companies/${props.result.short_cik}`} className={style.companySearchResult}>
-        <span className={style.companyName}>
-            {props.result.company_name}
-        </span>
-        <span className={style.shortCik}>
-            CIK: {props.result.short_cik}
-        </span>
-    </Link>
-);
-
-interface CompanySearchResults {
-    results: RootState.SearchResultsState
-}
-
-const CompanySearchResults: React.FC<CompanySearchResults> = props => (
-    <div className={style.companySearchResults}>
-        {props.results.data.map((each, i: number) =>
-            <Result key={i} result={each} />
-        )}
-    </div>
-);
+import {createLoadingSelector, RootState} from 'app/reducers';
+import {connect} from 'react-redux';
+import {bindActionCreators, Dispatch} from 'redux';
+import {omit} from 'app/utils';
+import {SearchActions} from 'app/actions/search';
+import {CompanySearch} from 'app/containers/Header/search';
 
 const Logo = () => (
     <div className={style.logo}>
         <Link to='/'>birb</Link>
-    </div>
-);
-
-interface CompanySearchInput {
-    handleInput: (pat: string) => void,
-}
-
-const CompanySearchInput: React.FC<CompanySearchInput> = props => (
-    <div className={style.companySearchInput}>
-        <input
-            autoFocus /* TODO only autofocus on the index/landing page */
-            placeholder='Type a company name'
-            type='text'
-            onInput={async (event: React.ChangeEvent<HTMLInputElement>) => {
-                const pat: string = event.target.value;
-                props.handleInput(pat);
-
-            }}
-        />
-        <button>Search</button>
-    </div>
-);
-
-
-
-interface CompanySearch {
-    handleInput: (pat: string) => void,
-    results: RootState.SearchResultsState,
-}
-
-const CompanySearch: React.FC<CompanySearch> = props => (
-    <div className={style.companySearch}>
-        <CompanySearchInput
-            handleInput={props.handleInput}
-        />
-        <CompanySearchResults
-            results={props.results}
-        />
     </div>
 );
 
