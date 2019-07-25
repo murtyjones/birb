@@ -147,12 +147,15 @@ export class CompanySearch extends React.PureComponent<CompanySearch.IProps> {
 
     public navigate(direction: -1|1) {
         if (this.props.results.data.length > 0) {
-            const lastItem = this.props.results.data.length - 1;
-            let newDirection = this.state.activeIndex - direction;
-            newDirection = Math.max(newDirection, 0);
-            newDirection = Math.min(newDirection, lastItem);
+            const lastItemIndex = this.props.results.data.length - 1;
+            let newActiveItemIndex = this.state.activeIndex - direction;
+            if (newActiveItemIndex < 0) {
+                newActiveItemIndex = lastItemIndex;
+            } else if (newActiveItemIndex > lastItemIndex) {
+                newActiveItemIndex = 0;
+            }
             this.setState({
-                activeIndex: newDirection,
+                activeIndex: newActiveItemIndex,
 
             });
         } else {
