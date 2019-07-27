@@ -4,8 +4,8 @@ resource "aws_secretsmanager_secret" "ROCKET_DATABASES" {
 }
 
 resource "aws_secretsmanager_secret_version" "ROCKET_DATABASES" {
-  secret_id     = "${aws_secretsmanager_secret.ROCKET_DATABASES.id}"
-  secret_string = "${var.ROCKET_DATABASES}"
+  secret_id     = aws_secretsmanager_secret.ROCKET_DATABASES.id
+  secret_string = var.ROCKET_DATABASES
 }
 
 resource "aws_secretsmanager_secret" "DATABASE_URI" {
@@ -14,6 +14,7 @@ resource "aws_secretsmanager_secret" "DATABASE_URI" {
 }
 
 resource "aws_secretsmanager_secret_version" "DATABASE_URI" {
-  secret_id     = "${aws_secretsmanager_secret.DATABASE_URI.id}"
-  secret_string = "${var.DATABASE_URI}"
+  secret_id     = aws_secretsmanager_secret.DATABASE_URI.id
+  secret_string = var.DATABASE_URI
 }
+

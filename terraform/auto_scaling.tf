@@ -2,7 +2,7 @@ resource "aws_appautoscaling_target" "server_autoscaling_target" {
   service_namespace  = "ecs"
   resource_id        = "service/${aws_ecs_cluster.server_cluster.name}/${aws_ecs_service.server_service.name}"
   scalable_dimension = "ecs:service:DesiredCount"
-  role_arn           = "${aws_iam_role.autoscale_role.arn}"
+  role_arn           = aws_iam_role.autoscale_role.arn
   min_capacity       = 1
   max_capacity       = 6
 }
@@ -25,7 +25,7 @@ resource "aws_appautoscaling_policy" "server_scale_up" {
     }
   }
 
-  depends_on = ["aws_appautoscaling_target.server_autoscaling_target"]
+  depends_on = [aws_appautoscaling_target.server_autoscaling_target]
 }
 
 # Automatically scale capacity down by one
@@ -46,7 +46,7 @@ resource "aws_appautoscaling_policy" "server_scale_down" {
     }
   }
 
-  depends_on = ["aws_appautoscaling_target.server_autoscaling_target"]
+  depends_on = [aws_appautoscaling_target.server_autoscaling_target]
 }
 
 # Cloudwatch alarm that triggers the autoscaling up policy
@@ -60,12 +60,12 @@ resource "aws_cloudwatch_metric_alarm" "server_cpu_utilization_high" {
   statistic           = "Average"
   threshold           = "85"
 
-  dimensions {
-    ClusterName = "${aws_ecs_cluster.server_cluster.name}"
-    ServiceName = "${aws_ecs_service.server_service.name}"
+  dimensions = {
+    ClusterName = aws_ecs_cluster.server_cluster.name
+    ServiceName = aws_ecs_service.server_service.name
   }
 
-  alarm_actions = ["${aws_appautoscaling_policy.server_scale_up.arn}"]
+  alarm_actions = [aws_appautoscaling_policy.server_scale_up.arn]
 }
 
 # Cloudwatch alarm that triggers the autoscaling down policy
@@ -79,10 +79,11 @@ resource "aws_cloudwatch_metric_alarm" "server_cpu_utilization_low" {
   statistic           = "Average"
   threshold           = "10"
 
-  dimensions {
-    ClusterName = "${aws_ecs_cluster.server_cluster.name}"
-    ServiceName = "${aws_ecs_service.server_service.name}"
+  dimensions = {
+    ClusterName = aws_ecs_cluster.server_cluster.name
+    ServiceName = aws_ecs_service.server_service.name
   }
 
-  alarm_actions = ["${aws_appautoscaling_policy.server_scale_down.arn}"]
+  alarm_actions = [aws_appautoscaling_policy.server_scale_down.arn]
 }
+

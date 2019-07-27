@@ -6,3 +6,4 @@ resource "aws_s3_bucket" "birb_edgar_filings" {
     Name = "Edgar Filings"
   }
 }
+

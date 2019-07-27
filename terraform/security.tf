@@ -3,7 +3,7 @@ resource "aws_security_group" "lb" {
   # Technically should be `birb-server-ecs-tasks-security-group` but hard to replace oh well
   name        = "birb-api-load-balancer-security-group"
   description = "Allow access on port 443 only to ALB"
-  vpc_id      = "${aws_vpc.main.id}"
+  vpc_id      = aws_vpc.main.id
 
   ingress {
     protocol    = "tcp"
@@ -32,13 +32,13 @@ resource "aws_security_group" "ecs_tasks" {
   # Technically should be `birb-server-ecs-tasks-security-group` but hard to replace oh well
   name        = "birb-api-ecs-tasks-security-group"
   description = "allow inbound access from the ALB only"
-  vpc_id      = "${aws_vpc.main.id}"
+  vpc_id      = aws_vpc.main.id
 
   ingress {
     protocol        = "tcp"
-    from_port       = "${var.app_port}"
-    to_port         = "${var.app_port}"
-    security_groups = ["${aws_security_group.lb.id}"]
+    from_port       = var.app_port
+    to_port         = var.app_port
+    security_groups = [aws_security_group.lb.id]
   }
 
   egress {
@@ -53,7 +53,7 @@ resource "aws_security_group" "ecs_tasks" {
 resource "aws_security_group" "rds_security_group" {
   name        = "birb-rds"
   description = "specify inbound access rules"
-  vpc_id      = "${aws_vpc.main.id}"
+  vpc_id      = aws_vpc.main.id
 
   ingress {
     protocol  = "tcp"
@@ -61,14 +61,9 @@ resource "aws_security_group" "rds_security_group" {
     to_port   = "5432"
 
     security_groups = [
-      # Allow ECS tasks to access RDS
-      "${aws_security_group.ecs_tasks.id}",
-
-      # Allow the bastion to access RDS
-      "${aws_security_group.bastion.id}",
-
-      # Allow lambdas to access RDS
-      "${aws_security_group.birb-edgar.id}",
+      aws_security_group.ecs_tasks.id,
+      aws_security_group.bastion.id,
+      aws_security_group.birb-edgar.id,
     ]
   }
 
@@ -82,7 +77,7 @@ resource "aws_security_group" "rds_security_group" {
 
 resource "aws_security_group" "bastion" {
   name   = "bastion-security-group"
-  vpc_id = "${aws_vpc.main.id}"
+  vpc_id = aws_vpc.main.id
 
   ingress {
     protocol  = "tcp"
@@ -90,7 +85,6 @@ resource "aws_security_group" "bastion" {
     to_port   = 22
 
     cidr_blocks = ["0.0.0.0/0"]
-
     //    cidr_blocks = [
     //      # as an extra layer of security, only allow access from these IPS:
     //      # Marty:
@@ -114,7 +108,7 @@ resource "aws_security_group" "bastion" {
 resource "aws_security_group" "birb-edgar" {
   name        = "birb-edgar-security-group"
   description = "no inbound, only outbound"
-  vpc_id      = "${aws_vpc.main.id}"
+  vpc_id      = aws_vpc.main.id
 
   egress {
     protocol    = "-1"
@@ -123,3 +117,4 @@ resource "aws_security_group" "birb-edgar" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+

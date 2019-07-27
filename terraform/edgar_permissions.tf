@@ -1,7 +1,7 @@
 resource "aws_iam_role" "edgar_instance_role" {
   name               = "edgar_instance_role"
   path               = "/"
-  assume_role_policy = "${data.aws_iam_policy_document.ecs-instance-policy.json}"
+  assume_role_policy = data.aws_iam_policy_document.ecs-instance-policy.json
 }
 
 data "aws_iam_policy_document" "ecs-instance-policy" {
@@ -64,22 +64,23 @@ resource "aws_iam_policy" "edgar_resource_access_policy" {
     ]
 }
 EOF
+
 }
 
 resource "aws_iam_role_policy_attachment" "edgar_instance_role_attachment" {
-  role       = "${aws_iam_role.edgar_instance_role.name}"
+  role = aws_iam_role.edgar_instance_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
 }
 
 resource "aws_iam_role_policy_attachment" "edgar_resource_access_attachment" {
-  role       = "${aws_iam_role.edgar_instance_role.name}"
-  policy_arn = "${aws_iam_policy.edgar_resource_access_policy.arn}"
+  role = aws_iam_role.edgar_instance_role.name
+  policy_arn = aws_iam_policy.edgar_resource_access_policy.arn
 }
 
 resource "aws_iam_instance_profile" "edgar_instance_profile" {
   name = "edgar_instance_profile"
   path = "/"
-  role = "${aws_iam_role.edgar_instance_role.id}"
+  role = aws_iam_role.edgar_instance_role.id
 
   provisioner "local-exec" {
     command = "sleep 60"
@@ -87,13 +88,13 @@ resource "aws_iam_instance_profile" "edgar_instance_profile" {
 }
 
 resource "aws_iam_role" "edgar_service_role" {
-  name               = "edgar_service_role"
-  path               = "/"
-  assume_role_policy = "${data.aws_iam_policy_document.edgar_service_policy.json}"
+  name = "edgar_service_role"
+  path = "/"
+  assume_role_policy = data.aws_iam_policy_document.edgar_service_policy.json
 }
 
 resource "aws_iam_role_policy_attachment" "edgar_service_role_attachment" {
-  role       = "${aws_iam_role.edgar_service_role.name}"
+  role = aws_iam_role.edgar_service_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceRole"
 }
 
@@ -102,8 +103,9 @@ data "aws_iam_policy_document" "edgar_service_policy" {
     actions = ["sts:AssumeRole"]
 
     principals {
-      type        = "Service"
+      type = "Service"
       identifiers = ["ecs.amazonaws.com"]
     }
   }
 }
+
