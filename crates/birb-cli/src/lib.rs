@@ -21,6 +21,7 @@ mod plan;
 mod push;
 mod seed;
 mod ssh;
+mod dbslicer;
 mod test;
 mod update;
 mod watch;
@@ -36,6 +37,7 @@ use crate::push::Push;
 use crate::seed::Seed;
 use crate::ssh::Ssh;
 use crate::test::Test;
+use crate::dbslicer::DbSlicer;
 use crate::update::Update;
 use crate::watch::Watch;
 use colored::*;
@@ -85,6 +87,9 @@ pub enum Bb {
     /// Run tests
     #[structopt(name = "test")]
     Test(Test),
+    /// Get a slice of production data
+    #[structopt(name = "dbslicer")]
+    DbSlicer(DbSlicer),
 }
 
 /// Used to create a Birb CLI subcommand
@@ -128,6 +133,7 @@ pub fn run() -> Result<(), failure::Error> {
         Bb::Seed(seed) => boxed_cmd(seed),
         Bb::Push(push) => boxed_cmd(push),
         Bb::Test(test) => boxed_cmd(test),
+        Bb::DbSlicer(slice) => boxed_cmd(slice),
     };
 
     let result = subcmd.run();

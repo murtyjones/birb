@@ -35,16 +35,26 @@ RDS_DB_ADDRESS=$(<terraform/out/rds_db_address)
 RDS_DB_PORT=$(<terraform/out/rds_db_port)
 
 # Private key path (provided or default)
-PRIVATE_KEY_PATH=${1:-"~/.ssh/id_rsa"}
-
-echo "$BASTION_IP"
-echo "$RDS_DB_ADDRESS"
-echo "$RDS_DB_PORT"
-echo "$PRIVATE_KEY_PATH"
+PRIVATE_KEY_PATH=~/.ssh/id_rsa
 
 # Establish tunnel and listen for connections locally
+
+# If "command" specified, run ssh in background
+if [[ $1 == "command" ]]; then
+    ssh -f \
+        -o ExitOnForwardFailure=yes \
+        -o StrictHostKeyChecking=no \
+        -L $LOCAL_PORT:$RDS_DB_ADDRESS:$RDS_DB_PORT \
+        $BASTION_USER@$BASTION_IP \
+        -i $PRIVATE_KEY_PATH \
+        -v \
+        sleep 10;
+else
 ssh -N \
-    -o "StrictHostKeyChecking no" \
+    -o ExitOnForwardFailure=yes \
+    -o StrictHostKeyChecking=no \
     -L $LOCAL_PORT:$RDS_DB_ADDRESS:$RDS_DB_PORT \
     $BASTION_USER@$BASTION_IP \
-    -i $PRIVATE_KEY_PATH -v
+    -i $PRIVATE_KEY_PATH \
+    -v;
+fi
