@@ -47,7 +47,6 @@ if [[ $1 == "command" ]]; then
         -L $LOCAL_PORT:$RDS_DB_ADDRESS:$RDS_DB_PORT \
         $BASTION_USER@$BASTION_IP \
         -i $PRIVATE_KEY_PATH \
-        -v \
         sleep 10;
 else
 ssh -N \
@@ -55,6 +54,5 @@ ssh -N \
     -o StrictHostKeyChecking=no \
     -L $LOCAL_PORT:$RDS_DB_ADDRESS:$RDS_DB_PORT \
     $BASTION_USER@$BASTION_IP \
-    -i $PRIVATE_KEY_PATH \
-    -v;
+    -i $PRIVATE_KEY_PATH;
 fi

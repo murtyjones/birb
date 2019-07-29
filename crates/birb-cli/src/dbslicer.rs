@@ -1,6 +1,5 @@
 use crate::bb_filesystem::bb_root_dir;
 use crate::{run_str_in_bash, Subcommand};
-use dbslicer;
 
 /// SSH into DB via Bastion
 #[derive(Debug, StructOpt)]
@@ -11,7 +10,7 @@ impl Subcommand for DbSlicer {
         let script_path = bb_root_dir().join("scripts/start_ssh_tunnel.sh command");
         run_str_in_bash(script_path.to_str().unwrap()).unwrap();
 
-        dbslicer::run();
+        run_str_in_bash("cargo run -p dbslicer").unwrap();
 
         Ok(())
     }
