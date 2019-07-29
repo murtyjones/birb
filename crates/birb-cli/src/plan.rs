@@ -34,7 +34,7 @@ impl Subcommand for Plan {
             Plan::All => {
                 run_str_in_bash(
                     "
-                    terraform plan -var-file=terraform/production.secret.tfvars \
+                    AWS_SDK_LOAD_CONFIG=1   AWS_PROFILE=birb terraform plan -var-file=terraform/production.secret.tfvars \
                                    -out=plan \
                                    terraform/
                 ",
@@ -46,7 +46,7 @@ impl Subcommand for Plan {
                 // TODO make this actually plan the right things
                 run_str_in_bash(
                     "
-                    terraform plan -var-file=terraform/production.secret.tfvars \
+                    AWS_SDK_LOAD_CONFIG=1   AWS_PROFILE=birb terraform plan -var-file=terraform/production.secret.tfvars \
                            -out=plan \
                            -target=aws_lambda_function.edgar_worker \
                            -target=aws_iam_role.edgar_worker \
@@ -59,7 +59,7 @@ impl Subcommand for Plan {
             Plan::Edgar => {
                 run_str_in_bash(
                     "
-                    terraform plan -var-file=terraform/production.secret.tfvars \
+                    AWS_SDK_LOAD_CONFIG=1   AWS_PROFILE=birb terraform plan -var-file=terraform/production.secret.tfvars \
                            -out=plan \
                            -target=aws_launch_configuration.edgar_launch_configuration \
                            -target=aws_autoscaling_group.edgar_autoscaling \
@@ -96,10 +96,9 @@ impl Subcommand for Plan {
             Plan::Bastion => {
                 run_str_in_bash(
                     "
-                    terraform plan -var-file=terraform/production.secret.tfvars \
+                    AWS_SDK_LOAD_CONFIG=1   AWS_PROFILE=birb terraform plan -var-file=terraform/production.secret.tfvars \
                            -out=plan \
                            -target=aws_instance.bastion \
-                           -target=aws_key_pair.bastion_key \
                            -target=aws_subnet.public \
                            -target=aws_route.internet_access \
                            -target=local_file.bastion_ip_address \
@@ -117,7 +116,7 @@ impl Subcommand for Plan {
             Plan::Output => {
                 run_str_in_bash(
                     "
-                    terraform plan -var-file=terraform/production.secret.tfvars \
+                    AWS_SDK_LOAD_CONFIG=1   AWS_PROFILE=birb terraform plan -var-file=terraform/production.secret.tfvars \
                            -out=plan \
                            -target=local_file.bastion_ip_address \
                            -target=local_file.rds_db_name \
@@ -134,7 +133,7 @@ impl Subcommand for Plan {
             Plan::RDS => {
                 run_str_in_bash(
                     "
-                    terraform plan -var-file=terraform/production.secret.tfvars \
+                    AWS_SDK_LOAD_CONFIG=1   AWS_PROFILE=birb terraform plan -var-file=terraform/production.secret.tfvars \
                            -out=plan \
                            -target=aws_db_instance.rds_instance \
                            terraform/
@@ -146,7 +145,7 @@ impl Subcommand for Plan {
             Plan::Stateful => {
                 run_str_in_bash(
                     "
-                    terraform plan -var-file=terraform/production.secret.tfvars \
+                    AWS_SDK_LOAD_CONFIG=1   AWS_PROFILE=birb terraform plan -var-file=terraform/production.secret.tfvars \
                            -out=plan \
                            -target=aws_db_instance.rds_instance \
                            -target=aws_ecr_repository.server_repo \
@@ -162,7 +161,7 @@ impl Subcommand for Plan {
             Plan::Stateless => {
                 run_str_in_bash(
                     "
-                      terraform plan -var-file=terraform/production.secret.tfvars \
+                      AWS_SDK_LOAD_CONFIG=1   AWS_PROFILE=birb terraform plan -var-file=terraform/production.secret.tfvars \
                            -out=plan \
                            -target=aws_alb.server_load_balancer \
                            -target=aws_alb_target_group.server_target_group \
@@ -171,7 +170,6 @@ impl Subcommand for Plan {
                            -target=aws_security_group.lb \
                            -target=aws_security_group.lb \
                            -target=aws_instance.bastion \
-                           -target=aws_key_pair.bastion_key \
                            -target=aws_ecs_cluster.server_cluster \
                            -target=aws_ecs_service.server_service \
                            -target=aws_ecs_task_definition.server_task \

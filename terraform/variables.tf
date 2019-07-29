@@ -83,10 +83,6 @@ variable "marty_ip_address_3" {
   description = "Marty's 3rd IP address"
 }
 
-variable "marty_id_rsa_pub" {
-  description = "Marty's public key"
-}
-
 variable "ROCKET_DATABASES" {
   description = "Database(s) connection information for Rocket"
 }
@@ -98,5 +94,13 @@ variable "DATABASE_URI" {
 variable "environment" {
   description = "The environment being deployed"
   default     = "production"
+}
+
+variable "marty_id_rsa_laptop_1_pub" {
+  description = "An SSH key on MJ's laptop"
+}
+
+variable "marty_id_rsa_laptop_2_pub" {
+  description = "An SSH key on MJ's laptop"
 }
 

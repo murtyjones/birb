@@ -16,4 +16,4 @@ mac = "*"
 rand = "*"
 rayon = "*"
 rusoto_s3 = "*"
-aws = { path = "../aws", version = "*" }
+aws = { path = "../aws" }

@@ -86,6 +86,8 @@ pub enum AwsBastion {
     Up,
     #[structopt(name = "down")]
     Down,
+    #[structopt(name = "redeploy")]
+    ReDeploy,
 }
 
 /// Get the outputs
@@ -102,6 +104,15 @@ pub enum AwsStateful {
 /// Stateless AWS resources that should be easy to create/delete
 #[derive(Debug, StructOpt)]
 pub enum AwsStateless {
+    #[structopt(name = "up")]
+    Up,
+    #[structopt(name = "down")]
+    Down,
+}
+
+/// Destroy and redeploy the bastion, used for example when you add a new SSH key
+#[derive(Debug, StructOpt)]
+pub enum ReDeploy {
     #[structopt(name = "up")]
     Up,
     #[structopt(name = "down")]
@@ -157,7 +168,7 @@ impl Subcommand for AwsAll {
             AwsAll::Down => {
                 let _result = run_str_in_bash(
                     "
-                    AWS_PROFILE=birb terraform destroy -var-file=terraform/production.secret.tfvars \
+                    AWS_SDK_LOAD_CONFIG=1   AWS_PROFILE=birb terraform destroy -var-file=terraform/production.secret.tfvars \
                         -auto-approve \
                         terraform/
                 ",
@@ -174,7 +185,7 @@ impl Subcommand for TfPlan {
             TfPlan::Up => {
                 run_str_in_bash(
                     "\
-                     AWS_PROFILE=birb terraform apply \"plan\" && rm -rf plan\
+                     AWS_SDK_LOAD_CONFIG=1   AWS_PROFILE=birb terraform apply \"plan\" && rm -rf plan\
                      ",
                 )?;
             }
@@ -190,7 +201,7 @@ impl Subcommand for AwsServer {
                 // Not currently worrying about whether or not the deploy was successful
                 let _plan = run_str_in_bash(
                     "
-                    AWS_PROFILE=birb terraform plan -var-file=terraform/production.secret.tfvars \
+                    AWS_SDK_LOAD_CONFIG=1   AWS_PROFILE=birb terraform plan -var-file=terraform/production.secret.tfvars \
                        -out=plan \
                        -target=aws_alb.server_load_balancer \
                        -target=aws_alb_target_group.server_target_group \
@@ -230,7 +241,7 @@ impl Subcommand for AwsServer {
             AwsServer::Down => {
                 let _reuslt = run_str_in_bash(
                     "
-                    AWS_PROFILE=birb terraform destroy -var-file=terraform/production.secret.tfvars \
+                    AWS_SDK_LOAD_CONFIG=1   AWS_PROFILE=birb terraform destroy -var-file=terraform/production.secret.tfvars \
                        -auto-approve \
                        -target=aws_alb.server_load_balancer \
                        -target=aws_alb_target_group.server_target_group \
@@ -287,7 +298,7 @@ impl Subcommand for AwsEdgar {
             AwsEdgar::Down => {
                 let _reuslt = run_str_in_bash(
                     "
-                    AWS_PROFILE=birb terraform destroy -var-file=terraform/production.secret.tfvars \
+                    AWS_SDK_LOAD_CONFIG=1   AWS_PROFILE=birb terraform destroy -var-file=terraform/production.secret.tfvars \
                        -auto-approve \
                        -target=aws_launch_configuration.edgar_launch_configuration \
                        -target=aws_autoscaling_group.edgar_autoscaling \
@@ -333,12 +344,18 @@ impl Subcommand for AwsBastion {
             AwsBastion::Down => {
                 let _result = run_str_in_bash(
                     "
-                AWS_PROFILE=birb terraform destroy -var-file=terraform/production.secret.tfvars \
+                AWS_SDK_LOAD_CONFIG=1   AWS_PROFILE=birb terraform destroy -var-file=terraform/production.secret.tfvars \
                            -auto-approve \
                            -target=aws_instance.bastion \
-                           -target=aws_key_pair.bastion_key \
                            -target=local_file.bastion_ip_address \
                            terraform/
+            ",
+                )?;
+            }
+            AwsBastion::ReDeploy => {
+                let _result = run_str_in_bash(
+                    "
+                bb aws bastion down && bb aws bastion up
             ",
                 )?;
             }
@@ -432,7 +449,7 @@ impl Subcommand for AwsStateless {
             AwsStateless::Down => {
                 let _result = run_str_in_bash(
                     "
-                       AWS_PROFILE=birb terraform destroy -var-file=terraform/production.secret.tfvars \
+                       AWS_SDK_LOAD_CONFIG=1   AWS_PROFILE=birb terraform destroy -var-file=terraform/production.secret.tfvars \
                            -auto-approve \
                            -target=aws_alb.server_load_balancer \
                            -target=aws_alb_target_group.server_target_group \
@@ -441,7 +458,6 @@ impl Subcommand for AwsStateless {
                            -target=aws_security_group.lb \
                            -target=aws_security_group.lb \
                            -target=aws_instance.bastion \
-                           -target=aws_key_pair.bastion_key \
                            -target=aws_ecs_cluster.server_cluster \
                            -target=aws_ecs_service.server_service \
                            -target=aws_ecs_task_definition.server_task \

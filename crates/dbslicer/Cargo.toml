@@ -10,14 +10,9 @@ postgres = "0.15.2"
 env_logger = "0.6.1"
 log = "0.4.6"
 
-server = { path = "../server" }
-filing-data = { path = "../filing-data" }
-filing-metadata = { path = "../filing-metadata" }
+aws = { path = "../aws" }
 
 [dependencies.rocket_contrib]
 version = "0.4.1"
 features = ["postgres_pool"]
 
-[[bin]]
-name="edgar-worker"
-path="src/bin.rs"

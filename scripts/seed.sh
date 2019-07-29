@@ -33,7 +33,6 @@ else
     exit 2;
 fi
 
-
 # Go to project root
 cd $(git rev-parse --show-toplevel)
 
