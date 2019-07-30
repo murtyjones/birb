@@ -6,5 +6,11 @@ pub fn get_connection<S>(host: S) -> Connection where S: Into<String> {
 }
 
 pub fn get_companies(conn: &Connection) -> Rows {
-    conn.query("SELECT * FROM companies LIMIT 100", &[]).expect("Couldn't get companies")
+    conn.query(
+        r#"
+            SELECT * FROM company
+            ORDER BY created_at ASC
+            LIMIT 100000
+        "#, &[]
+    ).expect("Couldn't get companies")
 }

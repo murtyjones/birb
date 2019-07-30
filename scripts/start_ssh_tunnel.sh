@@ -54,5 +54,6 @@ ssh -N \
     -o StrictHostKeyChecking=no \
     -L $LOCAL_PORT:$RDS_DB_ADDRESS:$RDS_DB_PORT \
     $BASTION_USER@$BASTION_IP \
+    -v \
     -i $PRIVATE_KEY_PATH;
 fi
