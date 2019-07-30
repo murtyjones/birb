@@ -21,6 +21,7 @@ fn main() {
     let local_connection = get_connection("postgres://postgres:develop@localhost:5432/postgres");
     println!("LOCAL CONN {:?}", local_connection);
     let companies = get_companies(&production_connection);
-    println!("{}", companies.len());
+    let filing_types = get_filing_types(&production_connection);
+    let filings = get_filings(&production_connection, &companies);
     for row in companies.iter() {}
 }
