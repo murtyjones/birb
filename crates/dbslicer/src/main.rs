@@ -22,12 +22,10 @@ fn main() {
     let local_connection = get_connection("postgres://postgres:develop@localhost:5432/postgres");
     let companies = get_companies(&production_connection);
     let company_filings = get_filings(&production_connection, &companies);
+
     for row in companies.par_iter() {
-        let company = Company {
-            short_cik: row.get("short_cik"),
-            company_name: row.get("company_name"),
-        };
+        let c: Company = row;
         let company_filings = get_company_filings(&production_connection, &company);
-        // https://github.com/sfackler/rust-postgres#statement-preparation
+        upsert_co_and_filings(&local_connection, &company, &company_filings);
     }
 }
