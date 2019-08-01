@@ -20,7 +20,7 @@ pub struct Company {
     pub updated_at: Option<chrono::DateTime<Utc>>,
 }
 
-#[derive(Debug, Serialize, Deserialize, ToSql, FromSql)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct CompanyFilingData {
     /// Identifier
     pub short_cik: String,
@@ -30,10 +30,10 @@ pub struct CompanyFilingData {
     pub filings: Vec<Filing>,
 }
 
-#[derive(Debug, Serialize, Deserialize, ToSql, FromSql)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Filing {
     pub id: i32,
-    pub short_cik: String,
+    pub company_short_cik: String,
     pub filing_name: String,
     pub filing_edgar_url: String,
     pub filing_quarter: i32,

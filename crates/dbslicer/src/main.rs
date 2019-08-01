@@ -21,10 +21,8 @@ fn main() {
     let production_connection = get_connection(prod_conn_string);
     let local_connection = get_connection("postgres://postgres:develop@localhost:5432/postgres");
     let companies = get_companies(&production_connection);
-    let company_filings = get_filings(&production_connection, &companies);
 
-    for row in companies.par_iter() {
-        let c: Company = row;
+    for company in companies.iter() {
         let company_filings = get_company_filings(&production_connection, &company);
         upsert_co_and_filings(&local_connection, &company, &company_filings);
     }
