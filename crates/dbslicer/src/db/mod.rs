@@ -27,10 +27,10 @@ pub fn get_company_filings(conn: &Connection, company: &Company) -> Vec<Filing> 
     let rows = conn.query(
         r#"
             SELECT * FROM filing
-            WHERE short_cik = $1
+            WHERE company_short_cik = $1
             LIMIT 100000
         "#, &[&company.short_cik]
-    ).expect("Couldn't get companies");
+    ).expect("Couldn't get company filings");
     rows.iter().map(|row| Filing {
         id: row.get("id"),
         company_short_cik: row.get("company_short_cik"),
@@ -50,7 +50,7 @@ pub fn upsert_co_and_filings (conn: &Connection, c: &Company, filings: &Vec<Fili
         "
              INSERT INTO company
              (short_cik, company_name, created_at, updated_at)
-             VALUES ($1, $2)
+             VALUES ($1, $2, $3, $4)
              ON CONFLICT (short_cik) DO NOTHING;
         ",
         &[&c.short_cik, &c.company_name, &c.created_at, &c.updated_at]
