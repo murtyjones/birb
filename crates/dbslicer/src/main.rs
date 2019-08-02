@@ -20,10 +20,14 @@ fn main() {
     let prod_conn_string = get_prod_conn_string();
     let production_connection = get_connection(prod_conn_string);
     let local_connection = get_connection("postgres://postgres:develop@localhost:5432/postgres");
+    truncate_local_companies(&local_connection);
     let companies = get_companies(&production_connection);
 
-    for company in companies.iter() {
+    let trans = local_connection.transaction().expect("Couldn't begin transaction");
+    for (i, company) in companies.iter().enumerate() {
+        println!("Inserting record {}", i);
         let company_filings = get_company_filings(&production_connection, &company);
-        upsert_co_and_filings(&local_connection, &company, &company_filings);
+        upsert_co_and_filings(&trans, &company, &company_filings);
     }
+    trans.commit().expect("Couldn't commit transaction");
 }

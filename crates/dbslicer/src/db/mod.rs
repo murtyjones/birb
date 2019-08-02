@@ -1,10 +1,24 @@
 use postgres::{Connection, TlsMode};
+use postgres::transaction::Transaction;
 use postgres::rows::{Rows,Row};
 use models::{Company, Filing};
 use rayon::prelude::*;
 
 pub fn get_connection<S>(host: S) -> Connection where S: Into<String> {
     Connection::connect(host.into(), TlsMode::None).unwrap()
+}
+
+pub fn truncate_local_companies(conn: &Connection) {
+    conn.query(
+        r#"
+            TRUNCATE company CASCADE;
+        "#, &[]
+    ).expect("Couldn't truncate `company`");
+    conn.query(
+        r#"
+            TRUNCATE filing CASCADE;
+        "#, &[]
+    ).expect("Couldn't truncate `filing`");
 }
 
 pub fn get_companies(conn: &Connection) -> Vec<Company> {
@@ -43,9 +57,7 @@ pub fn get_company_filings(conn: &Connection, company: &Company) -> Vec<Filing> 
     }).collect()
 }
 
-pub fn upsert_co_and_filings (conn: &Connection, c: &Company, filings: &Vec<Filing>) {
-    let trans = conn.transaction().expect("Couldn't begin transaction");
-
+pub fn upsert_co_and_filings (trans: &Transaction, c: &Company, filings: &Vec<Filing>) {
     trans.execute(
         "
              INSERT INTO company
@@ -72,6 +84,4 @@ pub fn upsert_co_and_filings (conn: &Connection, c: &Company, filings: &Vec<Fili
             ]
         ).expect("Couldn't perform update");
     }
-
-    trans.commit().expect("Couldn't commit transaction");
 }

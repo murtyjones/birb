@@ -19,6 +19,8 @@ pub fn get_typeahead_results(conn: &Connection, substr: String) -> Result<Vec<Co
         binds.push(Company {
             short_cik: row.get("short_cik"),
             company_name: row.get("company_name"),
+            created_at: row.get("created_at"),
+            updated_at: row.get("updated_at"),
         });
     }
     Ok(binds)
@@ -48,11 +50,15 @@ pub fn get_filing_info(
 
     for row in rows {
         company_filing_info.filings.push(Filing {
+            id: row.get("id,"),
+            company_short_cik: row.get("company_short_cik,"),
             collected: row.get("collected"),
             filing_edgar_url: row.get("filing_edgar_url"),
             filing_name: row.get("filing_name"),
             filing_quarter: row.get("filing_quarter"),
             filing_year: row.get("filing_year"),
+            created_at: Some(row.get("created_at")),
+            updated_at: Some(row.get("updated_at")),
         });
     }
     Ok(company_filing_info)
