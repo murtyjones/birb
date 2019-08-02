@@ -8,11 +8,11 @@ pub fn get_connection<S>(host: S) -> Connection where S: Into<String> {
 }
 
 pub fn get_companies(conn: &Connection) -> Vec<Company> {
+    // Get a small slice of companies
     let rows = conn.query(
         r#"
             SELECT * FROM company
-            ORDER BY created_at ASC
-            LIMIT 100000
+            WHERE CAST(short_cik AS INT) % 1000 < 3;
         "#, &[]
     ).expect("Couldn't get companies");
     rows.iter().map(|row| Company {
@@ -28,7 +28,6 @@ pub fn get_company_filings(conn: &Connection, company: &Company) -> Vec<Filing> 
         r#"
             SELECT * FROM filing
             WHERE company_short_cik = $1
-            LIMIT 100000
         "#, &[&company.short_cik]
     ).expect("Couldn't get company filings");
     rows.iter().map(|row| Filing {
@@ -45,8 +44,9 @@ pub fn get_company_filings(conn: &Connection, company: &Company) -> Vec<Filing> 
 }
 
 pub fn upsert_co_and_filings (conn: &Connection, c: &Company, filings: &Vec<Filing>) {
+    let trans = conn.transaction().expect("Couldn't begin transaction");
 
-    conn.execute(
+    trans.execute(
         "
              INSERT INTO company
              (short_cik, company_name, created_at, updated_at)
@@ -56,7 +56,7 @@ pub fn upsert_co_and_filings (conn: &Connection, c: &Company, filings: &Vec<Fili
         &[&c.short_cik, &c.company_name, &c.created_at, &c.updated_at]
     ).expect("Couldn't insert company");
 
-    let filing_upsert_stmt = conn
+    let filing_upsert_stmt = trans
         .prepare(
             "
              INSERT INTO filing
@@ -72,4 +72,6 @@ pub fn upsert_co_and_filings (conn: &Connection, c: &Company, filings: &Vec<Fili
             ]
         ).expect("Couldn't perform update");
     }
+
+    trans.commit().expect("Couldn't commit transaction");
 }

@@ -6,7 +6,7 @@ edition = "2018"
 autobins = false
 
 [dependencies]
-postgres = "0.15.2"
+postgres = { version = "0.15", features = ["with-chrono"] }
 env_logger = "0.6.1"
 log = "0.4.6"
 

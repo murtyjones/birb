@@ -30,7 +30,7 @@ pub struct CompanyFilingData {
     pub filings: Vec<Filing>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, ToSql, FromSql)]
 pub struct Filing {
     pub id: i32,
     pub company_short_cik: String,

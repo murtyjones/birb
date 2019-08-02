@@ -13,7 +13,7 @@ csv = "1.0.7"
 serde = { version = "1.0.91", features = ["derive"] }
 log = "0.4.6"
 env_logger = "0.6.1"
-postgres = "0.15"
+postgres = { version = "0.15", features = ["with-chrono"] }
 postgres-derive = "0.3"
 aws = { path = "../aws" }
 

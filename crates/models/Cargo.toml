@@ -7,6 +7,6 @@ edition = "2018"
 [dependencies]
 serde = "1.0.91"
 serde_derive = "1.0.91"
-postgres = "0.15.2"
+postgres = { version = "0.15", features = ["with-chrono"] }
 postgres-derive = "0.3"
 chrono = "0.4"

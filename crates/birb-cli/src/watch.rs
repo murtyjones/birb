@@ -6,10 +6,22 @@ pub struct Watch {}
 
 impl Subcommand for Watch {
     fn run(&self) -> Result<(), failure::Error> {
-        run_str_in_bash("bb docker restart").unwrap();
-        run_str_in_bash("bb docker up-no-test").unwrap();
-        run_str_in_bash("sleep 5s").unwrap();
-        run_str_in_bash("cargo watch -x \"run -p server\"").unwrap();
+        // Make a vector to hold the children which are spawned.
+        let mut children = vec![];
+
+        children.push(std::thread::spawn(move || {
+            run_str_in_bash("cargo watch -x \"run -p server\"").unwrap();
+        }));
+
+        children.push(std::thread::spawn(move || {
+            run_str_in_bash("npm start").unwrap();
+        }));
+
+        for child in children {
+            // Wait for the thread to finish. Returns a result.
+            let _ = child.join();
+        }
+
         Ok(())
     }
 }
