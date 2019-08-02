@@ -42,3 +42,21 @@ pub struct Filing {
     pub created_at: Option<chrono::DateTime<Utc>>,
     pub updated_at: Option<chrono::DateTime<Utc>>,
 }
+
+#[derive(Debug, Serialize, Deserialize, ToSql, FromSql)]
+pub struct CompanyFilingJoined {
+    /// Identifier
+    pub short_cik: String,
+    /// Company's name
+    pub company_name: String,
+    pub company_created_at: Option<chrono::DateTime<Utc>>,
+    pub company_updated_at: Option<chrono::DateTime<Utc>>,
+    pub id: i32,
+    pub filing_name: String,
+    pub filing_edgar_url: String,
+    pub filing_quarter: i32,
+    pub filing_year: i32,
+    pub collected: bool,
+    pub filing_created_at: Option<chrono::DateTime<Utc>>,
+    pub filing_updated_at: Option<chrono::DateTime<Utc>>,
+}

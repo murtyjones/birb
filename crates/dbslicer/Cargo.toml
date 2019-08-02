@@ -9,7 +9,6 @@ edition = "2018"
 [dependencies]
 postgres = { version = "0.15", features = ["with-chrono"] }
 postgres-derive = "*"
-rayon = "*"
 
 aws = { path = "../aws" }
 models = { path = "../models" }
