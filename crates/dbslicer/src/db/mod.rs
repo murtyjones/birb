@@ -38,7 +38,7 @@ pub fn get_companies_and_filings(conn: &Connection) -> Vec<CompanyFilingJoined> 
                 f.updated_at as filing_updated_at
             FROM company AS c
             JOIN filing AS f ON c.short_cik = f.company_short_cik
-            WHERE CAST(short_cik AS INT) % 100 <= 5;
+            WHERE CAST(short_cik AS INT) % 100 <= 1;
         "#, &[]
     ).expect("Couldn't get companies");
     rows.iter().map(|row| CompanyFilingJoined {
