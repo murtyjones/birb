@@ -44,7 +44,7 @@ const CompanySearchResults: React.FC<ICompanySearchResults> = (props) => (
 
 interface ICompanySearchInput {
     handleInput: (pat: string) => void;
-    handleBlur: () => void;
+    forceBlur: () => void;
     handleClick: () => void;
     handleKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
     isInputActive: boolean;
@@ -60,7 +60,7 @@ const CompanySearchInput: React.FC<ICompanySearchInput> = (props) => (
                 const pat: string = event.target.value;
                 props.handleInput(pat);
             }}
-            onBlur={() => props.handleBlur()}
+            onBlur={() => props.forceBlur()}
             onKeyDown={props.handleKeyDown}
             onClick={props.handleClick}
         />
@@ -91,10 +91,9 @@ export class CompanySearch extends React.PureComponent<CompanySearch.IProps> {
         this.handleKeyDown = this.handleKeyDown.bind(this);
         this.handleInput = this.handleInput.bind(this);
         this.handleClick = this.handleClick.bind(this);
-        this.handleBlur = this.handleBlur.bind(this);
         this.forceBlur = this.forceBlur.bind(this);
         this.navigate = this.navigate.bind(this);
-        this.handleSelect = this.handleSelect.bind(this);
+        this.handleKeyboardSelect = this.handleKeyboardSelect.bind(this);
     }
 
     public handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
@@ -125,7 +124,7 @@ export class CompanySearch extends React.PureComponent<CompanySearch.IProps> {
             this.forceBlur();
         } else if ((selectKeys as any)[event.key]) {
             event.preventDefault();
-            this.handleSelect();
+            this.handleKeyboardSelect();
         }
     }
 
@@ -136,13 +135,6 @@ export class CompanySearch extends React.PureComponent<CompanySearch.IProps> {
 
     public handleClick() {
         this.setState({ isInputActive: true });
-    }
-
-    public handleBlur() {
-        this.setState({
-            activeIndex: -1,
-            isInputActive: false,
-        });
     }
 
     public forceBlur() {
@@ -171,7 +163,7 @@ export class CompanySearch extends React.PureComponent<CompanySearch.IProps> {
         }
     }
 
-    public handleSelect() {
+    public handleKeyboardSelect() {
         const shortCik = this.props.results.data[this.state.activeIndex].short_cik;
         this.props.history.push(`/companies/${shortCik}`);
         this.forceBlur();
@@ -183,7 +175,7 @@ export class CompanySearch extends React.PureComponent<CompanySearch.IProps> {
                 <CompanySearchInput
                     handleInput={this.handleInput}
                     handleClick={this.handleClick}
-                    handleBlur={this.handleBlur}
+                    forceBlur={this.forceBlur}
                     handleKeyDown={this.handleKeyDown}
                     isInputActive={this.state.isInputActive}
                 />
