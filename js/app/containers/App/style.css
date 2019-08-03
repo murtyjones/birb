@@ -1,42 +1,5 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto:300,400,500');
 
-:root {
-  --grey-50: #FAFAFA;
-  --grey-100: #F5F5F5;
-  --grey-200: #EEEEEE;
-  --grey-300: #E0E0E0;
-  --grey-400: #BDBDBD;
-  --grey-500: #9E9E9E;
-  --grey-600: #757575;
-  --grey-700: #616161;
-  --grey-800: #424242;
-
-  /* flatui colors */
-
-  --Turquoise: #1abc9c;
-  --Emerland: #2ecc71;
-  --Peterriver: #3498db;
-  --Amethyst: #9b59b6;
-  --Wetasphalt: #34495e;
-  --Greensea: #16a085;
-  --Nephritis: #27ae60;
-  --Belizehole: #2980b9;
-  --Wisteria: #8e44ad;
-  --Midnightblue: #2c3e50;
-  --Sunflower: #f1c40f;
-  --Carrot: #e67e22;
-  --Alizarin: #e74c3c;
-  --Clouds: #ecf0f1;
-  --Concrete: #95a5a6;
-  --Orange: #f39c12;
-  --Pumpkin: #d35400;
-  --Pomegranate: #c0392b;
-  --Silver: #bdc3c7;
-  --Asbestos: #7f8c8d;
-
-  --main-bg-color: white;
-}
-
 html,
 body {
   height: 100%;
@@ -125,4 +88,52 @@ input[type='checkbox'] {
   -moz-text-rendering: optimizeLegibility;
   -ms-text-rendering: optimizeLegibility;
   text-rendering: optimizeLegibility;
+}
+
+/***********
+ * COLORS  *
+ ***********/
+
+:root {
+  --grey-50: #FAFAFA;
+  --grey-100: #F5F5F5;
+  --grey-200: #EEEEEE;
+  --grey-300: #E0E0E0;
+  --grey-400: #BDBDBD;
+  --grey-500: #9E9E9E;
+  --grey-600: #757575;
+  --grey-700: #616161;
+  --grey-800: #424242;
+
+  /* flatui colors */
+
+  --Turquoise: #1abc9c;
+  --Emerland: #2ecc71;
+  --Peterriver: #3498db;
+  --Amethyst: #9b59b6;
+  --Wetasphalt: #34495e;
+  --Greensea: #16a085;
+  --Nephritis: #27ae60;
+  --Belizehole: #2980b9;
+  --Wisteria: #8e44ad;
+  --Midnightblue: #2c3e50;
+  --Sunflower: #f1c40f;
+  --Carrot: #e67e22;
+  --Alizarin: #e74c3c;
+  --Clouds: #ecf0f1;
+  --Concrete: #95a5a6;
+  --Orange: #f39c12;
+  --Pumpkin: #d35400;
+  --Pomegranate: #c0392b;
+  --Silver: #bdc3c7;
+  --Asbestos: #7f8c8d;
+  --main-bg-color: white;
+}
+
+/*************
+ * Z-INDEXES *
+ *************/
+
+:root {
+  --header-z-index: 100;
 }

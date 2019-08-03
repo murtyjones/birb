@@ -1,4 +1,6 @@
 header {
+    position: relative;
+    z-index: var(--header-z-index);
     width: 100%;
     font-size: 14px;
 }
