@@ -26,7 +26,7 @@ pub struct CompanyFilingData {
     pub short_cik: String,
     /// Company's name
     pub company_name: String,
-    /// Filing's we have for the company
+    /// Filings we have for the company
     pub filings: Vec<Filing>,
 }
 

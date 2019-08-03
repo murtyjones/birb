@@ -50,8 +50,8 @@ pub fn get_filing_info(
 
     for row in rows {
         company_filing_info.filings.push(Filing {
-            id: row.get("id,"),
-            company_short_cik: row.get("company_short_cik,"),
+            id: row.get("id"),
+            company_short_cik: row.get("company_short_cik"),
             collected: row.get("collected"),
             filing_edgar_url: row.get("filing_edgar_url"),
             filing_name: row.get("filing_name"),
