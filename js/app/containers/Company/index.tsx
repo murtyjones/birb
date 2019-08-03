@@ -8,6 +8,8 @@ import {CompanyActions} from 'app/actions/companies';
 import {bindActionCreators, Dispatch} from 'redux';
 import {omit} from 'app/utils';
 import {createLoadingSelector} from 'app/reducers/selectors/loading';
+import {FilingModel} from "app/models/FilingModel";
+import {CompanyModel} from "app/models";
 
 interface MatchParams {
     shortCik: string;
@@ -15,18 +17,24 @@ interface MatchParams {
 
 export namespace Company {
     export interface Props extends RouteComponentProps<MatchParams> {
-        companies: RootState.CompanyState;
         actions: CompanyActions;
         isFetching: boolean;
+        company: CompanyModel;
+        companyFilings: FilingModel[];
     }
 }
 
 const loadingSelector = createLoadingSelector([CompanyActions.Type.GET_COMPANY]);
 
 @connect(
-    (state: RootState, ownProps): Pick<Company.Props, 'companies' | 'isFetching'> => {
+    (state: RootState, ownProps): Pick<Company.Props, 'company' | 'companyFilings' | 'isFetching'> => {
+        const shortCik = ownProps.match.params.shortCik;
+        const company = state.companies.byShortCik[shortCik] || {};
+        const companyFilings = company.filings || [];
+
         return {
-            companies: state.companies,
+            company,
+            companyFilings,
             isFetching: loadingSelector(state)
         };
     },
@@ -39,7 +47,6 @@ export class Company extends React.PureComponent<Company.Props> {
     constructor(props: Company.Props, context?: any) {
         super(props, context);
     }
-    readonly state = { allFilings: { company_name: '', filings: [], short_cik: '' } };
 
     async componentDidMount() {
         const shortCik = this.props.match.params.shortCik;
@@ -47,28 +54,36 @@ export class Company extends React.PureComponent<Company.Props> {
     }
 
     render() {
+
+        if (this.props.isFetching) {
+            return <div>Loading...</div>
+        }
+
+
+
         return (
             <div className={`${style.mainCompanyContents} container`}>
-                {/*{ this.state.allFilings.filings.length > 0*/}
-                {/*    ? AllFilingsTable(this.state.allFilings)*/}
-                {/*    : 'Hello!'*/}
-                {/*}*/}
+                <DataTable
+                    data={this.props.companyFilings}
+                />
             </div>
         )
     }
 }
 
-// const AllFilingsTable = (allFilings: CompanyFilingData) => (
-//     <div className={style.allFilingsTable}>
-//
-//         {
-//             allFilings.filings.map(each =>
-//                 <Link to={`/filing?bucket=birb-edgar-filings&key=${each.filing_edgar_url}`}>
-//                         <span>{each.filing_name}</span>
-//                         <span>{each.filing_quarter}</span>
-//                         <span>{each.filing_year}</span>
-//                 </Link>
-//             )
-//         }
-//     </div>
-// );
+interface IDataTableProps {
+    data: FilingModel[], // Change the required prop to an optional prop.
+}
+
+const DataTable: React.FC<IDataTableProps> = (props) =>
+    <div className={style.allFilingsTable}>
+        {
+            props.data.map(each =>
+                <Link to={`/filing?bucket=birb-edgar-filings&key=${each.filing_edgar_url}`}>
+                        <span>{each.filing_name}</span>
+                        <span>{each.filing_quarter}</span>
+                        <span>{each.filing_year}</span>
+                </Link>
+            )
+        }
+    </div>;

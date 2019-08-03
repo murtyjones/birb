@@ -108,25 +108,23 @@ export class CompanySearch extends React.PureComponent<CompanySearch.IProps> {
         this.forceBlur = this.forceBlur.bind(this);
         this.navigate = this.navigate.bind(this);
         this.handleKeyboardSelect = this.handleKeyboardSelect.bind(this);
-        this.maybeCloseTypeaheadFromClick = this.maybeCloseTypeaheadFromClick.bind(this);
+        this.maybeCloseTypeaheadFromOutsideClick = this.maybeCloseTypeaheadFromOutsideClick.bind(this);
     }
 
 
     componentDidMount(): void {
-        window.addEventListener('click', this.maybeCloseTypeaheadFromClick);
+        window.addEventListener('click', this.maybeCloseTypeaheadFromOutsideClick);
     }
 
     componentWillUnmount(): void {
-        window.removeEventListener('click', this.maybeCloseTypeaheadFromClick)
+        window.removeEventListener('click', this.maybeCloseTypeaheadFromOutsideClick)
     }
 
-    public maybeCloseTypeaheadFromClick (event: MouseEvent) {
+    public maybeCloseTypeaheadFromOutsideClick (event: MouseEvent) {
         if (event && event.target) {
             const elem = event.target as HTMLInputElement;
-            if (elem && elem.className) {
-                if (!elem.className.includes(eventListenerClassName)) {
-                    this.forceBlur(true);
-                }
+            if (!(elem && elem.className && elem.className.includes(eventListenerClassName))) {
+                this.forceBlur(false);
             }
         }
     }

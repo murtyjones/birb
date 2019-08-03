@@ -7,7 +7,7 @@ describe('Companies Reducer', () => {
         // Arrange
         const action = {
             type: CompanyActions.Type.GET_COMPANY_SUCCESS as CompanyActions.Type.GET_COMPANY_SUCCESS,
-            payload: { shortCik: '123', name: 'Tezzla' }
+            payload: { shortCik: '123', name: 'Tezzla', filings: [] }
         };
 
         // Act
@@ -17,7 +17,7 @@ describe('Companies Reducer', () => {
         // Assert
         expect(newState).toEqual({
             byShortCik: {
-                '123': { shortCik: '123', name: 'Tezzla' }
+                '123': { shortCik: '123', name: 'Tezzla', filings: [] }
             }
         })
     });
@@ -26,12 +26,12 @@ describe('Companies Reducer', () => {
         // Arrange
         const initialState = {
             byShortCik: {
-                '000': { shortCik: '000', name: 'NotTezzla' }
+                '000': { shortCik: '000', name: 'NotTezzla', filings: [] }
             }
         };
         const action = {
             type: CompanyActions.Type.GET_COMPANY_SUCCESS as CompanyActions.Type.GET_COMPANY_SUCCESS,
-            payload: { shortCik: '123', name: 'Tezzla' }
+            payload: { shortCik: '123', name: 'Tezzla', filings: [] }
         };
 
         // Act
@@ -42,7 +42,7 @@ describe('Companies Reducer', () => {
         expect(newState).toEqual({
             byShortCik: {
                 '000': { shortCik: '000', name: 'NotTezzla' },
-                '123': { shortCik: '123', name: 'Tezzla' }
+                '123': { shortCik: '123', name: 'Tezzla', filings: [] }
             }
         })
     });

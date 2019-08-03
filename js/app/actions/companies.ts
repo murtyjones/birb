@@ -2,6 +2,7 @@ import { Dispatch } from 'redux';
 import { createActionCreator } from 'deox'
 import { CompanyModel } from 'app/models';
 import { http } from 'app/utils/http';
+import {FilingModel} from 'app/models/FilingModel';
 
 export namespace CompanyActions {
   export enum Type {
@@ -10,7 +11,6 @@ export namespace CompanyActions {
     GET_COMPANY_SUCCESS = 'GET_COMPANY_SUCCESS',
     GET_COMPANY_FAILURE = 'GET_COMPANY_FAILURE',
   }
-
 
   function fetchCompany(shortCik: string) {
     return async (dispatch: Dispatch) => {
@@ -25,6 +25,7 @@ export namespace CompanyActions {
         dispatch(getCompany.success({
           shortCik: response.body.data.short_cik,
           name: response.body.data.company_name,
+          filings: response.body.data.filings
         }));
       } catch (error) {
         dispatch(getCompany.failure(error));
