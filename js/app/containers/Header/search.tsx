@@ -1,11 +1,10 @@
-import {SearchActions} from 'app/actions/search';
 import * as style from 'app/containers/Header/style.css';
 import {RootState} from 'app/reducers';
 import {Result} from 'app/reducers/search';
 import cns from 'classnames';
 import { History } from 'history';
 import * as React from 'react';
-import {Link, RouteComponentProps} from 'react-router-dom';
+import {Link} from 'react-router-dom';
 
 
 interface ICompanySearchResult {
@@ -55,14 +54,16 @@ const CompanySearchResults: React.FC<ICompanySearchResults> = (props) => (
 
 interface ICompanySearchInput {
     handleInput: (pat: string) => void;
-    handleClick: () => void;
+    handleInputClick: () => void;
     handleKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
     isInputActive: boolean;
+    inputValue: string;
 }
 
 const CompanySearchInput: React.FC<ICompanySearchInput> = (props) => (
     <div className={cns(style.companySearchInput, eventListenerClassName)}>
         <input
+            value={props.inputValue}
             className={cns('companySearchInput', eventListenerClassName)}
             autoFocus={props.isInputActive} /* TODO only autofocus on the index/landing page */
             placeholder='Type a company name'
@@ -72,7 +73,7 @@ const CompanySearchInput: React.FC<ICompanySearchInput> = (props) => (
                 props.handleInput(pat);
             }}
             onKeyDown={props.handleKeyDown}
-            onClick={props.handleClick}
+            onClick={props.handleInputClick}
         />
         <button className={cns('companySearchInput', eventListenerClassName)}>Search</button>
     </div>
@@ -89,24 +90,27 @@ export namespace CompanySearch {
 interface IState {
     activeIndex: -1|0|1|2|3|4|5|6|7|8|9;
     isInputActive: boolean;
+    inputValue: string;
 }
 
 export class CompanySearch extends React.PureComponent<CompanySearch.IProps> {
     public state: Readonly<IState> = {
         activeIndex: -1, // -1 indicates no active item
         isInputActive: true,
+        inputValue: '',
     };
 
     constructor(props: CompanySearch.IProps, context?: any) {
         super(props, context);
         this.handleKeyDown = this.handleKeyDown.bind(this);
         this.handleInput = this.handleInput.bind(this);
-        this.handleClick = this.handleClick.bind(this);
+        this.handleInputClick = this.handleInputClick.bind(this);
         this.forceBlur = this.forceBlur.bind(this);
         this.navigate = this.navigate.bind(this);
         this.handleKeyboardSelect = this.handleKeyboardSelect.bind(this);
         this.maybeCloseTypeaheadFromClick = this.maybeCloseTypeaheadFromClick.bind(this);
     }
+
 
     componentDidMount(): void {
         window.addEventListener('click', this.maybeCloseTypeaheadFromClick);
@@ -121,7 +125,7 @@ export class CompanySearch extends React.PureComponent<CompanySearch.IProps> {
             const elem = event.target as HTMLInputElement;
             if (elem && elem.className) {
                 if (!elem.className.includes(eventListenerClassName)) {
-                    this.forceBlur();
+                    this.forceBlur(true);
                 }
             }
         }
@@ -160,18 +164,24 @@ export class CompanySearch extends React.PureComponent<CompanySearch.IProps> {
     }
 
     public handleInput(pat: string) {
-        this.setState({ isInputActive: true });
+        this.setState({
+            isInputActive: true,
+            inputValue: pat,
+        });
         this.props.handleInput(pat);
     }
 
-    public handleClick() {
-        this.setState({ isInputActive: true });
+    public handleInputClick() {
+        this.setState({
+            isInputActive: !!this.state.inputValue
+        });
     }
 
-    public forceBlur() {
+    public forceBlur(resetInputContent = false) {
         this.setState({
             activeIndex: -1,
             isInputActive: false,
+            inputValue: resetInputContent ? '' : this.state.inputValue,
         });
     }
 
@@ -197,15 +207,16 @@ export class CompanySearch extends React.PureComponent<CompanySearch.IProps> {
     public handleKeyboardSelect() {
         const shortCik = this.props.results.data[this.state.activeIndex].short_cik;
         this.props.history.push(`/companies/${shortCik}`);
-        this.forceBlur();
+        this.forceBlur(true);
     }
 
     public render() {
         return (
             <div className={style.companySearch}>
                 <CompanySearchInput
+                    inputValue={this.state.inputValue}
                     handleInput={this.handleInput}
-                    handleClick={this.handleClick}
+                    handleInputClick={this.handleInputClick}
                     handleKeyDown={this.handleKeyDown}
                     isInputActive={this.state.isInputActive}
                 />
