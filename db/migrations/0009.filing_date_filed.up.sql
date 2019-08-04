@@ -1,3 +1,3 @@
-ALTER TABLE filing_type
+ALTER TABLE filing
 ADD COLUMN date_filed DATE;
 

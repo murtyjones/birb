@@ -1,2 +1,2 @@
-ALTER TABLE filing_type
+ALTER TABLE filing
 DROP COLUMN date_filed;
