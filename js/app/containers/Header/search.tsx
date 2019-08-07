@@ -163,8 +163,8 @@ export class CompanySearch extends React.PureComponent<CompanySearch.IProps> {
 
     public handleInput(pat: string) {
         this.setState({
-            isInputActive: true,
             inputValue: pat,
+            isInputActive: true,
         });
         this.props.handleInput(pat);
     }
@@ -178,8 +178,8 @@ export class CompanySearch extends React.PureComponent<CompanySearch.IProps> {
     public forceBlur(resetInputContent = false) {
         this.setState({
             activeIndex: -1,
-            isInputActive: false,
             inputValue: resetInputContent ? '' : this.state.inputValue,
+            isInputActive: false,
         });
     }
 
