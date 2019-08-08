@@ -15,5 +15,5 @@ lazy_static = "*"
 mac = "*"
 rand = "*"
 rayon = "*"
-rusoto_s3 = "*"
+rusoto_s3 = "0.40"
 aws = { path = "../aws" }

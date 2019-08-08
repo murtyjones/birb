@@ -1,6 +1,6 @@
 use std::fmt;
 
-#[derive(Copy, Clone, Debug, ToSql, FromSql)]
+#[derive(Copy, Clone, Debug, ToSql, FromSql, EnumIter)]
 pub enum Year {
     TwentySixteen = 2016,
     TwentySeventeen = 2017,
@@ -8,7 +8,7 @@ pub enum Year {
     TwentyNineteen = 2019,
 }
 
-#[derive(Copy, Clone, Debug, ToSql, FromSql)]
+#[derive(Copy, Clone, Debug, ToSql, FromSql, EnumIter)]
 pub enum Quarter {
     One = 1,
     Two = 2,

@@ -8,14 +8,15 @@ use std::io;
 use std::process;
 use std::vec::Vec;
 
-// By default, struct field names are deserialized based on the position of
-// a corresponding field in the CSV data's header record.
-#[derive(Debug, Deserialize)]
+/// !!! DO NOT REORDER THIS STRUCT !!!
+/// By default, struct field names are deserialized based on the position of
+/// a corresponding field in the CSV data's header record.
+#[derive(Debug, Deserialize, ToSql, FromSql)]
 pub struct FilingMetadata {
     pub short_cik: String,
     pub company_name: String,
     pub form_type: String,
-    pub date_filed: String,
+    pub date_filed: chrono::NaiveDate,
     pub filename: String,
 }
 

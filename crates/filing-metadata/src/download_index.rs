@@ -35,7 +35,7 @@ pub fn get_s3_object(client: &S3Client, bucket: &str, filename: &str) -> Vec<u8>
     let body = stream.concat2().wait().unwrap();
 
     assert!(body.len() > 0);
-    body
+    body.to_vec()
 }
 
 #[cfg(test)]

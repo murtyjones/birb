@@ -6,12 +6,16 @@ extern crate postgres_derive;
 extern crate log;
 extern crate aws;
 extern crate env_logger;
-
+extern crate strum;
+#[macro_use]
+extern crate strum_macros;
 extern crate futures;
+#[macro_use]
+extern crate lazy_static;
 
 pub mod download_index;
-mod parse_index;
-mod persist_filing_metadatas;
+pub mod parse_index;
+pub mod persist_filing_metadatas;
 pub mod should_process_for_quarter;
 pub mod time_periods;
 
@@ -59,10 +63,12 @@ pub fn do_for_all_time_periods() {
     // 2018
     do_for_time_period(Quarter::One, Year::TwentyEighteen);
     do_for_time_period(Quarter::Two, Year::TwentyEighteen);
-    do_for_time_period(Quarter::Three, Year::TwentyEighteen);
     do_for_time_period(Quarter::Four, Year::TwentyEighteen);
 
     // TODO 2019
+    do_for_time_period(Quarter::One, Year::TwentyNineteen);
+    do_for_time_period(Quarter::Two, Year::TwentyNineteen);
+    do_for_time_period(Quarter::Three, Year::TwentyNineteen);
 }
 
 #[cfg(test)]

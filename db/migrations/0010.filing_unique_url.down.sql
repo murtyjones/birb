@@ -1,0 +1,2 @@
+ALTER TABLE filing
+DROP CONSTRAINT unique_url;
