@@ -3,16 +3,16 @@ extern crate filing_metadata;
 extern crate lazy_static;
 extern crate chrono;
 
-use strum::IntoEnumIterator;
-use std::path::{Path, PathBuf};
-use std::io::prelude::*;
 use postgres::{Connection, TlsMode};
+use std::io::prelude::*;
+use std::path::{Path, PathBuf};
+use strum::IntoEnumIterator;
 
-use crate::filing_metadata::time_periods::{Quarter,Year};
 use crate::filing_metadata::parse_index;
-use postgres::transaction::Transaction;
+use crate::filing_metadata::time_periods::{Quarter, Year};
 use filing_metadata::parse_index::FilingMetadata;
 use postgres::stmt::Statement;
+use postgres::transaction::Transaction;
 
 lazy_static! {
     /// The Birb source code root directory.
@@ -40,34 +40,60 @@ pub fn bb_root_dir() -> &'static Path {
 fn get_index_contents(y: Year, q: Quarter) -> String {
     let root = bb_root_dir().to_string_lossy();
     let path_to_index_file = format!("{}/data/edgar-indexes/{}/QTR{}/master.idx", root, y, q);
-    let mut file = std::fs::File::open(path_to_index_file).expect(&format!("No index file found for: {}Q{}", q, y));
+    let mut file = std::fs::File::open(path_to_index_file)
+        .expect(&format!("No index file found for: {}Q{}", q, y));
     let mut contents = String::new();
     file.read_to_string(&mut contents);
     contents
 }
 
 pub fn get_prod_conn_string() -> String {
-    let port = std::str::from_utf8(include_bytes!("../../../../scripts/local_port")).unwrap().to_string();
-    let uname = std::str::from_utf8(include_bytes!("../../../../terraform/out/rds_db_username")).unwrap().to_string();
-    let passwd = std::str::from_utf8(include_bytes!("../../../../terraform/out/rds_db_password")).unwrap().to_string();
-    let db_name = std::str::from_utf8(include_bytes!("../../../../terraform/out/rds_db_name")).unwrap().to_string();
+    let port = std::str::from_utf8(include_bytes!("../../../../scripts/local_port"))
+        .unwrap()
+        .to_string();
+    let uname = std::str::from_utf8(include_bytes!("../../../../terraform/out/rds_db_username"))
+        .unwrap()
+        .to_string();
+    let passwd = std::str::from_utf8(include_bytes!("../../../../terraform/out/rds_db_password"))
+        .unwrap()
+        .to_string();
+    let db_name = std::str::from_utf8(include_bytes!("../../../../terraform/out/rds_db_name"))
+        .unwrap()
+        .to_string();
 
-    format!("postgres://{}:{}@localhost:{}/{}", uname, passwd, port, db_name)
+    format!(
+        "postgres://{}:{}@localhost:{}/{}",
+        uname, passwd, port, db_name
+    )
 }
 
 /// Get the database connection
 fn get_connection() -> Connection {
-//    Connection::connect(get_prod_conn_string(), TlsMode::None).expect("Unable to connect to database!")
-    Connection::connect("postgres://postgres:develop@localhost:5432/postgres", TlsMode::None)
-        .expect("Unable to connect to database!")
+    //    Connection::connect(get_prod_conn_string(), TlsMode::None).expect("Unable to connect to database!")
+    Connection::connect(
+        "postgres://postgres:develop@localhost:5432/postgres",
+        TlsMode::None,
+    )
+    .expect("Unable to connect to database!")
 }
 
 fn perform(y: Year, q: Quarter) {
     let conn = get_connection();
-    let contents = get_index_contents(y,q);
+    let contents = get_index_contents(y, q);
     let filing_metadatas = parse_index::main(contents).expect("Couldn't parse index!");
     let trans = conn.transaction().expect("Couldn't begin transaction");
-    let stmt = trans
+    let company_upsert_stmt = trans
+        .prepare(
+            "
+             INSERT INTO company
+             (short_cik, company_name)
+             VALUES ($1, $2)
+             ON CONFLICT (short_cik) DO NOTHING;
+             ",
+        )
+        .expect("Couldn't prepare company upsert statement for execution");
+
+    let filing_upsert_stmt = trans
         .prepare(
             "
              INSERT INTO filing
@@ -77,13 +103,26 @@ fn perform(y: Year, q: Quarter) {
                 UPDATE SET date_filed = $6;
          ",
         )
-        .expect("Couldn't prepare company upsert statement for execution");
+        .expect("Couldn't prepare filing upsert statement for execution");
     for f in filing_metadatas.iter() {
         let q_as_num = *&q as i32;
         let y_as_num = *&y as i32;
-        stmt.execute(&[
-            &f.short_cik, &f.form_type, &f.filename, &q_as_num, &y_as_num, &f.date_filed,
-        ]).expect("Couldn't execute update");
+        println!("Doing for {}", f.filename);
+
+        company_upsert_stmt
+            .execute(&[&f.short_cik, &f.company_name])
+            .expect("Couldn't execute company upsert");
+
+        filing_upsert_stmt
+            .execute(&[
+                &f.short_cik,
+                &f.form_type,
+                &f.filename,
+                &q_as_num,
+                &y_as_num,
+                &f.date_filed,
+            ])
+            .expect("Couldn't execute filing metadata upsert");
     }
     trans.commit().unwrap()
 }
