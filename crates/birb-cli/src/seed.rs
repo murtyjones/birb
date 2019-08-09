@@ -20,10 +20,6 @@ impl Subcommand for Seed {
             Seed::Up(up) => {
                 let cmd = format!("./scripts/seed.sh {} up", up.env);
                 run_str_in_bash(cmd.as_str()).unwrap();
-                // if seeding locally, use the dbslicer
-                if up.env == "local" {
-                    run_str_in_bash("cargo run -p dbslicer").expect("Couldn't run dbslicer");
-                }
                 Ok(())
             }
         }

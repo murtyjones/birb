@@ -47,25 +47,25 @@ fn get_index_contents(y: Year, q: Quarter) -> String {
     contents
 }
 
-pub fn get_prod_conn_string() -> String {
-    let port = std::str::from_utf8(include_bytes!("../../../../scripts/local_port"))
-        .unwrap()
-        .to_string();
-    let uname = std::str::from_utf8(include_bytes!("../../../../terraform/out/rds_db_username"))
-        .unwrap()
-        .to_string();
-    let passwd = std::str::from_utf8(include_bytes!("../../../../terraform/out/rds_db_password"))
-        .unwrap()
-        .to_string();
-    let db_name = std::str::from_utf8(include_bytes!("../../../../terraform/out/rds_db_name"))
-        .unwrap()
-        .to_string();
-
-    format!(
-        "postgres://{}:{}@localhost:{}/{}",
-        uname, passwd, port, db_name
-    )
-}
+//pub fn get_prod_conn_string() -> String {
+//    let port = std::str::from_utf8(include_bytes!("../../../../scripts/local_port"))
+//        .unwrap()
+//        .to_string();
+//    let uname = std::str::from_utf8(include_bytes!("../../../../terraform/out/rds_db_username"))
+//        .unwrap()
+//        .to_string();
+//    let passwd = std::str::from_utf8(include_bytes!("../../../../terraform/out/rds_db_password"))
+//        .unwrap()
+//        .to_string();
+//    let db_name = std::str::from_utf8(include_bytes!("../../../../terraform/out/rds_db_name"))
+//        .unwrap()
+//        .to_string();
+//
+//    format!(
+//        "postgres://{}:{}@localhost:{}/{}",
+//        uname, passwd, port, db_name
+//    )
+//}
 
 /// Get the database connection
 fn get_connection() -> Connection {

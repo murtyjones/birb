@@ -490,7 +490,8 @@ VALUES
     ('15F-12B/A', NULL, false, false),
     ('C-U-W', NULL, false, false),
     ('CERTCBO', NULL, false, false),
-    ('F-80/A', NULL, false, false)
+    ('F-80/A', NULL, false, false),
+    ('NTFNCEN', NULL, false, false)
 ON CONFLICT DO NOTHING;
 
 
