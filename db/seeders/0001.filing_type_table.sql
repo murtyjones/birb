@@ -491,7 +491,20 @@ VALUES
     ('C-U-W', NULL, false, false),
     ('CERTCBO', NULL, false, false),
     ('F-80/A', NULL, false, false),
-    ('NTFNCEN', NULL, false, false)
+    ('NTFNCEN', NULL, false, false),
+    ('SEC ACTION', NULL, false, false),
+    ('NPORT-EX', NULL, false, false),
+    ('NPORT-EX/A', NULL, false, false),
+    ('NT NPORT-EX', NULL, false, false),
+    ('NPORT-P', NULL, false, false),
+    ('NPORT-P/A', NULL, false, false),
+    ('ATS-N', NULL, false, false),
+    ('ATS-N/MA', NULL, false, false),
+    ('ATS-N/UA', NULL, false, false),
+    ('ATS-N/CA', NULL, false, false),
+    ('ATS-N/OFA', NULL, false, false),
+    ('ATS-N-C', NULL, false, false),
+    ('ATS-N-W', NULL, false, false)
 ON CONFLICT DO NOTHING;
 
 

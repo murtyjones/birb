@@ -2,6 +2,7 @@ extern crate filing_metadata;
 #[macro_use]
 extern crate lazy_static;
 extern crate chrono;
+use chrono::{Datelike, Timelike, Utc};
 
 use postgres::{Connection, TlsMode};
 use std::io::prelude::*;
@@ -77,7 +78,38 @@ fn get_connection() -> Connection {
     .expect("Unable to connect to database!")
 }
 
+fn get_current_year() -> i32 {
+    let now = Utc::now();
+    now.year()
+}
+
+fn get_current_quarter() -> i32 {
+    let month = Utc::now().month();
+    match month {
+        1|2|3 => 1,
+        4|5|6 => 2,
+        7|8|9 => 3,
+        _ /*10|11|12*/ => 4,
+    }
+}
+
+fn past_current_quarter(y: Year, q: Quarter) -> bool {
+    let q_as_num = *&q as i32;
+    let y_as_num = *&y as i32;
+    let current_q = get_current_quarter();
+    let current_y = get_current_year();
+    // Past current quarter in current year
+    if q_as_num > current_q && y_as_num == current_y {
+        return true;
+    }
+    // Past current year
+    return y_as_num > current_y;
+}
+
 fn perform(y: Year, q: Quarter) {
+    if past_current_quarter(y, q) {
+        return ();
+    };
     let conn = get_connection();
     let contents = get_index_contents(y, q);
     let filing_metadatas = parse_index::main(contents).expect("Couldn't parse index!");
