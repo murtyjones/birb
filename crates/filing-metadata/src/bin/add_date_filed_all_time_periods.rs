@@ -48,34 +48,35 @@ fn get_index_contents(y: Year, q: Quarter) -> String {
     contents
 }
 
-//pub fn get_prod_conn_string() -> String {
-//    let port = std::str::from_utf8(include_bytes!("../../../../scripts/local_port"))
-//        .unwrap()
-//        .to_string();
-//    let uname = std::str::from_utf8(include_bytes!("../../../../terraform/out/rds_db_username"))
-//        .unwrap()
-//        .to_string();
-//    let passwd = std::str::from_utf8(include_bytes!("../../../../terraform/out/rds_db_password"))
-//        .unwrap()
-//        .to_string();
-//    let db_name = std::str::from_utf8(include_bytes!("../../../../terraform/out/rds_db_name"))
-//        .unwrap()
-//        .to_string();
-//
-//    format!(
-//        "postgres://{}:{}@localhost:{}/{}",
-//        uname, passwd, port, db_name
-//    )
-//}
+pub fn get_prod_conn_string() -> String {
+    let port = std::str::from_utf8(include_bytes!("../../../../scripts/local_port"))
+        .unwrap()
+        .to_string();
+    let uname = std::str::from_utf8(include_bytes!("../../../../terraform/out/rds_db_username"))
+        .unwrap()
+        .to_string();
+    let passwd = std::str::from_utf8(include_bytes!("../../../../terraform/out/rds_db_password"))
+        .unwrap()
+        .to_string();
+    let db_name = std::str::from_utf8(include_bytes!("../../../../terraform/out/rds_db_name"))
+        .unwrap()
+        .to_string();
+
+    format!(
+        "postgres://{}:{}@localhost:{}/{}",
+        uname, passwd, port, db_name
+    )
+}
 
 /// Get the database connection
 fn get_connection() -> Connection {
-    //    Connection::connect(get_prod_conn_string(), TlsMode::None).expect("Unable to connect to database!")
-    Connection::connect(
-        "postgres://postgres:develop@localhost:5432/postgres",
-        TlsMode::None,
-    )
-    .expect("Unable to connect to database!")
+    Connection::connect(get_prod_conn_string(), TlsMode::None)
+        .expect("Unable to connect to database!")
+    //    Connection::connect(
+    //        "postgres://postgres:develop@localhost:5432/postgres",
+    //        TlsMode::None,
+    //    )
+    //    .expect("Unable to connect to database!")
 }
 
 fn get_current_year() -> i32 {
@@ -159,10 +160,40 @@ fn perform(y: Year, q: Quarter) {
     trans.commit().unwrap()
 }
 
+use std::time::{Duration, Instant};
+
 fn main() {
-    for year in Year::iter() {
-        for quarter in Quarter::iter() {
-            perform(year, quarter);
-        }
+    let start = Instant::now();
+
+    // Make a vector to hold the children which are spawned.
+    let mut children = vec![];
+
+    children.push(std::thread::spawn(move || {
+        perform(Year::TwentySeventeen, Quarter::One);
+    }));
+
+    children.push(std::thread::spawn(move || {
+        perform(Year::TwentySeventeen, Quarter::Two);
+    }));
+
+    children.push(std::thread::spawn(move || {
+        perform(Year::TwentySeventeen, Quarter::Three);
+    }));
+
+    children.push(std::thread::spawn(move || {
+        perform(Year::TwentySeventeen, Quarter::Four);
+    }));
+
+    for child in children {
+        // Wait for the thread to finish. Returns a result.
+        let _ = child.join();
     }
+
+    let duration = start.elapsed();
+    println!("Time elapsed in expensive_function() is: {:?}", duration);
+    //    for year in Year::iter() {
+    //        for quarter in Quarter::iter() {
+    //            perform(year, quarter);
+    //        }
+    //    }
 }
