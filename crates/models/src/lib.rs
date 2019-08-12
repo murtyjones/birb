@@ -8,7 +8,6 @@ extern crate chrono;
 
 use chrono::prelude::*;
 
-
 /// Model for a company
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Company {
@@ -57,6 +56,7 @@ pub struct CompanyFilingJoined {
     pub filing_quarter: i32,
     pub filing_year: i32,
     pub collected: bool,
+    pub date_filed: chrono::NaiveDate,
     pub filing_created_at: Option<chrono::DateTime<Utc>>,
     pub filing_updated_at: Option<chrono::DateTime<Utc>>,
 }

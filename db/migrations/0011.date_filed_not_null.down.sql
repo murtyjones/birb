@@ -1,0 +1,2 @@
+ALTER TABLE filing_type
+ALTER COLUMN date_filed DROP NOT NULL;

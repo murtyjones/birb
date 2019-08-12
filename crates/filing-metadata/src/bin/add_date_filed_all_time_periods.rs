@@ -166,28 +166,28 @@ fn main() {
     let start = Instant::now();
 
     // Make a vector to hold the children which are spawned.
-    let mut children = vec![];
+    //    let mut children = vec![];
+    //
+    //    children.push(std::thread::spawn(move || {
+    perform(Year::TwentySeventeen, Quarter::Three);
+    //    }));
 
-    children.push(std::thread::spawn(move || {
-        perform(Year::TwentySeventeen, Quarter::One);
-    }));
-
-    children.push(std::thread::spawn(move || {
-        perform(Year::TwentySeventeen, Quarter::Two);
-    }));
-
-    children.push(std::thread::spawn(move || {
-        perform(Year::TwentySeventeen, Quarter::Three);
-    }));
-
-    children.push(std::thread::spawn(move || {
-        perform(Year::TwentySeventeen, Quarter::Four);
-    }));
-
-    for child in children {
-        // Wait for the thread to finish. Returns a result.
-        let _ = child.join();
-    }
+    //    children.push(std::thread::spawn(move || {
+    //        perform(Year::TwentySeventeen, Quarter::Two);
+    //    }));
+    //
+    //    children.push(std::thread::spawn(move || {
+    //        perform(Year::TwentySeventeen, Quarter::Three);
+    //    }));
+    //
+    //    children.push(std::thread::spawn(move || {
+    //        perform(Year::TwentySeventeen, Quarter::Four);
+    //    }));
+    //
+    //    for child in children {
+    //        // Wait for the thread to finish. Returns a result.
+    //        let _ = child.join();
+    //    }
 
     let duration = start.elapsed();
     println!("Time elapsed in expensive_function() is: {:?}", duration);
