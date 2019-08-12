@@ -1,0 +1,2 @@
+ALTER TABLE filing_type
+ADD COLUMN is_processable BOOLEAN NOT NULL DEFAULT FALSE;
