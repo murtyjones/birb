@@ -141,6 +141,8 @@ jobs:
     machine: true
     working_directory: ~/birb/app
     steps:
+      - attach_workspace:
+          at: /home/circleci/birb/app
       - run:
           name: List the folder contents
           command: ls
