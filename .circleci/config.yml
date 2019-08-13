@@ -138,6 +138,7 @@ jobs:
             - ~/birb/app
 
   deploy-server:
+    machine: true
     working_directory: ~/birb/app
     steps:
       - run:
@@ -195,4 +196,6 @@ workflows:
 #          requires:
 #            - test-server
       - build-server
-      - deploy-server
+      - deploy-server:
+        requires:
+          - build-server
