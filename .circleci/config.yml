@@ -113,7 +113,7 @@ jobs:
   build-server:
     docker:
       - image: clux/muslrust:nightly
-    working_directory: /volume
+    working_directory: ~/birb/app
     steps:
       - checkout
       - run: echo 'export CACHE_VERSION="12' >> $BASH_ENV
