@@ -14,7 +14,6 @@ postgres = { version = "0.15", features = ["with-chrono"] }
 postgres-derive = "0.3"
 dotenv = "0.14.1"
 cfg-if = "0.1.9"
-app = { path = "../app" }
 models = { path = "../models" }
 
 [dependencies.rocket_contrib]

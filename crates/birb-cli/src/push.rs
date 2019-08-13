@@ -21,7 +21,7 @@ pub struct PushEdgar {}
 
 impl Subcommand for PushEdgar {
     fn run(&self) -> Result<(), failure::Error> {
-        run_str_in_bash("./scripts/build_push_edgar_worker.sh").unwrap();
+        run_str_in_bash("./scripts/push_edgar_worker.sh").unwrap();
         Ok(())
     }
 }

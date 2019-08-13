@@ -24,7 +24,7 @@ export namespace SearchActions {
             }
             dispatch(searchCompany.request());
             try {
-                const request = new Request(`http://localhost:8000/api/autocomplete/${pat}`, {
+                const request = new Request(`http://localhost:8000/autocomplete/${pat}`, {
                     method: 'GET',
                 });
                 const response = await http(request);

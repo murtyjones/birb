@@ -17,7 +17,7 @@ export namespace CompanyActions {
       dispatch(getCompany.request());
 
       try {
-        const request = new Request(`http://localhost:8000/api/companies/${shortCik}/filings`, {
+        const request = new Request(`http://localhost:8000/companies/${shortCik}/filings`, {
           method: 'GET'
         });
         const response = await http(request);

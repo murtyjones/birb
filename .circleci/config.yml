@@ -102,7 +102,7 @@ jobs:
           command: pip install --upgrade awscli
       - run:
           name: Deploy edgar worker binary
-          command: scripts/build_push_edgar_worker.sh
+          command: scripts/push_edgar_worker.sh
       - save_cache:
           key: v1-edgar-cache-{{ .Branch }}-{{ checksum "Cargo.lock" }}
           paths:
@@ -141,6 +141,7 @@ jobs:
     machine: true
     working_directory: ~/birb/app
     steps:
+      - checkout
       - attach_workspace:
           at: target/x86_64-unknown-linux-musl/release/
       - run:
@@ -149,36 +150,12 @@ jobs:
       - run:
           name: List the folder contents
           command: ls target/x86_64-unknown-linux-musl/release/
-
-  build-deploy-server:
-    machine: true
-    working_directory: ~/birb/app
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - v1-server-cache-{{ .Branch }}-{{ checksum "Cargo.lock" }} # Cache for the branch that you're on with this lockfile
-            - v1-server-cache-{{ checksum "Cargo.lock" }} # If that doesn't exist, use the default cache across all branches with this lockfile
-      - attach_workspace:
-          at: bb-cli-workspace
-      - run:
-          name: Get birb-cli binary
-          command: mv bb-cli-workspace/bb ./
-      - run:
-          name: Build edgar worker binary
-          command: scripts/build_binary.sh server
       - run:
           name: Upgrade AWS CLI Latest Version
           command: pip install --upgrade awscli
       - run:
-          name: Deploy server binary
-          command: scripts/build_push_server.sh
-      - save_cache:
-          key: v1-server-cache-{{ .Branch }}-{{ checksum "Cargo.lock" }}
-          paths:
-            - target
-            - /usr/local/cargo
-            - $HOME/.cargo/registry
+          name: Push server to ECR
+          command: scripts/push_server.sh
 
 workflows:
   version: 2

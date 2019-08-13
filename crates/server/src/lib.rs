@@ -19,7 +19,6 @@ extern crate dotenv;
 extern crate failure;
 extern crate serde_json;
 
-use app::App;
 #[cfg(debug_assertions)] use dotenv::dotenv;
 use rocket::fairing::{Fairing, Info, Kind};
 use rocket::http::{ContentType, Header, Method};
@@ -98,15 +97,11 @@ fn rocket() -> rocket::Rocket {
     #[cfg(debug_assertions)]
     dotenv().expect("Failed to read .env file");
 
-    let static_files = format!("{}/../client/build", env!("CARGO_MANIFEST_DIR"));
-
     return rocket::ignite()
         .attach(DbConnection::fairing())
         .attach(CORS())
-        .mount("/", routes![index, favicon, company, catch_all])
-        .mount("/static", StaticFiles::from(static_files.as_str()))
         .mount(
-            "/api",
+            "/",
             routes![
                 handlers::health_check::get,
                 handlers::autocomplete_company::get,
@@ -117,52 +112,6 @@ fn rocket() -> rocket::Rocket {
             handlers::not_found::handler,
             handlers::service_not_available::handler
         ]);
-}
-
-/// # Example
-///
-/// localhost:7878/
-#[get("/")]
-fn index() -> Result<Response<'static>, ()> {
-    respond("/".to_string())
-}
-
-/// # Example
-///
-/// localhost:7878/thing
-#[get("/companies/<short_cik>")]
-fn company(short_cik: String) -> Result<Response<'static>, ()> {
-    respond("/companies/".to_string() + &*short_cik)
-}
-
-/// # Example
-///
-/// localhost:7878/thing
-#[get("/<path>")]
-fn catch_all(path: String) -> Result<Response<'static>, ()> {
-    respond(path)
-}
-
-/// Favicon
-#[get("/favicon.ico")]
-fn favicon() -> &'static str {
-    ""
-}
-
-/// Responder
-fn respond(path: String) -> Result<Response<'static>, ()> {
-    let app = App::new(path);
-    let state = app.store.borrow();
-
-    let html = format!("{}", include_str!("../index.html"));
-    let html = html.replacen(HTML_PLACEHOLDER, &app.render().to_string(), 1);
-    let html = html.replacen(STATE_PLACEHOLDER, &state.to_json(), 1);
-
-    let mut response = Response::new();
-    response.set_header(ContentType::HTML);
-    response.set_sized_body(Cursor::new(html));
-
-    Ok(response)
 }
 
 /// Test suite
