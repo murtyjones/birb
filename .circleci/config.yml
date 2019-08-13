@@ -133,9 +133,9 @@ jobs:
           paths:
             - /root/.cargo
       - persist_to_workspace:
-          root: /target/x86_64-unknown-linux-musl/release/
+          root: /home/circleci/birb/app
           paths:
-            - .
+            - ./target
 
   deploy-server:
     machine: true
@@ -146,7 +146,7 @@ jobs:
           command: ls
       - run:
           name: List the folder contents
-          command: ls /target/x86_64-unknown-linux-musl/release/
+          command: ls target/x86_64-unknown-linux-musl/release/
 
   build-deploy-server:
     machine: true
