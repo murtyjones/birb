@@ -135,7 +135,14 @@ jobs:
       - persist_to_workspace:
           root: target/x86_64-unknown-linux-musl/release/
           paths:
-            - .
+            - ~/birb/app
+
+  deploy-server:
+    working_directory: ~/birb/app
+    steps:
+      - run:
+          name: List the folder contents
+          command: ls
 
   build-deploy-server:
     machine: true
@@ -188,3 +195,4 @@ workflows:
 #          requires:
 #            - test-server
       - build-server
+      - deploy-server
