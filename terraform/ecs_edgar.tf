@@ -55,18 +55,18 @@ EOF
 
 # need an ASG so we can easily add more ecs host nodes as necessary
 resource "aws_autoscaling_group" "edgar_autoscaling" {
-  name = "edgar_autoscaling"
-  max_size = "1"
-  min_size = "1"
+  name             = "edgar_autoscaling"
+  max_size         = "1"
+  min_size         = "1"
   desired_capacity = "1"
 
-  vpc_zone_identifier = aws_subnet.private.*.id
+  vpc_zone_identifier  = aws_subnet.private.*.id
   launch_configuration = aws_launch_configuration.edgar_launch_configuration.name
-  health_check_type = "ELB"
+  health_check_type    = "ELB"
 
   tag {
-    key = "Name"
-    value = "ECS-edgar_cluster"
+    key                 = "Name"
+    value               = "ECS-edgar_cluster"
     propagate_at_launch = true
   }
 }
@@ -76,15 +76,15 @@ resource "aws_ecs_cluster" "edgar_cluster" {
 }
 
 resource "aws_ecs_task_definition" "edgar_task" {
-  family = "birb-edgar-task"
-  execution_role_arn = aws_iam_role.edgar_instance_role.arn
+  family                = "birb-edgar-task"
+  execution_role_arn    = aws_iam_role.edgar_instance_role.arn
   container_definitions = data.template_file.birb_edgar_app.rendered
 }
 
 resource "aws_ecs_service" "edgar_service" {
-  name = "edgar_service"
-  cluster = aws_ecs_cluster.edgar_cluster.id
+  name            = "edgar_service"
+  cluster         = aws_ecs_cluster.edgar_cluster.id
   task_definition = aws_ecs_task_definition.edgar_task.arn
-  desired_count = 1
+  desired_count   = 1
 }
 

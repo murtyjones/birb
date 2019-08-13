@@ -68,12 +68,12 @@ EOF
 }
 
 resource "aws_iam_role_policy_attachment" "edgar_instance_role_attachment" {
-  role = aws_iam_role.edgar_instance_role.name
+  role       = aws_iam_role.edgar_instance_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
 }
 
 resource "aws_iam_role_policy_attachment" "edgar_resource_access_attachment" {
-  role = aws_iam_role.edgar_instance_role.name
+  role       = aws_iam_role.edgar_instance_role.name
   policy_arn = aws_iam_policy.edgar_resource_access_policy.arn
 }
 
@@ -88,13 +88,13 @@ resource "aws_iam_instance_profile" "edgar_instance_profile" {
 }
 
 resource "aws_iam_role" "edgar_service_role" {
-  name = "edgar_service_role"
-  path = "/"
+  name               = "edgar_service_role"
+  path               = "/"
   assume_role_policy = data.aws_iam_policy_document.edgar_service_policy.json
 }
 
 resource "aws_iam_role_policy_attachment" "edgar_service_role_attachment" {
-  role = aws_iam_role.edgar_service_role.name
+  role       = aws_iam_role.edgar_service_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceRole"
 }
 
@@ -103,7 +103,7 @@ data "aws_iam_policy_document" "edgar_service_policy" {
     actions = ["sts:AssumeRole"]
 
     principals {
-      type = "Service"
+      type        = "Service"
       identifiers = ["ecs.amazonaws.com"]
     }
   }

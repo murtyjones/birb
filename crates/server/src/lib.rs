@@ -24,7 +24,6 @@ use rocket::fairing::{Fairing, Info, Kind};
 use rocket::http::{ContentType, Header, Method};
 use rocket::response::Response;
 use rocket::Request;
-use rocket_contrib::serve::StaticFiles;
 use std::io::Cursor;
 
 /// Logic for retrieval
@@ -45,14 +44,6 @@ cfg_if! {
         pub struct DbConnection(postgres::Connection);
     }
 }
-
-/// html to be replaced
-const HTML_PLACEHOLDER: &str = "#HTML_INSERTED_HERE_BY_SERVER#";
-/// initial state to be replaced
-const STATE_PLACEHOLDER: &str = "#INITIAL_STATE_JSON#";
-
-/// base index file
-static INDEX_HTML: &str = include_str!("../index.html");
 
 /// Handles CORS things
 /// @see: https://github.com/SergioBenitez/Rocket/issues/25#issuecomment-313895086

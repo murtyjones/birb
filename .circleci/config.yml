@@ -47,7 +47,7 @@ jobs:
             - $HOME/.cargo/registry
 
 
-  test-edgar:
+  test-edgar-worker:
     docker:
       - image: rustlang/rust:nightly
     working_directory: ~/birb/app
@@ -78,37 +78,7 @@ jobs:
           at: bb-cli-workspace
       - run:
           name: Test edgar worker
-          command: cargo test -p edgar-worker
-
-  build-deploy-edgar:
-    machine: true
-    working_directory: ~/birb/app
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - v1-edgar-cache-{{ .Branch }}-{{ checksum "Cargo.lock" }} # Cache for the branch that you're on with this lockfile
-            - v1-edgar-cache-{{ checksum "Cargo.lock" }} # If that doesn't exist, use the default cache across all branches with this lockfile
-      - attach_workspace:
-          at: bb-cli-workspace
-      - run:
-          name: Get birb-cli binary
-          command: mv bb-cli-workspace/bb ./
-      - run:
-          name: Build edgar worker binary
-          command: scripts/build_binary.sh edgar-worker
-      - run:
-          name: Upgrade AWS CLI Latest Version
-          command: pip install --upgrade awscli
-      - run:
-          name: Deploy edgar worker binary
-          command: scripts/push_edgar_worker.sh
-      - save_cache:
-          key: v1-edgar-cache-{{ .Branch }}-{{ checksum "Cargo.lock" }}
-          paths:
-            - target
-            - /usr/local/cargo
-            - $HOME/.cargo/registry
+          command: cargo test -p server
 
   build-server:
     docker:
@@ -124,6 +94,33 @@ jobs:
           keys:
             - target.release-{{ .Environment.CACHE_VERSION }}
       - run: cargo build -p server --release
+      - save_cache:
+          key: target.release-{{ .Environment.CACHE_VERSION }}
+          paths:
+            - target
+      - save_cache:
+          key: cargo.registry.release-{{ .Environment.CACHE_VERSION }}
+          paths:
+            - /root/.cargo
+      - persist_to_workspace:
+          root: target/x86_64-unknown-linux-musl/release/
+          paths:
+            - .
+
+  build-edgar-worker:
+    docker:
+      - image: clux/muslrust:nightly
+    working_directory: /volume
+    steps:
+      - checkout
+      - run: echo 'export CACHE_VERSION="12' >> $BASH_ENV
+      - restore_cache:
+          keys:
+            - cargo.registry.release-{{ .Environment.CACHE_VERSION }}
+      - restore_cache:
+          keys:
+            - target.release-{{ .Environment.CACHE_VERSION }}
+      - run: cargo build -p edgar-worker --release
       - save_cache:
           key: target.release-{{ .Environment.CACHE_VERSION }}
           paths:
@@ -157,27 +154,43 @@ jobs:
           name: Push server to ECR
           command: scripts/push_server.sh
 
+  deploy-edgar-worker:
+    machine: true
+    working_directory: ~/birb/app
+    steps:
+      - checkout
+      - attach_workspace:
+          at: target/x86_64-unknown-linux-musl/release/
+      - run:
+          name: List the folder contents
+          command: ls
+      - run:
+          name: List the folder contents
+          command: ls target/x86_64-unknown-linux-musl/release/
+      - run:
+          name: Upgrade AWS CLI Latest Version
+          command: pip install --upgrade awscli
+      - run:
+          name: Push server to ECR
+          command: scripts/push_edgar_worker.sh
+
 workflows:
   version: 2
-  edgar:
+  main:
     jobs:
-#      - install-birb-cli
-#      - check
-#      - test-edgar:
-#          requires:
-#            - install-birb-cli
-#            - check
-#      - build-deploy-edgar:
-#          requires:
-#            - test-edgar
-#      - test-server:
-#          requires:
-#            - install-birb-cli
-#            - check
-#      - build-deploy-server:
-#          requires:
-#            - test-server
-      - build-server
+      - install-birb-cli
+      - check
+      - test-server
+      - build-server:
+          requires:
+            - test-server
       - deploy-server:
           requires:
             - build-server
+      - test-edgar-worker
+      - build-edgar-worker:
+          requires:
+            - test-edgar-worker
+      - deploy-edgar-worker:
+          requires:
+            - build-edgar-worker
