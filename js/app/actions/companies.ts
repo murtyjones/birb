@@ -2,7 +2,7 @@ import { Dispatch } from 'redux';
 import { createActionCreator } from 'deox'
 import { CompanyModel } from 'app/models';
 import { http } from 'app/utils/http';
-import {FilingModel} from 'app/models/FilingModel';
+import {IFilingModel} from 'app/models/IFilingModel';
 
 export namespace CompanyActions {
   export enum Type {

@@ -38,6 +38,7 @@ pub struct Filing {
     pub filing_quarter: i32,
     pub filing_year: i32,
     pub collected: bool,
+    pub date_filed: chrono::NaiveDate,
     pub created_at: Option<chrono::DateTime<Utc>>,
     pub updated_at: Option<chrono::DateTime<Utc>>,
 }

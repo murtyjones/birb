@@ -1,15 +1,15 @@
+import {CompanyActions} from 'app/actions/companies';
+import {CompanyModel} from 'app/models';
+import {IFilingModel} from 'app/models/IFilingModel';
+import {RootState} from 'app/reducers';
+import {createLoadingSelector} from 'app/reducers/selectors/loading';
+import {omit} from 'app/utils';
 import * as React from 'react';
-import * as style from './style.css';
+import {connect} from 'react-redux';
 import {RouteComponentProps} from 'react-router';
 import {Link} from 'react-router-dom';
-import {connect} from 'react-redux';
-import {RootState} from 'app/reducers';
-import {CompanyActions} from 'app/actions/companies';
 import {bindActionCreators, Dispatch} from 'redux';
-import {omit} from 'app/utils';
-import {createLoadingSelector} from 'app/reducers/selectors/loading';
-import {FilingModel} from "app/models/FilingModel";
-import {CompanyModel} from "app/models";
+import * as style from './style.css';
 
 interface MatchParams {
     shortCik: string;
@@ -20,7 +20,7 @@ export namespace Company {
         actions: CompanyActions;
         isFetching: boolean;
         company: CompanyModel;
-        companyFilings: FilingModel[];
+        companyFilings: IFilingModel[];
     }
 }
 
@@ -35,12 +35,12 @@ const loadingSelector = createLoadingSelector([CompanyActions.Type.GET_COMPANY])
         return {
             company,
             companyFilings,
-            isFetching: loadingSelector(state)
+            isFetching: loadingSelector(state),
         };
     },
     (dispatch: Dispatch): Pick<Company.Props, 'actions'> => ({
-        actions: bindActionCreators(omit(CompanyActions, 'Type'), dispatch)
-    })
+        actions: bindActionCreators(omit(CompanyActions, 'Type'), dispatch),
+    }),
 )
 
 export class Company extends React.PureComponent<Company.Props> {
@@ -48,15 +48,15 @@ export class Company extends React.PureComponent<Company.Props> {
         super(props, context);
     }
 
-    async componentDidMount() {
+    public async componentDidMount() {
         const shortCik = this.props.match.params.shortCik;
         await this.props.actions.getCompany(shortCik);
     }
 
-    render() {
+    public render() {
 
         if (this.props.isFetching) {
-            return <div>Loading...</div>
+            return <div>Loading...</div>;
         }
 
 
@@ -67,23 +67,24 @@ export class Company extends React.PureComponent<Company.Props> {
                     data={this.props.companyFilings}
                 />
             </div>
-        )
+        );
     }
 }
 
 interface IDataTableProps {
-    data: FilingModel[], // Change the required prop to an optional prop.
+    data: IFilingModel[]; // Change the required prop to an optional prop.
 }
 
 const DataTable: React.FC<IDataTableProps> = (props) =>
     <div className={style.allFilingsTable}>
         {
-            props.data.map(each =>
+            props.data.map((each) =>
                 <Link to={`/filing?bucket=birb-edgar-filings&key=${each.filing_edgar_url}`}>
                         <span>{each.filing_name}</span>
                         <span>{each.filing_quarter}</span>
                         <span>{each.filing_year}</span>
-                </Link>
+                        <span>{each.date_filed}</span>
+                </Link>,
             )
         }
     </div>;

@@ -57,6 +57,7 @@ pub fn get_filing_info(
             filing_name: row.get("filing_name"),
             filing_quarter: row.get("filing_quarter"),
             filing_year: row.get("filing_year"),
+            date_filed: row.get("date_filed"),
             created_at: Some(row.get("created_at")),
             updated_at: Some(row.get("updated_at")),
         });

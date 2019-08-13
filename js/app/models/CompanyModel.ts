@@ -1,8 +1,8 @@
-import {FilingModel} from 'app/models/FilingModel';
+import {IFilingModel} from 'app/models/IFilingModel';
 
 export interface CompanyModel {
   shortCik: string;
   name: string;
-  filings: FilingModel[]
+  filings: IFilingModel[]
 }
 
