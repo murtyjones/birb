@@ -110,6 +110,33 @@ jobs:
             - /usr/local/cargo
             - $HOME/.cargo/registry
 
+  build-server:
+    docker:
+      - image: clux/muslrust:nightly
+    working_directory: /volume
+    steps:
+      - checkout
+      - run: echo 'export CACHE_VERSION="12' >> $BASH_ENV
+      - restore_cache:
+          keys:
+            - cargo.registry.release-{{ .Environment.CACHE_VERSION }}
+      - restore_cache:
+          keys:
+            - target.release-{{ .Environment.CACHE_VERSION }}
+      - run: cargo build -p server --release
+      - save_cache:
+          key: target.release-{{ .Environment.CACHE_VERSION }}
+          paths:
+            - target
+      - save_cache:
+          key: cargo.registry.release-{{ .Environment.CACHE_VERSION }}
+          paths:
+            - /root/.cargo
+      - persist_to_workspace:
+          root: target/x86_64-unknown-linux-musl/release/
+          paths:
+            - .
+
   build-deploy-server:
     machine: true
     working_directory: ~/birb/app
@@ -144,19 +171,20 @@ workflows:
   version: 2
   edgar:
     jobs:
-      - install-birb-cli
-      - check
-      - test-edgar:
-          requires:
-            - install-birb-cli
-            - check
-      - build-deploy-edgar:
-          requires:
-            - test-edgar
-      - test-server:
-          requires:
-            - install-birb-cli
-            - check
-      - build-deploy-server:
-          requires:
-            - test-server
+#      - install-birb-cli
+#      - check
+#      - test-edgar:
+#          requires:
+#            - install-birb-cli
+#            - check
+#      - build-deploy-edgar:
+#          requires:
+#            - test-edgar
+#      - test-server:
+#          requires:
+#            - install-birb-cli
+#            - check
+#      - build-deploy-server:
+#          requires:
+#            - test-server
+      - build-server
