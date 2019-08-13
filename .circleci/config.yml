@@ -113,7 +113,7 @@ jobs:
   build-server:
     docker:
       - image: clux/muslrust:nightly
-    working_directory: ~/birb/app
+    working_directory: /volume
     steps:
       - checkout
       - run: echo 'export CACHE_VERSION="12' >> $BASH_ENV
@@ -135,7 +135,7 @@ jobs:
       - persist_to_workspace:
           root: target/x86_64-unknown-linux-musl/release/
           paths:
-            - ~/birb/app
+            - .
 
   deploy-server:
     machine: true
@@ -144,6 +144,9 @@ jobs:
       - run:
           name: List the folder contents
           command: ls
+      - run:
+          name: List the folder contents
+          command: ls target/x86_64-unknown-linux-musl/release/
 
   build-deploy-server:
     machine: true
