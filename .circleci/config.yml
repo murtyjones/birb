@@ -197,5 +197,5 @@ workflows:
 #            - test-server
       - build-server
       - deploy-server:
-        requires:
-          - build-server
+          requires:
+            - build-server
