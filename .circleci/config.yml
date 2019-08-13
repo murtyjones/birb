@@ -133,16 +133,16 @@ jobs:
           paths:
             - /root/.cargo
       - persist_to_workspace:
-          root: /home/circleci/birb/app
+          root: target/x86_64-unknown-linux-musl/release/
           paths:
-            - ./target
+            - .
 
   deploy-server:
     machine: true
     working_directory: ~/birb/app
     steps:
       - attach_workspace:
-          at: /home/circleci/birb/app
+          at: target/x86_64-unknown-linux-musl/release/
       - run:
           name: List the folder contents
           command: ls
