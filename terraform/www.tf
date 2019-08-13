@@ -10,10 +10,26 @@ variable "root_domain_name" {
   default = "birb.io"
 }
 
+
+// This Route53 record will point at our CloudFront distribution for birb.io.
+resource "aws_route53_record" "birb_www" {
+  zone_id = "${data.aws_route53_zone.birb.zone_id}"
+
+  // NOTE: name is blank here.
+  name = "${var.root_domain_name}"
+  type = "A"
+
+  alias {
+    name                   = "${aws_cloudfront_distribution.birb_www_distribution.domain_name}"
+    zone_id                = "${aws_cloudfront_distribution.birb_www_distribution.hosted_zone_id}"
+    evaluate_target_health = false
+  }
+}
+
 // S3 bucket for www.birb.io
 resource "aws_s3_bucket" "birb_www" {
   // Our bucket's name is going to be the same as our site's domain name.
-  bucket = "${var.www_domain_name}"
+  bucket = "${var.root_domain_name}"
   // Because we want our site to be available on the internet, we set this so
   // anyone can read this bucket.
   acl = "public-read"
@@ -29,7 +45,7 @@ resource "aws_s3_bucket" "birb_www" {
       "Effect":"Allow",
       "Principal": "*",
       "Action":["s3:GetObject"],
-      "Resource":["arn:aws:s3:::${var.www_domain_name}/*"]
+      "Resource":["arn:aws:s3:::${var.root_domain_name}/*"]
     }
   ]
 }
@@ -42,7 +58,7 @@ POLICY
     index_document = "index.html"
     // The page to serve up if a request results in an error or a non-existing
     // page.
-    error_document = "404.html"
+    error_document = "index.html"
   }
 
   // Allow GZIP compression in conjunction with CloudFront.
@@ -72,7 +88,7 @@ resource "aws_cloudfront_distribution" "birb_www_distribution" {
     // Here we're using our S3 bucket's URL!
     domain_name = "${aws_s3_bucket.birb_www.website_endpoint}"
     // This can be any name to identify this origin.
-    origin_id = "${var.www_domain_name}"
+    origin_id = "${var.root_domain_name}"
   }
 
   enabled             = true
@@ -100,7 +116,10 @@ resource "aws_cloudfront_distribution" "birb_www_distribution" {
 
   // Here we're ensuring we can hit this distribution using www.runatlantis.io
   // rather than the domain name CloudFront gives us.
-  aliases = ["${var.www_domain_name}"]
+  aliases = [
+    "${var.root_domain_name}",
+    "${var.www_domain_name}"
+  ]
 
   restrictions {
     geo_restriction {
@@ -113,105 +132,14 @@ resource "aws_cloudfront_distribution" "birb_www_distribution" {
     acm_certificate_arn = "${var.birb_server_certificate_arn}"
     ssl_support_method  = "sni-only"
   }
-}
 
-// This Route53 record will point at our CloudFront distribution for www.birb.io.
-resource "aws_route53_record" "birb_www" {
-  zone_id = "${data.aws_route53_zone.birb.zone_id}"
-  name    = "${var.www_domain_name}"
-  type    = "A"
+  custom_error_response {
+    error_code = 404
+    error_caching_min_ttl = 0
+    response_code = 200
+    response_page_path = "/index.html"
 
-  alias {
-    name                   = "${aws_cloudfront_distribution.birb_www_distribution.domain_name}"
-    zone_id                = "${aws_cloudfront_distribution.birb_www_distribution.hosted_zone_id}"
-    evaluate_target_health = false
   }
 }
 
-// S3 bucket for birb.io
-resource "aws_s3_bucket" "birb_root" {
-  bucket = "${var.root_domain_name}"
-  acl    = "public-read"
-  policy = <<POLICY
-{
-  "Version":"2012-10-17",
-  "Statement":[
-    {
-      "Sid":"AddPerm",
-      "Effect":"Allow",
-      "Principal": "*",
-      "Action":["s3:GetObject"],
-      "Resource":["arn:aws:s3:::${var.root_domain_name}/*"]
-    }
-  ]
-}
-POLICY
 
-  website {
-    // Note this redirect. Here's where the magic happens.
-    redirect_all_requests_to = "https://${var.www_domain_name}"
-  }
-}
-
-// CloudFront distro for birb.io
-resource "aws_cloudfront_distribution" "birb_root_distribution" {
-  origin {
-    custom_origin_config {
-      http_port              = "80"
-      https_port             = "443"
-      origin_protocol_policy = "http-only"
-      origin_ssl_protocols   = ["TLSv1", "TLSv1.1", "TLSv1.2"]
-    }
-    domain_name = "${aws_s3_bucket.birb_root.website_endpoint}"
-    origin_id   = "${var.root_domain_name}"
-  }
-
-  enabled             = true
-  default_root_object = "index.html"
-
-  default_cache_behavior {
-    viewer_protocol_policy = "redirect-to-https"
-    compress               = true
-    allowed_methods        = ["GET", "HEAD"]
-    cached_methods         = ["GET", "HEAD"]
-    target_origin_id       = "${var.root_domain_name}"
-    min_ttl                = 0
-    default_ttl            = 86400
-    max_ttl                = 31536000
-
-    forwarded_values {
-      query_string = false
-      cookies {
-        forward = "none"
-      }
-    }
-  }
-
-  aliases = ["${var.root_domain_name}"]
-
-  restrictions {
-    geo_restriction {
-      restriction_type = "none"
-    }
-  }
-
-  viewer_certificate {
-    acm_certificate_arn = "${var.birb_server_certificate_arn}"
-    ssl_support_method  = "sni-only"
-  }
-}
-
-// This Route53 record will point at our CloudFront distribution for birb.io.
-resource "aws_route53_record" "birb_root" {
-  zone_id = "${data.aws_route53_zone.birb.zone_id}"
-
-  // NOTE: name is blank here.
-  name = ""
-  type = "A"
-
-  alias {
-    name                   = "${aws_cloudfront_distribution.birb_root_distribution.domain_name}"
-    zone_id                = "${aws_cloudfront_distribution.birb_root_distribution.hosted_zone_id}"
-    evaluate_target_health = false
-  }
-}
