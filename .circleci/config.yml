@@ -171,7 +171,7 @@ jobs:
           at: build
       - run:
           name: Upgrade AWS CLI Latest Version
-          command: pip install --upgrade awscli
+          command: sudo pip install --upgrade awscli
       - run:
           name: Build and push app to S3, invalidate CloudFront cache
           command: scripts/push_www.sh
