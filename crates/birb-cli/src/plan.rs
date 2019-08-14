@@ -154,6 +154,7 @@ impl Subcommand for Plan {
                            -target=aws_s3_bucket.birb_edgar_filings \
                            -target=aws_s3_bucket.birb_www \
                            -target=aws_cloudfront_distribution.birb_www_distribution \
+                           -target=aws_route53_record.birb_root \
                            -target=aws_route53_record.birb_www \
                            terraform/
                 ",
