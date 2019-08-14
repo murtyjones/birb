@@ -162,10 +162,27 @@ jobs:
           command: scripts/push_edgar_worker.sh
 
   deploy-app:
-    machine: true
     working_directory: ~/birb/app
+    docker:
+      - image: circleci/node:4.8.2
     steps:
       - checkout
+      - run:
+          name: update-npm
+          command: 'sudo npm install -g npm@latest'
+      - restore_cache: # special step to restore the dependency cache
+          # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
+          key: dependency-cache-{{ checksum "package.json" }}
+      - run:
+          name: install dependencies
+          command: npm install
+      - save_cache: # special step to save the dependency cache
+          key: dependency-cache-{{ checksum "package.json" }}
+          paths:
+            - ./node_modules
+      - run: # run tests
+          name: test
+          command: npm test
       - run:
           name: Upgrade AWS CLI Latest Version
           command: pip install --upgrade awscli
@@ -180,13 +197,14 @@ workflows:
       - install-birb-cli
       - check
       - test-server
+      - test-edgar-worker
+      - deploy-app
       - build-server:
           requires:
             - test-server
       - deploy-server:
           requires:
             - build-server
-      - test-edgar-worker
       - build-edgar-worker:
           requires:
             - test-edgar-worker
