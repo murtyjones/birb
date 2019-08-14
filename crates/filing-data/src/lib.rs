@@ -58,7 +58,7 @@ const RANDOM_FILING_QUERY: &'static str = r#"
         FROM   generate_series(1, 1100) g
         ) r
     JOIN   filing USING (id)
-    WHERE filing.collected = true
+    WHERE filing.collected = false
     LIMIT  1;
 "#;
 
