@@ -196,9 +196,15 @@ workflows:
     jobs:
       - install-birb-cli
       - check
-      - test-server
-      - test-edgar-worker
-      - deploy-app
+      - test-server:
+          requires:
+            - check
+      - test-edgar-worker:
+          requires:
+            - check
+      - deploy-app:
+          requires:
+            - check
       - build-server:
           requires:
             - test-server
