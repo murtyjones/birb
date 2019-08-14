@@ -167,11 +167,15 @@ jobs:
     docker:
       - image: circleci/python:3.6.4
     steps:
+      - checkout
       - attach_workspace:
           at: build
       - run:
           name: Upgrade AWS CLI Latest Version
           command: sudo pip install --upgrade awscli
+      - run:
+          name: Upgrade AWS CLI Latest Version
+          command: ls
       - run:
           name: Build and push app to S3, invalidate CloudFront cache
           command: scripts/push_www.sh
