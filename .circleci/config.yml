@@ -164,7 +164,7 @@ jobs:
   deploy-app:
     working_directory: ~/birb/app
     docker:
-      - image: circleci/node:4.8.2
+      - image: circleci/node:8.9.0
     steps:
       - checkout
       - run:
