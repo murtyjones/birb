@@ -11,7 +11,7 @@ import * as style from './style.css';
 
 const Logo = () => (
     <div className={style.logo}>
-        <Link to='/'>birb</Link>
+        <Link to='/'>bbirb</Link>
     </div>
 );
 
