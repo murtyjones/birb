@@ -10,6 +10,12 @@ variable "root_domain_name" {
   default = "birb.io"
 }
 
+# Outputs to write to disk:
+resource "local_file" "www_cloudfront_id" {
+  content  = aws_cloudfront_distribution.birb_www_distribution.id
+  filename = "${path.module}/out/www_cloudfront_id"
+}
+
 
 // This Route53 record will point at our CloudFront distribution for birb.io.
 resource "aws_route53_record" "birb_root" {

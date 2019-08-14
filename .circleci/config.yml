@@ -86,7 +86,7 @@ jobs:
     working_directory: /volume
     steps:
       - checkout
-      - run: echo 'export CACHE_VERSION="12' >> $BASH_ENV
+      - run: echo 'export CACHE_VERSION="server-1' >> $BASH_ENV
       - restore_cache:
           keys:
             - cargo.registry.release-{{ .Environment.CACHE_VERSION }}
@@ -113,7 +113,7 @@ jobs:
     working_directory: /volume
     steps:
       - checkout
-      - run: echo 'export CACHE_VERSION="12' >> $BASH_ENV
+      - run: echo 'export CACHE_VERSION="edgar-worker-1' >> $BASH_ENV
       - restore_cache:
           keys:
             - cargo.registry.release-{{ .Environment.CACHE_VERSION }}
