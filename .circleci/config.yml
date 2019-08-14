@@ -1,32 +1,5 @@
 version: 2.1
 jobs:
-  install-birb-cli:
-    docker:
-      - image: rust:latest
-    working_directory: ~/birb/app
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - cli-release-v2-{{ .Branch }}
-            - cli-release-v2-
-
-      - run: cargo install --path ./crates/birb-cli --force
-      - save_cache:
-          key: cli-release-v2-{{ .Branch }}
-          paths:
-            - target
-            - /usr/local/cargo
-            - $HOME/.cargo/registry
-      - run:
-          name: Make birb-cli binary available to other jobs
-          command: |
-            mkdir bb-cli-workspace
-            mv /usr/local/cargo/bin/bb bb-cli-workspace/
-      - persist_to_workspace:
-          root: bb-cli-workspace
-          paths:
-            - bb
 
   check:
     docker:
@@ -194,7 +167,6 @@ workflows:
   version: 2
   main:
     jobs:
-      - install-birb-cli
       - check
       - test-server:
           requires:
