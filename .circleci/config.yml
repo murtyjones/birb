@@ -46,7 +46,6 @@ jobs:
             - /usr/local/cargo
             - $HOME/.cargo/registry
 
-
   test-edgar-worker:
     docker:
       - image: rustlang/rust:nightly
@@ -142,12 +141,6 @@ jobs:
       - attach_workspace:
           at: target/x86_64-unknown-linux-musl/release/
       - run:
-          name: List the folder contents
-          command: ls
-      - run:
-          name: List the folder contents
-          command: ls target/x86_64-unknown-linux-musl/release/
-      - run:
           name: Upgrade AWS CLI Latest Version
           command: pip install --upgrade awscli
       - run:
@@ -162,17 +155,23 @@ jobs:
       - attach_workspace:
           at: target/x86_64-unknown-linux-musl/release/
       - run:
-          name: List the folder contents
-          command: ls
-      - run:
-          name: List the folder contents
-          command: ls target/x86_64-unknown-linux-musl/release/
-      - run:
           name: Upgrade AWS CLI Latest Version
           command: pip install --upgrade awscli
       - run:
           name: Push server to ECR
           command: scripts/push_edgar_worker.sh
+
+  deploy-app:
+    machine: true
+    working_directory: ~/birb/app
+    steps:
+      - checkout
+      - run:
+          name: Upgrade AWS CLI Latest Version
+          command: pip install --upgrade awscli
+      - run:
+          name: Build and push app to S3, invalidate CloudFront cache
+          command: scripts/push_www.sh
 
 workflows:
   version: 2
