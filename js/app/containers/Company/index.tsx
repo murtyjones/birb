@@ -48,7 +48,7 @@ export class Company extends React.PureComponent<Company.Props> {
         super(props, context);
     }
 
-    public async componentDidUpdate(prevProps: Readonly<Company.Props>, prevState: Readonly<{}>, snapshot?: any): void {
+    public async componentDidUpdate(prevProps: Readonly<Company.Props>, prevState: Readonly<{}>, snapshot?: any) {
         if (this.props.match.params.shortCik !== prevProps.match.params.shortCik) {
             await this.props.actions.getCompany(this.props.match.params.shortCik);
         }
@@ -66,7 +66,7 @@ export class Company extends React.PureComponent<Company.Props> {
                 : this.props.companyFilings.length === 0
                     ? <div>Sorry, we don't have any filings for this company yet.</div>
                     : <DataTable data={this.props.companyFilings} />;
-                    
+
         return (
             <div className={`${style.mainCompanyContents} container`}>
                 {content}
