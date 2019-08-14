@@ -166,6 +166,7 @@ jobs:
     working_directory: ~/birb/app
     docker:
       - image: circleci/python:3.6.4
+    steps:
       - checkout
       - attach_workspace:
           at: build
