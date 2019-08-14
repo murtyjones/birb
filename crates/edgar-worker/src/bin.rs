@@ -13,15 +13,11 @@ pub fn main() -> () {
     // Initialize logging
     env_logger::init();
 
-    // Perform every 1 second
-    const SECONDS_DELAY: u16 = 1;
-
     // Create channels for sending and receieving
     let (one_tx, one_rx) = channel();
 
     // Spawn one second timer
     thread::spawn(move || loop {
-        thread::sleep(Duration::from_secs(SECONDS_DELAY.into()));
         one_tx.send("next iteration").unwrap();
     });
 

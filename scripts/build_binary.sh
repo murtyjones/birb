@@ -11,12 +11,11 @@ cd $(git rev-parse --show-toplevel)
 
 ## get base image
 docker pull clux/muslrust:nightly
-#
-## build binary
-docker run --rm \
-    -v cargo-cache:/usr/local/cargo \
-    -v target-cache:$PWD/target \
-    -v mac-cargo-cache:$HOME/.cargo/registry \
-    -v $PWD:/volume \
-    -w /volume \
-    -it clux/muslrust:nightly \
+
+# build binary
+docker run \
+    -v cargo-cache:/root/.cargo/registry \
+    -v "$PWD:/volume" \
+    --rm \
+    -it clux/muslrust \
+    cargo build -p ${PACKAGE} --release

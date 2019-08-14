@@ -48,16 +48,23 @@ fn get_connection() -> Connection {
     Connection::connect(db_uri, TlsMode::None).expect("Unable to connect to database!")
 }
 
+/// Used to get one randomly selected, not-yet collected filing.
+/// A little complex but very performant.
+/// Source: https://stackoverflow.com/a/8675160
+const RANDOM_FILING_QUERY: &'static str = r#"
+    SELECT *
+    FROM  (
+        SELECT DISTINCT 1 + trunc(random() * 5100000)::integer AS id
+        FROM   generate_series(1, 1100) g
+        ) r
+    JOIN   filing USING (id)
+    WHERE filing.collected = true
+    LIMIT  1;
+"#;
+
 fn get_filing_record(conn: &Connection) -> Option<Filing> {
     let rows = conn
-        .query(
-            "
-        SELECT * FROM filing
-        WHERE collected = false
-        ORDER BY random()
-        LIMIT 1;",
-            &[],
-        )
+        .query(RANDOM_FILING_QUERY, &[])
         .expect("Couldn't retrieve a random filing!");
     assert!(2 > rows.len(), "Query should have returned 1 or 0 records!");
     if rows.len() == 1 {
