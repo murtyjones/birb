@@ -60,18 +60,16 @@ export class Company extends React.PureComponent<Company.Props> {
     }
 
     public render() {
-
-        if (this.props.isFetching) {
-            return <div>Loading...</div>;
-        }
-
-
-
+        const content =
+            this.props.isFetching
+                ? <div>Loading...</div>
+                : this.props.companyFilings.length === 0
+                    ? <div>Sorry, we don't have any filings for this company yet.</div>
+                    : <DataTable data={this.props.companyFilings} />;
+                    
         return (
             <div className={`${style.mainCompanyContents} container`}>
-                <DataTable
-                    data={this.props.companyFilings}
-                />
+                {content}
             </div>
         );
     }

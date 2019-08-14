@@ -42,10 +42,18 @@ pub fn get_filing_info(
             &[&short_cik],
         )
         .expect("Couldn't get company's filing info");
-    let mut company_filing_info = CompanyFilingData {
-        short_cik: rows.get(0).get("short_cik"),
-        company_name: rows.get(0).get("company_name"),
-        filings: Vec::new(),
+
+    let mut company_filing_info = match rows.len() {
+        0 => CompanyFilingData {
+            short_cik: short_cik,
+            company_name: String::new(), // TODO still provide the name
+            filings: Vec::new(),
+        },
+        _ => CompanyFilingData {
+            short_cik: rows.get(0).get("short_cik"),
+            company_name: rows.get(0).get("company_name"),
+            filings: Vec::new(),
+        },
     };
 
     for row in rows {
