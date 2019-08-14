@@ -134,11 +134,10 @@ jobs:
           name: Push server to ECR
           command: scripts/push_edgar_worker.sh
 
-  deploy-app:
+  build-app:
     working_directory: ~/birb/app
     docker:
       - image: circleci/node:latest
-      - image: circleci/python:latest
     steps:
       - checkout
       - restore_cache: # special step to restore the dependency cache
@@ -154,6 +153,22 @@ jobs:
       - run: # run tests
           name: test
           command: npm test
+      - run: # build
+          name: test
+          command: npm run build
+      - persist_to_workspace:
+          root: build
+          paths:
+            - ./build
+
+
+  deploy-app:
+    working_directory: ~/birb/app
+    docker:
+      - image: circleci/python:3.6.4
+      - checkout
+      - attach_workspace:
+          at: build
       - run:
           name: Upgrade AWS CLI Latest Version
           command: pip install --upgrade awscli
@@ -172,9 +187,12 @@ workflows:
       - test-edgar-worker:
           requires:
             - check
-      - deploy-app:
+      - build-app:
           requires:
             - check
+      - deploy-app:
+          requires:
+            - build-app
       - build-server:
           requires:
             - test-server
