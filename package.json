@@ -15,8 +15,8 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
     "test": "jest",
-    "start": "webpack-dev-server --mode development --hot --progress --color --port 3000 --open",
-    "build": "webpack -p --progress --colors",
+    "start": "webpack-dev-server --env.BIRB_API_URL=http://localhost:8000  --mode development --hot --progress --color --port 3000 --open",
+    "build": "webpack --env.BIRB_API_URL=https://api.birb.io -p --progress --colors",
     "prettier": "prettier --write \"src/**/*.{ts,tsx,css}\""
   },
   "license": "MIT",

@@ -207,8 +207,7 @@ impl Subcommand for AwsServer {
                        -target=aws_alb_target_group.server_target_group \
                        -target=aws_alb_listener.server_lb_listener \
                        -target=aws_alb_listener.redirect_to_ssl \
-                       -target=aws_security_group.lb \
-                       -target=aws_security_group.lb \
+                           -target=aws_security_group.lb \
                        -target=aws_ecs_cluster.server_cluster \
                        -target=aws_ecs_service.server_service \
                        -target=aws_ecs_task_definition.server_task \
@@ -247,8 +246,7 @@ impl Subcommand for AwsServer {
                        -target=aws_alb_target_group.server_target_group \
                        -target=aws_alb_listener.server_lb_listener \
                        -target=aws_alb_listener.redirect_to_ssl \
-                       -target=aws_security_group.lb \
-                       -target=aws_security_group.lb \
+                           -target=aws_security_group.lb \
                        -target=aws_ecs_cluster.server_cluster \
                        -target=aws_ecs_service.server_service \
                        -target=aws_ecs_task_definition.server_task \
@@ -455,7 +453,6 @@ impl Subcommand for AwsStateless {
                            -target=aws_alb_target_group.server_target_group \
                            -target=aws_alb_listener.server_lb_listener \
                            -target=aws_alb_listener.redirect_to_ssl \
-                           -target=aws_security_group.lb \
                            -target=aws_security_group.lb \
                            -target=aws_instance.bastion \
                            -target=aws_ecs_cluster.server_cluster \

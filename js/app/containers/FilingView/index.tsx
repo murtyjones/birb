@@ -23,15 +23,15 @@ export class FilingView extends React.Component<FilingView.Props> {
             <div style={{
                 display: 'grid',
                 gridTemplateColumns: '200px auto',
-                height: '100vh'
+                height: '100vh',
             }}>
                 <div>sidebar</div>
                 <iframe
                     sandbox='allow-scripts'
                     style={{
-                        width: '100%',
+                        border: 0,
                         height: '100%',
-                        border: 0
+                        width: '100%',
                     }}
                     src='http://127.0.0.1:8887/crates/filing-parser/examples/10-Q/output/wow.html'
                 />

@@ -48,6 +48,12 @@ export class Company extends React.PureComponent<Company.Props> {
         super(props, context);
     }
 
+    public async componentDidUpdate(prevProps: Readonly<Company.Props>, prevState: Readonly<{}>, snapshot?: any): void {
+        if (this.props.match.params.shortCik !== prevProps.match.params.shortCik) {
+            await this.props.actions.getCompany(this.props.match.params.shortCik);
+        }
+    }
+
     public async componentDidMount() {
         const shortCik = this.props.match.params.shortCik;
         await this.props.actions.getCompany(shortCik);

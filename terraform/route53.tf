@@ -4,7 +4,7 @@ data "aws_route53_zone" "birb" {
 
 resource "aws_route53_record" "birb" {
   zone_id = data.aws_route53_zone.birb.zone_id
-  name    = "birb.io"
+  name    = "api.birb.io"
   type    = "A"
 
   alias {

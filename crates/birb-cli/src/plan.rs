@@ -48,8 +48,43 @@ impl Subcommand for Plan {
                     "
                     AWS_SDK_LOAD_CONFIG=1   AWS_PROFILE=birb terraform plan -var-file=terraform/production.secret.tfvars \
                            -out=plan \
-                           -target=aws_lambda_function.edgar_worker \
-                           -target=aws_iam_role.edgar_worker \
+                           -target=aws_alb.server_load_balancer \
+                           -target=aws_alb_target_group.server_target_group \
+                           -target=aws_alb_listener.server_lb_listener \
+                           -target=aws_alb_listener.redirect_to_ssl \
+                           -target=aws_security_group.lb \
+                           -target=aws_ecs_cluster.server_cluster \
+                           -target=aws_ecs_service.server_service \
+                           -target=aws_ecs_task_definition.server_task \
+                           -target=aws_appautoscaling_target.server_autoscaling_target \
+                           -target=aws_appautoscaling_policy.server_scale_up \
+                           -target=aws_appautoscaling_policy.server_scale_down \
+                           -target=aws_cloudwatch_metric_alarm.server_cpu_utilization_high \
+                           -target=aws_cloudwatch_metric_alarm.server_cpu_utilization_low \
+                           -target=aws_cloudwatch_log_group.server_log_group \
+                           -target=aws_cloudwatch_log_stream.server_log_stream \
+                           -target=aws_security_group.ecs_tasks \
+                           -target=aws_vpc.main \
+                           -target=aws_subnet.private \
+                           -target=aws_subnet.public \
+                           -target=aws_internet_gateway.gw \
+                           -target=aws_route.internet_access \
+                           -target=aws_eip.gw \
+                           -target=aws_nat_gateway.gw \
+                           -target=aws_route_table.private \
+                           -target=aws_route_table_association.private \
+                           -target=local_file.bastion_ip_address \
+                           -target=local_file.rds_db_name \
+                           -target=local_file.rds_db_port \
+                           -target=local_file.rds_db_address \
+                           -target=local_file.rds_db_username \
+                           -target=local_file.rds_db_password \
+                           -target=aws_iam_role.autoscale_role \
+                           -target=aws_iam_policy.autoscale_policy \
+                           -target=aws_iam_role_policy_attachment.server_autoscale_attachment \
+                           -target=aws_iam_role.task_execution_role \
+                           -target=aws_iam_policy.task_execution_policy \
+                           -target=aws_iam_role_policy_attachment.server_execution_attachment \
                            terraform/
                 ",
                 )
@@ -173,18 +208,17 @@ impl Subcommand for Plan {
                            -target=aws_alb_listener.server_lb_listener \
                            -target=aws_alb_listener.redirect_to_ssl \
                            -target=aws_security_group.lb \
-                           -target=aws_security_group.lb \
                            -target=aws_instance.bastion \
                            -target=aws_ecs_cluster.server_cluster \
                            -target=aws_ecs_service.server_service \
                            -target=aws_ecs_task_definition.server_task \
                            -target=aws_launch_configuration.edgar_launch_configuration \
-                           -target=aws_autoscaling_group.edgar_autoscaling \
                            -target=aws_appautoscaling_target.server_autoscaling_target \
                            -target=aws_appautoscaling_policy.server_scale_up \
                            -target=aws_appautoscaling_policy.server_scale_down \
                            -target=aws_cloudwatch_metric_alarm.server_cpu_utilization_high \
                            -target=aws_cloudwatch_metric_alarm.server_cpu_utilization_low \
+                           -target=aws_autoscaling_group.edgar_autoscaling \
                            -target=aws_ecs_cluster.edgar_cluster \
                            -target=aws_ecs_task_definition.edgar_task \
                            -target=aws_ecs_service.edgar_service \

@@ -148,7 +148,7 @@ resource "aws_cloudfront_distribution" "birb_www_distribution" {
 
   // Here's where our certificate is loaded in!
   viewer_certificate {
-    acm_certificate_arn = "${var.birb_server_certificate_arn}"
+    acm_certificate_arn = "${var.birb_www_certificate_arn}"
     ssl_support_method  = "sni-only"
   }
 

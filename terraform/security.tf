@@ -1,4 +1,4 @@
-# ALB allows access from anywhere and can call anywhere (in pratice, only goes to ECS) tasks
+# ALB allows access from anywhere and can call anywhere (in practice, only goes to ECS) tasks
 resource "aws_security_group" "lb" {
   # Technically should be `birb-server-ecs-tasks-security-group` but hard to replace oh well
   name        = "birb-api-load-balancer-security-group"

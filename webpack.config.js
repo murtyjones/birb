@@ -12,151 +12,156 @@ var HtmlWebpackPlugin = require('html-webpack-plugin');
 var MiniCssExtractPlugin = require('mini-css-extract-plugin');
 var { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
-module.exports = {
-  context: sourcePath,
-  entry: {
-    app: './main.tsx'
-  },
-  output: {
-    path: outPath,
-    filename: isProduction ? '[contenthash].js' : '[hash].js',
-    chunkFilename: isProduction ? '[name].[contenthash].js' : '[name].[hash].js',
-    publicPath: '/' // see: https://github.com/jantimon/html-webpack-plugin/issues/635#issuecomment-291285897
-  },
-  target: 'web',
-  resolve: {
-    extensions: ['.js', '.ts', '.tsx'],
-    // Fix webpack's default behavior to not load packages with jsnext:main module
-    // (jsnext:main directs not usually distributable es6 format, but es6 sources)
-    mainFields: ['module', 'browser', 'main'],
-    alias: {
-      app: path.resolve(__dirname, sourcePath, 'app/'),
-      // needed to prevent react-router 5+ singleton import issues:
-      'react-router-dom': path.join(__dirname, 'node_modules/react-router-dom/'),
-      'react-router': path.join(__dirname, 'node_modules/react-router/'),
-    }
-  },
-  module: {
-    rules: [
-      // .ts, .tsx
-      {
-        test: /\.tsx?$/,
-        use: [
-          !isProduction && {
-            loader: 'babel-loader',
-            options: { plugins: ['react-hot-loader/babel'] }
-          },
-          'ts-loader'
-        ].filter(Boolean)
-      },
-      // css
-      {
-        test: /\.css$/,
-        use: [
-          isProduction ? MiniCssExtractPlugin.loader : 'style-loader',
-          {
-            loader: 'css-loader',
-            query: {
-              modules: {
-                localIdentName: isProduction ? '[hash:base64:5]' : '[local]__[hash:base64:5]'
-              },
-              sourceMap: !isProduction,
-              importLoaders: 1,
-            }
-          },
-          {
-            loader: 'postcss-loader',
-            options: {
-              ident: 'postcss',
-              plugins: [
-                require('postcss-import')({ addDependencyTo: webpack }),
-                require('postcss-url')(),
-                require('postcss-preset-env')({
-                  /* use stage 2 features (defaults) */
-                  stage: 2
-                }),
-                require('postcss-reporter')(),
-                require('postcss-browser-reporter')({
-                  disabled: isProduction
-                })
-              ]
-            }
-          }
-        ]
-      },
-      // static assets
-      { test: /\.html$/, use: 'html-loader' },
-      { test: /\.(a?png|svg)$/, use: 'url-loader?limit=10000' },
-      {
-        test: /\.(jpe?g|gif|bmp|mp3|mp4|ogg|wav|eot|ttf|woff|woff2)$/,
-        use: 'file-loader'
+module.exports = env => {
+  return {
+    context: sourcePath,
+    entry: {
+      app: './main.tsx'
+    },
+    output: {
+      path: outPath,
+      filename: isProduction ? '[contenthash].js' : '[hash].js',
+      chunkFilename: isProduction ? '[name].[contenthash].js' : '[name].[hash].js',
+      publicPath: '/' // see: https://github.com/jantimon/html-webpack-plugin/issues/635#issuecomment-291285897
+    },
+    target: 'web',
+    resolve: {
+      extensions: ['.js', '.ts', '.tsx'],
+      // Fix webpack's default behavior to not load packages with jsnext:main module
+      // (jsnext:main directs not usually distributable es6 format, but es6 sources)
+      mainFields: ['module', 'browser', 'main'],
+      alias: {
+        app: path.resolve(__dirname, sourcePath, 'app/'),
+        // needed to prevent react-router 5+ singleton import issues:
+        'react-router-dom': path.join(__dirname, 'node_modules/react-router-dom/'),
+        'react-router': path.join(__dirname, 'node_modules/react-router/'),
       }
-    ]
-  },
-  optimization: {
-    splitChunks: {
-      name: true,
-      cacheGroups: {
-        commons: {
-          chunks: 'initial',
-          minChunks: 2
+    },
+    module: {
+      rules: [
+        // .ts, .tsx
+        {
+          test: /\.tsx?$/,
+          use: [
+            !isProduction && {
+              loader: 'babel-loader',
+              options: { plugins: ['react-hot-loader/babel'] }
+            },
+            'ts-loader'
+          ].filter(Boolean)
         },
-        vendors: {
-          test: /[\\/]node_modules[\\/]/,
-          chunks: 'all',
-          filename: isProduction ? 'vendor.[contenthash].js' : 'vendor.[hash].js',
-          priority: -10
+        // css
+        {
+          test: /\.css$/,
+          use: [
+            isProduction ? MiniCssExtractPlugin.loader : 'style-loader',
+            {
+              loader: 'css-loader',
+              query: {
+                modules: {
+                  localIdentName: isProduction ? '[hash:base64:5]' : '[local]__[hash:base64:5]'
+                },
+                sourceMap: !isProduction,
+                importLoaders: 1,
+              }
+            },
+            {
+              loader: 'postcss-loader',
+              options: {
+                ident: 'postcss',
+                plugins: [
+                  require('postcss-import')({ addDependencyTo: webpack }),
+                  require('postcss-url')(),
+                  require('postcss-preset-env')({
+                    /* use stage 2 features (defaults) */
+                    stage: 2
+                  }),
+                  require('postcss-reporter')(),
+                  require('postcss-browser-reporter')({
+                    disabled: isProduction
+                  })
+                ]
+              }
+            }
+          ]
+        },
+        // static assets
+        { test: /\.html$/, use: 'html-loader' },
+        { test: /\.(a?png|svg)$/, use: 'url-loader?limit=10000' },
+        {
+          test: /\.(jpe?g|gif|bmp|mp3|mp4|ogg|wav|eot|ttf|woff|woff2)$/,
+          use: 'file-loader'
         }
-      }
+      ]
     },
-    runtimeChunk: true
-  },
-  plugins: [
-    new webpack.EnvironmentPlugin({
-      NODE_ENV: 'development', // use 'development' unless process.env.NODE_ENV is defined
-      DEBUG: false
-    }),
-    new CleanWebpackPlugin(),
-    new MiniCssExtractPlugin({
-      filename: '[hash].css',
-      disable: !isProduction
-    }),
-    new HtmlWebpackPlugin({
-      template: 'assets/index.html',
-      minify: {
-        minifyJS: true,
-        minifyCSS: true,
-        removeComments: true,
-        useShortDoctype: true,
-        collapseWhitespace: true,
-        collapseInlineTagWhitespace: true
+    optimization: {
+      splitChunks: {
+        name: true,
+        cacheGroups: {
+          commons: {
+            chunks: 'initial',
+            minChunks: 2
+          },
+          vendors: {
+            test: /[\\/]node_modules[\\/]/,
+            chunks: 'all',
+            filename: isProduction ? 'vendor.[contenthash].js' : 'vendor.[hash].js',
+            priority: -10
+          }
+        }
       },
-      append: {
-        head: `<script src="//cdn.polyfill.io/v3/polyfill.min.js"></script>`
-      },
-      meta: {
-        title: package.name,
-        description: package.description,
-        keywords: Array.isArray(package.keywords) ? package.keywords.join(',') : undefined
-      }
-    })
-  ],
-  devServer: {
-    contentBase: sourcePath,
-    hot: true,
-    inline: true,
-    historyApiFallback: {
-      disableDotRule: true
+      runtimeChunk: true
     },
-    stats: 'minimal',
-    clientLogLevel: 'warning'
-  },
-  // https://webpack.js.org/configuration/devtool/
-  devtool: isProduction ? 'hidden-source-map' : 'cheap-module-eval-source-map',
-  node: {
-    // workaround for webpack-dev-server issue
-    // https://github.com/webpack/webpack-dev-server/issues/60#issuecomment-103411179
-    fs: 'empty',
-    net: 'empty'
+    plugins: [
+      new webpack.EnvironmentPlugin({
+        NODE_ENV: 'development', // use 'development' unless process.env.NODE_ENV is defined
+        DEBUG: false
+      }),
+      new CleanWebpackPlugin(),
+      new MiniCssExtractPlugin({
+        filename: '[hash].css',
+        disable: !isProduction
+      }),
+      new HtmlWebpackPlugin({
+        template: 'assets/index.html',
+        minify: {
+          minifyJS: true,
+          minifyCSS: true,
+          removeComments: true,
+          useShortDoctype: true,
+          collapseWhitespace: true,
+          collapseInlineTagWhitespace: true
+        },
+        append: {
+          head: `<script src="//cdn.polyfill.io/v3/polyfill.min.js"></script>`
+        },
+        meta: {
+          title: package.name,
+          description: package.description,
+          keywords: Array.isArray(package.keywords) ? package.keywords.join(',') : undefined
+        }
+      }),
+      new webpack.DefinePlugin({
+        'process.env.BIRB_API_URL': JSON.stringify(env.BIRB_API_URL)
+      })
+    ],
+    devServer: {
+      contentBase: sourcePath,
+      hot: true,
+      inline: true,
+      historyApiFallback: {
+        disableDotRule: true
+      },
+      stats: 'minimal',
+      clientLogLevel: 'warning'
+    },
+    // https://webpack.js.org/configuration/devtool/
+    devtool: isProduction ? 'hidden-source-map' : 'cheap-module-eval-source-map',
+    node: {
+      // workaround for webpack-dev-server issue
+      // https://github.com/webpack/webpack-dev-server/issues/60#issuecomment-103411179
+      fs: 'empty',
+      net: 'empty'
+    }
   }
 };

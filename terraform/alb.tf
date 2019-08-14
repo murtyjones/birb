@@ -28,7 +28,7 @@ resource "aws_alb_listener" "server_lb_listener" {
   port              = "443"
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-2016-08"
-  certificate_arn   = var.birb_server_certificate_arn
+  certificate_arn   = var.birb_api_certificate_arn
 
   default_action {
     target_group_arn = aws_alb_target_group.server_target_group.id

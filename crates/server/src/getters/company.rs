@@ -42,7 +42,6 @@ pub fn get_filing_info(
             &[&short_cik],
         )
         .expect("Couldn't get company's filing info");
-    assert!(rows.len() > 0, "Couldn't find filings!");
     let mut company_filing_info = CompanyFilingData {
         short_cik: rows.get(0).get("short_cik"),
         company_name: rows.get(0).get("company_name"),

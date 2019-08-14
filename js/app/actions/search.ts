@@ -24,7 +24,7 @@ export namespace SearchActions {
             }
             dispatch(searchCompany.request());
             try {
-                const request = new Request(`http://localhost:8000/autocomplete/${pat}`, {
+                const request = new Request(`${process.env.BIRB_API_URL}/autocomplete/${pat}`, {
                     method: 'GET',
                 });
                 const response = await http(request);
