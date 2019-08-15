@@ -12,7 +12,7 @@ const ActiveRoute = () => (
     <Switch>
         <Route path='/' exact component={Birb} />
         <Route path='/companies/:shortCik' exact component={Company} />
-        <Route path='/filings' exact component={FilingView} />
+        <Route path='/filings/:id' exact component={FilingView} />
         {/* TODO add 404 route */}
         <Route component={NoMatch} />
     </Switch>
