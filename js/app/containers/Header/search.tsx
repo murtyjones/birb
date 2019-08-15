@@ -7,14 +7,21 @@ import * as React from 'react';
 import {Link} from 'react-router-dom';
 
 
+const getCompanyLink = (shortCik: string) => {
+    return `/companies/${shortCik}`;
+};
+
 interface ICompanySearchResult {
+    onResultClick: (e: React.MouseEvent) => void;
     result: Result;
     isActive: boolean;
 }
 
 const Result: React.FC<ICompanySearchResult> = (props) => (
     <Link
-        to={`/companies/${props.result.short_cik}`}
+        to={getCompanyLink(props.result.short_cik)}
+        data-short-cik={props.result.short_cik}
+        onClick={props.onResultClick}
         className={cns(style.companySearchResult, {
             [style.activeResult]: props.isActive,
         })}
@@ -29,6 +36,7 @@ const Result: React.FC<ICompanySearchResult> = (props) => (
 );
 
 interface ICompanySearchResults {
+    onResultClick: (e: React.MouseEvent) => void;
     results: RootState.SearchResultsState;
     activeIndex: number;
     history: History;
@@ -38,6 +46,7 @@ const CompanySearchResults: React.FC<ICompanySearchResults> = (props) => (
     <div className={cns(style.companySearchResults)}>
         {props.results.data.map((each, i: number) =>
             <Result
+                onResultClick={props.onResultClick}
                 key={i}
                 isActive={i === props.activeIndex}
                 result={each}
@@ -87,7 +96,7 @@ interface IState {
     isInputActive: boolean;
 }
 
-export class CompanySearch extends React.PureComponent<CompanySearch.IProps> {
+export class CompanySearch extends React.Component<CompanySearch.IProps> {
     public state: Readonly<IState> = {
         activeIndex: -1, // -1 indicates no active item
         inputValue: '',
@@ -106,6 +115,7 @@ export class CompanySearch extends React.PureComponent<CompanySearch.IProps> {
         this.navigate = this.navigate.bind(this);
         this.handleKeyboardSelect = this.handleKeyboardSelect.bind(this);
         this.maybeCloseTypeaheadFromOutsideClick = this.maybeCloseTypeaheadFromOutsideClick.bind(this);
+        this.handleResultClick = this.handleResultClick.bind(this);
     }
 
 
@@ -173,6 +183,14 @@ export class CompanySearch extends React.PureComponent<CompanySearch.IProps> {
         });
     }
 
+    public handleResultClick(event: React.MouseEvent) {
+        event.preventDefault();
+        const companySearchResultElem = event.currentTarget as HTMLInputElement;
+        const shortCik = companySearchResultElem.dataset.shortCik;
+        this.forceBlur(true);
+        this.props.history.push(getCompanyLink(shortCik));
+    }
+
     public forceBlur(resetInputContent = false) {
         this.setState({
             activeIndex: -1,
@@ -222,6 +240,7 @@ export class CompanySearch extends React.PureComponent<CompanySearch.IProps> {
                 {
                     this.state.isInputActive &&
                         <CompanySearchResults
+                            onResultClick={this.handleResultClick}
                             results={this.props.results}
                             activeIndex={this.state.activeIndex}
                             history={this.props.history}
