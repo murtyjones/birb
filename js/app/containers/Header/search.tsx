@@ -186,7 +186,7 @@ export class CompanySearch extends React.Component<CompanySearch.IProps> {
     public handleResultClick(event: React.MouseEvent) {
         event.preventDefault();
         const companySearchResultElem = event.currentTarget as HTMLInputElement;
-        const shortCik = companySearchResultElem.dataset.shortCik;
+        const shortCik: string = companySearchResultElem.dataset.shortCik || '';
         this.forceBlur(true);
         this.props.history.push(getCompanyLink(shortCik));
     }

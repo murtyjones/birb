@@ -1,0 +1,14 @@
+.main {
+    padding-top: 20vh;
+    box-sizing: border-box;
+}
+
+h1 {
+    text-align: center;
+    margin: 0 0 20px 0;
+}
+
+h3 {
+    text-align: center;
+    margin: 0;
+}

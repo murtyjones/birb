@@ -5,6 +5,7 @@ import { Header } from 'app/containers/Header';
 import { Company } from 'app/containers/Company';
 import { CompanyNav } from 'app/components/CompanyNav';
 import { FilingView } from 'app/containers/FilingView';
+import { NoMatch } from 'app/containers/NoMatch';
 import { hot } from 'react-hot-loader';
 
 const ActiveRoute = () => (
@@ -13,6 +14,7 @@ const ActiveRoute = () => (
         <Route path='/companies/:shortCik' exact component={Company} />
         <Route path='/filings' exact component={FilingView} />
         {/* TODO add 404 route */}
+        <Route component={NoMatch} />
     </Switch>
 );
 
