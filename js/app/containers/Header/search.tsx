@@ -219,9 +219,14 @@ export class CompanySearch extends React.Component<CompanySearch.IProps> {
     }
 
     public handleKeyboardSelect() {
-        const shortCik = this.props.results.data[this.state.activeIndex].short_cik;
-        this.props.history.push(`/companies/${shortCik}`);
-        this.forceBlur(true);
+        // If no item selected when the user presses enter,
+        // just go to the first one in the list.
+        if (this.props.results.data && this.props.results.data.length) {
+            const indexToVisit = Math.max(this.state.activeIndex, 0);
+            const shortCik = this.props.results.data[indexToVisit].short_cik;
+            this.props.history.push(`/companies/${shortCik}`);
+            this.forceBlur(true);
+        }
     }
 
     public render() {
