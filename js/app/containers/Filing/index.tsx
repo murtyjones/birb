@@ -15,7 +15,7 @@ interface IMatchParams {
     filingId: string;
 }
 
-export namespace FilingView {
+export namespace Filing {
     export interface IProps extends RouteComponentProps<void> {
         actions: CompanyActions;
         isFetching: boolean;
@@ -33,7 +33,7 @@ export namespace FilingView {
 const loadingSelector = createLoadingSelector([CompanyActions.Type.GET_COMPANY_SIGNED_FILING_URL]);
 
 @connect(
-    (state: RootState, ownProps): Pick<FilingView.IProps, 'signedUrl' | 'shortCik' | 'filingId' | 'isFetching'> => {
+    (state: RootState, ownProps): Pick<Filing.IProps, 'signedUrl' | 'shortCik' | 'filingId' | 'isFetching'> => {
         const shortCik = ownProps.match.params.shortCik;
         const filingId = ownProps.match.params.filingId;
         const company = state.companies.byShortCik[shortCik];
@@ -45,13 +45,13 @@ const loadingSelector = createLoadingSelector([CompanyActions.Type.GET_COMPANY_S
             signedUrl: company && company.signedUrl ? company.signedUrl : null,
         };
     },
-    (dispatch: Dispatch): Pick<FilingView.IProps, 'actions'> => ({
+    (dispatch: Dispatch): Pick<Filing.IProps, 'actions'> => ({
         actions: bindActionCreators(omit(CompanyActions, 'Type'), dispatch),
     }),
 )
 
-export class FilingView extends React.Component<FilingView.IProps, FilingView.IState> {
-    constructor(props: FilingView.IProps, context?: any) {
+export class Filing extends React.Component<Filing.IProps, Filing.IState> {
+    constructor(props: Filing.IProps, context?: any) {
         super(props, context);
         this.state = {
             filingContents: undefined,
@@ -64,7 +64,7 @@ export class FilingView extends React.Component<FilingView.IProps, FilingView.IS
         await this.props.actions.getSignedUrl(shortCik, filingId);
     }
 
-    public async componentDidUpdate(prevProps: Readonly<FilingView.IProps>, prevState: Readonly<{}>, snapshot?: any) {
+    public async componentDidUpdate(prevProps: Readonly<Filing.IProps>, prevState: Readonly<{}>, snapshot?: any) {
         if (this.props.signedUrl && !prevProps.signedUrl) {
             const request = new Request(this.props.signedUrl, {
                 method: 'GET',

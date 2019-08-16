@@ -4,7 +4,7 @@ import { App as Birb } from 'app/containers/App';
 import { Header } from 'app/containers/Header';
 import { Company } from 'app/containers/Company';
 import { CompanyNav } from 'app/components/CompanyNav';
-import { FilingView } from 'app/containers/FilingView';
+import { Filing } from 'app/containers/Filing';
 import { NoMatch } from 'app/containers/NoMatch';
 import { hot } from 'react-hot-loader';
 
@@ -12,7 +12,7 @@ const ActiveRoute = () => (
     <Switch>
         <Route path='/' exact component={Birb} />
         <Route path='/companies/:shortCik' exact component={Company} />
-        <Route path='/companies/:shortCik/filings/:filingId' exact component={FilingView} />
+        <Route path='/companies/:shortCik/filings/:filingId' exact component={Filing} />
         <Route component={NoMatch} />
     </Switch>
 );
