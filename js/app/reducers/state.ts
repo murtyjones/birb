@@ -10,8 +10,8 @@ export interface RootState {
 }
 
 export namespace RootState {
-  export interface CompanyState { byShortCik: Record<ICompanyModel['shortCik'], ICompanyModel> }
-  export interface LoadingState { [requestName: string]: boolean }
-  export interface ErrorsState { [requestName: string]: boolean }
-  export interface SearchResultsState { data: Result[], hasMore: boolean }
+  export interface CompanyState { byShortCik: Record<ICompanyModel['shortCik'], ICompanyModel>; }
+  export interface LoadingState { [requestName: string]: boolean; }
+  export interface ErrorsState { [requestName: string]: boolean; }
+  export interface SearchResultsState { data: Result[]; hasMore: boolean; }
 }
