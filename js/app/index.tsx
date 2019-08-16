@@ -12,8 +12,7 @@ const ActiveRoute = () => (
     <Switch>
         <Route path='/' exact component={Birb} />
         <Route path='/companies/:shortCik' exact component={Company} />
-        <Route path='/filings/:id' exact component={FilingView} />
-        {/* TODO add 404 route */}
+        <Route path='/companies/:shortCik/filings/:filingId' exact component={FilingView} />
         <Route component={NoMatch} />
     </Switch>
 );
@@ -23,10 +22,10 @@ const ActiveRoute = () => (
  */
 const MaybeRenderHeader = () => (
     <Switch>
-        /* Routes that should not show the header: */
+        /* Routes that should not show the header (not exact): */
         <Route
             path={[
-                '/filings'
+                '/companies/:shortCik/filings',
             ]}
             children={null}
         />
@@ -35,13 +34,29 @@ const MaybeRenderHeader = () => (
     </Switch>
 );
 
+/*
+ * Show the company nav on all routes except those blacklisted below
+ */
+const MaybeRenderCompanyNav = () => (
+    <Switch>
+        /* Routes that should not show the company nav (not exact): */
+        <Route
+            path={[
+                '/companies/:shortCik/filings',
+            ]}
+            children={null}
+        />
+        /* All other routes ought to show the header: */
+        <Route path='/companies/:shortCik/:activeTab?' component={CompanyNav} />
+    </Switch>
+);
+
 export const App = hot(module)(() => (
     <>
 
         <MaybeRenderHeader />
 
-        {/* Show the company nav on all company routes */}
-        <Route path='/companies/:shortCik/:activeTab?' component={CompanyNav} />
+        <MaybeRenderCompanyNav />
 
         <ActiveRoute />
     </>

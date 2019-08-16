@@ -1,9 +1,9 @@
 
 interface ResponseInfo {
-    status: number,
+    status: number;
     body: {
-        [key: string]: any
-    },
+        [key: string]: any,
+    };
 }
 
 export const http = async (request: RequestInfo): Promise<ResponseInfo> => {
@@ -13,10 +13,10 @@ export const http = async (request: RequestInfo): Promise<ResponseInfo> => {
         return Promise.reject({
             status: response.status,
             body,
-        })
+        });
     }
     return Promise.resolve({
         status: response.status,
         body,
-    })
+    });
 };

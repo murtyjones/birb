@@ -1,9 +1,9 @@
-import { combineReducers } from 'redux';
-import { RootState } from './state';
-import { companyReducer } from './companies';
-import { loadingReducer } from './loading';
 import { errorsReducer } from 'app/reducers/errors';
 import { searchReducer } from 'app/reducers/search';
+import { combineReducers } from 'redux';
+import { companyReducer } from './companies';
+import { loadingReducer } from './loading';
+import { RootState } from './state';
 
 export * from './selectors';
 

@@ -1,8 +1,9 @@
 import {IFilingModel} from 'app/models/IFilingModel';
 
-export interface CompanyModel {
+export interface ICompanyModel {
   shortCik: string;
   name: string;
-  filings: IFilingModel[]
+  filings: IFilingModel[];
+  signedUrl: string|null;
 }
 

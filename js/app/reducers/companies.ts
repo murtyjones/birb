@@ -1,19 +1,24 @@
-import { RootState } from './state';
 import { CompanyActions } from 'app/actions/companies';
-import { createReducer } from 'deox'
+import { createReducer } from 'deox';
+import { RootState } from './state';
 
 export const defaultCompanyState: RootState.CompanyState = {
-    byShortCik: {}
+    byShortCik: {},
 };
 
-export const companyReducer = createReducer(defaultCompanyState, handleAction => [
+export const companyReducer = createReducer(defaultCompanyState, (handleAction) => [
     handleAction(CompanyActions.getCompany.success, (state, { payload }) => {
         const newState = Object.assign(state, {
             byShortCik: {
                 ...state.byShortCik,
-                [payload.shortCik]: payload
-            }
+                [payload.shortCik]: payload,
+            },
         });
+        return newState;
+    }),
+    handleAction(CompanyActions.getSignedUrl.success, (state, { payload }) => {
+        const newState = Object.assign(state);
+        newState.byShortCik[payload.shortCik].signedUrl = payload.signedUrl;
         return newState;
     }),
 ]);

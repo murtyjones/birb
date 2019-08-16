@@ -1,5 +1,5 @@
 import {CompanyActions} from 'app/actions/companies';
-import {CompanyModel} from 'app/models';
+import {ICompanyModel} from 'app/models';
 import {IFilingModel} from 'app/models/IFilingModel';
 import {RootState} from 'app/reducers';
 import {createLoadingSelector} from 'app/reducers/selectors/loading';
@@ -11,8 +11,8 @@ import {Link} from 'react-router-dom';
 import {bindActionCreators, Dispatch} from 'redux';
 import * as style from './style.css';
 
-const getFilingUrl = (filingId: string|number) =>
-    `/filings/${filingId}`;
+const getFilingUrl = (shortCik: string, filingId: string|number) =>
+    `/companies/${shortCik}/filings/${filingId}`;
 
 interface IMatchParams {
     shortCik: string;
@@ -22,7 +22,7 @@ export namespace Company {
     export interface IProps extends RouteComponentProps<IMatchParams> {
         actions: CompanyActions;
         isFetching: boolean;
-        company: CompanyModel;
+        company: ICompanyModel;
         companyFilings: IFilingModel[];
     }
 }
@@ -86,7 +86,7 @@ const DataTable: React.FC<IDataTableProps> = (props) =>
     <div className={style.allFilingsTable}>
         {
             props.data.map((each) =>
-                <Link to={getFilingUrl(each.id)}>
+                <Link to={getFilingUrl(each.company_short_cik, each.id)}>
                         <span>{each.filing_name}</span>
                         <span>{each.filing_quarter}</span>
                         <span>{each.filing_year}</span>

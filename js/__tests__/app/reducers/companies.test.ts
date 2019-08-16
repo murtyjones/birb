@@ -1,4 +1,3 @@
-const { shallow } = require('enzyme');
 import { CompanyActions } from 'app/actions/companies';
 import { companyReducer } from 'app/reducers/companies';
 
