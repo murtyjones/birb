@@ -1,18 +1,18 @@
-import * as React from 'react';
-import { Route, Switch } from 'react-router';
-import { App as Birb } from 'app/containers/App';
-import { Header } from 'app/containers/Header';
-import { Company } from 'app/containers/Company';
 import { CompanyNav } from 'app/components/CompanyNav';
+import { App as Birb } from 'app/containers/App';
+import { Company } from 'app/containers/Company';
 import { Filing } from 'app/containers/Filing';
+import { Header } from 'app/containers/Header';
 import { NoMatch } from 'app/containers/NoMatch';
+import * as React from 'react';
 import { hot } from 'react-hot-loader';
+import { Route, Switch } from 'react-router';
 
 const ActiveRoute = () => (
     <Switch>
-        <Route path='/' exact component={Birb} />
-        <Route path='/companies/:shortCik' exact component={Company} />
-        <Route path='/companies/:shortCik/filings/:filingId' exact component={Filing} />
+        <Route path='/' exact={true} component={Birb} />
+        <Route path='/companies/:shortCik' exact={true} component={Company} />
+        <Route path='/companies/:shortCik/filings/:filingId' exact={true} component={Filing} />
         <Route component={NoMatch} />
     </Switch>
 );
@@ -24,9 +24,7 @@ const MaybeRenderHeader = () => (
     <Switch>
         /* Routes that should not show the header (not exact): */
         <Route
-            path={[
-                '/companies/:shortCik/filings',
-            ]}
+            path={['/companies/:shortCik/filings']}
             children={null}
         />
         /* All other routes ought to show the header: */
@@ -41,9 +39,7 @@ const MaybeRenderCompanyNav = () => (
     <Switch>
         /* Routes that should not show the company nav (not exact): */
         <Route
-            path={[
-                '/companies/:shortCik/filings',
-            ]}
+            path={['/companies/:shortCik/filings']}
             children={null}
         />
         /* All other routes ought to show the header: */

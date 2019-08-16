@@ -18,8 +18,8 @@
     "start": "webpack-dev-server --env.BIRB_API_URL=http://localhost:8000  --mode development --hot --progress --color --port 3000 --open",
     "build": "webpack --env.BIRB_API_URL=https://api.birb.io -p --progress --colors",
     "prettier": "prettier --write \"js/**/*.{ts,tsx,css}\"",
-    "tslint": "tslint -c tslint.json js/**/*.ts --exclude 'js/**/*.d.ts'",
-    "tslint-fix": "tslint -c tslint.json js/**/*.ts --exclude 'js/**/*.d.ts' --fix"
+    "tslint": "tslint -c tslint.json js/**/*.{ts,tsx} --exclude 'js/**/*.d.ts'",
+    "tslint-fix": "tslint -c tslint.json js/**/*.{ts,tsx} --exclude 'js/**/*.d.ts' --fix"
   },
   "license": "MIT",
   "devDependencies": {
@@ -65,6 +65,7 @@
     "ts-jest": "^24.0.2",
     "ts-loader": "^6.0.4",
     "tslint": "^5.18.0",
+    "tslint-react": "^4.0.0",
     "typescript": "^3.5.3",
     "url-loader": "^2.1.0",
     "webpack": "^4.36.1",
