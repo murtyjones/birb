@@ -15,6 +15,7 @@ extern crate cfg_if;
 extern crate postgres;
 #[macro_use]
 extern crate postgres_derive;
+extern crate aws;
 extern crate dotenv;
 extern crate failure;
 extern crate serde_json;
@@ -96,7 +97,8 @@ fn rocket() -> rocket::Rocket {
             routes![
                 handlers::health_check::get,
                 handlers::autocomplete_company::get,
-                handlers::company::get_filing_info
+                handlers::company::get_company_filings,
+                handlers::company::get_filing_s3_link,
             ],
         )
         .register(catchers![

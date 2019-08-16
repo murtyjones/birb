@@ -1,6 +1,17 @@
+use aws::s3;
 use failure;
 use models::{Company, CompanyFilingData, Filing};
 use postgres::Connection;
+
+/// Model for an S3 link for a filing
+#[derive(Debug, Serialize, Deserialize)]
+pub struct FilingS3Link {
+    signed_url: Option<String>,
+}
+
+fn get_signed_url<S: Into<String>>(filing_edgar_url: S) -> String {
+    s3::get_signed_url("birb-edgar-filings", &*filing_edgar_url.into())
+}
 
 /// Find an entity using its cik
 pub fn get_typeahead_results(conn: &Connection, substr: String) -> Result<Vec<Company>, &str> {
@@ -27,7 +38,7 @@ pub fn get_typeahead_results(conn: &Connection, substr: String) -> Result<Vec<Co
 }
 
 /// Get a company's filing info
-pub fn get_filing_info(
+pub fn get_company_filings(
     conn: &Connection,
     short_cik: String,
 ) -> Result<CompanyFilingData, failure::Error> {
@@ -73,8 +84,36 @@ pub fn get_filing_info(
     Ok(company_filing_info)
 }
 
-#[cfg(test)]
-mod test {
-    #[test]
-    fn get_typeahead_results_unwraps() {}
+/// Get a company's filing S3 link
+pub fn get_filing_s3_link(
+    conn: &Connection,
+    filing_id: i32,
+) -> Result<FilingS3Link, failure::Error> {
+    let rows = &conn
+        .query(
+            "
+            SELECT * FROM filing
+            WHERE id = $1;
+        ",
+            &[&filing_id],
+        )
+        .expect("Couldn't get company's filing info for signed url");
+    if rows.len() == 0 {
+        return Ok(FilingS3Link { signed_url: None });
+    }
+
+    let filing_link = match rows.len() {
+        0 => FilingS3Link { signed_url: None },
+        _ => {
+            let filing_edgar_url: String = rows.get(0).get("filing_edgar_url");
+            FilingS3Link {
+                signed_url: Some(get_signed_url(filing_edgar_url)),
+            }
+        }
+    };
+
+    Ok(filing_link)
 }
+
+#[cfg(test)]
+mod test {}

@@ -89,6 +89,7 @@ version = "0.1.0"
 dependencies = [
  "futures 0.1.28 (registry+https://github.com/rust-lang/crates.io-index)",
  "rusoto_core 0.40.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rusoto_credential 0.40.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rusoto_s3 0.40.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -2295,6 +2296,7 @@ dependencies = [
 name = "server"
 version = "0.1.0"
 dependencies = [
+ "aws 0.1.0",
  "cfg-if 0.1.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "dotenv 0.14.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
