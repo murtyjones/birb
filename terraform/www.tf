@@ -1,14 +1,6 @@
 // Taken from: https://medium.com/runatlantis/hosting-our-static-site-over-ssl-with-s3-acm-cloudfront-and-terraform-513b799aec0f
 
-// Create a variable for our domain name because we'll be using it a lot.
-variable "www_domain_name" {
-  default = "www.birb.io"
-}
 
-// We'll also need the root domain (also known as zone apex or naked domain).
-variable "root_domain_name" {
-  default = "birb.io"
-}
 
 # Outputs to write to disk:
 resource "local_file" "www_cloudfront_id" {
@@ -133,7 +125,7 @@ resource "aws_cloudfront_distribution" "birb_www_distribution" {
     }
   }
 
-  // Here we're ensuring we can hit this distribution using www.runatlantis.io
+  // Here we're ensuring we can hit this distribution using (www.)birb.io
   // rather than the domain name CloudFront gives us.
   aliases = [
     "${var.root_domain_name}",
