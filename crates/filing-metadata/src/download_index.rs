@@ -55,6 +55,8 @@ pub fn store_s3_document(
         bucket: bucket.to_owned(),
         key: file_path.to_owned(),
         body: Some(contents.into()),
+        content_encoding: Some(String::from("gzip")),
+        content_type: Some(String::from("text/html")),
         ..Default::default()
     };
     client

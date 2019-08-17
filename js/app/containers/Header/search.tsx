@@ -7,7 +7,7 @@ import * as React from 'react';
 import {Link} from 'react-router-dom';
 
 
-const getCompanyLink = (shortCik: string) => {
+const getCompanyWithFilingsLink = (shortCik: string) => {
     return `/companies/${shortCik}`;
 };
 
@@ -19,7 +19,7 @@ interface ICompanySearchResult {
 
 const Result: React.FC<ICompanySearchResult> = (props) => (
     <Link
-        to={getCompanyLink(props.result.short_cik)}
+        to={getCompanyWithFilingsLink(props.result.short_cik)}
         data-short-cik={props.result.short_cik}
         onClick={props.onResultClick}
         className={cns(style.companySearchResult, {
@@ -188,7 +188,7 @@ export class CompanySearch extends React.Component<CompanySearch.IProps> {
         const companySearchResultElem = event.currentTarget as HTMLInputElement;
         const shortCik: string = companySearchResultElem.dataset.shortCik || '';
         this.forceBlur(true);
-        this.props.history.push(getCompanyLink(shortCik));
+        this.props.history.push(getCompanyWithFilingsLink(shortCik));
     }
 
     public forceBlur(resetInputContent = false) {

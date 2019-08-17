@@ -1,42 +1,5 @@
 // Taken from: https://medium.com/runatlantis/hosting-our-static-site-over-ssl-with-s3-acm-cloudfront-and-terraform-513b799aec0f
 
-
-
-# Outputs to write to disk:
-resource "local_file" "www_cloudfront_id" {
-  content  = aws_cloudfront_distribution.birb_www_distribution.id
-  filename = "${path.module}/out/www_cloudfront_id"
-}
-
-
-// This Route53 record will point at our CloudFront distribution for birb.io.
-resource "aws_route53_record" "birb_root" {
-  zone_id = "${data.aws_route53_zone.birb.zone_id}"
-
-  // NOTE: name is intentionally blank here.
-  name = ""
-  type = "A"
-
-  alias {
-    name                   = "${aws_cloudfront_distribution.birb_www_distribution.domain_name}"
-    zone_id                = "${aws_cloudfront_distribution.birb_www_distribution.hosted_zone_id}"
-    evaluate_target_health = false
-  }
-}
-// This Route53 record will point at our CloudFront distribution for www.birb.io.
-resource "aws_route53_record" "birb_www" {
-  zone_id = "${data.aws_route53_zone.birb.zone_id}"
-
-  name = "${var.www_domain_name}"
-  type = "A"
-
-  alias {
-    name                   = "${aws_cloudfront_distribution.birb_www_distribution.domain_name}"
-    zone_id                = "${aws_cloudfront_distribution.birb_www_distribution.hosted_zone_id}"
-    evaluate_target_health = false
-  }
-}
-
 // S3 bucket for www.birb.io
 resource "aws_s3_bucket" "birb_www" {
   // Our bucket's name is going to be the same as our site's domain name.

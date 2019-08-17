@@ -53,13 +53,13 @@ export class Company extends React.PureComponent<Company.IProps> {
 
     public async componentDidUpdate(prevProps: Readonly<Company.IProps>, prevState: Readonly<{}>, snapshot?: any) {
         if (this.props.match.params.shortCik !== prevProps.match.params.shortCik) {
-            await this.props.actions.getCompany(this.props.match.params.shortCik);
+            await this.props.actions.getCompanyWithFilings(this.props.match.params.shortCik);
         }
     }
 
     public async componentDidMount() {
         const shortCik = this.props.match.params.shortCik;
-        await this.props.actions.getCompany(shortCik);
+        await this.props.actions.getCompanyWithFilings(shortCik);
     }
 
     public render() {

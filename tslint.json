@@ -2,6 +2,8 @@
   "extends": ["tslint:recommended", "tslint-react"],
   "rulesDirectory": [],
   "rules": {
+    // override tslint-react rules here
+    "jsx-no-multiline-js": false,
     "max-line-length": {
       "options": [120]
     },

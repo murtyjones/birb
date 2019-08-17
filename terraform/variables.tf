@@ -75,6 +75,10 @@ variable "birb_api_certificate_arn" {
   description = "The certificate ARN for the api.birb.io"
 }
 
+variable "birb_raw_filings_certificate_arn" {
+  description = "The certificate ARN for the raw-filings.birb.io"
+}
+
 variable "marty_ip_address_1" {
   description = "Marty's 1st IP address"
 }

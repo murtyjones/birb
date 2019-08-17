@@ -23,11 +23,6 @@ export namespace Filing {
         filingId: string;
         signedUrl: string|null;
     }
-
-
-    export interface IState {
-        filingContents?: string;
-    }
 }
 
 const loadingSelector = createLoadingSelector([CompanyActions.Type.GET_COMPANY_SIGNED_FILING_URL]);
@@ -50,12 +45,9 @@ const loadingSelector = createLoadingSelector([CompanyActions.Type.GET_COMPANY_S
     }),
 )
 
-export class Filing extends React.Component<Filing.IProps, Filing.IState> {
+export class Filing extends React.Component<Filing.IProps> {
     constructor(props: Filing.IProps, context?: any) {
         super(props, context);
-        this.state = {
-            filingContents: undefined,
-        };
     }
 
     public async componentDidMount() {
@@ -64,25 +56,17 @@ export class Filing extends React.Component<Filing.IProps, Filing.IState> {
         await this.props.actions.getSignedUrl(shortCik, filingId);
     }
 
-    public async componentDidUpdate(prevProps: Readonly<Filing.IProps>, prevState: Readonly<{}>, snapshot?: any) {
-        if (this.props.signedUrl && !prevProps.signedUrl) {
-            const request = new Request(this.props.signedUrl, {
-                method: 'GET',
-            });
-            const response = await http(request);
-            console.log(response);
-        }
-    }
-
     public render() {
         return (
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: '200px auto',
-                height: '100vh',
-            }}>
+            <div
+                style={{
+                    display: 'grid',
+                    gridTemplateColumns: '200px auto',
+                    height: '100vh',
+                }}
+            >
                 <div>sidebar</div>
-                { this.state.filingContents
+                { this.props.signedUrl
                     ?
                     (
                         <iframe
@@ -92,7 +76,7 @@ export class Filing extends React.Component<Filing.IProps, Filing.IState> {
                                 height: '100%',
                                 width: '100%',
                             }}
-                            srcDoc={this.state.filingContents}
+                            src={this.props.signedUrl}
                         />
                     )
                     : 'Loading...'
