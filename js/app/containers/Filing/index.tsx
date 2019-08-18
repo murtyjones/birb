@@ -23,9 +23,14 @@ export namespace Filing {
         filingId: string;
         signedUrl: string|null;
     }
+
+    export interface IState {
+        content?: string;
+    }
 }
 
 const loadingSelector = createLoadingSelector([CompanyActions.Type.GET_COMPANY_SIGNED_FILING_URL]);
+
 
 @connect(
     (state: RootState, ownProps): Pick<Filing.IProps, 'signedUrl' | 'shortCik' | 'filingId' | 'isFetching'> => {
@@ -45,15 +50,35 @@ const loadingSelector = createLoadingSelector([CompanyActions.Type.GET_COMPANY_S
     }),
 )
 
-export class Filing extends React.Component<Filing.IProps> {
+export class Filing extends React.Component<Filing.IProps, Filing.IState> {
+
     constructor(props: Filing.IProps, context?: any) {
         super(props, context);
+        this.state = {
+            content: undefined,
+        };
     }
 
     public async componentDidMount() {
         const shortCik = this.props.shortCik;
         const filingId = this.props.filingId;
         await this.props.actions.getSignedUrl(shortCik, filingId);
+    }
+
+    public async componentDidUpdate(prevProps: Readonly<Filing.IProps>, prevState: Readonly<{}>, snapshot?: any) {
+        if (this.props.signedUrl && !prevProps.signedUrl) {
+            const response = await fetch(this.props.signedUrl);
+            const content = await response.text() || '';
+            this.setState({content});
+        }
+    }
+
+    public shouldComponentUpdate(
+        nextProps: Readonly<Filing.IProps>, nextState: Readonly<Filing.IState>, nextContext: any,
+    ) {
+        return (
+            nextProps.signedUrl !== this.props.signedUrl || nextState.content !== this.state.content
+        );
     }
 
     public render() {
@@ -66,17 +91,16 @@ export class Filing extends React.Component<Filing.IProps> {
                 }}
             >
                 <div>sidebar</div>
-                { this.props.signedUrl
+                { this.state.content
                     ?
                     (
                         <iframe
-                            sandbox='allow-scripts'
+                            srcDoc={this.state.content}
                             style={{
                                 border: 0,
                                 height: '100%',
                                 width: '100%',
                             }}
-                            src={this.props.signedUrl}
                         />
                     )
                     : 'Loading...'
