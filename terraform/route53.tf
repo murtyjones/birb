@@ -59,17 +59,4 @@ resource "aws_route53_record" "birb_www" {
   }
 }
 
-// This Route53 record will point at our CloudFront distribution for www.birb.io.
-resource "aws_route53_record" "birb_raw_filings_cdn" {
-  zone_id = "${data.aws_route53_zone.birb.zone_id}"
-
-  name = "${var.raw_filings_domain_name}"
-  type = "A"
-
-  alias {
-    name                   = "${aws_cloudfront_distribution.birb_raw_filings_cdn.domain_name}"
-    zone_id                = "${aws_cloudfront_distribution.birb_raw_filings_cdn.hosted_zone_id}"
-    evaluate_target_health = false
-  }
-}
 

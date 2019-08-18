@@ -10,7 +10,8 @@ pub struct FilingS3Link {
 }
 
 fn get_signed_url<S: Into<String>>(filing_edgar_url: S) -> String {
-    s3::get_signed_url("birb-edgar-filings", &*filing_edgar_url.into())
+    let compressed = format!("{}.gz", &*filing_edgar_url.into());
+    s3::get_signed_url("birb-edgar-filings", &*compressed)
 }
 
 /// Find an entity using its cik

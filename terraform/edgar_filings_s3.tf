@@ -15,23 +15,5 @@ resource "aws_s3_bucket" "birb_edgar_filings" {
   }
 }
 
-data "aws_iam_policy_document" "birb_edgar_filings_s3_policy" {
-  statement {
-    sid       = "OnlyCloudfrontReadAccess"
-    actions   = ["s3:GetObject"]
-    resources = ["${aws_s3_bucket.birb_edgar_filings.arn}/*"]
-
-    principals {
-      type        = "AWS"
-      identifiers = ["${aws_cloudfront_origin_access_identity.birb_raw_filings_access_identity.iam_arn}"]
-    }
-  }
-}
-
-resource "aws_s3_bucket_policy" "birb_edgar_filings" {
-  bucket = "${aws_s3_bucket.birb_edgar_filings.id}"
-  policy = "${data.aws_iam_policy_document.birb_edgar_filings_s3_policy.json}"
-
-}
-
-// AWS_SDK_LOAD_CONFIG=1   AWS_PROFILE=birb terraform plan -target=aws_s3_bucket_policy.birb_edgar_filings -var-file=terraform/production.secret.tfvars -out=plan terraform/
+// AWS_SDK_LOAD_CONFIG=1   AWS_PROFILE=birb terraform destroy -target=aws_s3_bucket_policy.birb_edgar_filings -var-file=terraform/production.secret.tfvars terraform/
+// AWS_SDK_LOAD_CONFIG=1   AWS_PROFILE=birb terraform plan -out=plan -target=aws_s3_bucket.birb_edgar_filings -var-file=terraform/production.secret.tfvars terraform/
