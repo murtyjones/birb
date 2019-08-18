@@ -51,6 +51,7 @@ const loadingSelector = createLoadingSelector([CompanyActions.Type.GET_COMPANY_S
 )
 
 export class Filing extends React.Component<Filing.IProps, Filing.IState> {
+    private myRef = React.createRef<HTMLIFrameElement>();
 
     constructor(props: Filing.IProps, context?: any) {
         super(props, context);
@@ -58,6 +59,7 @@ export class Filing extends React.Component<Filing.IProps, Filing.IState> {
             content: undefined,
         };
     }
+
 
     public async componentDidMount() {
         const shortCik = this.props.shortCik;
@@ -69,7 +71,13 @@ export class Filing extends React.Component<Filing.IProps, Filing.IState> {
         if (this.props.signedUrl && !prevProps.signedUrl) {
             const response = await fetch(this.props.signedUrl);
             const content = await response.text() || '';
-            this.setState({content});
+            const node = this.myRef.current;
+            if (node && node.contentDocument) {
+                const doc = node.contentDocument;
+                doc.open();
+                doc.write(content);
+                doc.close();
+            }
         }
     }
 
@@ -91,20 +99,15 @@ export class Filing extends React.Component<Filing.IProps, Filing.IState> {
                 }}
             >
                 <div>sidebar</div>
-                { this.state.content
-                    ?
-                    (
-                        <iframe
-                            srcDoc={this.state.content}
-                            style={{
-                                border: 0,
-                                height: '100%',
-                                width: '100%',
-                            }}
-                        />
-                    )
-                    : 'Loading...'
-                }
+                <iframe
+                    ref={this.myRef}
+                    seamless={true}
+                    style={{
+                        border: 0,
+                        height: '100%',
+                        width: '100%',
+                    }}
+                />
             </div>
         );
     }
