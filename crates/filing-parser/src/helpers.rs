@@ -71,25 +71,6 @@ pub fn tendril_to_string(text: &RefCell<StrTendril>) -> String {
     converted
 }
 
-pub fn add_attribute(handle: &Handle, new_attr: Attribute, strip_attr: Option<&'static str>) {
-    match handle.data {
-        NodeData::Element { ref attrs, .. } => {
-            if let Some(n) = strip_attr {
-                attrs.borrow_mut().retain(|attr| &attr.name.local != n);
-            }
-            attrs.borrow_mut().push(new_attr);
-        }
-        _ => panic!("Node should be an element!"),
-    }
-}
-
-pub fn create_x_birb_attr(attr_name: &'static str, value: i32) -> Attribute {
-    Attribute {
-        name: QualName::new(None, ns!(), LocalName::from(attr_name)),
-        value: format!("{}", value).to_tendril(),
-    }
-}
-
 pub fn write_to_file(file_path: &String, data: Vec<u8>) -> std::io::Result<()> {
     let absolute_path = get_abs_path(file_path);
     let mut pos = 0;

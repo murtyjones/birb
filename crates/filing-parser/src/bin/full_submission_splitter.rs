@@ -46,12 +46,17 @@ fn parse_doc(handle: &Rc<Node>) -> Option<ParsedDocument> {
                 "DOCUMENT", &name.local,
                 "Node should be a document element!"
             );
+            let type_node = &Rc::clone(&handle.children.borrow()[1]);
+            let sequence_node = &type_node.children.borrow()[1];
+            let filename_node = &sequence_node.children.borrow()[1];
+            let description_node = &filename_node.children.borrow()[1];
+            let text_node = &description_node.children.borrow()[1];
             Some(ParsedDocument {
-                type_: get_doc_type(handle),
-                sequence: get_doc_sequence(handle),
-                filename: get_doc_filename(handle),
-                description: get_doc_description(handle),
-                text: get_doc_text(handle),
+                type_: get_doc_type(type_node),
+                sequence: get_doc_sequence(sequence_node),
+                filename: get_doc_filename(filename_node),
+                description: get_doc_description(description_node),
+                text: get_doc_text(text_node),
             })
         }
         _ => None,
@@ -72,82 +77,78 @@ pub struct ParsedDocument {
 }
 
 fn get_doc_type(node: &Rc<Node>) -> String {
-    for child in node.children.borrow().iter() {
-        if let NodeData::Element { ref name, .. } = child.data {
-            assert_eq!("TYPE", &name.local);
-            assert!(0 < child.children.borrow().len());
-            if let NodeData::Text { ref contents } = &child.children.borrow()[0].data {
-                return tendril_to_string(contents);
-            }
-            panic!("Doc type not found! No text node.");
+    if let NodeData::Element { ref name, .. } = node.data {
+        assert_eq!("TYPE", &name.local);
+        assert!(0 < node.children.borrow().len());
+        if let NodeData::Text { ref contents } = &node.children.borrow()[0].data {
+            return tendril_to_string(contents);
         }
+        panic!("Doc type not found! No text node.");
     }
     panic!("Doc type not found!");
 }
 
 fn get_doc_sequence(node: &Rc<Node>) -> i32 {
-    for child in node.children.borrow().iter() {
-        if let NodeData::Element { ref name, .. } = child.data {
-            assert_eq!("SEQUENCE", &name.local);
-            assert!(0 < child.children.borrow().len());
-            if let NodeData::Text { ref contents } = &child.children.borrow()[0].data {
-                let as_str = tendril_to_string(contents);
-                let as_int: i32 = as_str.parse().unwrap();
-                return as_int;
-            }
-            panic!("No sequence found!");
+    if let NodeData::Element { ref name, .. } = node.data {
+        assert_eq!("SEQUENCE", &name.local);
+        assert!(0 < node.children.borrow().len());
+        if let NodeData::Text { ref contents } = &node.children.borrow()[0].data {
+            let as_str = tendril_to_string(contents);
+            panic!("{}", as_str);
+            let as_int: i32 = as_str.parse().unwrap();
+            return as_int;
         }
+        panic!("No sequence found!");
     }
     panic!("No sequence found!");
 }
 
 fn get_doc_filename(node: &Rc<Node>) -> String {
-    for child in node.children.borrow().iter() {
-        if let NodeData::Element { ref name, .. } = child.data {
-            assert_eq!("FILENAME", &name.local);
-            assert!(0 < child.children.borrow().len());
-            if let NodeData::Text { ref contents } = &child.children.borrow()[0].data {
-                let as_str = tendril_to_string(contents);
-                return as_str;
-            }
-            panic!("No filename found!");
+    if let NodeData::Element { ref name, .. } = node.data {
+        assert_eq!("FILENAME", &name.local);
+        assert!(0 < node.children.borrow().len());
+        if let NodeData::Text { ref contents } = &node.children.borrow()[0].data {
+            let as_str = tendril_to_string(contents);
+            return as_str;
         }
+        panic!("No filename found!");
     }
     panic!("No filename found!");
 }
 
 fn get_doc_description(node: &Rc<Node>) -> String {
-    for child in node.children.borrow().iter() {
-        if let NodeData::Element { ref name, .. } = child.data {
-            assert_eq!("DESCRIPTION", &name.local);
-            assert!(0 < child.children.borrow().len());
-            if let NodeData::Text { ref contents } = &child.children.borrow()[0].data {
-                let as_str = tendril_to_string(contents);
-                return as_str;
-            }
-            panic!("No description found!");
+    if let NodeData::Element { ref name, .. } = node.data {
+        assert_eq!("DESCRIPTION", &name.local);
+        assert!(0 < node.children.borrow().len());
+        if let NodeData::Text { ref contents } = &node.children.borrow()[0].data {
+            let as_str = tendril_to_string(contents);
+            return as_str;
         }
+        panic!("No description found!");
     }
     panic!("No description found!");
 }
 
+fn ser(node: &Rc<Node>) -> String {
+    let mut bytes = vec![];
+    xml5ever::serialize::serialize(
+        &mut bytes,
+        node,
+        xml5ever::serialize::SerializeOpts::default(),
+    )
+    .expect("Couldn't write to file.");
+    return String::from_utf8(bytes).unwrap();
+}
+
 fn get_doc_text(node: &Rc<Node>) -> String {
-    for child in node.children.borrow().iter() {
-        if let xml5ever::rcdom::NodeData::Element { ref name, .. } = child.data {
-            assert_eq!("TEXT", &name.local);
-            assert!(0 < child.children.borrow().len());
-            if let xml5ever::rcdom::NodeData::Element { .. } = &child.children.borrow()[0].data {
-                let mut bytes = vec![];
-                serialize(
-                    &mut bytes,
-                    &child.children.borrow()[0].data,
-                    xml5ever::serialize::SerializeOpts::default(),
-                )
-                .expect("Couldn't write to file.");
-                String::from_utf8(bytes).unwrap()
-            }
-            panic!("No text found!");
+    if let xml5ever::rcdom::NodeData::Element { ref name, .. } = node.data {
+        assert_eq!("TEXT", &name.local);
+        assert!(0 < node.children.borrow().len());
+        if let xml5ever::rcdom::NodeData::Element { .. } = &node.children.borrow()[0].data {
+            return ser(&node.children.borrow()[0]);
         }
+        panic!("No text found!");
     }
+
     panic!("No text found!");
 }
