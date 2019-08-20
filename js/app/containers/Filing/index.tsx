@@ -1,14 +1,10 @@
 import {CompanyActions} from 'app/actions';
-import {ICompanyModel} from 'app/models';
-import {IFilingModel} from 'app/models/IFilingModel';
 import {createLoadingSelector, RootState} from 'app/reducers';
 import {omit} from 'app/utils';
 import * as React from 'react';
 import {connect} from 'react-redux';
 import {RouteComponentProps} from 'react-router';
 import {bindActionCreators, Dispatch} from 'redux';
-import * as style from './style.css';
-import {http} from "app/utils/http";
 
 interface IMatchParams {
     shortCik: string;
@@ -67,25 +63,11 @@ export class Filing extends React.Component<Filing.IProps, Filing.IState> {
         await this.props.actions.getSignedUrl(shortCik, filingId);
     }
 
-    public async componentDidUpdate(prevProps: Readonly<Filing.IProps>, prevState: Readonly<{}>, snapshot?: any) {
-        if (this.props.signedUrl && !prevProps.signedUrl) {
-            const response = await fetch(this.props.signedUrl);
-            const content = await response.text() || '';
-            const node = this.myRef.current;
-            if (node && node.contentDocument) {
-                const doc = node.contentDocument;
-                doc.open();
-                doc.write(content);
-                doc.close();
-            }
-        }
-    }
-
     public shouldComponentUpdate(
         nextProps: Readonly<Filing.IProps>, nextState: Readonly<Filing.IState>, nextContext: any,
     ) {
         return (
-            nextProps.signedUrl !== this.props.signedUrl || nextState.content !== this.state.content
+            nextProps.signedUrl !== this.props.signedUrl
         );
     }
 
@@ -101,6 +83,7 @@ export class Filing extends React.Component<Filing.IProps, Filing.IState> {
                 <div>sidebar</div>
                 <iframe
                     ref={this.myRef}
+                    src={this.props.signedUrl || ''}
                     seamless={true}
                     style={{
                         border: 0,
