@@ -3,6 +3,10 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
+variable "aws_account_id" {
+  description = "The AWS account ID"
+}
+
 variable "az_count" {
   description = "Number of AZs to cover in a given region"
   default     = "2"
@@ -75,7 +79,7 @@ variable "birb_api_certificate_arn" {
   description = "The certificate ARN for the api.birb.io"
 }
 
-variable "birb_raw_filings_certificate_arn" {
+variable "birb_filings_certificate_arn" {
   description = "The certificate ARN for the raw-filings.birb.io"
 }
 
