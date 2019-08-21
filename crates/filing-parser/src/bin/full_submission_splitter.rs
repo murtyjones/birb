@@ -112,14 +112,14 @@ pub struct ParsedDocument {
     pub text: String,
 }
 
-fn find_type_node(node: &Handle) -> Option<Handle> {
+fn find_type_node(node: Handle) -> Option<Handle> {
     find_element(node, "TYPE")
 }
 
-fn find_element(node: &Handle, target_name: &'static str) -> Option<Handle> {
+fn find_element(node: Handle, target_name: &'static str) -> Option<Handle> {
     if let NodeData::Element { ref name, .. } = node.data {
         if &name.local == target_name {
-            return Some(Rc::clone(node));
+            return Some(Rc::clone(&node));
         }
     }
     None

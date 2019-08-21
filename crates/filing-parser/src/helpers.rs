@@ -96,34 +96,6 @@ pub fn get_children(handle: &Handle) -> Vec<Handle> {
         .collect::<Vec<Rc<Node>>>()
 }
 
-pub fn bfs_with_matches<CB>(handle: Handle, mut cb: CB) -> i32
-where
-    CB: (FnMut(Handle) -> Option<&'static Regex>),
-{
-    let mut matches: Vec<&'static Regex> = vec![];
-    let mut q = vec![handle];
-    while q.len() > 0 {
-        let node = q.remove(0);
-        if let Some(r) = cb(Rc::clone(&node)) {
-            let is_already_found = matches.iter().fold(false, |acc, each| {
-                if each.as_str() == r.as_str() {
-                    return true;
-                }
-                return acc;
-            });
-            if !is_already_found {
-                matches.push(r);
-            }
-        }
-        // Prepend the child's elements to the queue. This is less
-        // ideal than appending them because it requires more memory,
-        // but we need to parse the document in order (IE from top to
-        // bottom), so this approach is needed for now.
-        q = prepend(q, &mut get_children(&node));
-    }
-    matches.len() as i32
-}
-
 pub fn bfs<CB>(handle: Handle, mut cb: CB) -> bool
 where
     CB: (FnMut(Handle) -> bool),
@@ -134,11 +106,7 @@ where
         if cb(Rc::clone(&node)) {
             return true;
         }
-        // Prepend the child's elements to the queue. This is less
-        // ideal than appending them because it requires more memory,
-        // but we need to parse the document in order (IE from top to
-        // bottom), so this approach is needed for now.
-        q = prepend(q, &mut get_children(&node));
+        q.append(&mut get_children(&node));
     }
     false
 }
@@ -152,47 +120,9 @@ where
         if let Some(h) = cb(Rc::clone(&node)) {
             return Some(h);
         }
-        // Prepend the child's elements to the queue. This is less
-        // ideal than appending them because it requires more memory,
-        // but we need to parse the document in order (IE from top to
-        // bottom), so this approach is needed for now.
-        q = prepend(q, &mut get_children(&node));
+      q.append(&mut get_children(&node));
     }
     None
-}
-
-pub fn bfs_no_base_case<CB>(handle: Handle, mut cb: CB) -> ()
-where
-    CB: (FnMut(Handle) -> bool),
-{
-    let mut q = vec![handle];
-    while q.len() > 0 {
-        let node = q.remove(0);
-        let _found = cb(Rc::clone(&node));
-        // Prepend the child's elements to the queue. This is less
-        // ideal than appending them because it requires more memory,
-        // but we need to parse the document in order (IE from top to
-        // bottom), so this approach is needed for now.
-        q = prepend(q, &mut get_children(&node));
-    }
-}
-
-pub fn bfs_skip_chillins<CB>(handle: Handle, mut cb: CB) -> ()
-where
-    CB: (FnMut(Handle) -> bool),
-{
-    let mut q = vec![handle];
-    while q.len() > 0 {
-        let node = q.remove(0);
-        let found = cb(Rc::clone(&node));
-        if !found {
-            // Prepend the child's elements to the queue. This is less
-            // ideal than appending them because it requires more memory,
-            // but we need to parse the document in order (IE from top to
-            // bottom), so this approach is needed for now.
-            q = prepend(q, &mut get_children(&node));
-        }
-    }
 }
 
 fn prepend<T>(v: Vec<T>, s: &[T]) -> Vec<T>
