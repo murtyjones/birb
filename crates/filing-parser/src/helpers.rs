@@ -142,6 +142,24 @@ where
     }
     false
 }
+pub fn bfs_find_node<CB>(handle: Handle, mut cb: CB) -> Option<Handle>
+where
+    CB: (Fn(Handle) -> Option<Handle>),
+{
+    let mut q = vec![handle];
+    while q.len() > 0 {
+        let node = q.remove(0);
+        if let Some(h) = cb(Rc::clone(&node)) {
+            return Some(h);
+        }
+        // Prepend the child's elements to the queue. This is less
+        // ideal than appending them because it requires more memory,
+        // but we need to parse the document in order (IE from top to
+        // bottom), so this approach is needed for now.
+        q = prepend(q, &mut get_children(&node));
+    }
+    None
+}
 
 pub fn bfs_no_base_case<CB>(handle: Handle, mut cb: CB) -> ()
 where
