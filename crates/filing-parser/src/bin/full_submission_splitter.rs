@@ -81,7 +81,7 @@ fn parse_doc(handle: &Rc<Node>) -> Option<ParsedDocument> {
             );
 
             let type_node = bfs_find_node(Rc::clone(handle), find_type_node);
-
+            assert!(type_node.is_some(), "No type node found!");
             let type_node = &Rc::clone(&handle.children.borrow()[1]);
             let sequence_node = &type_node.children.borrow()[1];
             let filename_node = &sequence_node.children.borrow()[1];
