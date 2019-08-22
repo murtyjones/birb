@@ -2,6 +2,7 @@ extern crate filing_parser;
 
 use filing_parser::helpers::{bfs_find_node, tendril_to_string, write_to_file};
 use filing_parser::test_files::get_files;
+use std::fs::remove_dir;
 use std::rc::Rc;
 use xml5ever::driver::parse_document;
 use xml5ever::rcdom::{Handle, Node, NodeData, RcDom};
@@ -11,22 +12,22 @@ use xml5ever::tendril::TendrilSink;
 /// Splits a full submission text file into its parts
 fn main() {
     let test_files: Vec<&'static str> = vec![
-        //        include_str!("../../examples/10-Q/input/0001000623-17-000125.txt"),
-        //        include_str!("../../examples/10-Q/input/0001001288-16-000069.txt"),
+        include_str!("../../examples/10-Q/input/0001000623-17-000125.txt"),
+        include_str!("../../examples/10-Q/input/0001001288-16-000069.txt"),
         include_str!("../../examples/10-Q/input/0001004434-17-000011.txt"),
-        //        include_str!("../../examples/10-Q/input/0001004980-16-000073.txt"),
-        //        include_str!("../../examples/10-Q/input/0001015780-17-000075.txt"),
-        //        include_str!("../../examples/10-Q/input/0001079973-17-000690.txt"),
-        //        include_str!("../../examples/10-Q/input/0001185185-16-005721.txt"),
-        //        include_str!("../../examples/10-Q/input/0001185185-16-005747.txt"),
-        //        include_str!("../../examples/10-Q/input/0001193125-16-454777.txt"),
-        //        include_str!("../../examples/10-Q/input/0001193125-17-160261.txt"),
-        //        include_str!("../../examples/10-Q/input/0001193125-18-037381.txt"),
-        //        include_str!("../../examples/10-Q/input/0001213900-16-018375.txt"),
-        //        include_str!("../../examples/10-Q/input/0001437749-16-025027.txt"),
-        //        include_str!("../../examples/10-Q/input/0001437749-16-036870.txt"),
-        //        include_str!("../../examples/10-Q/input/0001493152-17-009297.txt"),
-        //        include_str!("../../examples/10-Q/input/0001564590-17-009385.txt"),
+        include_str!("../../examples/10-Q/input/0001004980-16-000073.txt"),
+        include_str!("../../examples/10-Q/input/0001015780-17-000075.txt"),
+        include_str!("../../examples/10-Q/input/0001079973-17-000690.txt"),
+        include_str!("../../examples/10-Q/input/0001185185-16-005721.txt"),
+        include_str!("../../examples/10-Q/input/0001185185-16-005747.txt"),
+        include_str!("../../examples/10-Q/input/0001193125-16-454777.txt"),
+        include_str!("../../examples/10-Q/input/0001193125-17-160261.txt"),
+        include_str!("../../examples/10-Q/input/0001193125-18-037381.txt"),
+        include_str!("../../examples/10-Q/input/0001213900-16-018375.txt"),
+        include_str!("../../examples/10-Q/input/0001437749-16-025027.txt"),
+        include_str!("../../examples/10-Q/input/0001437749-16-036870.txt"),
+        include_str!("../../examples/10-Q/input/0001493152-17-009297.txt"),
+        include_str!("../../examples/10-Q/input/0001564590-17-009385.txt"),
     ];
     for file_contents in test_files {
         let dom: RcDom = parse_document(RcDom::default(), Default::default()).one(&*file_contents);
@@ -80,25 +81,47 @@ fn parse_doc(handle: &Rc<Node>) -> Option<ParsedDocument> {
                 "Node should be a document element!"
             );
 
-            let type_node = bfs_find_node(Rc::clone(handle), find_type_node);
-            assert!(type_node.is_some(), "No type node found!");
-            let type_node = &Rc::clone(&handle.children.borrow()[1]);
-            let sequence_node = &type_node.children.borrow()[1];
-            let filename_node = &sequence_node.children.borrow()[1];
-            let description_node = &filename_node.children.borrow()[1];
-            let text_node = &description_node.children.borrow()[1];
+            let type_node =
+                bfs_find_node(Rc::clone(handle), |node: Handle| find_element(node, "TYPE"))
+                    .expect("No TYPE node found!");
+
+            let sequence_node = bfs_find_node(Rc::clone(handle), |node: Handle| {
+                find_element(node, "SEQUENCE")
+            })
+            .expect("No SEQUENCE node found!");
+
+            let filename_node = bfs_find_node(Rc::clone(handle), |node: Handle| {
+                find_element(node, "FILENAME")
+            })
+            .expect("No FILENAME node found!");
+
+            // There does not have to be a description node
+            let description_node = bfs_find_node(Rc::clone(handle), |node: Handle| {
+                find_element(node, "DESCRIPTION")
+            });
+
+            let description_contents = match description_node {
+                Some(d) => Some(get_node_contents_as_str(&d)),
+                None => None,
+            };
+
+            let text_node =
+                bfs_find_node(Rc::clone(handle), |node: Handle| find_element(node, "TEXT"))
+                    .expect("No TEXT node found!");
+
             Some(ParsedDocument {
-                type_: get_doc_type(type_node),
-                sequence: get_doc_sequence(sequence_node),
-                filename: get_doc_filename(filename_node),
-                description: get_doc_description(description_node),
-                text: get_doc_text(text_node),
+                type_: get_node_contents_as_str(&type_node),
+                sequence: get_node_contents_as_int(&sequence_node),
+                filename: get_node_contents_as_str(&filename_node),
+                description: description_contents,
+                text: get_text_node_children(&text_node),
             })
         }
         _ => None,
     }
 }
 
+#[derive(Debug)]
 pub struct ParsedDocument {
     /// The type of document (e.g. 10-Q). "type" is a Rust reserved keyword. Hence the underscore
     pub type_: String,
@@ -107,13 +130,9 @@ pub struct ParsedDocument {
     /// The filename of the document (e.g. d490575d10q.htm)
     pub filename: String,
     /// The SEC's description of the document (e.g. FORM 10-Q)
-    pub description: String,
+    pub description: Option<String>,
     /// The actual document contents
     pub text: String,
-}
-
-fn find_type_node(node: Handle) -> Option<Handle> {
-    find_element(node, "TYPE")
 }
 
 fn find_element(node: Handle, target_name: &'static str) -> Option<Handle> {
@@ -125,59 +144,37 @@ fn find_element(node: Handle, target_name: &'static str) -> Option<Handle> {
     None
 }
 
-fn get_doc_type(node: &Rc<Node>) -> String {
+fn get_node_contents_as_str(node: &Rc<Node>) -> String {
     if let NodeData::Element { ref name, .. } = node.data {
-        assert_eq!("TYPE", &name.local);
-        assert!(0 < node.children.borrow().len());
+        assert!(
+            0 < node.children.borrow().len(),
+            "Node should have children!"
+        );
         if let NodeData::Text { ref contents } = &node.children.borrow()[0].data {
             return String::from(tendril_to_string(contents).trim());
         }
-        panic!("Doc type not found! No text node.");
+        panic!("First child is not a text node!")
     }
-    panic!("Doc type not found!");
+    panic!("Wrong node type!")
 }
 
-fn get_doc_sequence(node: &Rc<Node>) -> i32 {
+fn get_node_contents_as_int(node: &Rc<Node>) -> i32 {
     if let NodeData::Element { ref name, .. } = node.data {
-        assert_eq!("SEQUENCE", &name.local);
-        assert!(0 < node.children.borrow().len());
+        assert!(
+            0 < node.children.borrow().len(),
+            "Node should have children!"
+        );
         if let NodeData::Text { ref contents } = &node.children.borrow()[0].data {
             let as_str = tendril_to_string(contents);
             let as_int: i32 = as_str.trim().parse().unwrap();
             return as_int;
         }
-        panic!("No sequence found!");
+        panic!("First child is not a text node!")
     }
-    panic!("No sequence found!");
+    panic!("Wrong node type!")
 }
 
-fn get_doc_filename(node: &Rc<Node>) -> String {
-    if let NodeData::Element { ref name, .. } = node.data {
-        assert_eq!("FILENAME", &name.local);
-        assert!(0 < node.children.borrow().len());
-        if let NodeData::Text { ref contents } = &node.children.borrow()[0].data {
-            let as_str = String::from(tendril_to_string(contents).trim());
-            return as_str;
-        }
-        panic!("No filename found!");
-    }
-    panic!("No filename found!");
-}
-
-fn get_doc_description(node: &Rc<Node>) -> String {
-    if let NodeData::Element { ref name, .. } = node.data {
-        assert_eq!("DESCRIPTION", &name.local);
-        assert!(0 < node.children.borrow().len());
-        if let NodeData::Text { ref contents } = &node.children.borrow()[0].data {
-            let as_str = String::from(tendril_to_string(contents).trim());
-            return as_str;
-        }
-        panic!("No description found!");
-    }
-    panic!("No description found!");
-}
-
-fn ser(node: &Rc<Node>) -> String {
+fn serialize_node(node: &Rc<Node>) -> String {
     let mut bytes = vec![];
     xml5ever::serialize::serialize(
         &mut bytes,
@@ -185,10 +182,10 @@ fn ser(node: &Rc<Node>) -> String {
         xml5ever::serialize::SerializeOpts::default(),
     )
     .expect("Couldn't write to file.");
-    return String::from_utf8(bytes).unwrap();
+    return String::from_utf8(bytes).unwrap().trim().to_string();
 }
 
-fn get_doc_text(node: &Rc<Node>) -> String {
+fn get_text_node_children(node: &Rc<Node>) -> String {
     if let xml5ever::rcdom::NodeData::Element { ref name, .. } = node.data {
         assert_eq!(
             "TEXT", &name.local,
@@ -198,7 +195,7 @@ fn get_doc_text(node: &Rc<Node>) -> String {
             0 < node.children.borrow().len(),
             "Text node had no children!"
         );
-        return ser(&node);
+        return serialize_node(&node);
     }
 
     panic!("No text found! Expected node was not an Element.");
