@@ -28,6 +28,7 @@ fn main() {
         include_str!("../../examples/10-Q/input/0001437749-16-036870.txt"),
         include_str!("../../examples/10-Q/input/0001493152-17-009297.txt"),
         include_str!("../../examples/10-Q/input/0001564590-17-009385.txt"),
+        include_str!("../../examples/10-Q/input/0001144204-16-084770.txt"),
     ];
     for file_contents in test_files {
         let dom: RcDom = parse_document(RcDom::default(), Default::default()).one(&*file_contents);
@@ -51,8 +52,9 @@ fn main() {
                 write_to_file(
                     &String::from(format!(
                         "/Users/murtyjones/Desktop/example-parsed/{}",
-                        d.filename
+                        d.filename,
                     )),
+                    "",
                     d.text.as_bytes().to_owned(),
                 )
                 .expect("Couldn't write to file!");

@@ -7,6 +7,8 @@ extern crate lazy_static;
 extern crate mac;
 #[macro_use]
 extern crate failure;
+extern crate bb;
+extern crate flate2;
 extern crate rand;
 
 pub mod excluded_companies;

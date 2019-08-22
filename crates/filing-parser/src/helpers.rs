@@ -71,10 +71,15 @@ pub fn tendril_to_string(text: &RefCell<StrTendril>) -> String {
     converted
 }
 
-pub fn write_to_file(file_path: &String, data: Vec<u8>) -> std::io::Result<()> {
-    let absolute_path = get_abs_path(file_path);
+pub fn write_to_file(
+    file_path: &String,
+    extension: &'static str,
+    data: Vec<u8>,
+) -> std::io::Result<()> {
+    let path = std::path::PathBuf::from(format!("{}{}", file_path, extension));
     let mut pos = 0;
-    let mut buffer = File::create(absolute_path).expect("Couldn't make file");
+    println!("Path: {:?}", path);
+    let mut buffer = File::create(path).expect("Couldn't make file");
 
     while pos < data.len() {
         let bytes_written = buffer.write(&data[pos..])?;
@@ -120,7 +125,7 @@ where
         if let Some(h) = cb(Rc::clone(&node)) {
             return Some(h);
         }
-      q.append(&mut get_children(&node));
+        q.append(&mut get_children(&node));
     }
     None
 }
