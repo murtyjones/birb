@@ -2,6 +2,7 @@ extern crate filing_parser;
 
 use filing_parser::helpers::{bfs_find_node, tendril_to_string, write_to_file};
 use filing_parser::test_files::get_files;
+use regex::{Regex, RegexBuilder};
 use std::fs::remove_dir;
 use std::rc::Rc;
 use xml5ever::driver::parse_document;
@@ -12,25 +13,27 @@ use xml5ever::tendril::TendrilSink;
 /// Splits a full submission text file into its parts
 fn main() {
     let test_files: Vec<&'static str> = vec![
-        include_str!("../../examples/10-Q/input/0001000623-17-000125.txt"),
+        //        include_str!("../../examples/10-Q/input/0001000623-17-000125.txt"),
         include_str!("../../examples/10-Q/input/0001001288-16-000069.txt"),
-        include_str!("../../examples/10-Q/input/0001004434-17-000011.txt"),
-        include_str!("../../examples/10-Q/input/0001004980-16-000073.txt"),
-        include_str!("../../examples/10-Q/input/0001015780-17-000075.txt"),
-        include_str!("../../examples/10-Q/input/0001079973-17-000690.txt"),
-        include_str!("../../examples/10-Q/input/0001185185-16-005721.txt"),
-        include_str!("../../examples/10-Q/input/0001185185-16-005747.txt"),
-        include_str!("../../examples/10-Q/input/0001193125-16-454777.txt"),
-        include_str!("../../examples/10-Q/input/0001193125-17-160261.txt"),
-        include_str!("../../examples/10-Q/input/0001193125-18-037381.txt"),
-        include_str!("../../examples/10-Q/input/0001213900-16-018375.txt"),
-        include_str!("../../examples/10-Q/input/0001437749-16-025027.txt"),
-        include_str!("../../examples/10-Q/input/0001437749-16-036870.txt"),
-        include_str!("../../examples/10-Q/input/0001493152-17-009297.txt"),
-        include_str!("../../examples/10-Q/input/0001564590-17-009385.txt"),
-        include_str!("../../examples/10-Q/input/0001144204-16-084770.txt"),
+        //        include_str!("../../examples/10-Q/input/0001004434-17-000011.txt"),
+        //        include_str!("../../examples/10-Q/input/0001004980-16-000073.txt"),
+        //        include_str!("../../examples/10-Q/input/0001015780-17-000075.txt"),
+        //        include_str!("../../examples/10-Q/input/0001079973-17-000690.txt"),
+        //        include_str!("../../examples/10-Q/input/0001185185-16-005721.txt"),
+        //        include_str!("../../examples/10-Q/input/0001185185-16-005747.txt"),
+        //        include_str!("../../examples/10-Q/input/0001193125-16-454777.txt"),
+        //        include_str!("../../examples/10-Q/input/0001193125-17-160261.txt"),
+        //        include_str!("../../examples/10-Q/input/0001193125-18-037381.txt"),
+        //        include_str!("../../examples/10-Q/input/0001213900-16-018375.txt"),
+        //        include_str!("../../examples/10-Q/input/0001437749-16-025027.txt"),
+        //        include_str!("../../examples/10-Q/input/0001437749-16-036870.txt"),
+        //        include_str!("../../examples/10-Q/input/0001493152-17-009297.txt"),
+        //        include_str!("../../examples/10-Q/input/0001564590-17-009385.txt"),
+        //        include_str!("../../examples/10-Q/input/0001144204-16-084770.txt"),
     ];
     for file_contents in test_files {
+        let after = REGEX.replace_all(file_contents, "$m/$d/$y");
+
         let dom: RcDom = parse_document(RcDom::default(), Default::default()).one(&*file_contents);
         let document: &Rc<Node> = &dom.document;
         assert_eq!(
@@ -102,21 +105,32 @@ fn parse_doc(handle: &Rc<Node>) -> Option<ParsedDocument> {
                 find_element(node, "DESCRIPTION")
             });
 
-            let description_contents = match description_node {
-                Some(d) => Some(get_node_contents_as_str(&d)),
-                None => None,
-            };
-
             let text_node =
                 bfs_find_node(Rc::clone(handle), |node: Handle| find_element(node, "TEXT"))
                     .expect("No TEXT node found!");
 
+            let type_contents = get_node_contents_as_str(&type_node);
+            let description_contents = match description_node {
+                Some(d) => Some(get_node_contents_as_str(&d)),
+                None => None,
+            };
+            let sequence_contents = get_node_contents_as_int(&sequence_node);
+            let filename_contents = get_node_contents_as_str(&filename_node);
+            let mut text_contents = get_text_node_children(&text_node);
+
+            if type_contents.contains("GRAPHIC") {
+                panic!("{:?}", text_node);
+                let newline_offset = text_contents.find('\n').unwrap_or(text_contents.len());
+                // Replace the range up until the newline from the string
+                text_contents.replace_range(..newline_offset, "");
+            }
+
             Some(ParsedDocument {
-                type_: get_node_contents_as_str(&type_node),
-                sequence: get_node_contents_as_int(&sequence_node),
-                filename: get_node_contents_as_str(&filename_node),
+                type_: type_contents,
+                sequence: sequence_contents,
+                filename: filename_contents,
                 description: description_contents,
-                text: get_text_node_children(&text_node),
+                text: text_contents,
             })
         }
         _ => None,
