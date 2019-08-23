@@ -4,6 +4,7 @@ extern crate lazy_static;
 
 use filing_parser::helpers::{bfs_find_node, tendril_to_string, write_to_file};
 use filing_parser::test_files::get_files;
+use filing_parser::uu;
 use regex::{Captures, Regex, RegexBuilder};
 use std::fs::remove_dir;
 use std::rc::Rc;
@@ -44,23 +45,23 @@ lazy_static! {
 /// Splits a full submission text file into its parts
 fn main() {
     let test_files: Vec<&'static str> = vec![
-        //        include_str!("../../examples/10-Q/input/0001000623-17-000125.txt"),
-        //        include_str!("../../examples/10-Q/input/0001001288-16-000069.txt"),
+        include_str!("../../examples/10-Q/input/0001000623-17-000125.txt"),
+        include_str!("../../examples/10-Q/input/0001001288-16-000069.txt"),
         include_str!("../../examples/10-Q/input/0001004434-17-000011.txt"),
-        //        include_str!("../../examples/10-Q/input/0001004980-16-000073.txt"),
-        //        include_str!("../../examples/10-Q/input/0001015780-17-000075.txt"),
-        //        include_str!("../../examples/10-Q/input/0001079973-17-000690.txt"),
-        //        include_str!("../../examples/10-Q/input/0001185185-16-005721.txt"),
-        //        include_str!("../../examples/10-Q/input/0001185185-16-005747.txt"),
-        //        include_str!("../../examples/10-Q/input/0001193125-16-454777.txt"),
-        //        include_str!("../../examples/10-Q/input/0001193125-17-160261.txt"),
-        //        include_str!("../../examples/10-Q/input/0001193125-18-037381.txt"),
-        //        include_str!("../../examples/10-Q/input/0001213900-16-018375.txt"),
-        //        include_str!("../../examples/10-Q/input/0001437749-16-025027.txt"),
-        //        include_str!("../../examples/10-Q/input/0001437749-16-036870.txt"),
-        //        include_str!("../../examples/10-Q/input/0001493152-17-009297.txt"),
-        //        include_str!("../../examples/10-Q/input/0001564590-17-009385.txt"),
-        //        include_str!("../../examples/10-Q/input/0001144204-16-084770.txt"),
+        include_str!("../../examples/10-Q/input/0001004980-16-000073.txt"),
+        include_str!("../../examples/10-Q/input/0001015780-17-000075.txt"),
+        include_str!("../../examples/10-Q/input/0001079973-17-000690.txt"),
+        include_str!("../../examples/10-Q/input/0001185185-16-005721.txt"),
+        include_str!("../../examples/10-Q/input/0001185185-16-005747.txt"),
+        include_str!("../../examples/10-Q/input/0001193125-16-454777.txt"),
+        include_str!("../../examples/10-Q/input/0001193125-17-160261.txt"),
+        include_str!("../../examples/10-Q/input/0001193125-18-037381.txt"),
+        include_str!("../../examples/10-Q/input/0001213900-16-018375.txt"),
+        include_str!("../../examples/10-Q/input/0001437749-16-025027.txt"),
+        include_str!("../../examples/10-Q/input/0001437749-16-036870.txt"),
+        include_str!("../../examples/10-Q/input/0001493152-17-009297.txt"),
+        include_str!("../../examples/10-Q/input/0001564590-17-009385.txt"),
+        include_str!("../../examples/10-Q/input/0001144204-16-084770.txt"),
     ];
     for file_contents in test_files {
         let file_contents = escape_graphic_node_contents(file_contents);
@@ -73,7 +74,7 @@ fn main() {
             "There should only be one main node!"
         );
         let main_node = &document.children.borrow()[0];
-        assert_main_node_is_SEC_DOCUMENT(main_node);
+        assert_main_node_is_sec_document(main_node);
         let parsed_documents = split_document_into_documents(main_node);
         let unescaped_parsed_documents = unescape_parsed_documents(parsed_documents);
 
@@ -85,6 +86,7 @@ fn unescape_parsed_documents(parsed_docs: Vec<ParsedDocument>) -> Vec<ParsedDocu
     let mut escaped_parsed_docs = vec![];
     for mut doc in parsed_docs {
         doc.text = String::from(unescape_graphic_node_contents(&doc.text));
+        doc.text = String::from(fix_broken_graphic_node_contents(&doc.text));
         escaped_parsed_docs.push(doc);
     }
     escaped_parsed_docs
@@ -95,6 +97,7 @@ fn split_document_into_documents(main_node: &Handle) -> Vec<ParsedDocument> {
         .children
         .borrow()
         .iter()
+        // Filter to only the parsed documents that succeeded:
         .filter_map(|node| parse_doc(node))
         .collect::<Vec<ParsedDocument>>()
 }
@@ -132,21 +135,48 @@ fn unescape_graphic_node_contents(contents: &str) -> String {
     )
 }
 
+/// If the GRAPHIC text content ends like this:
+/// ```
+/// 45NQ8LF7-GD6;5NU:MFW=@@T( #L!
+///
+/// end
+/// ```
+///
+/// It should end like this:
+/// ```
+/// 45NQ8LF7-GD6;5NU:MFW=@@T( #L!
+///
+/// end
+/// ```
+fn fix_broken_graphic_node_contents(contents: &str) -> String {
+    contents.replace("\n\nend", "\n`\nend")
+}
+
 fn write_parsed_docs_to_example_folder(parsed_documents: Vec<ParsedDocument>) {
     for doc in parsed_documents {
+        // TODO use a match statement here
+        let mut contents_for_file = Vec::new();
+        if doc.type_ == "GRAPHIC" {
+            //            panic!("{:?}", doc.text);
+            contents_for_file = uu::decode_uu(&*doc.text)
+                .expect("Couldn't uudecode document contents!")
+                .0;
+        } else {
+            contents_for_file = doc.text.as_bytes().to_owned();
+        }
         write_to_file(
             &String::from(format!(
                 "/Users/murtyjones/Desktop/example-parsed/{}",
                 doc.filename,
             )),
             "",
-            doc.text.as_bytes().to_owned(),
+            contents_for_file,
         )
         .expect("Couldn't write to file!");
     }
 }
 
-fn assert_main_node_is_SEC_DOCUMENT(handle: &Handle) {
+fn assert_main_node_is_sec_document(handle: &Handle) {
     match handle.data {
         NodeData::Element { ref name, .. } => {
             assert!("SEC-DOCUMENT" == &name.local, "First node in the document is not named '<SEC-DOCUMENT>'!");
@@ -360,5 +390,20 @@ mod test {
         "#;
         let r = unescape_graphic_node_contents(contents);
         assert_eq!(expected_contents, r);
+    }
+
+    #[test]
+    fn test_fix_broken_graphic_node_contents() {
+        let contents = r#"=HHH **** "BBB@ HHHH **** "BBB@ HHHH _]D!
+
+end"#;
+        let result = fix_broken_graphic_node_contents(contents);
+
+        assert_eq!(
+            r#"=HHH **** "BBB@ HHHH **** "BBB@ HHHH _]D!
+`
+end"#,
+            result
+        )
     }
 }
