@@ -13,14 +13,26 @@ use xml5ever::serialize::serialize;
 use xml5ever::tendril::TendrilSink;
 
 lazy_static! {
-    static ref PATTERN: &'static str = r"
-        (?:<TYPE>GRAPHIC)
-        .*?
+    static ref ESCAPE_GRAPHIC_PATTERN: &'static str = r"
+       (
+            (?:<TYPE>GRAPHIC)
+            .*?
+        )
         (?:<TEXT>)
         (.*?)
         (?:</TEXT>)
     ";
-    pub static ref REGEX: Regex = RegexBuilder::new(&PATTERN)
+    pub static ref ESCAPE_GRAPHIC_REGEX: Regex = RegexBuilder::new(&ESCAPE_GRAPHIC_PATTERN)
+        .case_insensitive(true)
+        .multi_line(true)
+        .ignore_whitespace(true)
+        .dot_matches_new_line(true)
+        .build()
+        .expect("Couldn't build graph contents regex!");
+    static ref UNESCAPE_GRAPHIC_PATTERN: &'static str = r"
+       (.*)
+    ";
+    pub static ref UNESCAPE_GRAPHIC_REGEX: Regex = RegexBuilder::new(&UNESCAPE_GRAPHIC_PATTERN)
         .case_insensitive(true)
         .multi_line(true)
         .ignore_whitespace(true)
@@ -33,8 +45,8 @@ lazy_static! {
 fn main() {
     let test_files: Vec<&'static str> = vec![
         //        include_str!("../../examples/10-Q/input/0001000623-17-000125.txt"),
-        include_str!("../../examples/10-Q/input/0001001288-16-000069.txt"),
-        //        include_str!("../../examples/10-Q/input/0001004434-17-000011.txt"),
+        //        include_str!("../../examples/10-Q/input/0001001288-16-000069.txt"),
+        include_str!("../../examples/10-Q/input/0001004434-17-000011.txt"),
         //        include_str!("../../examples/10-Q/input/0001004980-16-000073.txt"),
         //        include_str!("../../examples/10-Q/input/0001015780-17-000075.txt"),
         //        include_str!("../../examples/10-Q/input/0001079973-17-000690.txt"),
@@ -65,14 +77,14 @@ fn main() {
         let parsed_documents = split_document_into_documents(main_node);
         let unescaped_parsed_documents = unescape_parsed_documents(parsed_documents);
 
-        write_parsed_docs_to_example_folder(parsed_documents);
+        write_parsed_docs_to_example_folder(unescaped_parsed_documents);
     }
 }
 
 fn unescape_parsed_documents(parsed_docs: Vec<ParsedDocument>) -> Vec<ParsedDocument> {
     let mut escaped_parsed_docs = vec![];
     for mut doc in parsed_docs {
-        doc.text = String::from(unescape_graphic_node_contents(&d.text));
+        doc.text = String::from(unescape_graphic_node_contents(&doc.text));
         escaped_parsed_docs.push(doc);
     }
     escaped_parsed_docs
@@ -84,20 +96,40 @@ fn split_document_into_documents(main_node: &Handle) -> Vec<ParsedDocument> {
         .borrow()
         .iter()
         .filter_map(|node| parse_doc(node))
-        //        .map(|node| parse_doc(node))
-        //        .filter(|maybe_parsed| maybe_parsed.is_some())
-        //        .map(|parsed| parsed.unwrap())
         .collect::<Vec<ParsedDocument>>()
 }
 
-fn escape_graphic_node_contents(contents: &str) -> &str {
-    REGEX.replace_all(contents, |caps: &Captures| caps[1].replace("<", "&lt;"));
-    contents
+fn escape_graphic_node_contents(contents: &str) -> String {
+    String::from(
+        ESCAPE_GRAPHIC_REGEX.replace_all(contents, |caps: &Captures| {
+            format!(
+                r#"{}<TEXT>{}</TEXT>"#,
+                &caps[1],
+                &caps[2]
+                    .replace("&", "&amp;")
+                    .replace("<", "&lt;")
+                    .replace("\"", "&quot;")
+                    .replace("'", "&apos;")
+                    .replace(">", "&gt;")
+            )
+        }),
+    )
 }
 
-fn unescape_graphic_node_contents(contents: &str) -> &str {
-    REGEX.replace_all(contents, |caps: &Captures| caps[1].replace("&lt;", "<"));
-    contents
+fn unescape_graphic_node_contents(contents: &str) -> String {
+    String::from(
+        UNESCAPE_GRAPHIC_REGEX.replace_all(contents, |caps: &Captures| {
+            format!(
+                "{}",
+                &caps[0]
+                    .replace("&amp;", "&")
+                    .replace("&lt;", "<")
+                    .replace("&quot;", "\"")
+                    .replace("&apos;", "'")
+                    .replace("&gt;", ">")
+            )
+        }),
+    )
 }
 
 fn write_parsed_docs_to_example_folder(parsed_documents: Vec<ParsedDocument>) {
@@ -256,4 +288,77 @@ fn get_text_node_children(node: &Rc<Node>) -> String {
     }
 
     panic!("No text found! Expected node was not an Element.");
+}
+
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_escape_graphic_node_contents() {
+        let contents = r#"
+        some
+        other
+        unimportant
+        stuff
+<TYPE>GRAPHIC
+<SEQUENCE>6
+<FILENAME>image1.gif
+<DESCRIPTION>MATERIAL WEAKNESS REMEDIATION GRAPHIC
+<TEXT><</TEXT>
+    some
+        nonsense
+            after the fact
+        "#;
+
+        let expected_contents = r#"
+        some
+        other
+        unimportant
+        stuff
+<TYPE>GRAPHIC
+<SEQUENCE>6
+<FILENAME>image1.gif
+<DESCRIPTION>MATERIAL WEAKNESS REMEDIATION GRAPHIC
+<TEXT>&lt;</TEXT>
+    some
+        nonsense
+            after the fact
+        "#;
+        let r = escape_graphic_node_contents(contents);
+        assert_eq!(expected_contents, r);
+    }
+
+    #[test]
+    fn test_unescape_graphic_node_contents() {
+        let contents = r#"
+        some
+        other
+        unimportant
+        stuff
+<TYPE>GRAPHIC
+<SEQUENCE>6
+<FILENAME>image1.gif
+<DESCRIPTION>MATERIAL WEAKNESS REMEDIATION GRAPHIC
+<TEXT>&lt;</TEXT>
+    some
+        nonsense
+            after the fact
+        "#;
+        let expected_contents = r#"
+        some
+        other
+        unimportant
+        stuff
+<TYPE>GRAPHIC
+<SEQUENCE>6
+<FILENAME>image1.gif
+<DESCRIPTION>MATERIAL WEAKNESS REMEDIATION GRAPHIC
+<TEXT><</TEXT>
+    some
+        nonsense
+            after the fact
+        "#;
+        let r = unescape_graphic_node_contents(contents);
+        assert_eq!(expected_contents, r);
+    }
 }
