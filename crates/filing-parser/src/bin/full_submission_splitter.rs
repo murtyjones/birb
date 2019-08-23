@@ -3,15 +3,28 @@ extern crate filing_parser;
 extern crate lazy_static;
 
 use filing_parser::helpers::{bfs_find_node, tendril_to_string, write_to_file};
-use filing_parser::test_files::get_files;
 use filing_parser::uu;
 use regex::{Captures, Regex, RegexBuilder};
-use std::fs::remove_dir;
 use std::rc::Rc;
 use xml5ever::driver::parse_document;
 use xml5ever::rcdom::{Handle, Node, NodeData, RcDom};
 use xml5ever::serialize::serialize;
 use xml5ever::tendril::TendrilSink;
+
+
+#[derive(Debug)]
+pub struct ParsedDocument {
+  /// The type of document (e.g. 10-Q). "type" is a Rust reserved keyword. Hence the underscore
+  pub type_: String,
+  /// The sequence of the document for display purposes. 1 is the most important
+  pub sequence: i32,
+  /// The filename of the document (e.g. d490575d10q.htm)
+  pub filename: String,
+  /// The SEC's description of the document (e.g. FORM 10-Q)
+  pub description: Option<String>,
+  /// The actual document contents
+  pub text: String,
+}
 
 lazy_static! {
     static ref ESCAPE_GRAPHIC_PATTERN: &'static str = r"
@@ -47,22 +60,22 @@ lazy_static! {
 fn main() {
     let test_files: Vec<&'static str> = vec![
         include_str!("../../examples/10-Q/input/0001000623-17-000125.txt"),
-        include_str!("../../examples/10-Q/input/0001001288-16-000069.txt"),
-        include_str!("../../examples/10-Q/input/0001004434-17-000011.txt"),
-        include_str!("../../examples/10-Q/input/0001004980-16-000073.txt"),
-        include_str!("../../examples/10-Q/input/0001015780-17-000075.txt"),
-        include_str!("../../examples/10-Q/input/0001079973-17-000690.txt"),
-        include_str!("../../examples/10-Q/input/0001185185-16-005721.txt"),
-        include_str!("../../examples/10-Q/input/0001185185-16-005747.txt"),
-        include_str!("../../examples/10-Q/input/0001193125-16-454777.txt"),
-        include_str!("../../examples/10-Q/input/0001193125-17-160261.txt"),
-        include_str!("../../examples/10-Q/input/0001193125-18-037381.txt"),
-        include_str!("../../examples/10-Q/input/0001213900-16-018375.txt"),
-        include_str!("../../examples/10-Q/input/0001437749-16-025027.txt"),
-        include_str!("../../examples/10-Q/input/0001437749-16-036870.txt"),
-        include_str!("../../examples/10-Q/input/0001493152-17-009297.txt"),
-        include_str!("../../examples/10-Q/input/0001564590-17-009385.txt"),
-        include_str!("../../examples/10-Q/input/0001144204-16-084770.txt"),
+//        include_str!("../../examples/10-Q/input/0001001288-16-000069.txt"),
+//        include_str!("../../examples/10-Q/input/0001004434-17-000011.txt"),
+//        include_str!("../../examples/10-Q/input/0001004980-16-000073.txt"),
+//        include_str!("../../examples/10-Q/input/0001015780-17-000075.txt"),
+//        include_str!("../../examples/10-Q/input/0001079973-17-000690.txt"),
+//        include_str!("../../examples/10-Q/input/0001185185-16-005721.txt"),
+//        include_str!("../../examples/10-Q/input/0001185185-16-005747.txt"),
+//        include_str!("../../examples/10-Q/input/0001193125-16-454777.txt"),
+//        include_str!("../../examples/10-Q/input/0001193125-17-160261.txt"),
+//        include_str!("../../examples/10-Q/input/0001193125-18-037381.txt"),
+//        include_str!("../../examples/10-Q/input/0001213900-16-018375.txt"),
+//        include_str!("../../examples/10-Q/input/0001437749-16-025027.txt"),
+//        include_str!("../../examples/10-Q/input/0001437749-16-036870.txt"),
+//        include_str!("../../examples/10-Q/input/0001493152-17-009297.txt"),
+//        include_str!("../../examples/10-Q/input/0001564590-17-009385.txt"),
+//        include_str!("../../examples/10-Q/input/0001144204-16-084770.txt"),
     ];
     for file_contents in test_files {
         let file_contents = escape_graphic_node_contents(file_contents);
@@ -166,15 +179,12 @@ fn fix_broken_graphic_node_contents(contents: &str) -> String {
 /// and writes them to an example folder locally.
 fn write_parsed_docs_to_example_folder(parsed_documents: Vec<ParsedDocument>) {
     for doc in parsed_documents {
-        // TODO use a match statement here
-        let mut contents_for_file = Vec::new();
+        let mut contents_for_file = doc.text.as_bytes().to_owned();
         if doc.type_ == "GRAPHIC" {
             //            panic!("{:?}", doc.text);
             contents_for_file = uu::decode_uu(&*doc.text)
                 .expect("Couldn't uudecode document contents!")
                 .0;
-        } else {
-            contents_for_file = doc.text.as_bytes().to_owned();
         }
         write_to_file(
             &String::from(format!(
@@ -242,7 +252,7 @@ fn parse_doc(handle: &Rc<Node>) -> Option<ParsedDocument> {
             };
             let sequence_contents = get_node_contents_as_int(&sequence_node);
             let filename_contents = get_node_contents_as_str(&filename_node);
-            let mut text_contents = get_text_node_children(&text_node);
+            let text_contents = get_text_node_children(&text_node);
 
             Some(ParsedDocument {
                 type_: type_contents,
@@ -256,20 +266,6 @@ fn parse_doc(handle: &Rc<Node>) -> Option<ParsedDocument> {
     }
 }
 
-#[derive(Debug)]
-pub struct ParsedDocument {
-    /// The type of document (e.g. 10-Q). "type" is a Rust reserved keyword. Hence the underscore
-    pub type_: String,
-    /// The sequence of the document for display purposes. 1 is the most important
-    pub sequence: i32,
-    /// The filename of the document (e.g. d490575d10q.htm)
-    pub filename: String,
-    /// The SEC's description of the document (e.g. FORM 10-Q)
-    pub description: Option<String>,
-    /// The actual document contents
-    pub text: String,
-}
-
 fn find_element(node: Handle, target_name: &'static str) -> Option<Handle> {
     if let NodeData::Element { ref name, .. } = node.data {
         if &name.local == target_name {
@@ -280,7 +276,7 @@ fn find_element(node: Handle, target_name: &'static str) -> Option<Handle> {
 }
 
 fn get_node_contents_as_str(node: &Rc<Node>) -> String {
-    if let NodeData::Element { ref name, .. } = node.data {
+    if let NodeData::Element { .. } = node.data {
         assert!(
             0 < node.children.borrow().len(),
             "Node should have children!"
@@ -294,7 +290,7 @@ fn get_node_contents_as_str(node: &Rc<Node>) -> String {
 }
 
 fn get_node_contents_as_int(node: &Rc<Node>) -> i32 {
-    if let NodeData::Element { ref name, .. } = node.data {
+    if let NodeData::Element { .. } = node.data {
         assert!(
             0 < node.children.borrow().len(),
             "Node should have children!"
@@ -311,7 +307,7 @@ fn get_node_contents_as_int(node: &Rc<Node>) -> i32 {
 
 fn serialize_node(node: &Rc<Node>) -> String {
     let mut bytes = vec![];
-    xml5ever::serialize::serialize(
+    serialize(
         &mut bytes,
         node,
         xml5ever::serialize::SerializeOpts::default(),
@@ -337,7 +333,8 @@ fn get_text_node_children(node: &Rc<Node>) -> String {
 }
 
 mod test {
-    use super::*;
+  #[test]
+    use super::{escape_graphic_node_contents,unescape_node_contents,fix_broken_graphic_node_contents};
 
     #[test]
     fn test_escape_graphic_node_contents() {
