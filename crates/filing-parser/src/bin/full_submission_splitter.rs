@@ -42,7 +42,8 @@ lazy_static! {
         .expect("Couldn't build graph contents regex!");
 }
 
-/// Splits a full submission text file into its parts
+/// For now, iterates through our list of full submission ttext files and
+/// splits each into its seperate parts, then writes to disk.
 fn main() {
     let test_files: Vec<&'static str> = vec![
         include_str!("../../examples/10-Q/input/0001000623-17-000125.txt"),
@@ -73,27 +74,34 @@ fn main() {
             document.children.borrow().len(),
             "There should only be one main node!"
         );
-        let main_node = &document.children.borrow()[0];
-        assert_main_node_is_sec_document(main_node);
-        let parsed_documents = split_document_into_documents(main_node);
+        let sec_document_node = &document.children.borrow()[0];
+        assert_sec_document_node_is_sec_document(sec_document_node);
+        let parsed_documents = split_document_into_documents(sec_document_node);
         let unescaped_parsed_documents = unescape_parsed_documents(parsed_documents);
 
         write_parsed_docs_to_example_folder(unescaped_parsed_documents);
     }
 }
 
+/// Applies the unescape logic to all the GRAPHIC documents, then returns all parsed documents.
 fn unescape_parsed_documents(parsed_docs: Vec<ParsedDocument>) -> Vec<ParsedDocument> {
     let mut escaped_parsed_docs = vec![];
     for mut doc in parsed_docs {
-        doc.text = String::from(unescape_graphic_node_contents(&doc.text));
-        doc.text = String::from(fix_broken_graphic_node_contents(&doc.text));
+        if doc.type_ == "GRAPHIC" {
+            doc.text = String::from(unescape_node_contents(&doc.text));
+            doc.text = String::from(fix_broken_graphic_node_contents(&doc.text));
+        }
         escaped_parsed_docs.push(doc);
     }
     escaped_parsed_docs
 }
 
-fn split_document_into_documents(main_node: &Handle) -> Vec<ParsedDocument> {
-    main_node
+/// Takes the <SEC-DOCUMENT> node of the document and tries to parse its children
+/// into seperate documents. Most of its children are <DOCUMENT> nodes, which
+/// should be parsable. Some however are things like <SEC-HEADER>, which is not
+/// a document. Hence the filter_map.
+fn split_document_into_documents(sec_document_node: &Handle) -> Vec<ParsedDocument> {
+    sec_document_node
         .children
         .borrow()
         .iter()
@@ -102,6 +110,7 @@ fn split_document_into_documents(main_node: &Handle) -> Vec<ParsedDocument> {
         .collect::<Vec<ParsedDocument>>()
 }
 
+/// Escape's a node's contents so that it can be correctly parsed as XML.
 fn escape_graphic_node_contents(contents: &str) -> String {
     String::from(
         ESCAPE_GRAPHIC_REGEX.replace_all(contents, |caps: &Captures| {
@@ -119,7 +128,8 @@ fn escape_graphic_node_contents(contents: &str) -> String {
     )
 }
 
-fn unescape_graphic_node_contents(contents: &str) -> String {
+/// Unescape's the node's contents that were previously escaped.
+fn unescape_node_contents(contents: &str) -> String {
     String::from(
         UNESCAPE_GRAPHIC_REGEX.replace_all(contents, |caps: &Captures| {
             format!(
@@ -145,13 +155,15 @@ fn unescape_graphic_node_contents(contents: &str) -> String {
 /// It should end like this:
 /// ```
 /// 45NQ8LF7-GD6;5NU:MFW=@@T( #L!
-///
+/// `
 /// end
 /// ```
 fn fix_broken_graphic_node_contents(contents: &str) -> String {
     contents.replace("\n\nend", "\n`\nend")
 }
 
+/// Converts docs' contents to bytes (which may include uudecoding)
+/// and writes them to an example folder locally.
 fn write_parsed_docs_to_example_folder(parsed_documents: Vec<ParsedDocument>) {
     for doc in parsed_documents {
         // TODO use a match statement here
@@ -176,7 +188,9 @@ fn write_parsed_docs_to_example_folder(parsed_documents: Vec<ParsedDocument>) {
     }
 }
 
-fn assert_main_node_is_sec_document(handle: &Handle) {
+/// Ensures that we grabbed the <SEC-DOCUMENT> node, which we need
+/// to use as a base to parse any document.
+fn assert_sec_document_node_is_sec_document(handle: &Handle) {
     match handle.data {
         NodeData::Element { ref name, .. } => {
             assert!("SEC-DOCUMENT" == &name.local, "First node in the document is not named '<SEC-DOCUMENT>'!");
@@ -185,6 +199,8 @@ fn assert_main_node_is_sec_document(handle: &Handle) {
     }
 }
 
+/// If a node is a <DOCUMENT>, parses its components into a ParsedDocument.
+/// If it's an <SEC-HEADER>, returns None
 fn parse_doc(handle: &Rc<Node>) -> Option<ParsedDocument> {
     match handle.data {
         NodeData::Element { ref name, .. } => {
@@ -359,7 +375,7 @@ mod test {
     }
 
     #[test]
-    fn test_unescape_graphic_node_contents() {
+    fn test_unescape_node_contents() {
         let contents = r#"
         some
         other
@@ -388,7 +404,7 @@ mod test {
         nonsense
             after the fact
         "#;
-        let r = unescape_graphic_node_contents(contents);
+        let r = unescape_node_contents(contents);
         assert_eq!(expected_contents, r);
     }
 
