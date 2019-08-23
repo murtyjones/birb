@@ -1,14 +1,33 @@
 extern crate filing_parser;
+#[macro_use]
+extern crate lazy_static;
 
 use filing_parser::helpers::{bfs_find_node, tendril_to_string, write_to_file};
 use filing_parser::test_files::get_files;
-use regex::{Regex, RegexBuilder};
+use regex::{Captures, Regex, RegexBuilder};
 use std::fs::remove_dir;
 use std::rc::Rc;
 use xml5ever::driver::parse_document;
 use xml5ever::rcdom::{Handle, Node, NodeData, RcDom};
 use xml5ever::serialize::serialize;
 use xml5ever::tendril::TendrilSink;
+
+lazy_static! {
+    static ref PATTERN: &'static str = r"
+        (?:<TYPE>GRAPHIC)
+        .*?
+        (?:<TEXT>)
+        (.*?)
+        (?:</TEXT>)
+    ";
+    pub static ref REGEX: Regex = RegexBuilder::new(&PATTERN)
+        .case_insensitive(true)
+        .multi_line(true)
+        .ignore_whitespace(true)
+        .dot_matches_new_line(true)
+        .build()
+        .expect("Couldn't build graph contents regex!");
+}
 
 /// Splits a full submission text file into its parts
 fn main() {
@@ -32,7 +51,7 @@ fn main() {
         //        include_str!("../../examples/10-Q/input/0001144204-16-084770.txt"),
     ];
     for file_contents in test_files {
-        let after = REGEX.replace_all(file_contents, "$m/$d/$y");
+        let file_contents = escape_graphic_node_contents(file_contents);
 
         let dom: RcDom = parse_document(RcDom::default(), Default::default()).one(&*file_contents);
         let document: &Rc<Node> = &dom.document;
@@ -42,31 +61,60 @@ fn main() {
             "There should only be one main node!"
         );
         let main_node = &document.children.borrow()[0];
-        assert_main_node_is_sec_document(main_node);
-        let parsed_documents = main_node
-            .children
-            .borrow()
-            .iter()
-            .map(|node| parse_doc(node))
-            .collect::<Vec<Option<ParsedDocument>>>();
+        assert_main_node_is_SEC_DOCUMENT(main_node);
+        let parsed_documents = split_document_into_documents(main_node);
+        let unescaped_parsed_documents = unescape_parsed_documents(parsed_documents);
 
-        for doc in &parsed_documents {
-            if let Some(d) = doc {
-                write_to_file(
-                    &String::from(format!(
-                        "/Users/murtyjones/Desktop/example-parsed/{}",
-                        d.filename,
-                    )),
-                    "",
-                    d.text.as_bytes().to_owned(),
-                )
-                .expect("Couldn't write to file!");
-            }
-        }
+        write_parsed_docs_to_example_folder(parsed_documents);
     }
 }
 
-fn assert_main_node_is_sec_document(handle: &Handle) {
+fn unescape_parsed_documents(parsed_docs: Vec<ParsedDocument>) -> Vec<ParsedDocument> {
+    let mut escaped_parsed_docs = vec![];
+    for mut doc in parsed_docs {
+        doc.text = String::from(unescape_graphic_node_contents(&d.text));
+        escaped_parsed_docs.push(doc);
+    }
+    escaped_parsed_docs
+}
+
+fn split_document_into_documents(main_node: &Handle) -> Vec<ParsedDocument> {
+    main_node
+        .children
+        .borrow()
+        .iter()
+        .filter_map(|node| parse_doc(node))
+        //        .map(|node| parse_doc(node))
+        //        .filter(|maybe_parsed| maybe_parsed.is_some())
+        //        .map(|parsed| parsed.unwrap())
+        .collect::<Vec<ParsedDocument>>()
+}
+
+fn escape_graphic_node_contents(contents: &str) -> &str {
+    REGEX.replace_all(contents, |caps: &Captures| caps[1].replace("<", "&lt;"));
+    contents
+}
+
+fn unescape_graphic_node_contents(contents: &str) -> &str {
+    REGEX.replace_all(contents, |caps: &Captures| caps[1].replace("&lt;", "<"));
+    contents
+}
+
+fn write_parsed_docs_to_example_folder(parsed_documents: Vec<ParsedDocument>) {
+    for doc in parsed_documents {
+        write_to_file(
+            &String::from(format!(
+                "/Users/murtyjones/Desktop/example-parsed/{}",
+                doc.filename,
+            )),
+            "",
+            doc.text.as_bytes().to_owned(),
+        )
+        .expect("Couldn't write to file!");
+    }
+}
+
+fn assert_main_node_is_SEC_DOCUMENT(handle: &Handle) {
     match handle.data {
         NodeData::Element { ref name, .. } => {
             assert!("SEC-DOCUMENT" == &name.local, "First node in the document is not named '<SEC-DOCUMENT>'!");
@@ -117,13 +165,6 @@ fn parse_doc(handle: &Rc<Node>) -> Option<ParsedDocument> {
             let sequence_contents = get_node_contents_as_int(&sequence_node);
             let filename_contents = get_node_contents_as_str(&filename_node);
             let mut text_contents = get_text_node_children(&text_node);
-
-            if type_contents.contains("GRAPHIC") {
-                panic!("{:?}", text_node);
-                let newline_offset = text_contents.find('\n').unwrap_or(text_contents.len());
-                // Replace the range up until the newline from the string
-                text_contents.replace_range(..newline_offset, "");
-            }
 
             Some(ParsedDocument {
                 type_: type_contents,
