@@ -15,4 +15,3 @@ pub mod excluded_companies;
 pub mod helpers;
 pub mod regexes;
 pub mod test_files;
-pub mod uu;

@@ -17,6 +17,7 @@ rand = "*"
 rayon = "*"
 rusoto_s3 = "0.40"
 flate2 = "1.0.11"
+uuencode = "^0.1.0"
 aws = { path = "../aws" }
 bb = { path = "../birb-cli" }
 
