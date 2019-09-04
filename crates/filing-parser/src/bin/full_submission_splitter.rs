@@ -6,12 +6,25 @@ extern crate uuencode;
 use filing_parser::helpers::{bfs_find_node, tendril_to_string, write_to_file};
 use filing_parser::test_files::get_files;
 use regex::{Captures, Regex, RegexBuilder};
-use std::fs::remove_dir;
 use std::rc::Rc;
 use xml5ever::driver::parse_document;
 use xml5ever::rcdom::{Handle, Node, NodeData, RcDom};
 use xml5ever::serialize::serialize;
 use xml5ever::tendril::TendrilSink;
+
+#[derive(Debug)]
+pub struct ParsedDocument {
+    /// The type of document (e.g. 10-Q). "type" is a Rust reserved keyword. Hence the underscore
+    pub type_: String,
+    /// The sequence of the document for display purposes. 1 is the most important
+    pub sequence: i32,
+    /// The filename of the document (e.g. d490575d10q.htm)
+    pub filename: String,
+    /// The SEC's description of the document (e.g. FORM 10-Q)
+    pub description: Option<String>,
+    /// The actual document contents
+    pub text: String,
+}
 
 lazy_static! {
     static ref ESCAPE_GRAPHIC_PATTERN: &'static str = r"
@@ -148,15 +161,12 @@ fn unescape_node_contents(contents: &str) -> String {
 /// and writes them to an example folder locally.
 fn write_parsed_docs_to_example_folder(parsed_documents: Vec<ParsedDocument>) {
     for doc in parsed_documents {
-        // TODO use a match statement here
-        let mut contents_for_file = Vec::new();
+        let mut contents_for_file = doc.text.as_bytes().to_owned();
         if doc.type_ == "GRAPHIC" {
             //            panic!("{:?}", doc.text);
             contents_for_file = uuencode::uudecode(&*doc.text)
                 .expect("Couldn't uudecode document contents!")
                 .0;
-        } else {
-            contents_for_file = doc.text.as_bytes().to_owned();
         }
         write_to_file(
             &String::from(format!(
@@ -224,7 +234,7 @@ fn parse_doc(handle: &Rc<Node>) -> Option<ParsedDocument> {
             };
             let sequence_contents = get_node_contents_as_int(&sequence_node);
             let filename_contents = get_node_contents_as_str(&filename_node);
-            let mut text_contents = get_text_node_children(&text_node);
+            let text_contents = get_text_node_children(&text_node);
 
             Some(ParsedDocument {
                 type_: type_contents,
@@ -238,20 +248,6 @@ fn parse_doc(handle: &Rc<Node>) -> Option<ParsedDocument> {
     }
 }
 
-#[derive(Debug)]
-pub struct ParsedDocument {
-    /// The type of document (e.g. 10-Q). "type" is a Rust reserved keyword. Hence the underscore
-    pub type_: String,
-    /// The sequence of the document for display purposes. 1 is the most important
-    pub sequence: i32,
-    /// The filename of the document (e.g. d490575d10q.htm)
-    pub filename: String,
-    /// The SEC's description of the document (e.g. FORM 10-Q)
-    pub description: Option<String>,
-    /// The actual document contents
-    pub text: String,
-}
-
 fn find_element(node: Handle, target_name: &'static str) -> Option<Handle> {
     if let NodeData::Element { ref name, .. } = node.data {
         if &name.local == target_name {
@@ -262,7 +258,7 @@ fn find_element(node: Handle, target_name: &'static str) -> Option<Handle> {
 }
 
 fn get_node_contents_as_str(node: &Rc<Node>) -> String {
-    if let NodeData::Element { ref name, .. } = node.data {
+    if let NodeData::Element { .. } = node.data {
         assert!(
             0 < node.children.borrow().len(),
             "Node should have children!"
@@ -276,7 +272,7 @@ fn get_node_contents_as_str(node: &Rc<Node>) -> String {
 }
 
 fn get_node_contents_as_int(node: &Rc<Node>) -> i32 {
-    if let NodeData::Element { ref name, .. } = node.data {
+    if let NodeData::Element { .. } = node.data {
         assert!(
             0 < node.children.borrow().len(),
             "Node should have children!"
@@ -293,7 +289,7 @@ fn get_node_contents_as_int(node: &Rc<Node>) -> i32 {
 
 fn serialize_node(node: &Rc<Node>) -> String {
     let mut bytes = vec![];
-    xml5ever::serialize::serialize(
+    serialize(
         &mut bytes,
         node,
         xml5ever::serialize::SerializeOpts::default(),
@@ -319,7 +315,10 @@ fn get_text_node_children(node: &Rc<Node>) -> String {
 }
 
 mod test {
-    use super::*;
+    #[test]
+    use super::{
+        escape_graphic_node_contents, fix_broken_graphic_node_contents, unescape_node_contents,
+    };
 
     #[test]
     fn test_escape_graphic_node_contents() {
