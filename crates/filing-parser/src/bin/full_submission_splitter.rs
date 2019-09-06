@@ -1,30 +1,18 @@
 extern crate filing_parser;
 #[macro_use]
 extern crate lazy_static;
+extern crate models;
 extern crate uuencode;
 
 use filing_parser::helpers::{bfs_find_node, tendril_to_string, write_to_file};
 use filing_parser::test_files::get_files;
+use models::SplitDocument;
 use regex::{Captures, Regex, RegexBuilder};
 use std::rc::Rc;
 use xml5ever::driver::parse_document;
 use xml5ever::rcdom::{Handle, Node, NodeData, RcDom};
 use xml5ever::serialize::serialize;
 use xml5ever::tendril::TendrilSink;
-
-#[derive(Debug)]
-pub struct ParsedDocument {
-    /// The type of document (e.g. 10-Q). "type" is a Rust reserved keyword. Hence the underscore
-    pub type_: String,
-    /// The sequence of the document for display purposes. 1 is the most important
-    pub sequence: i32,
-    /// The filename of the document (e.g. d490575d10q.htm)
-    pub filename: String,
-    /// The SEC's description of the document (e.g. FORM 10-Q)
-    pub description: Option<String>,
-    /// The actual document contents
-    pub text: String,
-}
 
 lazy_static! {
     static ref ESCAPE_GRAPHIC_PATTERN: &'static str = r"
@@ -55,52 +43,27 @@ lazy_static! {
         .expect("Couldn't build graph contents regex!");
 }
 
-/// For now, iterates through our list of full submission ttext files and
-/// splits each into its seperate parts, then writes to disk.
-fn main() {
-    let test_files: Vec<&'static str> = vec![
-        include_str!("../../examples/10-Q/input/0001000623-17-000125.txt"),
-        include_str!("../../examples/10-Q/input/0001001288-16-000069.txt"),
-        include_str!("../../examples/10-Q/input/0001004434-17-000011.txt"),
-        //        include_str!("../../examples/10-Q/input/0001004980-16-000073.txt"),
-        //        include_str!("../../examples/10-Q/input/0001015780-17-000075.txt"),
-        //        include_str!("../../examples/10-Q/input/0001079973-17-000690.txt"),
-        //        include_str!("../../examples/10-Q/input/0001185185-16-005721.txt"),
-        //        include_str!("../../examples/10-Q/input/0001185185-16-005747.txt"),
-        //        include_str!("../../examples/10-Q/input/0001193125-16-454777.txt"),
-        //        include_str!("../../examples/10-Q/input/0001193125-17-160261.txt"),
-        //        include_str!("../../examples/10-Q/input/0001193125-18-037381.txt"),
-        //        include_str!("../../examples/10-Q/input/0001213900-16-018375.txt"),
-        //        include_str!("../../examples/10-Q/input/0001437749-16-025027.txt"),
-        //        include_str!("../../examples/10-Q/input/0001437749-16-036870.txt"),
-        //        include_str!("../../examples/10-Q/input/0001493152-17-009297.txt"),
-        //        include_str!("../../examples/10-Q/input/0001564590-17-009385.txt"),
-        //        include_str!("../../examples/10-Q/input/0001144204-16-084770.txt"),
-    ];
-    for file_contents in test_files {
-        let file_contents = escape_graphic_node_contents(file_contents);
+fn full_submission_splitter(file_contents: &str, filing_id: i32) -> Vec<SplitDocument> {
+    let file_contents = escape_graphic_node_contents(file_contents);
 
-        let dom: RcDom = parse_document(RcDom::default(), Default::default()).one(&*file_contents);
-        let document: &Rc<Node> = &dom.document;
-        assert_eq!(
-            1,
-            document.children.borrow().len(),
-            "There should only be one main node!"
-        );
-        let sec_document_node = &document.children.borrow()[0];
-        assert_sec_document_node_is_sec_document(sec_document_node);
-        let parsed_documents = split_document_into_documents(sec_document_node);
-        let unescaped_parsed_documents = unescape_parsed_documents(parsed_documents);
-
-        write_parsed_docs_to_example_folder(unescaped_parsed_documents);
-    }
+    let dom: RcDom = parse_document(RcDom::default(), Default::default()).one(&*file_contents);
+    let document: &Rc<Node> = &dom.document;
+    assert_eq!(
+        1,
+        document.children.borrow().len(),
+        "There should only be one main node!"
+    );
+    let sec_document_node = &document.children.borrow()[0];
+    assert_sec_document_node_is_sec_document(sec_document_node);
+    let parsed_documents = split_document_into_documents(sec_document_node, filing_id);
+    unescape_parsed_documents(parsed_documents)
 }
 
 /// Applies the unescape logic to all the GRAPHIC documents, then returns all parsed documents.
-fn unescape_parsed_documents(parsed_docs: Vec<ParsedDocument>) -> Vec<ParsedDocument> {
+fn unescape_parsed_documents(parsed_docs: Vec<SplitDocument>) -> Vec<SplitDocument> {
     let mut escaped_parsed_docs = vec![];
     for mut doc in parsed_docs {
-        if doc.type_ == "GRAPHIC" {
+        if doc.doc_type == "GRAPHIC" {
             doc.text = String::from(unescape_node_contents(&doc.text));
         }
         escaped_parsed_docs.push(doc);
@@ -112,14 +75,14 @@ fn unescape_parsed_documents(parsed_docs: Vec<ParsedDocument>) -> Vec<ParsedDocu
 /// into seperate documents. Most of its children are <DOCUMENT> nodes, which
 /// should be parsable. Some however are things like <SEC-HEADER>, which is not
 /// a document. Hence the filter_map.
-fn split_document_into_documents(sec_document_node: &Handle) -> Vec<ParsedDocument> {
+fn split_document_into_documents(sec_document_node: &Handle, filing_id: i32) -> Vec<SplitDocument> {
     sec_document_node
         .children
         .borrow()
         .iter()
         // Filter to only the parsed documents that succeeded:
-        .filter_map(|node| parse_doc(node))
-        .collect::<Vec<ParsedDocument>>()
+        .filter_map(|node| parse_doc(node, filing_id))
+        .collect::<Vec<SplitDocument>>()
 }
 
 /// Escape's a node's contents so that it can be correctly parsed as XML.
@@ -157,29 +120,6 @@ fn unescape_node_contents(contents: &str) -> String {
     )
 }
 
-/// Converts docs' contents to bytes (which may include uudecoding)
-/// and writes them to an example folder locally.
-fn write_parsed_docs_to_example_folder(parsed_documents: Vec<ParsedDocument>) {
-    for doc in parsed_documents {
-        let mut contents_for_file = doc.text.as_bytes().to_owned();
-        if doc.type_ == "GRAPHIC" {
-            //            panic!("{:?}", doc.text);
-            contents_for_file = uuencode::uudecode(&*doc.text)
-                .expect("Couldn't uudecode document contents!")
-                .0;
-        }
-        write_to_file(
-            &String::from(format!(
-                "/Users/murtyjones/Desktop/example-parsed/{}",
-                doc.filename,
-            )),
-            "",
-            contents_for_file,
-        )
-        .expect("Couldn't write to file!");
-    }
-}
-
 /// Ensures that we grabbed the <SEC-DOCUMENT> node, which we need
 /// to use as a base to parse any document.
 fn assert_sec_document_node_is_sec_document(handle: &Handle) {
@@ -191,9 +131,9 @@ fn assert_sec_document_node_is_sec_document(handle: &Handle) {
     }
 }
 
-/// If a node is a <DOCUMENT>, parses its components into a ParsedDocument.
+/// If a node is a <DOCUMENT>, parses its components into a SplitDocument.
 /// If it's an <SEC-HEADER>, returns None
-fn parse_doc(handle: &Rc<Node>) -> Option<ParsedDocument> {
+fn parse_doc(handle: &Rc<Node>, filing_id: i32) -> Option<SplitDocument> {
     match handle.data {
         NodeData::Element { ref name, .. } => {
             if "SEC-HEADER" == &name.local {
@@ -236,12 +176,15 @@ fn parse_doc(handle: &Rc<Node>) -> Option<ParsedDocument> {
             let filename_contents = get_node_contents_as_str(&filename_node);
             let text_contents = get_text_node_children(&text_node);
 
-            Some(ParsedDocument {
-                type_: type_contents,
+            Some(SplitDocument {
+                filing_id,
+                doc_type: type_contents,
                 sequence: sequence_contents,
                 filename: filename_contents,
                 description: description_contents,
                 text: text_contents,
+                created_at: None,
+                updated_at: None,
             })
         }
         _ => None,
@@ -315,10 +258,40 @@ fn get_text_node_children(node: &Rc<Node>) -> String {
 }
 
 mod test {
+    use super::*;
+
+    /// Converts docs' contents to bytes (which may include uudecoding)
+    /// and writes them to an example folder locally.
+    fn write_parsed_docs_to_example_folder(parsed_documents: Vec<SplitDocument>) {
+        for doc in parsed_documents {
+            let mut contents_for_file = doc.text.as_bytes().to_owned();
+            if doc.doc_type == "GRAPHIC" {
+                //            panic!("{:?}", doc.text);
+                contents_for_file = uuencode::uudecode(&*doc.text)
+                    .expect("Couldn't uudecode document contents!")
+                    .0;
+            }
+            write_to_file(
+                &String::from(format!(
+                    "/Users/murtyjones/Desktop/example-parsed/{}",
+                    doc.filename,
+                )),
+                "",
+                contents_for_file,
+            )
+            .expect("Couldn't write to file!");
+        }
+    }
+
     #[test]
-    use super::{
-        escape_graphic_node_contents, fix_broken_graphic_node_contents, unescape_node_contents,
-    };
+    fn test_local_file_1() {
+        // Chosen at random
+        let file_contents = include_str!("../../examples/10-Q/input/0001004434-17-000011.txt");
+        let stub_id = 1;
+        let r = full_submission_splitter(file_contents, stub_id);
+        assert_eq!(83, r.len());
+        //        write_parsed_docs_to_example_folder(r);
+    }
 
     #[test]
     fn test_escape_graphic_node_contents() {
