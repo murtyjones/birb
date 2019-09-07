@@ -15,6 +15,7 @@ members = [
   "crates/filing-parser",
   "crates/models",
   "crates/server",
+  "crates/utils",
 ]
 
 [dependencies]

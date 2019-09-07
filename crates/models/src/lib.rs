@@ -65,6 +65,25 @@ pub struct CompanyFilingJoined {
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSql, FromSql)]
+pub struct SplitDocumentBeforeUpload {
+    /// contents of the <TYPE> node. Ex. "GRAPHIC", "10-Q", "EX-101.2"
+    /// `filing_type` table even though it might seem like it should
+    pub doc_type: String,
+    /// The sequence of the document for display purposes,
+    /// beginning at `1`, which is the most important
+    pub sequence: i32,
+    /// The filename of the document (e.g. "d490575d10q.htm")
+    /// from the <FILENAME> node
+    pub filename: String,
+    /// The SEC's description of the document from
+    /// the <DESCRIPTION> node (e.g. "FORM 10-Q")
+    pub description: Option<String>,
+    /// The actual document contents from the <TEXT> node
+    /// TODO: This shouldn't be persisted to the DB... so how does this struct need to change?
+    pub text: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSql, FromSql)]
 pub struct SplitDocument {
     /// Foreign key - the filing that this split document relates to.
     /// This is a one-to-many relationship from the `filing` to the
@@ -82,8 +101,9 @@ pub struct SplitDocument {
     /// The SEC's description of the document from
     /// the <DESCRIPTION> node (e.g. "FORM 10-Q")
     pub description: Option<String>,
-    /// The actual document contents from the <TEXT> node
-    pub text: String,
+    /// Where this lives in S3. Should be in
+    /// the format of: `edgar/data/111111/1111111111-11-111111`
+    pub s3_url_prefix: String,
     /// When it was saved to our DB.
     pub created_at: Option<chrono::DateTime<Utc>>,
     /// When it was last updated in our DB.

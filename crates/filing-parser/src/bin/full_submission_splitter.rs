@@ -6,7 +6,7 @@ extern crate uuencode;
 
 use filing_parser::helpers::{bfs_find_node, tendril_to_string, write_to_file};
 use filing_parser::test_files::get_files;
-use models::SplitDocument;
+use models::SplitDocumentBeforeUpload;
 use regex::{Captures, Regex, RegexBuilder};
 use std::rc::Rc;
 use xml5ever::driver::parse_document;
@@ -43,7 +43,7 @@ lazy_static! {
         .expect("Couldn't build graph contents regex!");
 }
 
-fn full_submission_splitter(file_contents: &str, filing_id: i32) -> Vec<SplitDocument> {
+fn full_submission_splitter(file_contents: &str) -> Vec<SplitDocumentBeforeUpload> {
     let file_contents = escape_graphic_node_contents(file_contents);
 
     let dom: RcDom = parse_document(RcDom::default(), Default::default()).one(&*file_contents);
@@ -55,12 +55,14 @@ fn full_submission_splitter(file_contents: &str, filing_id: i32) -> Vec<SplitDoc
     );
     let sec_document_node = &document.children.borrow()[0];
     assert_sec_document_node_is_sec_document(sec_document_node);
-    let parsed_documents = split_document_into_documents(sec_document_node, filing_id);
+    let parsed_documents = split_document_into_documents(sec_document_node);
     unescape_parsed_documents(parsed_documents)
 }
 
 /// Applies the unescape logic to all the GRAPHIC documents, then returns all parsed documents.
-fn unescape_parsed_documents(parsed_docs: Vec<SplitDocument>) -> Vec<SplitDocument> {
+fn unescape_parsed_documents(
+    parsed_docs: Vec<SplitDocumentBeforeUpload>,
+) -> Vec<SplitDocumentBeforeUpload> {
     let mut escaped_parsed_docs = vec![];
     for mut doc in parsed_docs {
         if doc.doc_type == "GRAPHIC" {
@@ -75,14 +77,14 @@ fn unescape_parsed_documents(parsed_docs: Vec<SplitDocument>) -> Vec<SplitDocume
 /// into seperate documents. Most of its children are <DOCUMENT> nodes, which
 /// should be parsable. Some however are things like <SEC-HEADER>, which is not
 /// a document. Hence the filter_map.
-fn split_document_into_documents(sec_document_node: &Handle, filing_id: i32) -> Vec<SplitDocument> {
+fn split_document_into_documents(sec_document_node: &Handle) -> Vec<SplitDocumentBeforeUpload> {
     sec_document_node
         .children
         .borrow()
         .iter()
         // Filter to only the parsed documents that succeeded:
-        .filter_map(|node| parse_doc(node, filing_id))
-        .collect::<Vec<SplitDocument>>()
+        .filter_map(|node| parse_doc(node))
+        .collect::<Vec<SplitDocumentBeforeUpload>>()
 }
 
 /// Escape's a node's contents so that it can be correctly parsed as XML.
@@ -131,9 +133,9 @@ fn assert_sec_document_node_is_sec_document(handle: &Handle) {
     }
 }
 
-/// If a node is a <DOCUMENT>, parses its components into a SplitDocument.
+/// If a node is a <DOCUMENT>, parses its components into a SplitDocumentBeforeUpload.
 /// If it's an <SEC-HEADER>, returns None
-fn parse_doc(handle: &Rc<Node>, filing_id: i32) -> Option<SplitDocument> {
+fn parse_doc(handle: &Rc<Node>) -> Option<SplitDocumentBeforeUpload> {
     match handle.data {
         NodeData::Element { ref name, .. } => {
             if "SEC-HEADER" == &name.local {
@@ -167,24 +169,21 @@ fn parse_doc(handle: &Rc<Node>, filing_id: i32) -> Option<SplitDocument> {
                 bfs_find_node(Rc::clone(handle), |node: Handle| find_element(node, "TEXT"))
                     .expect("No TEXT node found!");
 
-            let type_contents = get_node_contents_as_str(&type_node);
-            let description_contents = match description_node {
+            let sequence = get_node_contents_as_int(&sequence_node);
+            let doc_type = get_node_contents_as_str(&type_node);
+            let maybe_description = match description_node {
                 Some(d) => Some(get_node_contents_as_str(&d)),
                 None => None,
             };
-            let sequence_contents = get_node_contents_as_int(&sequence_node);
-            let filename_contents = get_node_contents_as_str(&filename_node);
-            let text_contents = get_text_node_children(&text_node);
+            let filename = get_node_contents_as_str(&filename_node);
+            let text = get_text_node_children(&text_node);
 
-            Some(SplitDocument {
-                filing_id,
-                doc_type: type_contents,
-                sequence: sequence_contents,
-                filename: filename_contents,
-                description: description_contents,
-                text: text_contents,
-                created_at: None,
-                updated_at: None,
+            Some(SplitDocumentBeforeUpload {
+                doc_type,
+                sequence,
+                filename,
+                description: maybe_description,
+                text,
             })
         }
         _ => None,
@@ -262,7 +261,7 @@ mod test {
 
     /// Converts docs' contents to bytes (which may include uudecoding)
     /// and writes them to an example folder locally.
-    fn write_parsed_docs_to_example_folder(parsed_documents: Vec<SplitDocument>) {
+    fn write_parsed_docs_to_example_folder(parsed_documents: Vec<SplitDocumentBeforeUpload>) {
         for doc in parsed_documents {
             let mut contents_for_file = doc.text.as_bytes().to_owned();
             if doc.doc_type == "GRAPHIC" {
@@ -287,8 +286,7 @@ mod test {
     fn test_local_file_1() {
         // Chosen at random
         let file_contents = include_str!("../../examples/10-Q/input/0001004434-17-000011.txt");
-        let stub_id = 1;
-        let r = full_submission_splitter(file_contents, stub_id);
+        let r = full_submission_splitter(file_contents);
         assert_eq!(83, r.len());
         //        write_parsed_docs_to_example_folder(r);
     }
