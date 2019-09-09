@@ -1,3 +1,5 @@
+use utils::get_connection;
+
 pub mod db;
 use db::*;
 

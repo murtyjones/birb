@@ -51,6 +51,7 @@ fn get_connection() -> Connection {
 /// Used to get one randomly selected, not-yet collected filing.
 /// A little complex but very performant.
 /// Source: https://stackoverflow.com/a/8675160
+/// TODO this doesn't enforce collected = false! Not good
 const RANDOM_FILING_QUERY: &'static str = r#"
     SELECT *
     FROM  (
@@ -77,6 +78,8 @@ fn get_filing_record(conn: &Connection) -> Option<Filing> {
             filing_quarter: record.get("filing_quarter"),
             filing_year: record.get("filing_year"),
         };
+        let collected: bool = record.get("collected");
+        assert_eq!(false, collected, "Filing should not already be collected!");
         return Some(filing);
     }
     None

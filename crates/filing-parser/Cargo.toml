@@ -21,4 +21,6 @@ uuencode = "^0.1.4"
 aws = { path = "../aws" }
 bb = { path = "../birb-cli" }
 models = { path = "../models" }
+utils = { path = "../utils" }
+
 

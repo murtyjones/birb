@@ -12,3 +12,4 @@ postgres-derive = "*"
 
 aws = { path = "../aws" }
 models = { path = "../models" }
+utils = { path = "../utils" }

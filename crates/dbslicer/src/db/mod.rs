@@ -1,13 +1,6 @@
 use models::CompanyFilingJoined;
 use postgres::transaction::Transaction;
-use postgres::{Connection, TlsMode};
-
-pub fn get_connection<S>(host: S) -> Connection
-where
-    S: Into<String>,
-{
-    Connection::connect(host.into(), TlsMode::None).unwrap()
-}
+use postgres::Connection;
 
 pub fn truncate_local_companies(conn: &Connection) {
     conn.query(

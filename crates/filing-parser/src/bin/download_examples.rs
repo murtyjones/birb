@@ -1,11 +1,12 @@
 extern crate filing_parser;
+extern crate utils;
 
 use aws::s3;
-use filing_parser::helpers::{path_exists, write_to_file};
+use filing_parser::helpers::path_exists;
 use filing_parser::test_files::get_files;
 use flate2::read::GzDecoder;
-use std::io::prelude::*;
 use tendril::fmt::Slice;
+use utils::write_to_file;
 
 /// Downloads any filings that are missing from the examples needed for testing
 fn main() {

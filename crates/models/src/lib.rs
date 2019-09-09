@@ -7,6 +7,7 @@ extern crate postgres_derive;
 extern crate chrono;
 
 use chrono::prelude::*;
+use postgres::rows::Row;
 
 /// Model for a company
 #[derive(Debug, Serialize, Deserialize)]
@@ -42,6 +43,23 @@ pub struct Filing {
     pub date_filed: chrono::NaiveDate,
     pub created_at: Option<chrono::DateTime<Utc>>,
     pub updated_at: Option<chrono::DateTime<Utc>>,
+}
+
+impl Filing {
+    pub fn from_row(row: Row) -> Filing {
+        Filing {
+            id: row.get("id"),
+            company_short_cik: row.get("company_short_cik"),
+            filing_name: row.get("filing_name"),
+            filing_edgar_url: row.get("filing_edgar_url"),
+            filing_quarter: row.get("filing_quarter"),
+            filing_year: row.get("filing_year"),
+            collected: row.get("collected"),
+            date_filed: row.get("date_filed"),
+            created_at: Some(row.get("created_at")),
+            updated_at: Some(row.get("updated_at")),
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSql, FromSql)]

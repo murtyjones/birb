@@ -5,7 +5,6 @@ use html5ever::{LocalName, QualName};
 use markup5ever::Attribute;
 use regex::Regex;
 use std::cell::RefCell;
-use std::fs::File;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
@@ -69,23 +68,6 @@ pub fn tendril_to_string(text: &RefCell<StrTendril>) -> String {
     let mut converted = String::new();
     converted.push_str(&text.borrow());
     converted
-}
-
-pub fn write_to_file(
-    file_path: &String,
-    extension: &'static str,
-    data: Vec<u8>,
-) -> std::io::Result<()> {
-    let path = std::path::PathBuf::from(format!("{}{}", file_path, extension));
-    let mut pos = 0;
-    println!("Path: {:?}", path);
-    let mut buffer = File::create(path).expect("Couldn't make file");
-
-    while pos < data.len() {
-        let bytes_written = buffer.write(&data[pos..])?;
-        pos += bytes_written;
-    }
-    Ok(())
 }
 
 pub fn get_children(handle: &Handle) -> Vec<Handle> {

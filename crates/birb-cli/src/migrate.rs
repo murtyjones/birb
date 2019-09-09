@@ -105,7 +105,10 @@ impl Subcommand for Migrate {
                 Ok(())
             }
             Migrate::Create(create) => {
-                let cmd = format!("dbmigrate create --slug {} s--path ./db/migrations", create.slug);
+                let cmd = format!(
+                    "dbmigrate create --slug {} s--path ./db/migrations",
+                    create.slug
+                );
                 run_str_in_bash(cmd.as_str()).unwrap();
                 Ok(())
             }
