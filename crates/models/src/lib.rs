@@ -99,6 +99,8 @@ pub struct SplitDocumentBeforeUpload {
     /// The actual document contents from the <TEXT> node
     /// TODO: This shouldn't be persisted to the DB... so how does this struct need to change?
     pub text: String,
+    /// If the text is uuencoded, this is the decoded text
+    pub decoded_text: Option<Vec<u8>>,
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSql, FromSql)]

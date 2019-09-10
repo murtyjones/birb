@@ -678,13 +678,14 @@ dependencies = [
  "mac 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "markup5ever 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "models 0.1.0",
+ "postgres 0.15.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rayon 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "regex 1.1.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "rusoto_s3 0.40.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "tendril 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "utils 0.1.0",
- "uuencode 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)",
+ "uuencode 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "xml5ever 0.15.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -2933,7 +2934,7 @@ dependencies = [
 
 [[package]]
 name = "uuencode"
-version = "0.1.4"
+version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
@@ -3393,7 +3394,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum url 1.7.2 (registry+https://github.com/rust-lang/crates.io-index)" = "dd4e7c0d531266369519a4aa4f399d748bd37043b00bde1e4ff1f60a120b355a"
 "checksum utf-8 0.7.5 (registry+https://github.com/rust-lang/crates.io-index)" = "05e42f7c18b8f902290b009cde6d651262f956c98bc51bca4cd1d511c9cd85c7"
 "checksum utf8-ranges 1.0.3 (registry+https://github.com/rust-lang/crates.io-index)" = "9d50aa7650df78abf942826607c62468ce18d9019673d4a2ebe1865dbb96ffde"
-"checksum uuencode 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)" = "1bc0fc6122a9a2082fe52a84e419d2741ec163e41e8df0d2a224706736e477ab"
+"checksum uuencode 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)" = "ce87414615a82bde6978712c15b79bf056d16827930ff779f1e40ed74c692ac0"
 "checksum uuid 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)" = "bcc7e3b898aa6f6c08e5295b6c89258d1331e9ac578cc992fb818759951bdc22"
 "checksum uuid 0.7.4 (registry+https://github.com/rust-lang/crates.io-index)" = "90dbc611eb48397705a6b0f6e917da23ae517e4d127123d2cf7674206627d32a"
 "checksum vcpkg 0.2.7 (registry+https://github.com/rust-lang/crates.io-index)" = "33dd455d0f96e90a75803cfeb7f948768c08d70a6de9a8d2362461935698bf95"

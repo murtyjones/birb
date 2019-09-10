@@ -9,27 +9,30 @@ use xml5ever::rcdom::{Handle, Node, NodeData, RcDom};
 use xml5ever::serialize::serialize;
 use xml5ever::tendril::TendrilSink;
 
+/// Document types that need to be unescaped and decoded
+const UUENCODED_DOCUMENTS: [&str; 3] = ["GRAPHIC", "EXCEL", "ZIP"];
+
 lazy_static! {
-    static ref ESCAPE_GRAPHIC_PATTERN: &'static str = r"
+    static ref ESCAPE_ENCODED_PATTERN: &'static str = r"
        (
-            (?:<TYPE>GRAPHIC)
+            (?:<TYPE>(?:GRAPHIC|EXCEL|ZIP))
             .*?
         )
         (?:<TEXT>)
         (.*?)
         (?:</TEXT>)
     ";
-    pub static ref ESCAPE_GRAPHIC_REGEX: Regex = RegexBuilder::new(&ESCAPE_GRAPHIC_PATTERN)
+    pub static ref ESCAPE_ENCODED_REGEX: Regex = RegexBuilder::new(&ESCAPE_ENCODED_PATTERN)
         .case_insensitive(true)
         .multi_line(true)
         .ignore_whitespace(true)
         .dot_matches_new_line(true)
         .build()
         .expect("Couldn't build graph contents regex!");
-    static ref UNESCAPE_GRAPHIC_PATTERN: &'static str = r"
+    static ref UNESCAPE_ENCODED_PATTERN: &'static str = r"
        (.*)
     ";
-    pub static ref UNESCAPE_GRAPHIC_REGEX: Regex = RegexBuilder::new(&UNESCAPE_GRAPHIC_PATTERN)
+    pub static ref UNESCAPE_ENCODED_REGEX: Regex = RegexBuilder::new(&UNESCAPE_ENCODED_PATTERN)
         .case_insensitive(true)
         .multi_line(true)
         .ignore_whitespace(true)
@@ -39,7 +42,7 @@ lazy_static! {
 }
 
 pub fn split_full_submission(file_contents: &str) -> Vec<SplitDocumentBeforeUpload> {
-    let file_contents = escape_graphic_node_contents(file_contents);
+    let file_contents = escape_encoded_node_contents(file_contents);
 
     let dom: RcDom = parse_document(RcDom::default(), Default::default()).one(&*file_contents);
     let document: &Rc<Node> = &dom.document;
@@ -54,14 +57,15 @@ pub fn split_full_submission(file_contents: &str) -> Vec<SplitDocumentBeforeUplo
     unescape_parsed_documents(parsed_documents)
 }
 
-/// Applies the unescape logic to all the GRAPHIC documents, then returns all parsed documents.
+/// Applies the unescape logic to all the uuencoded documents, then returns all parsed documents.
 fn unescape_parsed_documents(
     parsed_docs: Vec<SplitDocumentBeforeUpload>,
 ) -> Vec<SplitDocumentBeforeUpload> {
     let mut escaped_parsed_docs = vec![];
     for mut doc in parsed_docs {
-        if doc.doc_type == "GRAPHIC" {
+        if UUENCODED_DOCUMENTS.contains(&&*doc.doc_type) {
             doc.text = String::from(unescape_node_contents(&doc.text));
+            doc.decoded_text = Some(uuencode::uudecode(&*doc.text).expect("couldn't decode!").0);
         }
         escaped_parsed_docs.push(doc);
     }
@@ -83,9 +87,9 @@ fn split_main_node_into_documents(sec_document_node: &Handle) -> Vec<SplitDocume
 }
 
 /// Escape's a node's contents so that it can be correctly parsed as XML.
-fn escape_graphic_node_contents(contents: &str) -> String {
+fn escape_encoded_node_contents(contents: &str) -> String {
     String::from(
-        ESCAPE_GRAPHIC_REGEX.replace_all(contents, |caps: &Captures| {
+        ESCAPE_ENCODED_REGEX.replace_all(contents, |caps: &Captures| {
             format!(
                 r#"{}<TEXT>{}</TEXT>"#,
                 &caps[1],
@@ -103,7 +107,7 @@ fn escape_graphic_node_contents(contents: &str) -> String {
 /// Unescape's the node's contents that were previously escaped.
 fn unescape_node_contents(contents: &str) -> String {
     String::from(
-        UNESCAPE_GRAPHIC_REGEX.replace_all(contents, |caps: &Captures| {
+        UNESCAPE_ENCODED_REGEX.replace_all(contents, |caps: &Captures| {
             format!(
                 "{}",
                 &caps[0]
@@ -179,6 +183,7 @@ fn parse_doc(handle: &Rc<Node>) -> Option<SplitDocumentBeforeUpload> {
                 filename,
                 description: maybe_description,
                 text,
+                decoded_text: None, // we'll handle this later on
             })
         }
         _ => None,
@@ -254,40 +259,17 @@ fn get_text_node_children(node: &Rc<Node>) -> String {
 mod test {
     use super::*;
 
-    /// Converts docs' contents to bytes (which may include uudecoding)
-    /// and writes them to an example folder locally.
-    fn write_parsed_docs_to_example_folder(parsed_documents: Vec<SplitDocumentBeforeUpload>) {
-        for doc in parsed_documents {
-            let mut contents_for_file = doc.text.as_bytes().to_owned();
-            if doc.doc_type == "GRAPHIC" {
-                //            panic!("{:?}", doc.text);
-                contents_for_file = uuencode::uudecode(&*doc.text)
-                    .expect("Couldn't uudecode document contents!")
-                    .0;
-            }
-            write_to_file(
-                &String::from(format!(
-                    "/Users/murtyjones/Desktop/example-parsed/{}",
-                    doc.filename,
-                )),
-                "",
-                contents_for_file,
-            )
-            .expect("Couldn't write to file!");
-        }
-    }
+    //    #[test]
+    //    fn test_local_file_1() {
+    //        // Chosen at random
+    //        let file_contents = include_str!("../../examples/10-Q/input/0001004434-17-000011.txt");
+    //        let r = split_full_submission(file_contents);
+    //        assert_eq!(83, r.len());
+    //        //        write_parsed_docs_to_example_folder(r);
+    //    }
 
     #[test]
-    fn test_local_file_1() {
-        // Chosen at random
-        let file_contents = include_str!("../../examples/10-Q/input/0001004434-17-000011.txt");
-        let r = split_full_submission(file_contents);
-        assert_eq!(83, r.len());
-        //        write_parsed_docs_to_example_folder(r);
-    }
-
-    #[test]
-    fn test_escape_graphic_node_contents() {
+    fn test_escape_encoded_node_contents() {
         let contents = r#"
         some
         other
@@ -317,7 +299,42 @@ mod test {
         nonsense
             after the fact
         "#;
-        let r = escape_graphic_node_contents(contents);
+        let r = escape_encoded_node_contents(contents);
+        assert_eq!(expected_contents, r);
+    }
+
+    #[test]
+    fn test_escape_encoded_node_contents_excel() {
+        let contents = r#"
+        some
+        other
+        unimportant
+        stuff
+<TYPE>EXCEL
+<SEQUENCE>6
+<FILENAME>thing.xlsx
+<DESCRIPTION>MATERIAL WEAKNESS REMEDIATION GRAPHIC
+<TEXT><</TEXT>
+    some
+        nonsense
+            after the fact
+        "#;
+
+        let expected_contents = r#"
+        some
+        other
+        unimportant
+        stuff
+<TYPE>EXCEL
+<SEQUENCE>6
+<FILENAME>thing.xlsx
+<DESCRIPTION>MATERIAL WEAKNESS REMEDIATION GRAPHIC
+<TEXT>&lt;</TEXT>
+    some
+        nonsense
+            after the fact
+        "#;
+        let r = escape_encoded_node_contents(contents);
         assert_eq!(expected_contents, r);
     }
 
