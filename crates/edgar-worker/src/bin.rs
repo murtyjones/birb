@@ -18,6 +18,7 @@ pub fn main() -> () {
 
     // Spawn one second timer
     thread::spawn(move || loop {
+        thread::sleep(Duration::from_secs(1));
         one_tx.send("next iteration").unwrap();
     });
 
