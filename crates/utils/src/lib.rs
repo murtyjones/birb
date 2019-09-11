@@ -1,4 +1,6 @@
 use flate2::read::GzDecoder;
+use flate2::write::GzEncoder;
+use flate2::Compression;
 use postgres::{Connection, TlsMode};
 use std::fs::File;
 use std::fs::{self, ReadDir};
@@ -65,6 +67,13 @@ pub fn decompress_gzip(compressed: Vec<u8>) -> String {
     let mut decompressed_object_contents = String::new();
     d.read_to_string(&mut decompressed_object_contents).unwrap();
     decompressed_object_contents
+}
+
+pub fn compress_gzip(compressed: Vec<u8>) -> Vec<u8> {
+    let mut e = GzEncoder::new(Vec::new(), Compression::default());
+    e.write_all(compressed.as_slice())
+        .expect("Couldn't write to gzip");
+    e.finish().expect("Couldn't complete gzip writing")
 }
 
 pub fn delete_dir_contents(path: &str) {

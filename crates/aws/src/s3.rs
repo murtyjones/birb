@@ -1,3 +1,4 @@
+use failure;
 use futures::{Future, Stream};
 use rusoto_core::credential::{ChainProvider, InstanceMetadataProvider, ProfileProvider};
 use rusoto_core::request::HttpClient;
@@ -5,6 +6,7 @@ use rusoto_core::Region;
 use rusoto_credential::ProvideAwsCredentials;
 use rusoto_s3::util::PreSignedRequest;
 use rusoto_s3::{GetObjectRequest, ListObjectsRequest, Object, PutObjectRequest, S3Client, S3};
+use utils::compress_gzip;
 
 pub fn get_birb_region() -> Region {
     Region::UsEast1
@@ -81,4 +83,27 @@ pub fn get_signed_url<S: Into<String>>(bucket: S, filename: S) -> String {
         .expect("Couldn't get credentials!");
 
     req.get_presigned_url(&get_birb_region(), credentials, &Default::default())
+}
+
+pub fn store_s3_document_gzipped(
+    client: &S3Client,
+    bucket: &str,
+    file_path: &str,
+    contents: Vec<u8>,
+) -> Result<(), failure::Error> {
+    let compressed_contents = compress_gzip(contents);
+
+    let put_req = PutObjectRequest {
+        bucket: bucket.to_owned(),
+        key: file_path.to_owned(),
+        body: Some(compressed_contents.into()),
+        content_encoding: Some(String::from("gzip")),
+        content_type: Some(String::from("text/html")),
+        ..Default::default()
+    };
+    client
+        .put_object(put_req)
+        .sync()
+        .expect("Couldn't PUT S3 object.");
+    Ok(())
 }

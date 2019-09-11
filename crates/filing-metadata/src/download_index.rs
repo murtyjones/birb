@@ -17,7 +17,6 @@ pub fn main(q: Quarter, y: Year) -> Vec<u8> {
     get_s3_object(&client, &bucket, &filename)
 }
 
-#[cfg(not(test))]
 /// Gets an S3 object
 pub fn get_s3_object(client: &S3Client, bucket: &str, filename: &str) -> Vec<u8> {
     let get_req = GetObjectRequest {
@@ -36,34 +35,6 @@ pub fn get_s3_object(client: &S3Client, bucket: &str, filename: &str) -> Vec<u8>
 
     assert!(body.len() > 0);
     body.to_vec()
-}
-
-#[cfg(test)]
-fn get_s3_object(_c: &S3Client, _b: &str, _f: &str) -> Vec<u8> {
-    // TODO make this return a real index document
-    // for parser testing
-    vec![1, 2, 3]
-}
-
-pub fn store_s3_document(
-    client: &S3Client,
-    bucket: &str,
-    file_path: &str,
-    contents: Vec<u8>,
-) -> Result<(), failure::Error> {
-    let put_req = PutObjectRequest {
-        bucket: bucket.to_owned(),
-        key: file_path.to_owned(),
-        body: Some(contents.into()),
-        content_encoding: Some(String::from("gzip")),
-        content_type: Some(String::from("text/html")),
-        ..Default::default()
-    };
-    client
-        .put_object(put_req)
-        .sync()
-        .expect("Couldn't PUT S3 object.");
-    Ok(())
 }
 
 #[cfg(test)]

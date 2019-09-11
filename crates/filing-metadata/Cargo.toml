@@ -7,7 +7,7 @@ edition = "2018"
 [dependencies]
 rusoto_core = "0.40"
 rusoto_s3 = "0.40"
-failure = "0.1.5"
+failure = "^0.1.5"
 futures = "0.1.27"
 csv = "1.0.7"
 serde = { version = "1.0.91", features = ["derive"] }

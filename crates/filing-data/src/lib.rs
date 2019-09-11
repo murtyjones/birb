@@ -15,12 +15,12 @@ use std::env;
 
 mod filing;
 use aws::s3::get_s3_client;
+use aws::s3::store_s3_document_gzipped;
 use filing::Filing;
-use filing_metadata::download_index::store_s3_document;
 
 static BASE_EDGAR_URL: &'static str = "https://www.sec.gov/Archives/";
 
-pub fn main() {
+pub fn get_one_filing() {
     let conn = get_connection();
     let s3_client = get_s3_client();
     let filing_record = get_filing_record(&conn);
@@ -31,10 +31,13 @@ pub fn main() {
             let file_path = &f.filing_edgar_url;
             let document_contents = get_edgar_filing(file_path).into_bytes();
             info!("Storing doc with file path: {:?}", file_path);
-            store_s3_document(&s3_client, &bucket, &file_path, document_contents);
+            println!("Storing doc with file path: {:?}", file_path);
+            store_s3_document_gzipped(&s3_client, &bucket, &file_path, document_contents)
+                .expect("Couldn't store filing in S3");
             info!("Updating status for collected to 'true'");
             persist_document_storage_status(&conn, &f);
             info!("Done!");
+            println!("DONe!");
         }
         None => {
             info!("No records left to collect. Have a drink instead.");
