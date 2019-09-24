@@ -31,13 +31,11 @@ pub fn get_one_filing() {
             let file_path = &f.filing_edgar_url;
             let document_contents = get_edgar_filing(file_path).into_bytes();
             info!("Storing doc with file path: {:?}", file_path);
-            println!("Storing doc with file path: {:?}", file_path);
             store_s3_document_gzipped(&s3_client, &bucket, &file_path, document_contents)
                 .expect("Couldn't store filing in S3");
             info!("Updating status for collected to 'true'");
             persist_document_storage_status(&conn, &f);
             info!("Done!");
-            println!("DONe!");
         }
         None => {
             info!("No records left to collect. Have a drink instead.");
@@ -51,19 +49,14 @@ fn get_connection() -> Connection {
     Connection::connect(db_uri, TlsMode::None).expect("Unable to connect to database!")
 }
 
-/// Used to get one randomly selected, not-yet collected filing.
-/// A little complex but very performant.
-/// Source: https://stackoverflow.com/a/8675160
-/// TODO this doesn't enforce collected = false! Not good
+/// Used to get one randomly selected, not-yet collected filing
+/// from the 2019 collection of filings.
 const RANDOM_FILING_QUERY: &'static str = r#"
-    SELECT *
-    FROM  (
-        SELECT DISTINCT 1 + trunc(random() * 5100000)::integer AS id
-        FROM   generate_series(1, 1100) g
-        ) r
-    JOIN   filing USING (id)
-    WHERE filing.collected = false
-    LIMIT  1;
+    SELECT * FROM filing
+    WHERE collected = false
+    AND filing_year = 2019
+    ORDER by random()
+    LIMIT 1;
 "#;
 
 fn get_filing_record(conn: &Connection) -> Option<Filing> {
