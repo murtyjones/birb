@@ -127,27 +127,32 @@ mod test {
         let file_path = "edgar/data/1322952/0001017386-17-000104/R42.htm";
         assert_eq!(
             "text/html; charset=utf-8",
-            get_content_type_from_filepath(file_path)
+            get_content_type_from_filepath(file_path).unwrap()
         );
         let file_path = "edgar/data/1322952/0001017386-17-000104/report.css";
         assert_eq!(
             "text/css; charset=utf-8",
-            get_content_type_from_filepath(file_path)
+            get_content_type_from_filepath(file_path).unwrap()
         );
         let file_path = "edgar/data/1322952/0001017386-17-000104/Financial_Report.xlsx";
         assert_eq!(
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=utf-8",
-            get_content_type_from_filepath(file_path)
+            get_content_type_from_filepath(file_path).unwrap()
         );
         let file_path = "edgar/data/1322952/0001017386-17-000104/FilingSummary.xml";
         assert_eq!(
             "text/xml; charset=utf-8",
-            get_content_type_from_filepath(file_path)
+            get_content_type_from_filepath(file_path).unwrap()
         );
         let file_path = "edgar/data/1322952/0001017386-17-000104/anton_chia-logo.jpg";
         assert_eq!(
-            "image/jpeg; charset=utf-8",
-            get_content_type_from_filepath(file_path)
+            "image/jpeg",
+            get_content_type_from_filepath(file_path).unwrap()
+        );
+        let file_path = "edgar/data/1322952/0001017386-17-000104/anton_chia-logo.jpeg";
+        assert_eq!(
+            "image/jpeg",
+            get_content_type_from_filepath(file_path).unwrap()
         );
     }
 
