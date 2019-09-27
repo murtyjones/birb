@@ -80,6 +80,13 @@ pub struct CompanyFilingJoined {
     pub date_filed: chrono::NaiveDate,
     pub filing_created_at: Option<chrono::DateTime<Utc>>,
     pub filing_updated_at: Option<chrono::DateTime<Utc>>,
+    pub sequence: i32,
+    pub filename: String,
+    pub description: Option<String>,
+    pub doc_type: String,
+    pub s3_url_prefix: String,
+    pub split_filing_created_at: Option<chrono::DateTime<Utc>>,
+    pub split_filing_updated_at: Option<chrono::DateTime<Utc>>,
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSql, FromSql)]

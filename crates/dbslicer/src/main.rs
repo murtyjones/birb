@@ -7,21 +7,20 @@ pub fn get_prod_read_only_conn_string() -> String {
     let port = format!("{}/../../scripts/local_port", env!("CARGO_MANIFEST_DIR"));
     let port = std::path::Path::new(&port);
     let username = format!(
-        "{}/../../scripts/terraform/out/rds_db_username",
+        "{}/../../terraform/out/rds_db_username",
         env!("CARGO_MANIFEST_DIR")
     );
     let username = std::path::Path::new(&username);
     let password = format!(
-        "{}/../../scripts/terraform/out/rds_db_password",
+        "{}/../../terraform/out/rds_db_password",
         env!("CARGO_MANIFEST_DIR")
     );
     let password = std::path::Path::new(&password);
     let db_name = format!(
-        "{}/../../scripts/terraform/out/rds_db_name",
+        "{}/../../terraform/out/rds_db_name",
         env!("CARGO_MANIFEST_DIR")
     );
     let db_name = std::path::Path::new(&db_name);
-
     if username.is_file() && password.is_file() && db_name.is_file() {
         let port = std::fs::read_to_string(port).unwrap();
         let username = std::fs::read_to_string(username).unwrap();

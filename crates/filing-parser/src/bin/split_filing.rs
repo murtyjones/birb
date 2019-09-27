@@ -2,14 +2,16 @@ use aws::s3::{get_s3_client, get_s3_object, store_s3_document_gzipped};
 use filing_parser::split_full_submission::split_full_submission;
 use models::{Filing, SplitDocumentBeforeUpload};
 use postgres::Connection;
+use rayon::prelude::*;
 use rusoto_s3::S3Client;
 use utils::{decompress_gzip, get_accession_number, get_cik, get_connection};
 
 /// Do the main work infinitely
 fn main() {
-    //    loop {
-    _main();
-    //    }
+    let iterations: Vec<_> = (1..=10).collect();
+    iterations.par_iter().for_each(|_e| {
+        _main();
+    });
 }
 
 /// Finds a filing that has been collected, but not yet split.
@@ -50,6 +52,7 @@ fn collect_random_not_yet_split_filing(
         LIMIT 1
         ;
     ";
+    //    let query = r"select * from filing where filing_edgar_url = 'edgar/data/40545/0000040545-16-000152.txt'";
     // Execute query
     let rows = &conn.query(query, &[]).expect("");
     assert_eq!(
