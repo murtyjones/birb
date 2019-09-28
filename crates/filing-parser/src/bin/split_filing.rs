@@ -8,7 +8,7 @@ use utils::{decompress_gzip, get_accession_number, get_cik, get_connection};
 
 /// Do the main work infinitely
 fn main() {
-    let iterations: Vec<_> = (1..=10).collect();
+    let iterations: Vec<_> = (1..=50).collect();
     iterations.par_iter().for_each(|_e| {
         _main();
     });
@@ -29,7 +29,7 @@ fn _main() {
         collect_random_not_yet_split_filing(&conn, &s3_client);
 
     // Split:
-    let split_filings = split_full_submission(&*filing);
+    let split_filings = split_full_submission(&*filing, &filing_id);
 
     let cik = get_cik(&*filing_s3_path);
     let accession_number = get_accession_number(&*filing_s3_path);
@@ -82,8 +82,20 @@ fn upload_to_s3(
             None => doc.text.clone().into_bytes(),
         };
         let path = format!("{}/{}", s3_url_prefix, doc.filename);
-        store_s3_document_gzipped(s3_client, "birb-edgar-filings", &*path, contents_for_file)
-            .expect("Couldn't upload document!");
+        // The first document is always the important one, and therefore the
+        // one that we want to restrict read access.
+        let acl = match doc.sequence {
+            1 => "private",
+            _ => "public-read",
+        };
+        store_s3_document_gzipped(
+            s3_client,
+            "birb-edgar-filings",
+            &*path,
+            contents_for_file,
+            acl,
+        )
+        .expect("Couldn't upload document!");
         println!("File path: {}", path);
     }
 }

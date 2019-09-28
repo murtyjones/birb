@@ -7,7 +7,7 @@ extern crate postgres_derive;
 extern crate chrono;
 
 use chrono::prelude::*;
-use postgres::rows::Row;
+use postgres::rows::{Row, Rows};
 
 /// Model for a company
 #[derive(Debug, Serialize, Deserialize)]
@@ -135,4 +135,21 @@ pub struct SplitDocument {
     pub created_at: Option<chrono::DateTime<Utc>>,
     /// When it was last updated in our DB.
     pub updated_at: Option<chrono::DateTime<Utc>>,
+}
+
+impl SplitDocument {
+    pub fn from_rows(rows: &Rows) -> Vec<SplitDocument> {
+        rows.iter()
+            .map(|row| SplitDocument {
+                filing_id: row.get("filing_id"),
+                doc_type: row.get("doc_type"),
+                sequence: row.get("sequence"),
+                filename: row.get("filename"),
+                description: row.get("description"),
+                s3_url_prefix: row.get("s3_url_prefix"),
+                created_at: row.get("created_at"),
+                updated_at: row.get("updated_at"),
+            })
+            .collect::<Vec<SplitDocument>>()
+    }
 }

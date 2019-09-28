@@ -41,7 +41,10 @@ lazy_static! {
         .expect("Couldn't build graph contents regex!");
 }
 
-pub fn split_full_submission(file_contents: &str) -> Vec<SplitDocumentBeforeUpload> {
+pub fn split_full_submission(
+    file_contents: &str,
+    filing_id: &i32,
+) -> Vec<SplitDocumentBeforeUpload> {
     let file_contents = escape_encoded_node_contents(file_contents);
 
     let dom: RcDom = parse_document(RcDom::default(), Default::default()).one(&*file_contents);
@@ -49,7 +52,8 @@ pub fn split_full_submission(file_contents: &str) -> Vec<SplitDocumentBeforeUplo
     assert_eq!(
         1,
         document.children.borrow().len(),
-        "There should only be one main node!"
+        "There should only be one main node for filing_id = {}!",
+        filing_id
     );
     let sec_document_node = &document.children.borrow()[0];
     assert_sec_document_node_is_sec_document(sec_document_node);

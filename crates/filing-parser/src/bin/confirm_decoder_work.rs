@@ -49,7 +49,7 @@ fn _main(local_connection: &Connection, s3_client: &S3Client) {
     let s3_path = format!("{}.gz", filing.filing_edgar_url);
     let object_contents = get_s3_object(&s3_client, "birb-edgar-filings", &*s3_path);
     let decompressed = decompress_gzip(object_contents);
-    let parsed_docs = split_full_submission(&*decompressed);
+    let parsed_docs = split_full_submission(&*decompressed, &filing.id);
     write_parsed_docs_to_example_folder(parsed_docs);
 }
 

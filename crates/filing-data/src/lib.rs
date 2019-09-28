@@ -31,8 +31,14 @@ pub fn get_one_filing() {
             let file_path = &f.filing_edgar_url;
             let document_contents = get_edgar_filing(file_path).into_bytes();
             info!("Storing doc with file path: {:?}", file_path);
-            store_s3_document_gzipped(&s3_client, &bucket, &file_path, document_contents)
-                .expect("Couldn't store filing in S3");
+            store_s3_document_gzipped(
+                &s3_client,
+                &bucket,
+                &file_path,
+                document_contents,
+                "private",
+            )
+            .expect("Couldn't store filing in S3");
             info!("Updating status for collected to 'true'");
             persist_document_storage_status(&conn, &f);
             info!("Done!");

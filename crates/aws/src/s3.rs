@@ -90,6 +90,7 @@ pub fn store_s3_document_gzipped(
     bucket: &str,
     file_path: &str,
     contents: Vec<u8>,
+    acl: &str,
 ) -> Result<(), failure::Error> {
     let compressed_contents = compress_gzip(contents);
 
@@ -102,6 +103,7 @@ pub fn store_s3_document_gzipped(
         body: Some(compressed_contents.into()),
         content_encoding: Some(String::from("gzip")),
         content_type,
+        acl: Some(String::from(acl)),
         ..Default::default()
     };
     client
