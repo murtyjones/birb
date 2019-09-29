@@ -7,7 +7,7 @@ export interface Result {
     company_name: string;
 }
 
-export const defaultSearchResultsState: IRootState.SearchResultsState = {
+export const defaultSearchResultsState: IRootState.ISearchResultsState = {
     data: [], hasMore: false,
 };
 

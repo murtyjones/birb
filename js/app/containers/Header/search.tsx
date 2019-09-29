@@ -37,7 +37,7 @@ const Result: React.FC<ICompanySearchResult> = (props) => (
 
 interface ICompanySearchResults {
     onResultClick: (e: React.MouseEvent) => void;
-    results: IRootState.SearchResultsState;
+    results: IRootState.ISearchResultsState;
     activeIndex: number;
     history: History;
 }
@@ -86,7 +86,7 @@ export namespace CompanySearch {
     export interface IProps {
         history: History;
         handleInput: (pat: string) => void;
-        results: IRootState.SearchResultsState;
+        results: IRootState.ISearchResultsState;
     }
 }
 

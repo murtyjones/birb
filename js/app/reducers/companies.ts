@@ -2,7 +2,7 @@ import { CompanyActions } from 'app/actions/companies';
 import { createReducer } from 'deox';
 import { IRootState } from './state';
 
-export const defaultCompanyState: IRootState.CompanyState = {
+export const defaultCompanyState: IRootState.ICompanyState = {
     byShortCik: {},
 };
 

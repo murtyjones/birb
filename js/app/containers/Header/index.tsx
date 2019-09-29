@@ -19,7 +19,7 @@ export namespace Header {
     export interface Props extends RouteComponentProps<void> {
         actions: SearchActions;
         isFetching: boolean;
-        searchResults: IRootState.SearchResultsState;
+        searchResults: IRootState.ISearchResultsState;
     }
 }
 
