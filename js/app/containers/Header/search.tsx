@@ -1,5 +1,5 @@
 import * as style from 'app/containers/Header/style.css';
-import {RootState} from 'app/reducers';
+import {IRootState} from 'app/reducers';
 import {Result} from 'app/reducers/search';
 import cns from 'classnames';
 import { History } from 'history';
@@ -37,7 +37,7 @@ const Result: React.FC<ICompanySearchResult> = (props) => (
 
 interface ICompanySearchResults {
     onResultClick: (e: React.MouseEvent) => void;
-    results: RootState.SearchResultsState;
+    results: IRootState.SearchResultsState;
     activeIndex: number;
     history: History;
 }
@@ -86,7 +86,7 @@ export namespace CompanySearch {
     export interface IProps {
         history: History;
         handleInput: (pat: string) => void;
-        results: RootState.SearchResultsState;
+        results: IRootState.SearchResultsState;
     }
 }
 

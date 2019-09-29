@@ -1,5 +1,5 @@
 import {CompanyActions} from 'app/actions';
-import {createLoadingSelector, RootState} from 'app/reducers';
+import {createLoadingSelector, IRootState} from 'app/reducers';
 import {omit} from 'app/utils';
 import * as React from 'react';
 import {connect} from 'react-redux';
@@ -29,7 +29,7 @@ const loadingSelector = createLoadingSelector([CompanyActions.Type.GET_COMPANY_S
 
 
 @connect(
-    (state: RootState, ownProps): Pick<Filing.IProps, 'signedUrl' | 'shortCik' | 'filingId' | 'isFetching'> => {
+    (state: IRootState, ownProps): Pick<Filing.IProps, 'signedUrl' | 'shortCik' | 'filingId' | 'isFetching'> => {
         const shortCik = ownProps.match.params.shortCik;
         const filingId = ownProps.match.params.filingId;
         const company = state.companies.byShortCik[shortCik];

@@ -1,6 +1,6 @@
 import {SearchActions} from 'app/actions/search';
 import {CompanySearch} from 'app/containers/Header/search';
-import {createLoadingSelector, RootState} from 'app/reducers';
+import {createLoadingSelector, IRootState} from 'app/reducers';
 import {omit} from 'app/utils';
 import * as React from 'react';
 import {connect} from 'react-redux';
@@ -19,14 +19,14 @@ export namespace Header {
     export interface Props extends RouteComponentProps<void> {
         actions: SearchActions;
         isFetching: boolean;
-        searchResults: RootState.SearchResultsState;
+        searchResults: IRootState.SearchResultsState;
     }
 }
 
 const loadingSelector = createLoadingSelector([SearchActions.Type.SEARCH_COMPANY]);
 
 @connect(
-    (state: RootState, ownProps): Pick<Header.Props, 'isFetching' | 'searchResults'> => {
+    (state: IRootState, ownProps): Pick<Header.Props, 'isFetching' | 'searchResults'> => {
         return {
             isFetching: loadingSelector(state),
             searchResults: state.searchResults,

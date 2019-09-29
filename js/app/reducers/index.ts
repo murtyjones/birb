@@ -3,15 +3,15 @@ import { searchReducer } from 'app/reducers/search';
 import { combineReducers } from 'redux';
 import { companyReducer } from './companies';
 import { loadingReducer } from './loading';
-import { RootState } from './state';
+import { IRootState } from './state';
 
 export * from './selectors';
 
-export { RootState };
+export { IRootState };
 
 // NOTE: current type definition of Reducer in 'redux-actions' module
 // doesn't go well with redux@4
-export const rootReducer = combineReducers<RootState>({
+export const rootReducer = combineReducers<IRootState>({
   companies: companyReducer as any,
   loading: loadingReducer as any,
   errors: errorsReducer as any,

@@ -1,8 +1,8 @@
 import { CompanyActions } from 'app/actions/companies';
 import { createReducer } from 'deox';
-import { RootState } from './state';
+import { IRootState } from './state';
 
-export const defaultCompanyState: RootState.CompanyState = {
+export const defaultCompanyState: IRootState.CompanyState = {
     byShortCik: {},
 };
 

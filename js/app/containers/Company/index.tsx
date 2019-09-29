@@ -1,7 +1,7 @@
 import {CompanyActions} from 'app/actions/companies';
 import {ICompanyModel} from 'app/models';
 import {IFilingModel} from 'app/models/IFilingModel';
-import {RootState} from 'app/reducers';
+import {IRootState} from 'app/reducers';
 import {createLoadingSelector} from 'app/reducers/selectors/loading';
 import {omit} from 'app/utils';
 import * as React from 'react';
@@ -30,7 +30,7 @@ export namespace Company {
 const loadingSelector = createLoadingSelector([CompanyActions.Type.GET_COMPANY]);
 
 @connect(
-    (state: RootState, ownProps): Pick<Company.IProps, 'company' | 'companyFilings' | 'isFetching'> => {
+    (state: IRootState, ownProps): Pick<Company.IProps, 'company' | 'companyFilings' | 'isFetching'> => {
         const shortCik = ownProps.match.params.shortCik;
         const company = state.companies.byShortCik[shortCik] || {};
         const companyFilings = company.filings || [];
