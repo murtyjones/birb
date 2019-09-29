@@ -1,8 +1,8 @@
 import { SignedUrlActions } from 'app/actions';
 import { createReducer } from 'deox';
-import { IRootState } from './state';
+import { ISignedUrlState } from './state';
 
-export const defaultCompanyState: IRootState.ISignedUrlState = {
+export const defaultCompanyState: ISignedUrlState = {
     byFilingId: {},
 };
 

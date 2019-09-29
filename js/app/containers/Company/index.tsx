@@ -1,8 +1,7 @@
 import {CompanyActions} from 'app/actions/companies';
 import {ICompanyModel} from 'app/models';
 import {IFilingModel} from 'app/models/IFilingModel';
-import {IRootState} from 'app/reducers';
-import {createLoadingSelector} from 'app/reducers/selectors/loading';
+import {createLoadingSelector, IRootState} from 'app/reducers';
 import {omit} from 'app/utils';
 import * as React from 'react';
 import {connect} from 'react-redux';

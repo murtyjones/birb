@@ -1,10 +1,10 @@
-import {Result} from 'app/reducers/search';
+import {ISearchResult} from 'app/reducers/search';
 import {http} from 'app/utils/http';
 import {createActionCreator} from 'deox';
 import {Dispatch} from 'redux';
 
 export interface ISearchResults {
-    data: Result[];
+    data: ISearchResult[];
     has_more: boolean;
 }
 

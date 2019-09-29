@@ -1,6 +1,6 @@
 import * as style from 'app/containers/Header/style.css';
+import {ISearchResult} from 'app/reducers/search';
 import {ISearchResultsState} from 'app/reducers/state';
-import {Result} from 'app/reducers/search';
 import cns from 'classnames';
 import { History } from 'history';
 import * as React from 'react';
@@ -13,7 +13,7 @@ const getCompanyWithFilingsLink = (shortCik: string) => {
 
 interface ICompanySearchResult {
     onResultClick: (e: React.MouseEvent) => void;
-    result: Result;
+    result: ISearchResult;
     isActive: boolean;
 }
 

@@ -1,7 +1,7 @@
 import { Action } from 'redux';
-import { IRootState } from './state';
+import { ILoadingState } from './state';
 
-export const defaultLoadingState: IRootState.ILoadingState = {
+export const defaultLoadingState: ILoadingState = {
 
 };
 

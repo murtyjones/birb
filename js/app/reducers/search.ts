@@ -1,13 +1,13 @@
 import { SearchActions } from 'app/actions/search';
 import { createReducer } from 'deox';
-import { IRootState } from './state';
+import { ISearchResultsState } from './state';
 
-export interface Result {
+export interface ISearchResult {
     short_cik: string;
     company_name: string;
 }
 
-export const defaultSearchResultsState: IRootState.ISearchResultsState = {
+export const defaultSearchResultsState: ISearchResultsState = {
     data: [], hasMore: false,
 };
 

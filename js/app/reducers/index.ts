@@ -8,7 +8,7 @@ import { IRootState } from './state';
 
 export * from './selectors';
 
-export { IRootState };
+export * from './state';
 
 // NOTE: current type definition of Reducer in 'redux-actions' module
 // doesn't go well with redux@4
