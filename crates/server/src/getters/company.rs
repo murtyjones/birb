@@ -1,12 +1,8 @@
 use aws::s3;
 use failure;
+use models::SignedUrl;
 use models::{Company, CompanyFilingData, Filing, SplitDocument};
 use postgres::Connection;
-
-fn get_signed_url<S: Into<String>>(filing_edgar_url: S) -> String {
-    let compressed = format!("{}.gz", &*filing_edgar_url.into());
-    s3::get_signed_url("birb-edgar-filings", &*compressed)
-}
 
 /// Find an entity using its cik
 pub fn get_typeahead_results(conn: &Connection, substr: String) -> Result<Vec<Company>, &str> {
@@ -80,27 +76,34 @@ pub fn get_company_filings(
 }
 
 /// Get a company's filing S3 link
-pub fn get_split_filing(
+pub fn get_signed_url(
     conn: &Connection,
+    short_cik: i32,
     filing_id: i32,
-) -> Result<Vec<SplitDocument>, failure::Error> {
+) -> Result<SignedUrl, failure::Error> {
     let rows = &conn
         .query(
             "
             SELECT * FROM split_filing
             WHERE filing_id = $1
-            ORDER BY sequence;
+            AND sequence = 1;
         ",
             &[&filing_id],
         )
         .expect("Couldn't get company's filing info for signed url");
+    assert_eq!(1, rows.len(), "No filing found!");
 
-    let docs = match rows.len() {
-        0 => vec![],
-        _ => SplitDocument::from_rows(rows),
-    };
+    let split_doc: SplitDocument = rows.get(0).into();
 
-    Ok(docs)
+    // e.g. edgar/data/14707/0000014707-16-000090 + / + s102614_10q.htm
+    let filepath = format!("{}/{}", split_doc.s3_url_prefix, split_doc.filename);
+    let signed_url = s3::get_signed_url("birb-edgar-filings", &*filepath);
+
+    Ok(SignedUrl {
+        filing_id,
+        short_cik,
+        signed_url,
+    })
 }
 
 #[cfg(test)]

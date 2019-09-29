@@ -153,3 +153,25 @@ impl SplitDocument {
             .collect::<Vec<SplitDocument>>()
     }
 }
+
+impl<'a> From<Row<'a>> for SplitDocument {
+    fn from(row: Row) -> Self {
+        SplitDocument {
+            filing_id: row.get("filing_id"),
+            doc_type: row.get("doc_type"),
+            sequence: row.get("sequence"),
+            filename: row.get("filename"),
+            description: row.get("description"),
+            s3_url_prefix: row.get("s3_url_prefix"),
+            created_at: row.get("created_at"),
+            updated_at: row.get("updated_at"),
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSql, FromSql)]
+pub struct SignedUrl {
+    pub short_cik: i32,
+    pub filing_id: i32,
+    pub signed_url: String,
+}

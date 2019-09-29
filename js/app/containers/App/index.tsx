@@ -1,30 +1,28 @@
 import * as React from 'react';
-import * as style from './style.css';
 import { RouteComponentProps } from 'react-router';
+import * as style from './style.css';
 
-export namespace App {
-  export interface Props extends RouteComponentProps<void> {
-    // thing1: IRootState.Thing1State;
-    // actions: SomeActions;
-  }
+export interface IProps extends RouteComponentProps<void> {
+  // thing1: IRootState.Thing1State;
+  // actions: SomeActions;
 }
 
 // @connect(
-//   (state: IRootState, ownProps): Pick<App.Props, 'thing1' | 'thing2'> => {},
-//   (dispatch: Dispatch): Pick<App.Props, 'actions'> => ({})
+//   (state: IRootState, ownProps): Pick<IProps, 'thing1' | 'thing2'> => {},
+//   (dispatch: Dispatch): Pick<IProps, 'actions'> => ({})
 // )
-export class App extends React.Component<App.Props> {
-  static defaultProps: Partial<App.Props> = {
+export class App extends React.Component<IProps> {
+  public static defaultProps: Partial<IProps> = {
 
   };
 
-  constructor(props: App.Props, context?: any) {
+  constructor(props: IProps, context?: any) {
     super(props, context);
   }
 
-  render() {
+  public render() {
     return (
-      <div className={style.normal}></div>
+      <div className={style.normal}/>
     );
   }
 }

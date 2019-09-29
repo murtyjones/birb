@@ -4,6 +4,5 @@ export interface ICompanyModel {
   shortCik: string;
   name: string;
   filings: IFilingModel[];
-  signedUrl: string|null;
 }
 

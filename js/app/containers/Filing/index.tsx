@@ -1,4 +1,4 @@
-import {CompanyActions} from 'app/actions';
+import {SignedUrlActions} from 'app/actions';
 import {createLoadingSelector, IRootState} from 'app/reducers';
 import {omit} from 'app/utils';
 import * as React from 'react';
@@ -11,45 +11,44 @@ interface IMatchParams {
     filingId: string;
 }
 
-export namespace Filing {
-    export interface IProps extends RouteComponentProps<void> {
-        actions: CompanyActions;
-        isFetching: boolean;
-        shortCik: string;
-        filingId: string;
-        signedUrl: string|null;
-    }
-
-    export interface IState {
-        content?: string;
-    }
+export interface IProps extends RouteComponentProps<void> {
+    actions: SignedUrlActions;
+    isFetching: boolean;
+    shortCik: string;
+    filingId: string;
+    signedUrl: string|undefined;
 }
 
-const loadingSelector = createLoadingSelector([CompanyActions.Type.GET_COMPANY_SIGNED_FILING_URL]);
+export interface IState {
+    content?: string;
+}
+
+const loadingSelector = createLoadingSelector([SignedUrlActions.Type.GET_SIGNED_FILING_URL]);
 
 
 @connect(
-    (state: IRootState, ownProps): Pick<Filing.IProps, 'signedUrl' | 'shortCik' | 'filingId' | 'isFetching'> => {
+    (state: IRootState, ownProps): Pick<IProps, 'signedUrl' | 'shortCik' | 'filingId' | 'isFetching'> => {
         const shortCik = ownProps.match.params.shortCik;
         const filingId = ownProps.match.params.filingId;
         const company = state.companies.byShortCik[shortCik];
+        const signedUrl = (state.signedUrls.byFilingId[filingId] || {}).signedUrl;
 
         return {
             filingId,
             isFetching: loadingSelector(state),
             shortCik,
-            signedUrl: company && company.signedUrl ? company.signedUrl : null,
+            signedUrl,
         };
     },
-    (dispatch: Dispatch): Pick<Filing.IProps, 'actions'> => ({
-        actions: bindActionCreators(omit(CompanyActions, 'Type'), dispatch),
+    (dispatch: Dispatch): Pick<IProps, 'actions'> => ({
+        actions: bindActionCreators(omit(SignedUrlActions, 'Type'), dispatch),
     }),
 )
 
-export class Filing extends React.Component<Filing.IProps, Filing.IState> {
+export class Filing extends React.Component<IProps, IState> {
     private myRef = React.createRef<HTMLIFrameElement>();
 
-    constructor(props: Filing.IProps, context?: any) {
+    constructor(props: IProps, context?: any) {
         super(props, context);
         this.state = {
             content: undefined,
@@ -64,7 +63,7 @@ export class Filing extends React.Component<Filing.IProps, Filing.IState> {
     }
 
     public shouldComponentUpdate(
-        nextProps: Readonly<Filing.IProps>, nextState: Readonly<Filing.IState>, nextContext: any,
+        nextProps: Readonly<IProps>, nextState: Readonly<IState>, nextContext: any,
     ) {
         return (
             nextProps.signedUrl !== this.props.signedUrl

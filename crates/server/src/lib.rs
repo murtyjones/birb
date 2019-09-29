@@ -98,7 +98,7 @@ fn rocket() -> rocket::Rocket {
                 handlers::health_check::get,
                 handlers::autocomplete_company::get,
                 handlers::company::get_company_filings,
-                handlers::company::get_split_filing,
+                handlers::company::get_signed_url,
             ],
         )
         .register(catchers![
