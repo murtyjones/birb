@@ -2,10 +2,13 @@ use failure;
 use futures::{Future, Stream};
 use rusoto_core::credential::{ChainProvider, InstanceMetadataProvider, ProfileProvider};
 use rusoto_core::request::HttpClient;
-use rusoto_core::Region;
+use rusoto_core::{Region, RusotoFuture};
 use rusoto_credential::ProvideAwsCredentials;
 use rusoto_s3::util::PreSignedRequest;
-use rusoto_s3::{GetObjectRequest, ListObjectsRequest, Object, PutObjectRequest, S3Client, S3};
+use rusoto_s3::{
+    GetObjectRequest, ListObjectsRequest, Object, PutObjectError, PutObjectOutput,
+    PutObjectRequest, S3Client, S3,
+};
 use utils::{compress_gzip, get_content_type_from_filepath};
 
 pub fn get_birb_region() -> Region {
@@ -111,4 +114,28 @@ pub fn store_s3_document_gzipped(
         .sync()
         .expect("Couldn't PUT S3 object.");
     Ok(())
+}
+
+pub fn store_s3_document_gzipped_async(
+    client: &S3Client,
+    bucket: &str,
+    file_path: &str,
+    contents: Vec<u8>,
+    acl: &str,
+) -> RusotoFuture<PutObjectOutput, PutObjectError> {
+    let compressed_contents = compress_gzip(contents);
+
+    let content_type = get_content_type_from_filepath(&file_path);
+    let content_type = content_type.map(|s| s.to_string());
+
+    let put_req = PutObjectRequest {
+        bucket: bucket.to_owned(),
+        key: file_path.to_owned(),
+        body: Some(compressed_contents.into()),
+        content_encoding: Some(String::from("gzip")),
+        content_type,
+        acl: Some(String::from(acl)),
+        ..Default::default()
+    };
+    client.put_object(put_req)
 }

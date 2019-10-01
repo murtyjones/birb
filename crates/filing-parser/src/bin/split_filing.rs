@@ -8,10 +8,12 @@ use utils::{decompress_gzip, get_accession_number, get_cik, get_connection};
 
 /// Do the main work infinitely
 fn main() {
-    let iterations: Vec<_> = (1..=50).collect();
+    let start = std::time::Instant::now();
+    let iterations: Vec<_> = (1..=10).collect();
     iterations.par_iter().for_each(|_e| {
         _main();
     });
+    println!("Finished in {:?}", start.elapsed());
 }
 
 /// Finds a filing that has been collected, but not yet split.
