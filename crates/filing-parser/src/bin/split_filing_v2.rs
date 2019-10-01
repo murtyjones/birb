@@ -5,13 +5,14 @@ use futures::{future, Future, Stream};
 use models::{Filing, SplitDocumentBeforeUpload};
 use postgres::Connection;
 use rayon::prelude::*;
-use rusoto_core::RusotoFuture;
+use rusoto_s3::PutObjectOutput;
 use rusoto_s3::S3Client;
 use rusoto_s3::S3;
 use rusoto_s3::{GetObjectOutput, GetObjectRequest};
-use rusoto_s3::{PutObjectError, PutObjectOutput};
 use tokio_core::reactor::Core;
 use utils::{decompress_gzip, get_accession_number, get_cik, get_connection};
+
+const NUMBER_TO_COLLECT_PER_ITERATION: i32 = 20;
 
 fn main() {
     let start = std::time::Instant::now();
@@ -21,7 +22,10 @@ fn main() {
 
     let now = std::time::Instant::now();
     let filings = collect_random_not_yet_split_filings(&conn, &s3_client);
-    println!("Took {:?} to query for un-split filings", now.elapsed());
+    println!(
+        "Took {:?} to query and download un-split filings",
+        now.elapsed()
+    );
 
     let now = std::time::Instant::now();
     let split_filings = filings
@@ -60,20 +64,23 @@ fn collect_random_not_yet_split_filings(
     s3_client: &S3Client,
 ) -> Vec<(String, String, i32)> {
     let mut core = Core::new().unwrap();
-    let query = r"
-        SELECT f.* FROM filing f
+    let query = format!(
+        "
+        SELECT * FROM filing f TABLESAMPLE SYSTEM ((100000 * 100) / 5100000.0)
         LEFT JOIN split_filing sf on f.id = sf.filing_id
         WHERE f.collected = true
         AND sf.filing_id IS NULL
         ORDER BY random()
-        LIMIT 10
+        LIMIT {}
         ;
-    ";
+    ",
+        NUMBER_TO_COLLECT_PER_ITERATION
+    );
     //    let query = r"select * from filing where filing_edgar_url = 'edgar/data/40545/0000040545-16-000152.txt'";
     // Execute query
-    let rows = &conn.query(query, &[]).expect("");
+    let rows = &conn.query(&*query, &[]).expect("Couldn't get rows!");
     let promises = future::join_all(rows.iter().map(|row| {
-        let filing = Filing::from_row(rows.get(0));
+        let filing: Filing = row.into();
         let s3_path = format!("{}.gz", filing.filing_edgar_url);
         let get_req = GetObjectRequest {
             bucket: String::from("birb-edgar-filings"),
@@ -102,7 +109,7 @@ fn collect_random_not_yet_split_filings(
 
     for (i, object_contents) in objects.into_iter().enumerate() {
         let row = rows.get(i);
-        let filing = Filing::from_row(row);
+        let filing: Filing = row.into();
         results.push((
             decompress_gzip(object_contents),
             filing.filing_edgar_url,
@@ -152,7 +159,7 @@ fn upload_all(
     }));
 
     match core.run(promises) {
-        Ok(items) => println!("Uploaded!"),
+        Ok(_items) => println!("Uploaded!"),
         Err(e) => panic!("Error completing futures: {}", e),
     };
 

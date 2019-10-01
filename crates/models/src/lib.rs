@@ -45,8 +45,8 @@ pub struct Filing {
     pub updated_at: Option<chrono::DateTime<Utc>>,
 }
 
-impl Filing {
-    pub fn from_row(row: Row) -> Filing {
+impl<'a> From<Row<'a>> for Filing {
+    fn from(row: Row) -> Self {
         Filing {
             id: row.get("id"),
             company_short_cik: row.get("company_short_cik"),

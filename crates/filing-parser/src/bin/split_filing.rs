@@ -9,7 +9,7 @@ use utils::{decompress_gzip, get_accession_number, get_cik, get_connection};
 /// Do the main work infinitely
 fn main() {
     let start = std::time::Instant::now();
-    let iterations: Vec<_> = (1..=10).collect();
+    let iterations: Vec<_> = (1..=20).collect();
     iterations.par_iter().for_each(|_e| {
         _main();
     });
@@ -46,7 +46,7 @@ fn collect_random_not_yet_split_filing(
     s3_client: &S3Client,
 ) -> (String, String, i32) {
     let query = r"
-        SELECT f.* FROM filing f
+        SELECT * FROM filing f TABLESAMPLE SYSTEM ((100000 * 100) / 5100000.0)
         LEFT JOIN split_filing sf on f.id = sf.filing_id
         WHERE f.collected = true
         AND sf.filing_id IS NULL
@@ -63,7 +63,7 @@ fn collect_random_not_yet_split_filing(
         "Should have received one row! Instead received {} rows",
         rows.len()
     );
-    let filing = Filing::from_row(rows.get(0));
+    let filing: Filing = rows.get(0).into();
     let s3_path = format!("{}.gz", filing.filing_edgar_url);
     let object_contents = get_s3_object(&s3_client, "birb-edgar-filings", &*s3_path);
     (

@@ -45,7 +45,7 @@ fn _main(local_connection: &Connection, s3_client: &S3Client) {
         "Should have received one row! Instead received {} rows",
         rows.len()
     );
-    let filing = Filing::from_row(rows.get(0));
+    let filing: Filing = rows.get(0).into();
     let s3_path = format!("{}.gz", filing.filing_edgar_url);
     let object_contents = get_s3_object(&s3_client, "birb-edgar-filings", &*s3_path);
     let decompressed = decompress_gzip(object_contents);
