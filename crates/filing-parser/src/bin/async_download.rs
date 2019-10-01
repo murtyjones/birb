@@ -6,20 +6,15 @@ use tokio_core::reactor::Core;
 
 const FILENAMES: &'static [&'static str] = &[
     "edgar/data/1001463/0001185185-17-000668.txt.gz",
-    "edgar/data/1001463/0001185185-17-000668.txt.gz",
-    "edgar/data/1001463/0001185185-17-000668.txt.gz",
-    "edgar/data/1001463/0001185185-17-000668.txt.gz",
-    "edgar/data/1001463/0001185185-17-000668.txt.gz",
-    "edgar/data/1001463/0001185185-17-000668.txt.gz",
-    "edgar/data/1001463/0001185185-17-000668.txt.gz",
-    "edgar/data/1001463/0001185185-17-000668.txt.gz",
-    "edgar/data/1001463/0001185185-17-000668.txt.gz",
-    "edgar/data/1001463/0001185185-17-000668.txt.gz",
+    "edgar/data/1001463/0001185185-16-005195.txt.gz",
+    "edgar/data/1001463/0001185185-16-005721.txt.gz",
+    "edgar/data/1001463/0001185185-17-001067.txt.gz",
+    "edgar/data/1001463/0001185185-17-002324.txt.gz",
 ];
 
 fn main() {
-    requests_async();
     requests_sync();
+    requests_async();
 }
 
 fn requests_sync() {
