@@ -19,10 +19,7 @@ use utils::{decompress_gzip, get_accession_number, get_cik, get_connection};
 const NUMBER_TO_COLLECT_PER_ITERATION: i32 = 10;
 const PARALLEL_REQUESTS: usize = 5;
 
-use reqwest::r#async::Client; // 0.9.14
 use tokio; // 0.1.18
-
-type Result<T> = std::result::Result<T, Box<std::error::Error>>;
 
 fn main() {
     let start = std::time::Instant::now();
