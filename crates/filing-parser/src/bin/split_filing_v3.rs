@@ -17,8 +17,8 @@ use std::thread;
 use tokio_core::reactor::Core;
 use utils::{decompress_gzip, get_accession_number, get_cik, get_connection};
 
-const NUMBER_TO_COLLECT_PER_ITERATION: i32 = 10;
-const PARALLEL_REQUESTS: usize = 10;
+const NUMBER_TO_COLLECT_PER_ITERATION: i32 = 20;
+const PARALLEL_REQUESTS: usize = 5;
 
 use futures::future::FromErr;
 use futures::stream::Concat2;
@@ -31,26 +31,22 @@ fn main() {
     let s3_client = get_s3_client();
     let num_threads = num_cpus::get();
     let rows = get_unsplit_filings(&conn);
+    let filings = rows
+        .into_iter()
+        .map(|row| row.into())
+        .collect::<Vec<Filing>>();
 
-    let filings_contents = Arc::new(Mutex::new(vec![]));
-    let filings_contents2 = filings_contents.clone();
+    let filings_to_process_queue = Arc::new(Mutex::new(vec![]));
+    let filings_to_process_queue2 = filings_to_process_queue.clone();
 
     for _i in 0..num_threads {
-        let filings_contents = filings_contents.clone();
-        spawn_worker(filings_contents);
+        let filings_to_process_queue = filings_to_process_queue.clone();
+        spawn_worker(filings_to_process_queue);
     }
 
-    let filing_s3_paths = rows
-        .iter()
-        .map(|row| {
-            let f: Filing = row.into();
-            f.filing_edgar_url
-        })
-        .collect::<Vec<String>>();
-
-    let bodies = stream::iter_ok(filing_s3_paths)
-        .map(move |path| {
-            let full_path = format!("{}.gz", path);
+    let bodies = stream::iter_ok(filings)
+        .map(move |filing| {
+            let full_path = format!("{}.gz", filing.filing_edgar_url);
             let get_req = GetObjectRequest {
                 bucket: String::from("birb-edgar-filings"),
                 key: full_path,
@@ -59,20 +55,17 @@ fn main() {
             s3_client.get_object(get_req).and_then(move |result| {
                 let stream: FromErr<Concat2<ByteStream>, std::io::Error> =
                     result.body.unwrap().concat2().from_err();
-                std::boxed::Box::new(future::ok((stream, path)))
+                std::boxed::Box::new(future::ok((stream, filing)))
             })
         })
         .buffer_unordered(PARALLEL_REQUESTS);
 
     let work = bodies
-        .for_each(move |(result, path)| {
-            println!("Retrieved {}", path);
+        .for_each(move |(result, filing)| {
             let body = result.wait().unwrap().to_vec();
-            let filings_contents = filings_contents.clone();
-            std::thread::spawn(move || {
-                let mut locked = filings_contents.lock().unwrap();
-                locked.push(body);
-            });
+            let filings_to_process_queue = filings_to_process_queue.clone();
+            let mut locked = filings_to_process_queue.lock().unwrap();
+            locked.push((body, filing));
             Ok(())
         })
         .map_err(|e| panic!("Error while processing: {}", e));
@@ -82,13 +75,15 @@ fn main() {
     println!("Took: {:?}", start.elapsed());
 }
 
-fn spawn_worker(filing_contents: Arc<Mutex<Vec<Vec<u8>>>>) {
-    let filing_contents = filing_contents.clone();
+fn spawn_worker(queue: Arc<Mutex<Vec<(Vec<u8>, Filing)>>>) {
+    let queue = queue.clone();
     thread::spawn(move || loop {
-        let mut locked = filing_contents.lock().expect("Oh no!");
-        if locked.len() > 0 {
-            let first = locked.swap_remove(0);
-            println!("Processing item with length: {}", first.len());
+        let first = {
+            let mut locked = queue.lock().expect("Oh no!");
+            locked.pop()
+        };
+        if let Some((contents, filing)) = first {
+            println!("Processing item: {:?}", filing.id);
         }
     });
 }
