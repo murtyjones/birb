@@ -1,4 +1,5 @@
 use aws::s3::{get_s3_client, store_s3_document_gzipped_async};
+use chrono::Utc;
 use failure;
 use filing_parser::split_full_submission::split_full_submission;
 use futures::{future, stream, Future, Stream};
@@ -6,7 +7,7 @@ use models::{Filing, SplitDocumentBeforeUpload};
 use postgres::rows::{Row, Rows};
 use postgres::Connection;
 use rayon::prelude::*;
-use rusoto_core::RusotoFuture;
+use rusoto_core::{ByteStream, RusotoFuture};
 use rusoto_s3::S3Client;
 use rusoto_s3::S3;
 use rusoto_s3::{GetObjectError, PutObjectOutput};
@@ -17,9 +18,11 @@ use tokio_core::reactor::Core;
 use utils::{decompress_gzip, get_accession_number, get_cik, get_connection};
 
 const NUMBER_TO_COLLECT_PER_ITERATION: i32 = 10;
-const PARALLEL_REQUESTS: usize = 5;
+const PARALLEL_REQUESTS: usize = 10;
 
-use tokio; // 0.1.18
+use futures::future::FromErr;
+use futures::stream::Concat2;
+use tokio;
 
 fn main() {
     let start = std::time::Instant::now();
@@ -27,7 +30,7 @@ fn main() {
     let conn = get_connection(db_uri);
     let s3_client = get_s3_client();
     let num_threads = num_cpus::get();
-    let mut rows = get_unsplit_filings(&conn);
+    let rows = get_unsplit_filings(&conn);
 
     let filings_contents = Arc::new(Mutex::new(vec![]));
     let filings_contents2 = filings_contents.clone();
@@ -44,6 +47,7 @@ fn main() {
             f.filing_edgar_url
         })
         .collect::<Vec<String>>();
+
     let bodies = stream::iter_ok(filing_s3_paths)
         .map(move |path| {
             let full_path = format!("{}.gz", path);
@@ -52,20 +56,22 @@ fn main() {
                 key: full_path,
                 ..Default::default()
             };
-            s3_client.get_object(get_req).and_then(|result| {
-                let stream = result.body.unwrap();
-                stream.concat2().from_err()
+            s3_client.get_object(get_req).and_then(move |result| {
+                let stream: FromErr<Concat2<ByteStream>, std::io::Error> =
+                    result.body.unwrap().concat2().from_err();
+                std::boxed::Box::new(future::ok((stream, path)))
             })
         })
         .buffer_unordered(PARALLEL_REQUESTS);
 
     let work = bodies
-        .for_each(move |b| {
-            println!("Got {} bytes", b.len());
+        .for_each(move |(result, path)| {
+            println!("Retrieved {}", path);
+            let body = result.wait().unwrap().to_vec();
             let filings_contents = filings_contents.clone();
             std::thread::spawn(move || {
                 let mut locked = filings_contents.lock().unwrap();
-                locked.push(b.to_vec());
+                locked.push(body);
             });
             Ok(())
         })
@@ -73,10 +79,7 @@ fn main() {
 
     tokio::run(work);
 
-    println!(
-        "Total items: {}",
-        filings_contents2.clone().lock().unwrap().len()
-    );
+    println!("Took: {:?}", start.elapsed());
 }
 
 fn spawn_worker(filing_contents: Arc<Mutex<Vec<Vec<u8>>>>) {
