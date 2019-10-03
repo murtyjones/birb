@@ -19,6 +19,7 @@ use utils::{decompress_gzip, get_accession_number, get_cik, get_connection};
 
 const NUMBER_TO_COLLECT_PER_ITERATION: i32 = 20;
 const PARALLEL_REQUESTS: usize = 5;
+const MINIMUM_QUEUE_SIZE: usize = 20;
 
 use futures::future::FromErr;
 use futures::stream::Concat2;
@@ -78,12 +79,18 @@ fn main() {
 fn spawn_worker(queue: Arc<Mutex<Vec<(Vec<u8>, Filing)>>>) {
     let queue = queue.clone();
     thread::spawn(move || loop {
-        let first = {
+        let (first, len) = {
             let mut locked = queue.lock().expect("Oh no!");
-            locked.pop()
+            (locked.pop(), locked.len())
         };
         if let Some((contents, filing)) = first {
             println!("Processing item: {:?}", filing.id);
+        }
+        if len < MINIMUM_QUEUE_SIZE {
+            println!(
+                "Queue length is {}, below the threshold of {}. Adding another item",
+                len, MINIMUM_QUEUE_SIZE
+            );
         }
     });
 }
