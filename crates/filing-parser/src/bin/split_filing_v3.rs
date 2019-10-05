@@ -17,7 +17,7 @@ use std::thread;
 use tokio_core::reactor::Core;
 use utils::{decompress_gzip, get_accession_number, get_cik, get_connection};
 
-const NUMBER_TO_COLLECT_PER_ITERATION: i32 = 20;
+const NUMBER_TO_COLLECT_PER_ITERATION: i32 = 10;
 const PARALLEL_REQUESTS: usize = 5;
 const MINIMUM_QUEUE_SIZE: usize = 20;
 
@@ -29,20 +29,24 @@ fn main() {
     let start = std::time::Instant::now();
     let db_uri = std::env::var("DATABASE_URI").expect("No connection string found!");
     let conn = get_connection(db_uri);
+    let arced_conn = Arc::new(Mutex::new(conn));
     let s3_client = get_s3_client();
     let num_threads = num_cpus::get();
-    let rows = get_unsplit_filings(&conn);
+    let rows = get_unsplit_filings(arced_conn.clone());
     let filings = rows
         .into_iter()
         .map(|row| row.into())
         .collect::<Vec<Filing>>();
 
+    println!("Got {}", filings.len());
+
     let filings_to_process_queue = Arc::new(Mutex::new(vec![]));
     let filings_to_process_queue2 = filings_to_process_queue.clone();
 
+    let mut handles = vec![];
     for _i in 0..num_threads {
         let filings_to_process_queue = filings_to_process_queue.clone();
-        spawn_worker(filings_to_process_queue);
+        handles.push(spawn_worker(arced_conn.clone(), filings_to_process_queue));
     }
 
     let bodies = stream::iter_ok(filings)
@@ -66,6 +70,7 @@ fn main() {
             let body = result.wait().unwrap().to_vec();
             let filings_to_process_queue = filings_to_process_queue.clone();
             let mut locked = filings_to_process_queue.lock().unwrap();
+            println!("pushing");
             locked.push((body, filing));
             Ok(())
         })
@@ -73,29 +78,46 @@ fn main() {
 
     tokio::run(work);
 
+    // wait for all threads to resolve
+    for h in handles {
+        h.join().unwrap();
+    }
+
     println!("Took: {:?}", start.elapsed());
 }
 
-fn spawn_worker(queue: Arc<Mutex<Vec<(Vec<u8>, Filing)>>>) {
+fn spawn_worker(
+    conn: Arc<Mutex<Connection>>,
+    queue: Arc<Mutex<Vec<(Vec<u8>, Filing)>>>,
+) -> std::thread::JoinHandle<()> {
     let queue = queue.clone();
     thread::spawn(move || loop {
+        let conn = conn.clone();
         let (first, len) = {
             let mut locked = queue.lock().expect("Oh no!");
             (locked.pop(), locked.len())
         };
         if let Some((contents, filing)) = first {
             println!("Processing item: {:?}", filing.id);
+            let decompressed = decompress_gzip(contents);
+            let docs = split_full_submission(&*decompressed, &filing.id);
+            upload_all(&filing, &docs).expect("Couldn't upload docs");
+            persist_split_filings_to_db(conn, &filing, &docs).expect("Couldn't persist filings");
+            if len == 0 {
+                println!("Nothing left to process! Exiting");
+                break;
+            }
         }
-        if len < MINIMUM_QUEUE_SIZE {
-            println!(
-                "Queue length is {}, below the threshold of {}. Adding another item",
-                len, MINIMUM_QUEUE_SIZE
-            );
-        }
-    });
+        //        if len < MINIMUM_QUEUE_SIZE {
+        //            println!(
+        //                "Queue length is {}, below the threshold of {}. Adding another item",
+        //                len, MINIMUM_QUEUE_SIZE
+        //            );
+        //        }
+    })
 }
 
-fn get_unsplit_filings(conn: &Connection) -> Rows {
+fn get_unsplit_filings(conn: Arc<Mutex<Connection>>) -> Rows {
     let query = format!(
         "
         SELECT * FROM filing f TABLESAMPLE SYSTEM ((100000 * 100) / 5100000.0)
@@ -110,5 +132,81 @@ fn get_unsplit_filings(conn: &Connection) -> Rows {
     );
     //    let query = r"select * from filing where filing_edgar_url = 'edgar/data/40545/0000040545-16-000152.txt'";
     // Execute query
-    conn.query(&*query, &[]).expect("Couldn't get rows!")
+    let locked = conn.lock().unwrap();
+    locked.query(&*query, &[]).expect("Couldn't get rows!")
+}
+
+fn upload_all(
+    filing: &Filing,
+    split_filings: &Vec<SplitDocumentBeforeUpload>,
+) -> Result<(), failure::Error> {
+    let s3_client = get_s3_client();
+    let mut core = Core::new().unwrap();
+
+    let promises = future::join_all(split_filings.iter().map(|doc| {
+        let cik = get_cik(&*filing.filing_edgar_url);
+        let accession_number = get_accession_number(&*filing.filing_edgar_url);
+        let s3_url_prefix = format!("edgar/data/{}/{}", cik, accession_number);
+        let contents_for_file = match &doc.decoded_text {
+            Some(d) => d.clone(),
+            None => doc.text.clone().into_bytes(),
+        };
+        let path = format!("{}/{}", s3_url_prefix, doc.filename);
+        // The first document is always the important one, and therefore the
+        // one that we want to restrict read access.
+        let acl = match doc.sequence {
+            1 => "private",
+            _ => "public-read",
+        };
+        store_s3_document_gzipped_async(
+            &s3_client,
+            "birb-edgar-filings",
+            &*path,
+            contents_for_file,
+            acl,
+        )
+    }));
+
+    match core.run(promises) {
+        Ok(_items) => println!("Uploaded!"),
+        Err(e) => panic!("Error completing futures: {}", e),
+    };
+
+    Ok(())
+}
+
+fn persist_split_filings_to_db(
+    conn: Arc<Mutex<Connection>>,
+    filing: &Filing,
+    split_filings: &Vec<SplitDocumentBeforeUpload>,
+) -> Result<(), failure::Error> {
+    let locked = conn.lock().unwrap();
+    let trans = locked.transaction().expect("Couldn't begin transaction");
+    let statement = trans
+        .prepare(
+            "
+             INSERT INTO split_filing
+             (filing_id, sequence, doc_type, filename, description, s3_url_prefix)
+             VALUES ($1, $2, $3, $4, $5, $6);
+             ",
+        )
+        .expect("Couldn't prepare company upsert statement for execution");
+
+    for doc in split_filings {
+        let cik = get_cik(&*filing.filing_edgar_url);
+        let accession_number = get_accession_number(&*filing.filing_edgar_url);
+        let s3_url_prefix = format!("edgar/data/{}/{}", cik, accession_number);
+        statement
+            .execute(&[
+                &filing.id,
+                &doc.sequence,
+                &doc.doc_type,
+                &doc.filename,
+                &doc.description,
+                &s3_url_prefix,
+            ])
+            .expect("Couldn't execute update");
+    }
+    trans.commit().expect("Couldn't insert into split_filing");
+    Ok(())
 }

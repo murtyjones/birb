@@ -22,10 +22,7 @@ fn main() {
 
     let now = std::time::Instant::now();
     let filings = collect_random_not_yet_split_filings(&conn, &s3_client);
-    println!(
-        "Took {:?} to query and download un-split filings",
-        now.elapsed()
-    );
+    println!("Took {:?} to query and download filings", now.elapsed());
 
     let now = std::time::Instant::now();
     let split_filings = filings
