@@ -2,23 +2,29 @@ use aws::s3::{get_s3_client, get_s3_object, store_s3_document_gzipped_async};
 use chrono::Utc;
 use failure;
 use filing_parser::split_full_submission::split_full_submission;
-use futures::future;
+use futures::{future, stream, Future, Stream};
 use models::{Filing, SplitDocumentBeforeUpload};
 use postgres::rows::Rows;
 use postgres::Connection;
 use r2d2_postgres::{PostgresConnectionManager, TlsMode};
-use rusoto_core::RusotoFuture;
+use rusoto_core::{ByteStream, RusotoFuture};
 use rusoto_s3::S3Client;
+use rusoto_s3::S3;
+use rusoto_s3::{GetObjectOutput, GetObjectRequest};
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::thread::JoinHandle;
 use tokio_core::reactor::Core;
 use utils::{decompress_gzip, get_accession_number, get_cik, get_connection};
 
-const NUMBER_TO_COLLECT_PER_ITERATION: i32 = 20;
-
+use futures::future::FromErr;
+use futures::stream::Concat2;
 use r2d2;
 use r2d2::{Pool, PooledConnection};
+use tokio;
+
+const PARALLEL_REQUESTS: usize = 5;
+const MIN_QUEUE_SIZE: usize = 10;
 
 fn main() {
     let start = std::time::Instant::now();
@@ -27,21 +33,21 @@ fn main() {
     let pool = Pool::new(manager).unwrap();
     let s3_client = get_s3_client();
     let num_threads = num_cpus::get();
-    let mut filings = get_unsplit_filings(pool.get().unwrap())
+    let filings = get_unsplit_filings(pool.get().unwrap())
         .into_iter()
         .map(|row| row.into())
         .collect::<Vec<Filing>>();
 
-    let mut filings_to_process: Vec<Vec<Filing>> =
-        get_filings_for_threads(&mut filings, num_threads);
-
     let mut handles = vec![];
+
+    let queue = Arc::new(Mutex::new(vec![]));
+
+    handles.push(spawn_requester(queue.clone(), filings));
+
     for _i in 0..num_threads {
+        let queue = queue.clone();
         let pool = pool.clone();
-        handles.push(spawn_worker(
-            pool.get().unwrap(),
-            filings_to_process.pop().unwrap(),
-        ));
+        spawn_worker(queue, pool.get().unwrap());
     }
 
     // wait for all threads to resolve
@@ -52,23 +58,70 @@ fn main() {
     println!("Took: {:?}", start.elapsed());
 }
 
-fn spawn_worker(
-    conn: PooledConnection<PostgresConnectionManager>,
-    queue: Vec<Filing>,
+fn spawn_requester(
+    queue: Arc<Mutex<Vec<(String, Filing)>>>,
+    mut filings: Vec<Filing>,
 ) -> JoinHandle<()> {
     thread::spawn(move || {
-        queue.into_iter().for_each(|filing| {
-            let s3_client = get_s3_client();
-            let s3_path = format!("{}.gz", filing.filing_edgar_url);
-            let object_contents =
-                decompress_gzip(get_s3_object(&s3_client, "birb-edgar-filings", &*s3_path));
+        while filings.len() > 0 {
+            let queue = queue.clone();
+            let queue_size = { queue.clone().lock().unwrap().len() };
+            if queue_size < MIN_QUEUE_SIZE {
+                println!("Queue at {}, adding more filings.", queue_size);
+                let mut filings_to_download = vec![];
+                for _i in 0..10 {
+                    if let Some(f) = filings.pop() {
+                        filings_to_download.push(f);
+                    }
+                }
+                let bodies = stream::iter_ok(filings_to_download)
+                    .map(move |filing| {
+                        let full_path = format!("{}.gz", filing.filing_edgar_url);
+                        let get_req = GetObjectRequest {
+                            bucket: String::from("birb-edgar-filings"),
+                            key: full_path,
+                            ..Default::default()
+                        };
+                        let s3_client = get_s3_client();
+                        s3_client.get_object(get_req).and_then(move |result| {
+                            let stream: FromErr<Concat2<ByteStream>, std::io::Error> =
+                                result.body.unwrap().concat2().from_err();
+                            std::boxed::Box::new(future::ok((stream, filing)))
+                        })
+                    })
+                    .buffer_unordered(PARALLEL_REQUESTS);
+
+                let work = bodies
+                    .for_each(move |(result, filing)| {
+                        let body = decompress_gzip(result.wait().unwrap().to_vec());
+                        let queue = queue.clone();
+                        let mut filings_to_process_queue = queue.lock().unwrap();
+                        println!("Adding to work queue");
+                        filings_to_process_queue.push((body, filing));
+                        Ok(())
+                    })
+                    .map_err(|e| panic!("Error while processing: {}", e));
+
+                tokio::run(work);
+            }
+        }
+    })
+}
+
+fn spawn_worker(
+    queue: Arc<Mutex<Vec<(String, Filing)>>>,
+    conn: PooledConnection<PostgresConnectionManager>,
+) -> JoinHandle<()> {
+    thread::spawn(move || loop {
+        if let Some((object_contents, filing)) = queue.lock().unwrap().pop() {
             let split_filings = split_full_submission(&*object_contents, &filing.id);
             let cik = get_cik(&*filing.filing_edgar_url);
             let accession_number = get_accession_number(&*filing.filing_edgar_url);
             let s3_url_prefix = format!("edgar/data/{}/{}", cik, accession_number);
+            let s3_client = get_s3_client();
             upload_all(&s3_client, &filing, &split_filings).expect("Couldn't persist to DB!");
             persist_split_filing_to_db(&conn, &split_filings, &s3_url_prefix, &filing.id);
-        });
+        }
     })
 }
 
@@ -144,26 +197,6 @@ fn persist_split_filing_to_db(
     trans.commit().expect("Couldn't insert into split_filing")
 }
 
-fn get_filings_for_threads<T>(f: &mut Vec<T>, n: usize) -> Vec<Vec<T>>
-where
-    T: Clone + std::fmt::Debug,
-{
-    let mut i = 0;
-    let mut chunks: Vec<Vec<T>> = vec![];
-    for i in 0..n {
-        let s: Vec<T> = Vec::new();
-        chunks.push(s);
-    }
-
-    while f.len() > 0 {
-        let item_to_insert = f.pop().expect("Item doesn't exist in vec!");
-        let chunk: &mut Vec<T> = chunks.get_mut(i).expect("chunk doesn't exist");
-        chunk.push(item_to_insert);
-        i = (i + 1) % (n);
-    }
-    chunks
-}
-
 fn get_unsplit_filings(conn: PooledConnection<PostgresConnectionManager>) -> Rows {
     let query = format!(
         "
@@ -172,10 +205,9 @@ fn get_unsplit_filings(conn: PooledConnection<PostgresConnectionManager>) -> Row
         WHERE f.collected = true
         AND sf.filing_id IS NULL
         ORDER BY random()
-        LIMIT {}
+        LIMIT 20
         ;
-    ",
-        NUMBER_TO_COLLECT_PER_ITERATION
+    "
     );
     //    let query = r"select * from filing where filing_edgar_url = 'edgar/data/40545/0000040545-16-000152.txt'";
     // Execute query
@@ -184,39 +216,5 @@ fn get_unsplit_filings(conn: PooledConnection<PostgresConnectionManager>) -> Row
 
 mod test {
     use super::*;
-
-    #[test]
-    fn test_chunk_splitting() {
-        let mut input = vec![1, 2, 3, 4, 5, 6];
-        let expected_output = vec![vec![6, 3], vec![5, 2], vec![4, 1]];
-        let result = get_filings_for_threads(&mut input, 3);
-        assert_eq!(expected_output, result);
-
-        let mut input = vec![1, 2, 3, 4, 5, 6, 7];
-        let expected_output = vec![vec![7, 4, 1], vec![6, 3], vec![5, 2]];
-        let result = get_filings_for_threads(&mut input, 3);
-        assert_eq!(expected_output, result);
-
-        let mut input = vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
-        let expected_output = vec![
-            vec![14, 11, 8, 5, 2],
-            vec![13, 10, 7, 4, 1],
-            vec![12, 9, 6, 3],
-        ];
-        let result = get_filings_for_threads(&mut input, 3);
-        assert_eq!(expected_output, result);
-
-        let mut input = vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
-        let expected_output = vec![
-            vec![14, 8, 2],
-            vec![13, 7, 1],
-            vec![12, 6],
-            vec![11, 5],
-            vec![10, 4],
-            vec![9, 3],
-        ];
-        let result = get_filings_for_threads(&mut input, 6);
-        assert_eq!(expected_output, result);
-    }
 
 }
