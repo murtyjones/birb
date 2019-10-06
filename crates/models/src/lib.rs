@@ -30,7 +30,7 @@ pub struct CompanyFilingData {
     pub filings: Vec<Filing>,
 }
 
-#[derive(Debug, Serialize, Deserialize, ToSql, FromSql)]
+#[derive(Clone, Debug, Serialize, Deserialize, ToSql, FromSql)]
 /// Used for the `filing` table
 pub struct Filing {
     pub id: i32,

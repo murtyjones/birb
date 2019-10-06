@@ -19,7 +19,7 @@ use std::thread::JoinHandle;
 use tokio_core::reactor::Core;
 use utils::{decompress_gzip, get_accession_number, get_cik, get_connection};
 
-const NUMBER_TO_COLLECT_PER_ITERATION: i32 = 10;
+const NUMBER_TO_COLLECT_PER_ITERATION: i32 = 20;
 const PARALLEL_REQUESTS: usize = 5;
 const MINIMUM_QUEUE_SIZE: usize = 20;
 
