@@ -6,6 +6,7 @@ use futures::{future, stream, Future, Stream};
 use models::{Filing, SplitDocumentBeforeUpload};
 use postgres::rows::{Row, Rows};
 use postgres::Connection;
+use r2d2_postgres::{PostgresConnectionManager, TlsMode};
 use rayon::prelude::*;
 use rusoto_core::{ByteStream, RusotoFuture};
 use rusoto_s3::S3Client;
@@ -14,6 +15,7 @@ use rusoto_s3::{GetObjectError, PutObjectOutput};
 use rusoto_s3::{GetObjectOutput, GetObjectRequest};
 use std::sync::{Arc, Mutex};
 use std::thread;
+use std::thread::JoinHandle;
 use tokio_core::reactor::Core;
 use utils::{decompress_gzip, get_accession_number, get_cik, get_connection};
 
@@ -23,16 +25,18 @@ const MINIMUM_QUEUE_SIZE: usize = 20;
 
 use futures::future::FromErr;
 use futures::stream::Concat2;
+use r2d2;
+use r2d2::{Pool, PooledConnection};
 use tokio;
 
 fn main() {
     let start = std::time::Instant::now();
     let db_uri = std::env::var("DATABASE_URI").expect("No connection string found!");
-    let conn = get_connection(db_uri);
-    let arced_conn = Arc::new(Mutex::new(conn));
+    let manager = PostgresConnectionManager::new(db_uri, TlsMode::None).unwrap();
+    let pool = Pool::new(manager).unwrap();
     let s3_client = get_s3_client();
     let num_threads = num_cpus::get();
-    let rows = get_unsplit_filings(arced_conn.clone());
+    let rows = get_unsplit_filings(pool.get().unwrap());
     let filings = rows
         .into_iter()
         .map(|row| row.into())
@@ -41,12 +45,12 @@ fn main() {
     println!("Got {}", filings.len());
 
     let filings_to_process_queue = Arc::new(Mutex::new(vec![]));
-    let filings_to_process_queue2 = filings_to_process_queue.clone();
 
     let mut handles = vec![];
     for _i in 0..num_threads {
+        let pool = pool.clone();
         let filings_to_process_queue = filings_to_process_queue.clone();
-        handles.push(spawn_worker(arced_conn.clone(), filings_to_process_queue));
+        handles.push(spawn_worker(pool, filings_to_process_queue));
     }
 
     let bodies = stream::iter_ok(filings)
@@ -70,7 +74,7 @@ fn main() {
             let body = result.wait().unwrap().to_vec();
             let filings_to_process_queue = filings_to_process_queue.clone();
             let mut locked = filings_to_process_queue.lock().unwrap();
-            println!("pushing");
+            println!("Adding to work queue");
             locked.push((body, filing));
             Ok(())
         })
@@ -87,12 +91,12 @@ fn main() {
 }
 
 fn spawn_worker(
-    conn: Arc<Mutex<Connection>>,
+    pool: Pool<PostgresConnectionManager>,
     queue: Arc<Mutex<Vec<(Vec<u8>, Filing)>>>,
-) -> std::thread::JoinHandle<()> {
+) -> JoinHandle<()> {
     let queue = queue.clone();
     thread::spawn(move || loop {
-        let conn = conn.clone();
+        let pool = pool.clone();
         let (first, len) = {
             let mut locked = queue.lock().expect("Oh no!");
             (locked.pop(), locked.len())
@@ -102,6 +106,7 @@ fn spawn_worker(
             let decompressed = decompress_gzip(contents);
             let docs = split_full_submission(&*decompressed, &filing.id);
             upload_all(&filing, &docs).expect("Couldn't upload docs");
+            let conn = pool.get().unwrap();
             persist_split_filings_to_db(conn, &filing, &docs).expect("Couldn't persist filings");
             if len == 0 {
                 println!("Nothing left to process! Exiting");
@@ -117,7 +122,7 @@ fn spawn_worker(
     })
 }
 
-fn get_unsplit_filings(conn: Arc<Mutex<Connection>>) -> Rows {
+fn get_unsplit_filings(conn: PooledConnection<PostgresConnectionManager>) -> Rows {
     let query = format!(
         "
         SELECT * FROM filing f TABLESAMPLE SYSTEM ((100000 * 100) / 5100000.0)
@@ -132,8 +137,7 @@ fn get_unsplit_filings(conn: Arc<Mutex<Connection>>) -> Rows {
     );
     //    let query = r"select * from filing where filing_edgar_url = 'edgar/data/40545/0000040545-16-000152.txt'";
     // Execute query
-    let locked = conn.lock().unwrap();
-    locked.query(&*query, &[]).expect("Couldn't get rows!")
+    conn.query(&*query, &[]).expect("Couldn't get rows!")
 }
 
 fn upload_all(
@@ -176,12 +180,11 @@ fn upload_all(
 }
 
 fn persist_split_filings_to_db(
-    conn: Arc<Mutex<Connection>>,
+    conn: PooledConnection<PostgresConnectionManager>,
     filing: &Filing,
     split_filings: &Vec<SplitDocumentBeforeUpload>,
 ) -> Result<(), failure::Error> {
-    let locked = conn.lock().unwrap();
-    let trans = locked.transaction().expect("Couldn't begin transaction");
+    let trans = conn.transaction().expect("Couldn't begin transaction");
     let statement = trans
         .prepare(
             "
