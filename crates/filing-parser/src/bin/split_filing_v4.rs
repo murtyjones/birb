@@ -1,7 +1,7 @@
 use aws::s3::{get_s3_client, get_s3_object, store_s3_document_gzipped_async};
 use chrono::Utc;
 use failure;
-use filing_parser::split_full_submission::split_full_submission;
+use filing_parser::split_full_submission::{split_full_submission, SplittingError};
 use futures::{future, stream, Future, Stream};
 use models::{Filing, SplitDocumentBeforeUpload};
 use postgres::rows::Rows;
@@ -131,12 +131,21 @@ fn spawn_worker(
         if let Some((object_contents, filing)) = maybe_filing_to_process {
             println!("Processing one");
             let split_filings = split_full_submission(&*object_contents, &filing.id);
-            let cik = get_cik(&*filing.filing_edgar_url);
-            let accession_number = get_accession_number(&*filing.filing_edgar_url);
-            let s3_url_prefix = format!("edgar/data/{}/{}", cik, accession_number);
-            let s3_client = get_s3_client();
-            upload_all(&s3_client, &filing, &split_filings).expect("Couldn't persist to DB!");
-            persist_split_filing_to_db(&conn, &split_filings, &s3_url_prefix, &filing.id);
+            match split_filings {
+                Ok(docs) => {
+                    let cik = get_cik(&*filing.filing_edgar_url);
+                    let accession_number = get_accession_number(&*filing.filing_edgar_url);
+                    let s3_url_prefix = format!("edgar/data/{}/{}", cik, accession_number);
+                    let s3_client = get_s3_client();
+                    upload_all(&s3_client, &filing, &docs).expect("Couldn't persist to DB!");
+                    persist_split_filing_to_db(&conn, &docs, &s3_url_prefix, &filing.id);
+                }
+                Err(e) => match e {
+                    SplittingError::WrongWebPageHasBeenCollected { .. } => {
+                        reset_filing_to_not_collected(&conn, &filing.id);
+                    }
+                },
+            }
         } else {
             if filings.lock().unwrap().len() == 0 {
                 // Nothing left for the thread to work on
@@ -233,6 +242,12 @@ fn get_unsplit_filings(conn: PooledConnection<PostgresConnectionManager>) -> Row
     //    let query = r"select * from filing where filing_edgar_url = 'edgar/data/40545/0000040545-16-000152.txt'";
     // Execute query
     conn.query(&*query, &[]).expect("Couldn't get rows!")
+}
+
+fn reset_filing_to_not_collected(conn: &Connection, filing_id: &i32) {
+    let query = "UPDATE filing SET collected = false WHERE id = {}";
+    conn.query(&*query, &[filing_id])
+        .expect("Couldn't update filing status to collected = false!");
 }
 
 mod test {

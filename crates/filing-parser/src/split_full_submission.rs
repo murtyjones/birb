@@ -41,30 +41,59 @@ lazy_static! {
         .expect("Couldn't build graph contents regex!");
 }
 
+#[derive(Debug, Fail)]
+pub enum SplittingError {
+    #[fail(
+        display = "The saved webpage for {} is is not a filing document. This can sometimes happen when the scraper hits the SEC's 500 internal error page. It will need to be collected again.",
+        filing_id
+    )]
+    WrongWebPageHasBeenCollected { filing_id: i32 },
+}
+
 pub fn split_full_submission(
     file_contents: &str,
     filing_id: &i32,
-) -> Vec<SplitDocumentBeforeUpload> {
+) -> Result<Vec<SplitDocumentBeforeUpload>, SplittingError> {
     let file_contents = escape_encoded_node_contents(file_contents);
 
     let dom: RcDom = parse_document(RcDom::default(), Default::default()).one(&*file_contents);
     let document: &Rc<Node> = &dom.document;
-    assert_eq!(
-        1,
-        document.children.borrow().len(),
-        "There should only be one main node for filing_id = {}!",
-        filing_id
-    );
-    let sec_document_node = &document.children.borrow()[0];
-    assert_sec_document_node_is_sec_document(sec_document_node);
-    let parsed_documents = split_main_node_into_documents(sec_document_node);
+
+    // if no main node
+    let sec_document_node = main_node_is_document_node(document, filing_id)?;
+
+    let parsed_documents = split_main_node_into_documents(&sec_document_node);
     unescape_parsed_documents(parsed_documents)
+}
+
+/// Ensures that we grabbed the <SEC-DOCUMENT> node, which we need
+/// to use as a base to parse any document.
+fn main_node_is_document_node(
+    document: &Rc<Node>,
+    filing_id: &i32,
+) -> Result<Rc<Node>, SplittingError> {
+    let err = Err(SplittingError::WrongWebPageHasBeenCollected {
+        filing_id: *filing_id,
+    });
+    if document.children.borrow().len() != 1 {
+        return err;
+    }
+    let sec_document_node = &document.children.borrow()[0];
+    match sec_document_node.data {
+        NodeData::Element { ref name, .. } => {
+            if "SEC-DOCUMENT" == &name.local {
+                return Ok(Rc::clone(sec_document_node));
+            }
+            return err;
+        }
+        _ => return err,
+    }
 }
 
 /// Applies the unescape logic to all the uuencoded documents, then returns all parsed documents.
 fn unescape_parsed_documents(
     parsed_docs: Vec<SplitDocumentBeforeUpload>,
-) -> Vec<SplitDocumentBeforeUpload> {
+) -> Result<Vec<SplitDocumentBeforeUpload>, SplittingError> {
     let mut escaped_parsed_docs = vec![];
     for mut doc in parsed_docs {
         if UUENCODED_DOCUMENTS.contains(&&*doc.doc_type) {
@@ -73,7 +102,7 @@ fn unescape_parsed_documents(
         }
         escaped_parsed_docs.push(doc);
     }
-    escaped_parsed_docs
+    Ok(escaped_parsed_docs)
 }
 
 /// Takes the <SEC-DOCUMENT> node of the document and tries to parse its children
@@ -123,17 +152,6 @@ fn unescape_node_contents(contents: &str) -> String {
             )
         }),
     )
-}
-
-/// Ensures that we grabbed the <SEC-DOCUMENT> node, which we need
-/// to use as a base to parse any document.
-fn assert_sec_document_node_is_sec_document(handle: &Handle) {
-    match handle.data {
-        NodeData::Element { ref name, .. } => {
-            assert!("SEC-DOCUMENT" == &name.local, "First node in the document is not named '<SEC-DOCUMENT>'!");
-        }
-        _ => panic!("First node in the document is not an element. It should be an element with the name '<SEC-DOCUMENT>'")
-    }
 }
 
 /// If a node is a <DOCUMENT>, parses its components into a SplitDocumentBeforeUpload.
