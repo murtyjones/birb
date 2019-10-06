@@ -33,21 +33,23 @@ fn main() {
     let pool = Pool::new(manager).unwrap();
     let s3_client = get_s3_client();
     let num_threads = num_cpus::get();
-    let filings = get_unsplit_filings(pool.get().unwrap())
-        .into_iter()
-        .map(|row| row.into())
-        .collect::<Vec<Filing>>();
+    let filings = Arc::new(Mutex::new(
+        get_unsplit_filings(pool.get().unwrap())
+            .into_iter()
+            .map(|row| row.into())
+            .collect::<Vec<Filing>>(),
+    ));
 
     let mut handles = vec![];
 
     let queue = Arc::new(Mutex::new(vec![]));
 
-    handles.push(spawn_requester(queue.clone(), filings));
+    handles.push(spawn_requester(queue.clone(), filings.clone()));
 
     for _i in 0..num_threads {
         let queue = queue.clone();
         let pool = pool.clone();
-        spawn_worker(queue, pool.get().unwrap());
+        handles.push(spawn_worker(queue, pool.get().unwrap(), filings.clone()));
     }
 
     // wait for all threads to resolve
@@ -60,50 +62,57 @@ fn main() {
 
 fn spawn_requester(
     queue: Arc<Mutex<Vec<(String, Filing)>>>,
-    mut filings: Vec<Filing>,
+    mut filings: Arc<Mutex<Vec<Filing>>>,
 ) -> JoinHandle<()> {
-    thread::spawn(move || {
-        while filings.len() > 0 {
-            let queue = queue.clone();
-            let queue_size = { queue.clone().lock().unwrap().len() };
-            if queue_size < MIN_QUEUE_SIZE {
-                println!("Queue at {}, adding more filings.", queue_size);
-                let mut filings_to_download = vec![];
-                for _i in 0..10 {
-                    if let Some(f) = filings.pop() {
-                        filings_to_download.push(f);
-                    }
+    thread::spawn(move || loop {
+        let queue = queue.clone();
+        let filings = filings.clone();
+        let (queue_size, filings_left) = {
+            (
+                queue.clone().lock().unwrap().len(),
+                filings.clone().lock().unwrap().len(),
+            )
+        };
+
+        if queue_size + filings_left == 0 {
+            break;
+        } else if queue_size < MIN_QUEUE_SIZE && filings_left > 0 {
+            println!("Queue at {}, adding more filings.", queue_size);
+            let mut filings_to_download = vec![];
+            for _i in 0..10 {
+                if let Some(f) = filings.lock().unwrap().pop() {
+                    filings_to_download.push(f);
                 }
-                let bodies = stream::iter_ok(filings_to_download)
-                    .map(move |filing| {
-                        let full_path = format!("{}.gz", filing.filing_edgar_url);
-                        let get_req = GetObjectRequest {
-                            bucket: String::from("birb-edgar-filings"),
-                            key: full_path,
-                            ..Default::default()
-                        };
-                        let s3_client = get_s3_client();
-                        s3_client.get_object(get_req).and_then(move |result| {
-                            let stream: FromErr<Concat2<ByteStream>, std::io::Error> =
-                                result.body.unwrap().concat2().from_err();
-                            std::boxed::Box::new(future::ok((stream, filing)))
-                        })
-                    })
-                    .buffer_unordered(PARALLEL_REQUESTS);
-
-                let work = bodies
-                    .for_each(move |(result, filing)| {
-                        let body = decompress_gzip(result.wait().unwrap().to_vec());
-                        let queue = queue.clone();
-                        let mut filings_to_process_queue = queue.lock().unwrap();
-                        println!("Adding to work queue");
-                        filings_to_process_queue.push((body, filing));
-                        Ok(())
-                    })
-                    .map_err(|e| panic!("Error while processing: {}", e));
-
-                tokio::run(work);
             }
+            let bodies = stream::iter_ok(filings_to_download)
+                .map(move |filing| {
+                    let full_path = format!("{}.gz", filing.filing_edgar_url);
+                    let get_req = GetObjectRequest {
+                        bucket: String::from("birb-edgar-filings"),
+                        key: full_path,
+                        ..Default::default()
+                    };
+                    let s3_client = get_s3_client();
+                    s3_client.get_object(get_req).and_then(move |result| {
+                        let stream: FromErr<Concat2<ByteStream>, std::io::Error> =
+                            result.body.unwrap().concat2().from_err();
+                        std::boxed::Box::new(future::ok((stream, filing)))
+                    })
+                })
+                .buffer_unordered(PARALLEL_REQUESTS);
+
+            let work = bodies
+                .for_each(move |(result, filing)| {
+                    let body = decompress_gzip(result.wait().unwrap().to_vec());
+                    let queue = queue.clone();
+                    let mut filings_to_process_queue = queue.lock().unwrap();
+                    println!("Adding to work queue");
+                    filings_to_process_queue.push((body, filing));
+                    Ok(())
+                })
+                .map_err(|e| panic!("Error while processing: {}", e));
+
+            tokio::run(work);
         }
     })
 }
@@ -111,9 +120,16 @@ fn spawn_requester(
 fn spawn_worker(
     queue: Arc<Mutex<Vec<(String, Filing)>>>,
     conn: PooledConnection<PostgresConnectionManager>,
+    mut filings: Arc<Mutex<Vec<Filing>>>,
 ) -> JoinHandle<()> {
     thread::spawn(move || loop {
-        if let Some((object_contents, filing)) = queue.lock().unwrap().pop() {
+        let maybe_filing_to_process = {
+            let queue = queue.clone();
+            let maybe_doc = queue.lock().unwrap().pop();
+            maybe_doc
+        };
+        if let Some((object_contents, filing)) = maybe_filing_to_process {
+            println!("Processing one");
             let split_filings = split_full_submission(&*object_contents, &filing.id);
             let cik = get_cik(&*filing.filing_edgar_url);
             let accession_number = get_accession_number(&*filing.filing_edgar_url);
@@ -121,6 +137,11 @@ fn spawn_worker(
             let s3_client = get_s3_client();
             upload_all(&s3_client, &filing, &split_filings).expect("Couldn't persist to DB!");
             persist_split_filing_to_db(&conn, &split_filings, &s3_url_prefix, &filing.id);
+        } else {
+            if filings.lock().unwrap().len() == 0 {
+                // Nothing left for the thread to work on
+                break;
+            }
         }
     })
 }
