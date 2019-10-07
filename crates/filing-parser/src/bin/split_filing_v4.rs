@@ -245,7 +245,10 @@ fn get_unsplit_filings(conn: PooledConnection<PostgresConnectionManager>) -> Row
 }
 
 fn reset_filing_to_not_collected(conn: &Connection, filing_id: &i32) {
-    let query = "UPDATE filing SET collected = false WHERE id = {}";
+    let query = format!(
+        "UPDATE filing SET collected = false WHERE id = {};",
+        filing_id
+    );
     conn.query(&*query, &[filing_id])
         .expect("Couldn't update filing status to collected = false!");
 }
