@@ -1,6 +1,12 @@
+extern crate aws;
+extern crate failure;
+extern crate models;
+extern crate r2d2;
+extern crate r2d2_postgres;
+extern crate reqwest;
+extern crate rusoto_core;
+
 use aws::s3::{get_s3_client, store_s3_document_gzipped_async};
-use failure;
-use filing_parser::split_full_submission::{split_full_submission, SplittingError};
 use futures::{future, stream, Future, Stream};
 use models::{Filing, SplitDocumentBeforeUpload};
 use postgres::rows::Rows;
@@ -15,11 +21,10 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::thread::JoinHandle;
 use tokio_core::reactor::Core;
-use utils::{decompress_gzip, get_accession_number, get_cik, get_connection_pool};
+use utils::{compress_gzip, get_accession_number, get_cik, get_connection_pool};
 
 use futures::future::FromErr;
 use futures::stream::Concat2;
-use r2d2;
 use r2d2::PooledConnection;
 use tokio;
 
@@ -49,7 +54,7 @@ fn main() {
 
     let work = bodies
         .for_each(move |(body, filing)| {
-            let s = decompress_gzip(body.wait().unwrap().to_vec());
+            let s = compress_gzip(body.wait().unwrap().to_vec());
             Ok(())
         })
         .map_err(|e| panic!("Error while processing: {}", e));

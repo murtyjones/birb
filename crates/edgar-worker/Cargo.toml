@@ -9,10 +9,22 @@ autobins = false
 postgres = { version = "0.15", features = ["with-chrono"] }
 env_logger = "0.6.1"
 log = "0.4.6"
+rusoto_s3 = "0.40"
+tokio = "0.1.22"
+tokio-core = "0.1.17"
+futures = "0.1.29"
+reqwest = "0.9.20"
+r2d2 = "^0.8"
+r2d2_postgres = "0.14.0"
+rusoto_core = "0.40"
+failure = "^0.1.5"
 
 server = { path = "../server" }
 filing-data = { path = "../filing-data" }
 filing-metadata = { path = "../filing-metadata" }
+aws = { path = "../aws" }
+utils = { path = "../utils" }
+models = { path = "../models" }
 
 [dependencies.rocket_contrib]
 version = "0.4.1"
