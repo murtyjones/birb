@@ -1,26 +1,25 @@
-use aws::s3::{get_s3_client, get_s3_object, store_s3_document_gzipped_async};
-use chrono::Utc;
+use aws::s3::{get_s3_client, store_s3_document_gzipped_async};
 use failure;
 use filing_parser::split_full_submission::{split_full_submission, SplittingError};
 use futures::{future, stream, Future, Stream};
 use models::{Filing, SplitDocumentBeforeUpload};
 use postgres::rows::Rows;
 use postgres::Connection;
-use r2d2_postgres::{PostgresConnectionManager, TlsMode};
-use rusoto_core::{ByteStream, RusotoFuture};
+use r2d2_postgres::PostgresConnectionManager;
+use rusoto_core::ByteStream;
+use rusoto_s3::GetObjectRequest;
 use rusoto_s3::S3Client;
 use rusoto_s3::S3;
-use rusoto_s3::{GetObjectOutput, GetObjectRequest};
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::thread::JoinHandle;
 use tokio_core::reactor::Core;
-use utils::{decompress_gzip, get_accession_number, get_cik, get_connection};
+use utils::{decompress_gzip, get_accession_number, get_cik, get_connection_pool};
 
 use futures::future::FromErr;
 use futures::stream::Concat2;
 use r2d2;
-use r2d2::{Pool, PooledConnection};
+use r2d2::PooledConnection;
 use tokio;
 
 const PARALLEL_REQUESTS: usize = 5;
@@ -29,9 +28,7 @@ const MIN_QUEUE_SIZE: usize = 10;
 fn main() {
     let start = std::time::Instant::now();
     let db_uri = std::env::var("DATABASE_URI").expect("No connection string found!");
-    let manager = PostgresConnectionManager::new(db_uri, TlsMode::None).unwrap();
-    let pool = Pool::new(manager).unwrap();
-    let s3_client = get_s3_client();
+    let pool = get_connection_pool(db_uri);
     let num_threads = num_cpus::get();
     let filings = Arc::new(Mutex::new(
         get_unsplit_filings(pool.get().unwrap())
@@ -62,8 +59,9 @@ fn main() {
 
 fn spawn_requester(
     queue: Arc<Mutex<Vec<(String, Filing)>>>,
-    mut filings: Arc<Mutex<Vec<Filing>>>,
+    filings: Arc<Mutex<Vec<Filing>>>,
 ) -> JoinHandle<()> {
+    println!("Requester");
     thread::spawn(move || loop {
         let queue = queue.clone();
         let filings = filings.clone();
@@ -94,6 +92,7 @@ fn spawn_requester(
                     };
                     let s3_client = get_s3_client();
                     s3_client.get_object(get_req).and_then(move |result| {
+                        println!("Got object");
                         let stream: FromErr<Concat2<ByteStream>, std::io::Error> =
                             result.body.unwrap().concat2().from_err();
                         std::boxed::Box::new(future::ok((stream, filing)))
@@ -120,7 +119,7 @@ fn spawn_requester(
 fn spawn_worker(
     queue: Arc<Mutex<Vec<(String, Filing)>>>,
     conn: PooledConnection<PostgresConnectionManager>,
-    mut filings: Arc<Mutex<Vec<Filing>>>,
+    filings: Arc<Mutex<Vec<Filing>>>,
 ) -> JoinHandle<()> {
     thread::spawn(move || loop {
         let maybe_filing_to_process = {
@@ -251,9 +250,4 @@ fn reset_filing_to_not_collected(conn: &Connection, filing_id: &i32) {
     );
     conn.query(&*query, &[filing_id])
         .expect("Couldn't update filing status to collected = false!");
-}
-
-mod test {
-    use super::*;
-
 }

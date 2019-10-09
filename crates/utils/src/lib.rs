@@ -1,7 +1,10 @@
 use flate2::read::GzDecoder;
 use flate2::write::GzEncoder;
 use flate2::Compression;
+use postgres::params::IntoConnectParams;
 use postgres::{Connection, TlsMode};
+use r2d2::Pool;
+use r2d2_postgres::{PostgresConnectionManager, TlsMode as R2d2TlsMode};
 use std::fs::File;
 use std::fs::{self, ReadDir};
 use std::io::prelude::*;
@@ -61,6 +64,14 @@ where
     S: Into<String>,
 {
     Connection::connect(host.into(), TlsMode::None).unwrap()
+}
+
+pub fn get_connection_pool<S>(host: S) -> Pool<PostgresConnectionManager>
+where
+    S: IntoConnectParams,
+{
+    let manager = PostgresConnectionManager::new(host, R2d2TlsMode::None).unwrap();
+    Pool::new(manager).unwrap()
 }
 
 pub fn decompress_gzip(compressed: Vec<u8>) -> String {
