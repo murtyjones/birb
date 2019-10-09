@@ -81,9 +81,9 @@ pub fn decompress_gzip(compressed: Vec<u8>) -> String {
     decompressed_object_contents
 }
 
-pub fn compress_gzip(compressed: Vec<u8>) -> Vec<u8> {
+pub fn compress_gzip(uncompressed: Vec<u8>) -> Vec<u8> {
     let mut e = GzEncoder::new(Vec::new(), Compression::default());
-    e.write_all(compressed.as_slice())
+    e.write_all(uncompressed.as_slice())
         .expect("Couldn't write to gzip");
     e.finish().expect("Couldn't complete gzip writing")
 }
