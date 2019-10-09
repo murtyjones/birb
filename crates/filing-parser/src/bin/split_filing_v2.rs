@@ -32,7 +32,7 @@ fn main() {
             (
                 filing_s3_path,
                 filing_id,
-                split_full_submission(&*filing, &filing_id),
+                split_full_submission(&*filing, &filing_id).expect("Couldn't persist filings"),
             )
         })
         .collect::<Vec<(&String, &i32, Vec<SplitDocumentBeforeUpload>)>>();

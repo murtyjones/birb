@@ -104,7 +104,8 @@ fn spawn_worker(
         if let Some((contents, filing)) = first {
             println!("Processing item: {:?}", filing.id);
             let decompressed = decompress_gzip(contents);
-            let docs = split_full_submission(&*decompressed, &filing.id);
+            let docs =
+                split_full_submission(&*decompressed, &filing.id).expect("couldnt split file");
             upload_all(&filing, &docs).expect("Couldn't upload docs");
             let conn = pool.get().unwrap();
             persist_split_filings_to_db(conn, &filing, &docs).expect("Couldn't persist filings");

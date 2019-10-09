@@ -31,7 +31,7 @@ fn _main() {
         collect_random_not_yet_split_filing(&conn, &s3_client);
 
     // Split:
-    let split_filings = split_full_submission(&*filing, &filing_id);
+    let split_filings = split_full_submission(&*filing, &filing_id).expect("couldnt split file");
 
     let cik = get_cik(&*filing_s3_path);
     let accession_number = get_accession_number(&*filing_s3_path);
