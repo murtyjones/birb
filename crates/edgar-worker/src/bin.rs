@@ -58,7 +58,7 @@ fn main() {
 
     let work = bodies
         .for_each(move |(body, filing)| {
-            let utc: DateTime<Utc> = Utc::now();
+            let utc = Utc::now().timestamp();
             let body = body.wait().unwrap().to_vec();
             println!("Collected at: {}", utc);
             let pool = pool.clone();
@@ -106,7 +106,7 @@ fn persist_collected_filing_status_to_db(
     let result = conn.query(&*query, &[&filing.id]);
     match result {
         Ok(_) => {
-            println!("Uploaded: {}", filing.filing_edgar_url);
+            //            println!("Uploaded: {}", filing.filing_edgar_url);
         }
         Err(e) => {
             println!("Error updating DB for collected filing! {:?}", e);
