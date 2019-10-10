@@ -537,6 +537,7 @@ name = "edgar-worker"
 version = "0.1.0"
 dependencies = [
  "aws 0.1.0",
+ "chrono 0.4.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "env_logger 0.6.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "filing-data 0.1.0",

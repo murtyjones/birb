@@ -1,4 +1,5 @@
 extern crate aws;
+extern crate chrono;
 extern crate failure;
 extern crate models;
 extern crate r2d2;
@@ -6,7 +7,8 @@ extern crate r2d2_postgres;
 extern crate reqwest;
 extern crate rusoto_core;
 
-use aws::s3::{get_s3_client, store_s3_document_gzipped_async};
+use aws::s3::{get_s3_client, store_s3_document_gzipped};
+use chrono::prelude::*;
 use futures::{future, stream, Future, Stream};
 use models::{Filing, SplitDocumentBeforeUpload};
 use postgres::rows::Rows;
@@ -21,6 +23,7 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::thread::JoinHandle;
 use tokio_core::reactor::Core;
+
 use utils::{compress_gzip, get_accession_number, get_cik, get_connection_pool};
 
 use futures::future::FromErr;
@@ -28,13 +31,14 @@ use futures::stream::Concat2;
 use r2d2::PooledConnection;
 use tokio;
 
-const PARALLEL_REQUESTS: usize = 5;
+const PARALLEL_REQUESTS: usize = 3;
 static BASE_EDGAR_URL: &'static str = "https://www.sec.gov/Archives/";
 
 fn main() {
     let start = std::time::Instant::now();
     let db_uri = std::env::var("DATABASE_URI").expect("No connection string found!");
     let pool = get_connection_pool(db_uri);
+    let s3_client = get_s3_client();
     let client = Client::new();
     let filings_to_collect: Vec<Filing> = get_not_yet_collected_filings(pool.get().unwrap())
         .into_iter()
@@ -54,10 +58,27 @@ fn main() {
 
     let work = bodies
         .for_each(move |(body, filing)| {
-            let s = compress_gzip(body.wait().unwrap().to_vec());
+            let utc: DateTime<Utc> = Utc::now();
+            println!("Collected at: {}", utc);
+            let compressed_body = compress_gzip(body.wait().unwrap().to_vec());
+            let pool = pool.clone();
+            let conn = pool.get().unwrap();
+            let r = store_s3_document_gzipped(
+                &s3_client,
+                "birb-edgar-filings",
+                &*filing.filing_edgar_url,
+                compressed_body,
+                "private",
+            );
+            match r {
+                Ok(()) => {
+                    persist_collected_filing_status_to_db(conn, filing);
+                }
+                Err(e) => println!("Error storing document: {}", e),
+            }
             Ok(())
         })
-        .map_err(|e| panic!("Error while processing: {}", e));
+        .map_err(|e| println!("Error while downloading: {}", e));
 
     tokio::run(work);
 }
@@ -73,4 +94,17 @@ fn get_not_yet_collected_filings(conn: PooledConnection<PostgresConnectionManage
     ";
     conn.query(&*query, &[])
         .expect("Couldn't update filing status to collected = false!")
+}
+
+fn persist_collected_filing_status_to_db(
+    conn: PooledConnection<PostgresConnectionManager>,
+    filing: Filing,
+) {
+    let query = "
+        UPDATE filing SET collected = true WHERE id = $1
+    ";
+    let result = conn.query(&*query, &[&filing.id]);
+    if let Err(e) = result {
+        println!("Error updating DB for collected filing! {:?}", e);
+    }
 }

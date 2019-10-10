@@ -16,6 +16,7 @@ futures = "0.1.29"
 reqwest = "0.9.20"
 r2d2 = "^0.8"
 r2d2_postgres = "0.14.0"
+chrono = "0.4.9"
 rusoto_core = "0.40"
 failure = "^0.1.5"
 
