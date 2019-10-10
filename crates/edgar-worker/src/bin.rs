@@ -59,15 +59,15 @@ fn main() {
     let work = bodies
         .for_each(move |(body, filing)| {
             let utc: DateTime<Utc> = Utc::now();
+            let body = body.wait().unwrap().to_vec();
             println!("Collected at: {}", utc);
-            let compressed_body = compress_gzip(body.wait().unwrap().to_vec());
             let pool = pool.clone();
             let conn = pool.get().unwrap();
             let r = store_s3_document_gzipped(
                 &s3_client,
                 "birb-edgar-filings",
                 &*filing.filing_edgar_url,
-                compressed_body,
+                body,
                 "private",
             );
             match r {
@@ -104,7 +104,12 @@ fn persist_collected_filing_status_to_db(
         UPDATE filing SET collected = true WHERE id = $1
     ";
     let result = conn.query(&*query, &[&filing.id]);
-    if let Err(e) = result {
-        println!("Error updating DB for collected filing! {:?}", e);
+    match result {
+        Ok(_) => {
+            println!("Uploaded: {}", filing.filing_edgar_url);
+        }
+        Err(e) => {
+            println!("Error updating DB for collected filing! {:?}", e);
+        }
     }
 }

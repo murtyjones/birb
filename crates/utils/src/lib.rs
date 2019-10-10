@@ -110,6 +110,10 @@ pub fn get_content_type_from_filepath(file_path: &str) -> Option<&str> {
     let split = split.collect::<Vec<&str>>();
     let last_chunk = split[split.len() - 1];
 
+    if file_path.contains("edgar/data") && file_path.contains(".txt") {
+        return Some("text/html; charset=utf-8");
+    }
+
     match last_chunk {
         "htm" | "html" => Some("text/html; charset=utf-8"),
         "css" => Some("text/css; charset=utf-8"),
@@ -123,6 +127,7 @@ pub fn get_content_type_from_filepath(file_path: &str) -> Option<&str> {
         "ico" => Some("image/x-icon"),
         "svg" => Some("image/svg+xml"),
         "zip" => Some("application/zip, application/octet-stream"),
+        "txt" => Some("text/plain"),
         "xlsx" => {
             Some("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=utf-8")
         }
@@ -163,6 +168,16 @@ mod test {
         let file_path = "edgar/data/1322952/0001017386-17-000104/anton_chia-logo.jpeg";
         assert_eq!(
             "image/jpeg",
+            get_content_type_from_filepath(file_path).unwrap()
+        );
+        let file_path = "edgar/data/1322952/0001017386-17-000104/1010101.txt";
+        assert_eq!(
+            "text/html; charset=utf-8",
+            get_content_type_from_filepath(file_path).unwrap()
+        );
+        let file_path = "not-an-edgar-path.txt";
+        assert_eq!(
+            "text/plain",
             get_content_type_from_filepath(file_path).unwrap()
         );
     }
