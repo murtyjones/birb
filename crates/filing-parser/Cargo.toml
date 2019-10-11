@@ -23,7 +23,7 @@ tokio = "0.1.22"
 tokio-core = "0.1.17"
 num_cpus = "1.10.1"
 futures = "0.1.29"
-reqwest = "0.9.20"
+reqwest = "^0.9"
 chrono = "0.4.9"
 postgres = { version = "0.15", features = ["with-chrono"] }
 r2d2_postgres = "0.14.0"
