@@ -1,3 +1,5 @@
+#[macro_use]
+extern crate log;
 use aws::s3::{get_s3_client, store_s3_document_gzipped_async};
 use failure;
 use filing_parser::split_full_submission::{split_full_submission, SplittingError};
@@ -16,6 +18,7 @@ use std::thread::JoinHandle;
 use tokio_core::reactor::Core;
 use utils::{decompress_gzip, get_accession_number, get_cik, get_connection_pool};
 
+use env_logger;
 use futures::future::FromErr;
 use futures::stream::Concat2;
 use r2d2;
@@ -26,6 +29,7 @@ const PARALLEL_REQUESTS: usize = 5;
 const MIN_QUEUE_SIZE: usize = 10;
 
 fn main() {
+    env_logger::init();
     let start = std::time::Instant::now();
     let db_uri = std::env::var("DATABASE_URI").expect("No connection string found!");
     let pool = get_connection_pool(db_uri);
@@ -54,14 +58,14 @@ fn main() {
         h.join().unwrap();
     }
 
-    println!("Took: {:?}", start.elapsed());
+    info!("Took: {:?}", start.elapsed());
 }
 
 fn spawn_requester(
     queue: Arc<Mutex<Vec<(String, Filing)>>>,
     filings: Arc<Mutex<Vec<Filing>>>,
 ) -> JoinHandle<()> {
-    println!("Requester");
+    info!("Requester");
     thread::spawn(move || loop {
         let queue = queue.clone();
         let filings = filings.clone();
@@ -75,7 +79,7 @@ fn spawn_requester(
         if queue_size + filings_left == 0 {
             break;
         } else if queue_size < MIN_QUEUE_SIZE && filings_left > 0 {
-            println!("Queue at {}, adding more filings.", queue_size);
+            info!("Queue at {}, adding more filings.", queue_size);
             let mut filings_to_download = vec![];
             for _i in 0..10 {
                 if let Some(f) = filings.lock().unwrap().pop() {
@@ -92,7 +96,7 @@ fn spawn_requester(
                     };
                     let s3_client = get_s3_client();
                     s3_client.get_object(get_req).and_then(move |result| {
-                        println!("Got object");
+                        info!("Got object");
                         let stream: FromErr<Concat2<ByteStream>, std::io::Error> =
                             result.body.unwrap().concat2().from_err();
                         std::boxed::Box::new(future::ok((stream, filing)))
@@ -105,7 +109,7 @@ fn spawn_requester(
                     let body = decompress_gzip(result.wait().unwrap().to_vec());
                     let queue = queue.clone();
                     let mut filings_to_process_queue = queue.lock().unwrap();
-                    println!("Adding to work queue");
+                    info!("Adding to work queue");
                     filings_to_process_queue.push((body, filing));
                     Ok(())
                 })
@@ -128,7 +132,7 @@ fn spawn_worker(
             maybe_doc
         };
         if let Some((object_contents, filing)) = maybe_filing_to_process {
-            println!("Processing one");
+            info!("Processing one");
             let split_filings = split_full_submission(&*object_contents, &filing.id);
             match split_filings {
                 Ok(docs) => {
@@ -147,6 +151,7 @@ fn spawn_worker(
             }
         } else {
             if filings.lock().unwrap().len() == 0 {
+                info!("Nothing left...");
                 // Nothing left for the thread to work on
                 break;
             }
@@ -159,6 +164,7 @@ fn upload_all(
     filing: &Filing,
     split_filings: &Vec<SplitDocumentBeforeUpload>,
 ) -> Result<(), failure::Error> {
+    info!("Uploading...");
     let mut core = Core::new().unwrap();
     let promises = future::join_all(split_filings.iter().map(|doc| {
         let cik = get_cik(&*filing.filing_edgar_url);
@@ -185,7 +191,7 @@ fn upload_all(
     }));
 
     match core.run(promises) {
-        Ok(_items) => println!("Uploaded!"),
+        Ok(_items) => info!("Uploaded!"),
         Err(e) => panic!("Error completing futures: {}", e),
     };
 
@@ -198,6 +204,7 @@ fn persist_split_filing_to_db(
     s3_url_prefix: &String,
     filing_id: &i32,
 ) {
+    info!("Persisting");
     let trans = conn.transaction().expect("Couldn't begin transaction");
 
     let statement = trans
@@ -234,7 +241,6 @@ fn get_unsplit_filings(conn: PooledConnection<PostgresConnectionManager>) -> Row
         WHERE f.collected = true
         AND sf.filing_id IS NULL
         ORDER BY random()
-        LIMIT 20
         ;
     "
     );
