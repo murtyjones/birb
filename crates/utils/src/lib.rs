@@ -66,6 +66,13 @@ where
     Connection::connect(host.into(), TlsMode::None).unwrap()
 }
 
+pub fn get_connection_mgr<S>(host: S) -> PostgresConnectionManager
+where
+    S: IntoConnectParams,
+{
+    PostgresConnectionManager::new(host, R2d2TlsMode::None).unwrap()
+}
+
 pub fn get_connection_pool<S>(host: S) -> Pool<PostgresConnectionManager>
 where
     S: IntoConnectParams,

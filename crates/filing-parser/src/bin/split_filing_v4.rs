@@ -16,7 +16,9 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::thread::JoinHandle;
 use tokio_core::reactor::Core;
-use utils::{decompress_gzip, get_accession_number, get_cik, get_connection_pool};
+use utils::{
+    decompress_gzip, get_accession_number, get_cik, get_connection_mgr, get_connection_pool,
+};
 
 use env_logger;
 use futures::future::FromErr;
@@ -30,10 +32,14 @@ const MIN_QUEUE_SIZE: usize = 10;
 
 fn main() {
     env_logger::init();
+    let num_threads = num_cpus::get();
     let start = std::time::Instant::now();
     let db_uri = std::env::var("DATABASE_URI").expect("No connection string found!");
-    let pool = get_connection_pool(db_uri);
-    let num_threads = num_cpus::get();
+    let manager = get_connection_mgr(db_uri);
+    let pool = r2d2::Pool::builder()
+        .max_size(num_threads as u32)
+        .build(manager)
+        .unwrap();
     let filings = Arc::new(Mutex::new(
         get_unsplit_filings(pool.get().unwrap())
             .into_iter()
