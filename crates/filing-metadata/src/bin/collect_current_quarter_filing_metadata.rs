@@ -129,6 +129,5 @@ fn persist(conn: &Connection, qtr: i32, year: i32, d: Vec<FilingMetadata>) -> ()
             ])
             .expect("Couldn't execute update");
     }
-
     trans.commit().unwrap()
 }

@@ -37,7 +37,7 @@ fn main() {
     let db_uri = std::env::var("DATABASE_URI").expect("No connection string found!");
     let manager = get_connection_mgr(db_uri);
     let pool = r2d2::Pool::builder()
-        .max_size(num_threads as u32)
+        .max_size((num_threads as u32) + 1)
         .build(manager)
         .unwrap();
     let filings = Arc::new(Mutex::new(
@@ -134,7 +134,8 @@ fn spawn_worker(
     thread::spawn(move || loop {
         let maybe_filing_to_process = {
             let queue = queue.clone();
-            let maybe_doc = queue.lock().unwrap().pop();
+            let mut unlocked = queue.lock().unwrap();
+            let maybe_doc = unlocked.pop();
             maybe_doc
         };
         if let Some((object_contents, filing)) = maybe_filing_to_process {
@@ -235,7 +236,7 @@ fn persist_split_filing_to_db(
             ])
             .expect("Couldn't execute update");
     }
-
+    info!("Committing");
     trans.commit().expect("Couldn't insert into split_filing")
 }
 
