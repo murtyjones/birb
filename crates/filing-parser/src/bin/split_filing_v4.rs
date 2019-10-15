@@ -7,11 +7,12 @@ use futures::{future, stream, Future, Stream};
 use models::{Filing, SplitDocumentBeforeUpload};
 use postgres::rows::Rows;
 use postgres::Connection;
+use r2d2::Pool;
 use r2d2_postgres::PostgresConnectionManager;
-use rusoto_core::ByteStream;
-use rusoto_s3::GetObjectRequest;
-use rusoto_s3::S3Client;
+use rusoto_core::{ByteStream, RusotoError};
 use rusoto_s3::S3;
+use rusoto_s3::{GetObjectRequest, PutObjectOutput};
+use rusoto_s3::{PutObjectError, S3Client};
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::thread::JoinHandle;
@@ -23,10 +24,12 @@ use utils::{
 use env_logger;
 use futures::future::FromErr;
 use futures::stream::Concat2;
+use postgres::transaction::Transaction;
 use r2d2;
 use r2d2::PooledConnection;
 use tokio;
 
+const FILINGS_TO_DOWNLOAD_PER_BATCH: usize = 20;
 const PARALLEL_REQUESTS: usize = 5;
 const MIN_QUEUE_SIZE: usize = 10;
 
@@ -35,8 +38,8 @@ fn main() {
     let num_threads = num_cpus::get();
     let start = std::time::Instant::now();
     let db_uri = std::env::var("DATABASE_URI").expect("No connection string found!");
-    let manager = get_connection_mgr(db_uri);
-    let pool = r2d2::Pool::builder()
+    let manager: PostgresConnectionManager = get_connection_mgr(db_uri);
+    let pool: Pool<PostgresConnectionManager> = r2d2::Pool::builder()
         .max_size((num_threads as u32) + 1)
         .build(manager)
         .unwrap();
@@ -51,7 +54,7 @@ fn main() {
 
     let queue = Arc::new(Mutex::new(vec![]));
 
-    handles.push(spawn_requester(queue.clone(), filings.clone()));
+    //    handles.push(spawn_requester(queue.clone(), filings.clone()));
 
     for _i in 0..num_threads {
         let queue = queue.clone();
@@ -71,8 +74,8 @@ fn spawn_requester(
     queue: Arc<Mutex<Vec<(String, Filing)>>>,
     filings: Arc<Mutex<Vec<Filing>>>,
 ) -> JoinHandle<()> {
-    info!("Requester");
     thread::spawn(move || loop {
+        println!("Requester loop!");
         let queue = queue.clone();
         let filings = filings.clone();
         let (queue_size, filings_left) = {
@@ -81,47 +84,15 @@ fn spawn_requester(
                 filings.clone().lock().unwrap().len(),
             )
         };
-
+        println!("some left {}", queue_size + filings_left == 0);
+        println!(
+            "time to get more? {} {} {} {}",
+            queue_size, MIN_QUEUE_SIZE, filings_left, 0
+        );
         if queue_size + filings_left == 0 {
             break;
         } else if queue_size < MIN_QUEUE_SIZE && filings_left > 0 {
-            info!("Queue at {}, adding more filings.", queue_size);
-            let mut filings_to_download = vec![];
-            for _i in 0..10 {
-                if let Some(f) = filings.lock().unwrap().pop() {
-                    filings_to_download.push(f);
-                }
-            }
-            let bodies = stream::iter_ok(filings_to_download)
-                .map(move |filing| {
-                    let full_path = format!("{}.gz", filing.filing_edgar_url);
-                    let get_req = GetObjectRequest {
-                        bucket: String::from("birb-edgar-filings"),
-                        key: full_path,
-                        ..Default::default()
-                    };
-                    let s3_client = get_s3_client();
-                    s3_client.get_object(get_req).and_then(move |result| {
-                        info!("Got object");
-                        let stream: FromErr<Concat2<ByteStream>, std::io::Error> =
-                            result.body.unwrap().concat2().from_err();
-                        std::boxed::Box::new(future::ok((stream, filing)))
-                    })
-                })
-                .buffer_unordered(PARALLEL_REQUESTS);
 
-            let work = bodies
-                .for_each(move |(result, filing)| {
-                    let body = decompress_gzip(result.wait().unwrap().to_vec());
-                    let queue = queue.clone();
-                    let mut filings_to_process_queue = queue.lock().unwrap();
-                    info!("Adding to work queue");
-                    filings_to_process_queue.push((body, filing));
-                    Ok(())
-                })
-                .map_err(|e| panic!("Error while processing: {}", e));
-
-            tokio::run(work);
         }
     })
 }
@@ -147,8 +118,15 @@ fn spawn_worker(
                     let accession_number = get_accession_number(&*filing.filing_edgar_url);
                     let s3_url_prefix = format!("edgar/data/{}/{}", cik, accession_number);
                     let s3_client = get_s3_client();
-                    upload_all(&s3_client, &filing, &docs).expect("Couldn't persist to DB!");
-                    persist_split_filing_to_db(&conn, &docs, &s3_url_prefix, &filing.id);
+                    match upload_all(&s3_client, &filing, &docs) {
+                        Ok(_) => {
+                            persist_split_filing_to_db(&conn, &docs, &s3_url_prefix, &filing.id);
+                            info!("Committed!");
+                        }
+                        Err(e) => {
+                            error!("Error completing upload: {}", e);
+                        }
+                    };
                 }
                 Err(e) => match e {
                     SplittingError::WrongWebPageHasBeenCollected { .. } => {
@@ -161,16 +139,67 @@ fn spawn_worker(
                 info!("Nothing left...");
                 // Nothing left for the thread to work on
                 break;
+            } else {
+                // Collect more filings
+                info!(
+                    "Queue at {}, adding more filings.",
+                    filings.lock().unwrap().len()
+                );
+                collect_more(queue.clone(), filings.clone());
             }
         }
     })
+}
+
+fn collect_more(queue: Arc<Mutex<Vec<(String, Filing)>>>, filings: Arc<Mutex<Vec<Filing>>>) {
+    let mut core = Core::new().unwrap();
+    let mut filings_to_download = vec![];
+    for _i in 0..FILINGS_TO_DOWNLOAD_PER_BATCH {
+        if let Some(f) = filings.lock().unwrap().pop() {
+            filings_to_download.push(f);
+        }
+    }
+    let bodies = stream::iter_ok(filings_to_download)
+        .map(move |filing| {
+            let full_path = format!("{}.gz", filing.filing_edgar_url);
+            let get_req = GetObjectRequest {
+                bucket: String::from("birb-edgar-filings"),
+                key: full_path,
+                ..Default::default()
+            };
+            let s3_client = get_s3_client();
+            s3_client.get_object(get_req).and_then(move |result| {
+                info!("Got object");
+                let stream: FromErr<Concat2<ByteStream>, std::io::Error> =
+                    result.body.unwrap().concat2().from_err();
+                std::boxed::Box::new(future::ok((stream, filing)))
+            })
+        })
+        .buffer_unordered(PARALLEL_REQUESTS);
+
+    let work = bodies
+        .for_each(move |(result, filing)| {
+            info!("Getting result...");
+            let r = result.wait().unwrap().to_vec();
+            info!("Decompressing...");
+            let body = decompress_gzip(r);
+            info!("Decompressed!");
+            let queue = queue.clone();
+            let mut filings_to_process_queue = queue.lock().unwrap();
+            info!("Adding to work queue");
+            filings_to_process_queue.push((body, filing));
+            Ok(())
+        })
+        .map_err(|e| panic!("Error while processing: {}", e));
+
+    core.run(work);
 }
 
 fn upload_all(
     s3_client: &S3Client,
     filing: &Filing,
     split_filings: &Vec<SplitDocumentBeforeUpload>,
-) -> Result<(), failure::Error> {
+) -> Result<Vec<PutObjectOutput>, RusotoError<PutObjectError>> {
     info!("Uploading...");
     let mut core = Core::new().unwrap();
     let promises = future::join_all(split_filings.iter().map(|doc| {
@@ -197,12 +226,7 @@ fn upload_all(
         )
     }));
 
-    match core.run(promises) {
-        Ok(_items) => info!("Uploaded!"),
-        Err(e) => panic!("Error completing futures: {}", e),
-    };
-
-    Ok(())
+    core.run(promises)
 }
 
 fn persist_split_filing_to_db(
@@ -212,7 +236,7 @@ fn persist_split_filing_to_db(
     filing_id: &i32,
 ) {
     info!("Persisting");
-    let trans = conn.transaction().expect("Couldn't begin transaction");
+    let trans: Transaction = conn.transaction().expect("Couldn't begin transaction");
 
     let statement = trans
         .prepare(
@@ -237,7 +261,7 @@ fn persist_split_filing_to_db(
             .expect("Couldn't execute update");
     }
     info!("Committing");
-    trans.commit().expect("Couldn't insert into split_filing")
+    trans.commit().expect("Couldn't insert into split_filing");
 }
 
 fn get_unsplit_filings(conn: PooledConnection<PostgresConnectionManager>) -> Rows {
