@@ -54,8 +54,6 @@ fn main() {
 
     let queue = Arc::new(Mutex::new(vec![]));
 
-    //    handles.push(spawn_requester(queue.clone(), filings.clone()));
-
     for _i in 0..num_threads {
         let queue = queue.clone();
         let pool = pool.clone();
@@ -68,33 +66,6 @@ fn main() {
     }
 
     info!("Took: {:?}", start.elapsed());
-}
-
-fn spawn_requester(
-    queue: Arc<Mutex<Vec<(String, Filing)>>>,
-    filings: Arc<Mutex<Vec<Filing>>>,
-) -> JoinHandle<()> {
-    thread::spawn(move || loop {
-        println!("Requester loop!");
-        let queue = queue.clone();
-        let filings = filings.clone();
-        let (queue_size, filings_left) = {
-            (
-                queue.clone().lock().unwrap().len(),
-                filings.clone().lock().unwrap().len(),
-            )
-        };
-        println!("some left {}", queue_size + filings_left == 0);
-        println!(
-            "time to get more? {} {} {} {}",
-            queue_size, MIN_QUEUE_SIZE, filings_left, 0
-        );
-        if queue_size + filings_left == 0 {
-            break;
-        } else if queue_size < MIN_QUEUE_SIZE && filings_left > 0 {
-
-        }
-    })
 }
 
 fn spawn_worker(

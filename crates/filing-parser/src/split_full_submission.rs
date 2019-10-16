@@ -62,9 +62,7 @@ pub fn split_full_submission(
     // if no main node
     let sec_document_node = main_node_is_document_node(document, filing_id)?;
 
-    println!("Splitting");
     let parsed_documents = split_main_node_into_documents(&sec_document_node);
-    println!("Split complete");
     unescape_parsed_documents(parsed_documents)
 }
 
