@@ -1,4 +1,7 @@
 [![CircleCI](https://circleci.com/gh/murtyjones/birb.svg?style=svg)](https://circleci.com/gh/murtyjones/birb)
+
+Unmaintained.
+
 # birb
 ## Getting Started
 1. `git clone https://github.com/murtyjones/birb.git`
