@@ -32,3 +32,7 @@ cargo install --force dbmigrate
 
 # Wasm pack for the web client
 cargo install --force wasm-pack
+
+# Install mdbook
+cargo install mdbook
+

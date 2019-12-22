@@ -43,3 +43,7 @@ makefile
 node_modules
 .module-cache
 *.log*
+
+
+# Ignore the book output directory
+crates/book/book

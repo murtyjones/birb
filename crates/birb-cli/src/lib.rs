@@ -11,10 +11,11 @@
 extern crate structopt;
 extern crate failure;
 
+pub mod bb_filesystem;
 mod aws;
 mod bash_completion;
-pub mod bb_filesystem;
 mod build;
+mod book;
 mod dbslicer;
 mod docker;
 mod migrate;
@@ -30,6 +31,7 @@ use crate::aws::Aws;
 use crate::bash_completion::BashCompletionGenerator;
 use crate::bb_filesystem::{bb_dot_dir, cargo_toml_version};
 use crate::build::Build;
+use crate::book::Book;
 use crate::dbslicer::DbSlicer;
 use crate::docker::Docker;
 use crate::migrate::Migrate;
@@ -65,6 +67,9 @@ pub enum Bb {
     /// Used to build application binaries
     #[structopt(name = "build")]
     Build(Build),
+    /// Used for book-related commands
+    #[structopt(name = "book")]
+    Book(Book),
     /// Generate the file that powers autocompleting the `bb` command in
     /// your bash shell.
     #[structopt(name = "generate-bash-completions")]
@@ -124,6 +129,7 @@ pub fn run() -> Result<(), failure::Error> {
         }
         Bb::Update(update) => boxed_cmd(update),
         Bb::Build(build) => boxed_cmd(build),
+        Bb::Book(book) => boxed_cmd(book),
         Bb::Docker(docker) => boxed_cmd(docker),
         Bb::Plan(plan) => boxed_cmd(plan),
         Bb::Aws(aws) => boxed_cmd(aws),
