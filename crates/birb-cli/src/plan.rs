@@ -187,8 +187,10 @@ impl Subcommand for Plan {
                            -target=aws_ecr_repository.edgar_repo \
                            -target=aws_s3_bucket.birb_edgar_indexes \
                            -target=aws_s3_bucket.birb_edgar_filings \
+                           -target=aws_s3_bucket.birb_docs \
                            -target=aws_s3_bucket.birb_www \
                            -target=aws_cloudfront_distribution.birb_www_distribution \
+                           -target=aws_cloudfront_distribution.birb_docs_distribution \
                            -target=aws_route53_record.birb_root \
                            -target=aws_route53_record.birb_www \
                            -target=local_file.www_cloudfront_id \

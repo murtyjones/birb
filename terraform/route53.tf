@@ -12,9 +12,14 @@ variable "root_domain_name" {
   default = "birb.io"
 }
 
-// We'll also need the root domain (also known as zone apex or naked domain).
+// Here's our CDN for filings
 variable "filings_domain_name" {
   default = "filings.birb.io"
+}
+
+// Here's our doc site
+variable "docs_domain_name" {
+  default = "docs.birb.io"
 }
 
 // This Route53 record will point at our CloudFront distribution for birb.io.

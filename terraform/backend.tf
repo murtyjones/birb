@@ -2,7 +2,7 @@ data "terraform_remote_state" "network" {
   backend = "s3"
 
   config = {
-    bucket = "terraform-state-production"
+    bucket = "tf-state-birb"
     key    = "network/terraform.tfstate"
     region = "us-east-1"
   }
@@ -10,7 +10,7 @@ data "terraform_remote_state" "network" {
 
 terraform {
   backend "s3" {
-    bucket = "terraform-state-production"
+    bucket = "tf-state-birb"
     key    = "network/terraform.tfstate"
     region = "us-east-1"
   }

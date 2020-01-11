@@ -7,6 +7,9 @@ pub enum Book {
   /// Launches a local server with the book and watches for changes
   #[structopt(name = "watch")]
   Watch,
+  /// Builds the production book site
+  #[structopt(name = "build")]
+  Build,
 }
 
 impl Subcommand for Book {
@@ -15,6 +18,11 @@ impl Subcommand for Book {
       Book::Watch => {
         // Open browser and watch for book changes
         run_str_in_bash("mdbook watch crates/book --open")?;
+        Ok(())
+      }
+      Book::Build {
+        // Generates the book and outputs it to crates/book/book
+        run_str_in_bash("mdbook build crates/book")?;
         Ok(())
       }
     }

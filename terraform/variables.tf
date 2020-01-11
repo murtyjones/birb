@@ -80,7 +80,11 @@ variable "birb_api_certificate_arn" {
 }
 
 variable "birb_filings_certificate_arn" {
-  description = "The certificate ARN for the raw-filings.birb.io"
+  description = "The certificate ARN for the filings.birb.io"
+}
+
+variable "birb_docs_certificate_arn" {
+  description = "The certificate ARN for the docs.birb.io"
 }
 
 variable "marty_ip_address_1" {
