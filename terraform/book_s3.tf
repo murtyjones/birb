@@ -60,7 +60,7 @@ resource "aws_cloudfront_distribution" "birb_docs_distribution" {
     }
 
     // Here we're using our S3 bucket's URL!
-    domain_name = "${aws_s3_bucket.birb_www.website_endpoint}"
+    domain_name = "${aws_s3_bucket.birb_docs.website_endpoint}"
     // This can be any name to identify this origin.
     origin_id = "${var.docs_domain_name}"
   }

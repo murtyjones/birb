@@ -18,7 +18,7 @@ pub enum Aws {
     /// Deploy the Database
     #[structopt(name = "rds")]
     RDS(AwsRDS),
-    /// S3 bucket
+    /// Commands related to different S3 buckets we have
     #[structopt(name = "s3")]
     S3(AwsS3),
     /// Deploy whatever change is held by the "plan" file
@@ -138,6 +138,8 @@ pub enum AwsRDS {
 pub enum AwsS3 {
     #[structopt(name = "upload")]
     Upload(S3Buckets),
+    #[structopt(name = "book")]
+    Book(Book),
 }
 
 /// Which AWS buckets can be uploaded to
@@ -145,6 +147,12 @@ pub enum AwsS3 {
 pub enum S3Buckets {
     #[structopt(name = "edgar-indexes")]
     EdgarIndexes,
+}
+
+#[derive(Debug, StructOpt)]
+pub enum Book {
+  #[structopt(name = "up")]
+  Up,
 }
 
 pub struct EdgarIndexes {}
@@ -529,6 +537,24 @@ impl Subcommand for AwsS3 {
                         let _result = run_str_in_bash(
                             "aws s3 cp data/edgar-indexes s3://birb-edgar-indexes/ --recursive",
                         )?;
+                    }
+                }
+            }
+            AwsS3::Book(book) => {
+                match book {
+                    Book::Up => {
+                      // Not currently worrying about whether or not the deploy was successful
+                      let _plan = run_str_in_bash(
+                        "
+                          bb plan book
+                      ",
+                      )?;
+
+                      let _result = run_str_in_bash(
+                        "
+                          bb aws plan up
+                      ",
+                      )?;
                     }
                 }
             }

@@ -3,3 +3,5 @@ authors = ["Marty Jones"]
 multilingual = false
 src = "src"
 title = "book"
+# In your book.toml
+[preprocessor.bookimport]

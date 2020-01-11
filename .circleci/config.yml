@@ -206,6 +206,7 @@ workflows:
       - build-edgar-worker:
           requires:
             - test-edgar-worker
-      - deploy-edgar-worker:
-          requires:
-            - build-edgar-worker
+# Temporarily disable edgar worker
+#      - deploy-edgar-worker:
+#          requires:
+#            - build-edgar-worker

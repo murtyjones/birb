@@ -26,6 +26,9 @@ pub enum Plan {
     /// Plan stateless pieces of architecture
     #[structopt(name = "stateless")]
     Stateless,
+    /// Plan docs.birb.io
+    #[structopt(name = "book")]
+    Book,
 }
 
 impl Subcommand for Plan {
@@ -193,6 +196,7 @@ impl Subcommand for Plan {
                            -target=aws_cloudfront_distribution.birb_docs_distribution \
                            -target=aws_route53_record.birb_root \
                            -target=aws_route53_record.birb_www \
+                           -target=aws_route53_record.birb_docs \
                            -target=local_file.www_cloudfront_id \
                            terraform/
                 ",
@@ -265,6 +269,20 @@ impl Subcommand for Plan {
                            -target=aws_security_group.rds_security_group \
                            -target=aws_security_group.bastion \
                            -target=aws_security_group.birb-edgar \
+                           terraform/
+                ",
+                )
+                .unwrap();
+                Ok(())
+            }
+            Plan::Book => {
+                run_str_in_bash(
+                    "
+                      AWS_SDK_LOAD_CONFIG=1   AWS_PROFILE=birb terraform plan -var-file=terraform/production.secret.tfvars \
+                           -out=plan \
+                           -target=aws_s3_bucket.birb_docs \
+                           -target=aws_cloudfront_distribution.birb_docs_distribution \
+                           -target=aws_route53_record.birb_docs \
                            terraform/
                 ",
                 )

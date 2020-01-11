@@ -35,4 +35,4 @@ cargo install --force wasm-pack
 
 # Install mdbook
 cargo install mdbook
-
+cargo install mdbook-bookimport

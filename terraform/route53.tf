@@ -1,5 +1,5 @@
 data "aws_route53_zone" "birb" {
-  zone_id = "Z1D0S9UH91H2SA"
+  zone_id = "Z3E84F61Q1N2YA"
 }
 
 // Create a variable for our domain name because we'll be using it a lot.
@@ -60,6 +60,20 @@ resource "aws_route53_record" "birb_www" {
   alias {
     name                   = "${aws_cloudfront_distribution.birb_www_distribution.domain_name}"
     zone_id                = "${aws_cloudfront_distribution.birb_www_distribution.hosted_zone_id}"
+    evaluate_target_health = false
+  }
+}
+
+// This Route53 record will point at our CloudFront distribution for docs.birb.io.
+resource "aws_route53_record" "birb_docs" {
+  zone_id = "${data.aws_route53_zone.birb.zone_id}"
+
+  name = "${var.docs_domain_name}"
+  type = "A"
+
+  alias {
+    name                   = "${aws_cloudfront_distribution.birb_docs_distribution.domain_name}"
+    zone_id                = "${aws_cloudfront_distribution.birb_docs_distribution.hosted_zone_id}"
     evaluate_target_health = false
   }
 }
